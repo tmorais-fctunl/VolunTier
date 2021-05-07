@@ -1,0 +1,361 @@
+package resources;
+
+import java.util.logging.Logger;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+
+import com.google.cloud.datastore.Datastore;
+import com.google.cloud.datastore.DatastoreOptions;
+import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.KeyFactory;
+import com.google.cloud.datastore.Transaction;
+
+import util.Account;
+import util.RequestData;
+import util.State;
+import util.UpdateProfileData;
+import util.UpdateRoleData;
+import util.UpdateStateData;
+import util.UserData;
+import util.UserDataFull;
+
+@Path("/update")
+@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
+public class UpdateResource {
+
+	private static final Logger LOG = Logger.getLogger(UpdateResource.class.getName());
+
+	private static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
+	private static KeyFactory usersFactory = datastore.newKeyFactory().setKind("User");
+	private static KeyFactory sessionFactory = datastore.newKeyFactory().setKind("Session");
+
+	public UpdateResource(){}
+
+	@POST
+	@Path("/remove")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response doRemoval(RequestData data) {
+
+		if(!data.isValid())
+			return Response.status(Status.BAD_REQUEST).entity("").build();
+
+		Transaction txn = datastore.newTransaction();
+		try {
+
+			Key tokenKey = sessionFactory.newKey(data.token);
+			Entity token = txn.get(tokenKey);
+
+			if(!TokensResource.isValidAccess(token)) {
+				txn.rollback();
+				LOG.warning("Failed removal of user: " + data.user_id);
+				return Response.status(Status.FORBIDDEN).entity("Invalid token").build();
+			} else {
+				// user being removed (attempted)
+				Key tg_userKey = usersFactory.newKey(data.user_id);
+				Entity tg_user = txn.get(tg_userKey);
+
+				// user requesting removal
+				Key rq_userKey = usersFactory.newKey(token.getString("token_user_id"));
+				Entity rq_user = txn.get(rq_userKey);
+
+				// check if user being removed exists and is not already removed
+				if(tg_user == null || tg_user.getString("user_account").equals(Account.REMOVED.toString())) {
+					txn.rollback();
+					LOG.warning("User:" + rq_user.getString("user_id") + " is trying to remove an inexistent or already removed user: " + data.user_id);
+					return Response.status(Status.FORBIDDEN).entity("").build();
+				} else {
+					// check permissions
+					if(!ActionsResource.hasRemovePermission(rq_user, tg_user, txn)) {
+						txn.rollback();
+						LOG.warning("User:" + rq_user.getString("user_id") + " does not have enough permissions to remove: " + data.user_id);
+						return Response.status(Status.FORBIDDEN).entity("").build();
+					} else {
+						// set removed flag for user
+						tg_user = Entity.newBuilder(tg_userKey)
+								.set("user_id", tg_user.getString("user_id"))
+								.set("user_pwd", tg_user.getString("user_pwd"))
+								.set("user_email", tg_user.getString("user_email"))
+								.set("user_role", tg_user.getString("user_role"))
+								.set("user_state", tg_user.getString("user_state"))
+								.set("user_profile", tg_user.getString("user_profile"))
+								.set("user_landline", tg_user.getString("user_landline"))
+								.set("user_mobile", tg_user.getString("user_mobile"))
+								.set("user_address", tg_user.getString("user_address"))
+								.set("user_address2", tg_user.getString("user_address2"))
+								.set("user_region", tg_user.getString("user_region"))
+								.set("user_pc", tg_user.getString("user_pc"))
+								.set("user_account", Account.REMOVED.toString())
+								.build();
+
+						// invalidate all sessions related to this user
+						SessionResource.invalidateAllSessionsOfUser(data.user_id, txn);						
+
+						txn.put(tg_user);
+						txn.commit();
+
+						LOG.fine("User: " + rq_user.getString("user_id") + " removed User: " + data.user_id);
+						return Response.ok("User removed: " + data.user_id).build();
+					}
+				}
+			}
+
+		} catch(Exception e) {
+			txn.rollback();
+			LOG.severe(e.getMessage());
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+
+		} finally {
+			if(txn.isActive()) {
+				txn.rollback();
+				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+			}
+		}
+	}
+
+	@POST
+	@Path("/state")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response doUpdateState(UpdateStateData data) {
+
+		if(!data.isValid())
+			return Response.status(Status.BAD_REQUEST).entity("").build();
+
+		Transaction txn = datastore.newTransaction();
+		try {
+
+			Key tokenKey = sessionFactory.newKey(data.token);
+			Entity token = txn.get(tokenKey);
+
+			if(!TokensResource.isValidAccess(token)) {
+				txn.rollback();
+				LOG.warning("Failed request to change state of user: " + data.user_id);
+				return Response.status(Status.FORBIDDEN).entity("Invalid token").build();
+			} else {
+				// target user
+				Key tg_userKey = usersFactory.newKey(data.user_id);
+				Entity tg_user = txn.get(tg_userKey);
+
+				// user requesting change
+				Key rq_userKey = usersFactory.newKey(token.getString("token_user_id"));
+				Entity rq_user = txn.get(rq_userKey);
+
+				// check if target user exists and is not removed
+				if(tg_user == null || tg_user.getString("user_account").equals(Account.REMOVED.toString())) {
+					txn.rollback();
+					LOG.warning("User:" + rq_user.getString("user_id") + " is trying to change state of an inexistent or already removed user: " + data.user_id);
+					return Response.status(Status.FORBIDDEN).entity("").build();
+				} else {
+					// check permissions
+					if(!ActionsResource.hasStatePermission(rq_user, tg_user, txn)) {
+						txn.rollback();
+						LOG.warning("User:" + rq_user.getString("user_id") + " does not have enough permissions to change state of user: " + data.user_id);
+						return Response.status(Status.FORBIDDEN).entity("").build();
+					} else {
+						// set state flag for target user
+						tg_user = Entity.newBuilder(tg_userKey)
+								.set("user_id", tg_user.getString("user_id"))
+								.set("user_pwd", tg_user.getString("user_pwd"))
+								.set("user_email", tg_user.getString("user_email"))
+								.set("user_role", tg_user.getString("user_role"))
+								.set("user_state", data.state)
+								.set("user_profile", tg_user.getString("user_profile"))
+								.set("user_landline", tg_user.getString("user_landline"))
+								.set("user_mobile", tg_user.getString("user_mobile"))
+								.set("user_address", tg_user.getString("user_address"))
+								.set("user_address2", tg_user.getString("user_address2"))
+								.set("user_region", tg_user.getString("user_region"))
+								.set("user_pc", tg_user.getString("user_pc"))
+								.set("user_account", tg_user.getString("user_account"))
+								.build();				
+
+						txn.put(tg_user);
+						txn.commit();
+
+						LOG.fine("User: " + rq_user.getString("user_id") + " changed state of User: " + data.user_id + " to: " + data.state);
+						return Response.ok(data.user_id + " state set to: " + data.state).build();
+					}
+				}
+			}
+
+		} catch(Exception e) {
+			txn.rollback();
+			LOG.severe(e.getMessage());
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+
+		} finally {
+			if(txn.isActive()) {
+				txn.rollback();
+				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+			}
+		}
+	}
+
+	@POST
+	@Path("/profile")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response doUpdateProfile(UpdateProfileData data) {
+
+		if(!data.isValid())
+			return Response.status(Status.BAD_REQUEST).entity("").build();
+
+		Transaction txn = datastore.newTransaction();
+		try {
+
+			Key tokenKey = sessionFactory.newKey(data.token);
+			Entity token = txn.get(tokenKey);
+
+			if(!TokensResource.isValidAccess(token)) {
+				txn.rollback();
+				LOG.warning("Failed request to change state of user: " + data.user_id);
+				return Response.status(Status.FORBIDDEN).entity("Invalid token").build();
+			} else {
+				// target user
+				Key tg_userKey = usersFactory.newKey(data.user_id);
+				Entity tg_user = txn.get(tg_userKey);
+
+				// user requesting update
+				Key rq_userKey = usersFactory.newKey(token.getString("token_user_id"));
+				Entity rq_user = txn.get(rq_userKey);
+
+				// check if target user exists and is not removed
+				if(tg_user == null || tg_user.getString("user_account").equals(Account.REMOVED.toString())) {
+					txn.rollback();
+					LOG.warning("User:" + rq_user.getString("user_id") + " is trying to change profile attributes of an inexistent or already removed user: " + data.user_id);
+					return Response.status(Status.FORBIDDEN).entity("").build();
+				} else {
+					// check permissions
+					if(!ActionsResource.hasAtribPermission(rq_user, tg_user, txn)) {
+						txn.rollback();
+						LOG.warning("User:" + rq_user.getString("user_id") + " does not have enough permissions to change profile of user: " + data.user_id);
+						return Response.status(Status.FORBIDDEN).entity("").build();
+					} else {
+
+						if(data.password != null && !tg_user.getString("user_pwd").equals(UserData.hashPassword(data.old_password))) {	
+							txn.rollback();
+							return Response.status(Status.NOT_ACCEPTABLE).entity("Current password is not correct.").build();
+						}
+
+						// set state flag for target user
+						tg_user = Entity.newBuilder(tg_userKey)
+								.set("user_id", tg_user.getString("user_id"))
+								.set("user_pwd", data.getPassword(tg_user.getString("user_pwd")))
+								.set("user_email", data.getEmail(tg_user.getString("user_email")))
+								.set("user_role", tg_user.getString("user_role"))
+								.set("user_state", tg_user.getString("user_state"))
+								.set("user_profile", data.getProfile(tg_user.getString("user_profile")))
+								.set("user_landline", data.getLandline(tg_user.getString("user_landline")))
+								.set("user_mobile", data.getMobile(tg_user.getString("user_mobile")))
+								.set("user_address", data.getAddress(tg_user.getString("user_address")))
+								.set("user_address2", data.getAddress2(tg_user.getString("user_address2")))
+								.set("user_region", data.getRegion(tg_user.getString("user_region")))
+								.set("user_pc", data.getPc(tg_user.getString("user_pc")))
+								.set("user_account", tg_user.getString("user_account"))
+								.build();				
+
+						txn.put(tg_user);
+						txn.commit();
+
+						LOG.fine("User: " + rq_user.getString("user_id") + " changed profile of User: " + data.user_id);
+						return Response.ok(data.user_id + "'s profile updated").build();
+					}
+				}
+			}
+
+		} catch(Exception e) {
+			txn.rollback();
+			LOG.severe(e.getMessage());
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+
+		} finally {
+			if(txn.isActive()) {
+				txn.rollback();
+				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+			}
+		}
+	}
+
+	@POST
+	@Path("/role")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response doUpdateRole(UpdateRoleData data) {
+
+		if(!data.isValid())
+			return Response.status(Status.BAD_REQUEST).entity("").build();
+
+		Transaction txn = datastore.newTransaction();
+		try {
+
+			Key tokenKey = sessionFactory.newKey(data.token);
+			Entity token = txn.get(tokenKey);
+
+			if(!TokensResource.isValidAccess(token)) {
+				txn.rollback();
+				LOG.warning("Failed request to change state of user: " + data.user_id);
+				return Response.status(Status.FORBIDDEN).entity("Invalid token").build();
+			} else {
+				// target user
+				Key tg_userKey = usersFactory.newKey(data.user_id);
+				Entity tg_user = txn.get(tg_userKey);
+
+				// user requesting change
+				Key rq_userKey = usersFactory.newKey(token.getString("token_user_id"));
+				Entity rq_user = txn.get(rq_userKey);
+
+				// check if target user exists and is not removed
+				if(tg_user == null || tg_user.getString("user_account").equals(Account.REMOVED.toString()) || tg_user.getString("user_state").equals(State.DISABLED.toString())) {
+					txn.rollback();
+					LOG.warning("User:" + rq_user.getString("user_id") + " is trying to change role of an inexistent or already removed user: " + data.user_id);
+					return Response.status(Status.FORBIDDEN).entity("No user with id " + data.user_id).build();
+				} else {
+					// check permissions
+					if(!ActionsResource.hasRolePermission(rq_user, tg_user, txn, data.role)) {
+						txn.rollback();
+						LOG.warning("User:" + rq_user.getString("user_id") + " does not have enough permissions to change role of user: " + data.user_id);
+						return Response.status(Status.FORBIDDEN).entity("Not enough permissions .").build();
+					} else {
+						// set state flag for target user
+						tg_user = Entity.newBuilder(tg_userKey)
+								.set("user_id", tg_user.getString("user_id"))
+								.set("user_pwd", tg_user.getString("user_pwd"))
+								.set("user_email", tg_user.getString("user_email"))
+								.set("user_role", data.role)
+								.set("user_state", tg_user.getString("user_state"))
+								.set("user_profile", tg_user.getString("user_profile"))
+								.set("user_landline", tg_user.getString("user_landline"))
+								.set("user_mobile", tg_user.getString("user_mobile"))
+								.set("user_address", tg_user.getString("user_address"))
+								.set("user_address2", tg_user.getString("user_address2"))
+								.set("user_region", tg_user.getString("user_region"))
+								.set("user_pc", tg_user.getString("user_pc"))
+								.set("user_account", tg_user.getString("user_account"))
+								.build();				
+
+						txn.put(tg_user);
+						txn.commit();
+
+						LOG.fine("User: " + rq_user.getString("user_id") + " changed role of User: " + data.user_id + " to: " + data.role);
+						return Response.ok(data.user_id + " role set to: " + data.role).build();
+					}
+				}
+			}
+
+		} catch(Exception e) {
+			txn.rollback();
+			LOG.severe(e.getMessage());
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+
+		} finally {
+			if(txn.isActive()) {
+				txn.rollback();
+				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+			}
+		}
+	}
+}
