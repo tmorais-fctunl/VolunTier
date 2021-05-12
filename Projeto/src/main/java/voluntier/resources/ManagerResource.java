@@ -1,4 +1,4 @@
-package resources;
+package voluntier.resources;
 
 import java.util.logging.Logger;
 
@@ -19,8 +19,8 @@ import com.google.cloud.datastore.Transaction;
 
 import com.google.gson.Gson;
 
-import util.RequestData;
-import util.UserDataFull;
+import voluntier.util.RequestData;
+import voluntier.util.UserDataFull;
 
 @Path("/user")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")

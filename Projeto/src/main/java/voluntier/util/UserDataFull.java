@@ -1,4 +1,4 @@
-package util;
+package voluntier.util;
 
 import com.google.cloud.datastore.Entity;
 

@@ -1,4 +1,4 @@
-package util;
+package voluntier.util;
 
 import java.util.UUID;
 public class AuthToken {

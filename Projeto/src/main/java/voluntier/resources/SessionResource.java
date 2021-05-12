@@ -1,4 +1,4 @@
-package resources;
+package voluntier.resources;
 
 import java.util.logging.Logger;
 
@@ -14,15 +14,15 @@ import org.javatuples.Triplet;
 
 import com.google.gson.Gson;
 
+import voluntier.util.Account;
+import voluntier.util.AuthToken;
+import voluntier.util.LoginData;
+import voluntier.util.RequestData;
+import voluntier.util.State;
+import voluntier.util.UserDataFull;
+
 import com.google.cloud.datastore.*;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
-
-import util.Account;
-import util.AuthToken;
-import util.LoginData;
-import util.RequestData;
-import util.State;
-import util.UserDataFull;
 
 @Path("/")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")

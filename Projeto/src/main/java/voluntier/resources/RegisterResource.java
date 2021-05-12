@@ -1,4 +1,4 @@
-package resources;
+package voluntier.resources;
 
 import java.util.logging.Logger;
 
@@ -17,11 +17,11 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Transaction;
 
-import util.Account;
-import util.RegisterData;
-import util.UserData;
-import util.UserDataFull;
-import util.email.ConfirmationEmail;
+import voluntier.util.Account;
+import voluntier.util.RegisterData;
+import voluntier.util.UserData;
+import voluntier.util.UserDataFull;
+import voluntier.util.email.ConfirmationEmail;
 
 @Path("/register")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")

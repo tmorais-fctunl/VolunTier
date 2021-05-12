@@ -1,4 +1,4 @@
-package util;
+package voluntier.util;
 
 public class UpdateRoleData extends RequestData{
 	public String role;

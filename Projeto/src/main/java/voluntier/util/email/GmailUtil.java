@@ -1,4 +1,4 @@
-package util.email;
+package voluntier.util.email;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Properties;

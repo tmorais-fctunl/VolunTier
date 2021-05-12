@@ -1,4 +1,4 @@
-package util;
+package voluntier.util;
 
 import org.apache.commons.codec.digest.DigestUtils;
 

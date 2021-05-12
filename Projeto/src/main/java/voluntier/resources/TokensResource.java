@@ -1,4 +1,4 @@
-package resources;
+package voluntier.resources;
 
 import org.javatuples.Triplet;
 
@@ -8,7 +8,7 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 
-import util.AuthToken;
+import voluntier.util.AuthToken;
 
 public class TokensResource {
 	private static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();

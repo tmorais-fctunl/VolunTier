@@ -1,4 +1,4 @@
-package resources;
+package voluntier.resources;
 
 import java.util.logging.Logger;
 
@@ -17,14 +17,14 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Transaction;
 
-import util.Account;
-import util.RequestData;
-import util.State;
-import util.UpdateProfileData;
-import util.UpdateRoleData;
-import util.UpdateStateData;
-import util.UserData;
-import util.UserDataFull;
+import voluntier.util.Account;
+import voluntier.util.RequestData;
+import voluntier.util.State;
+import voluntier.util.UpdateProfileData;
+import voluntier.util.UpdateRoleData;
+import voluntier.util.UpdateStateData;
+import voluntier.util.UserData;
+import voluntier.util.UserDataFull;
 
 @Path("/update")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")

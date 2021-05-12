@@ -1,4 +1,4 @@
-package filters;
+package voluntier.filters;
 
 import java.io.IOException;
 import javax.ws.rs.container.ContainerRequestContext;

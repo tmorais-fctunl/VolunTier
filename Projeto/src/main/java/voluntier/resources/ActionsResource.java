@@ -1,4 +1,4 @@
-package resources;
+package voluntier.resources;
 
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
@@ -7,7 +7,7 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Transaction;
 
-import util.Roles;
+import voluntier.util.Roles;
 
 public class ActionsResource {
 	private static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
