@@ -1,20 +1,18 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
-  <head>
-    <meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8" />
-    <title>Hello App Engine</title>
-  </head>
-
-  <body>
-    <h1>Hello App Engine!</h1>
-
-    <table>
-      <tr>
-        <td colspan="2" style="font-weight:bold;">Available Servlets:</td>        
-      </tr>
-      <tr>
-        <td><a href='/hello'>The servlet</a></td>
-      </tr>
-    </table>
-  </body>
+<head>
+<meta http-equiv="content-type"
+	content="application/xhtml+xml; charset=UTF-8" />
+<script src="https://apis.google.com/js/platform.js" async defer></script>
+<script src="GoogleSignin/googleSignin.js"></script>
+<meta name="google-signin-client_id"
+	content="663592685939-lv6kh3ns2b9m8ap7sf6q5tl0g552ia94.apps.googleusercontent.com">
+	
+<title>Hello App Engine</title>
+</head>
+<body>
+	<h1>Hello App Engine!</h1>
+	<div class="g-signin2" data-onsuccess="onSignIn"></div>
+	<button type="button" onclick="signOut()">Sign out</button>
+</body>
 </html>

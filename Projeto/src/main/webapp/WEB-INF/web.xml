@@ -3,7 +3,7 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
 	version="3.1">
-	<display-name>APDC Avaliacao Individual</display-name>
+	<display-name>VolunTier</display-name>
 	<welcome-file-list>
 		<welcome-file>index.html</welcome-file>
 	</welcome-file-list>
@@ -13,7 +13,7 @@
 		<servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
 		<init-param>
 			<param-name>jersey.config.server.provider.packages</param-name>
-			<param-value>pt.unl.fct.apdc.avl.resources</param-value>
+			<param-value>resources</param-value>
 		</init-param>
 		<init-param>
 			<param-name>jersey.config.server.provider.scanning.recursive</param-name>
@@ -21,7 +21,7 @@
 		</init-param>
 		<init-param>
 			<param-name>jersey.config.server.provider.classnames</param-name>
-			<param-value>pt.unl.fct.apdc.avl.filters.AdditionalResponseHeadersFilter</param-value>
+			<param-value>filters.AdditionalResponseHeadersFilter</param-value>
 		</init-param>
 		<init-param>
 			<param-name>jersey.config.servlet.filter.contextPath</param-name>

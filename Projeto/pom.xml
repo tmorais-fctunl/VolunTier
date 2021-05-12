@@ -7,8 +7,8 @@
 	<packaging>war</packaging>
 	<version>0.1.0-SNAPSHOT</version>
 
-	<groupId>apdcavl</groupId>
-	<artifactId>apdcavl</artifactId>
+	<groupId>voluntier</groupId>
+	<artifactId>voluntier</artifactId>
 
 	<properties>
 		<appengine.maven.plugin.version>2.4.0</appengine.maven.plugin.version>

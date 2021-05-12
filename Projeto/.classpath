@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" output="target/apdcavl-0.1.0-SNAPSHOT/WEB-INF/classes" path="src/main/java">
+	<classpathentry kind="src" output="target/voluntier-0.1.0-SNAPSHOT/WEB-INF/classes" path="src/main/java">
 		<attributes>
 			<attribute name="optional" value="true"/>
 			<attribute name="maven.pomderived" value="true"/>
@@ -22,5 +22,12 @@
 			<attribute name="org.eclipse.jst.component.dependency" value="/WEB-INF/lib"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="output" path="target/apdcavl-0.1.0-SNAPSHOT/WEB-INF/classes"/>
+	<classpathentry kind="src" output="target/test-classes" path="src/test/java">
+		<attributes>
+			<attribute name="optional" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="output" path="target/voluntier-0.1.0-SNAPSHOT/WEB-INF/classes"/>
 </classpath>
