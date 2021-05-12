@@ -131,6 +131,13 @@
 			<artifactId>google-cloud-datastore</artifactId>
 		</dependency>
 
+		<!-- for sending emails -->
+		<dependency>
+			<groupId>com.sun.mail</groupId>
+			<artifactId>javax.mail</artifactId>
+			<version>1.6.2</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
