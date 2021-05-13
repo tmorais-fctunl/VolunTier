@@ -21,10 +21,10 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Transaction;
 
 import voluntier.util.Account;
-import voluntier.util.ConfirmationURL;
 import voluntier.util.RegisterData;
 import voluntier.util.UserData;
 import voluntier.util.UserDataFull;
+import voluntier.util.email.ConfirmationData;
 import voluntier.util.email.ConfirmationEmail;
 
 @Path("/register")
@@ -116,7 +116,7 @@ public class RegisterResource {
 
 				if (serviceEmail != null) {
 					try {
-						ConfirmationURL url = ConfirmationEmail.sendConfirmationEmail(serviceEmail.getString("email"), reg_data);
+						ConfirmationData url = ConfirmationEmail.sendConfirmationEmail(serviceEmail.getString("email"), reg_data);
 
 						Key confirmationKey = confirmationFactory.newKey(url.code);
 						Entity confirmation = Entity.newBuilder(confirmationKey).set("confirmation_code", url.code)

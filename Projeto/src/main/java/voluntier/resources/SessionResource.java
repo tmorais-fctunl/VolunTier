@@ -53,7 +53,7 @@ public class SessionResource {
 			Entity user = txn.get(userKey);
 
 			// check if user exists
-			if(user == null || user.getString("user_state").equals(State.DISABLED.toString()) || user.getString("user_account").equals(Account.REMOVED.toString())) {
+			if(user == null || user.getString("user_state").equals(State.BANNED.toString()) || user.getString("user_account").equals(Account.REMOVED.toString())) {
 				txn.rollback();
 				return Response.status(Status.FORBIDDEN).entity("Incorrect id or password: " + data.user_id).build();
 			} else {
@@ -114,7 +114,7 @@ public class SessionResource {
 			txn.commit();
 			
 			LOG.fine("Logout by user: " + data.user_id);
-			return Response.ok("Logged out. User: " + data.user_id).build();
+			return Response.status(Status.NO_CONTENT).build();
 
 		} catch(Exception e) {
 			txn.rollback();
@@ -130,7 +130,7 @@ public class SessionResource {
 	}
 
 	@POST
-	@Path("/auth/refresh")
+	@Path("/refresh")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response doRefresh(RequestData data) {
@@ -163,8 +163,6 @@ public class SessionResource {
 
 			LOG.fine("Refreshed session by user: " + data.user_id);
 			return Response.ok(g.toJson(tokens.getValue2())).build();
-
-
 		} catch(Exception e) {
 			txn.rollback();
 			LOG.severe(e.getMessage());
@@ -177,8 +175,6 @@ public class SessionResource {
 			}
 		}
 	}
-
-	
 
 	public static void invalidateAllSessionsOfUser(String user_id, Transaction txn) {
 		Query<Entity> query = Query.newEntityQueryBuilder()

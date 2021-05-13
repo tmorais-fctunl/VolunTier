@@ -101,7 +101,7 @@ public class UpdateResource {
 						txn.commit();
 
 						LOG.fine("User: " + rq_user.getString("user_id") + " removed User: " + data.user_id);
-						return Response.ok("User removed: " + data.user_id).build();
+						return Response.status(Status.NO_CONTENT).build();
 					}
 				}
 			}
@@ -179,7 +179,7 @@ public class UpdateResource {
 						txn.commit();
 
 						LOG.fine("User: " + rq_user.getString("user_id") + " changed state of User: " + data.user_id + " to: " + data.state);
-						return Response.ok(data.user_id + " state set to: " + data.state).build();
+						return Response.status(Status.NO_CONTENT).build();
 					}
 				}
 			}
@@ -263,7 +263,7 @@ public class UpdateResource {
 						txn.commit();
 
 						LOG.fine("User: " + rq_user.getString("user_id") + " changed profile of User: " + data.user_id);
-						return Response.ok(data.user_id + "'s profile updated").build();
+						return Response.status(Status.NO_CONTENT).build();
 					}
 				}
 			}
@@ -309,7 +309,7 @@ public class UpdateResource {
 				Entity rq_user = txn.get(rq_userKey);
 
 				// check if target user exists and is not removed
-				if(tg_user == null || tg_user.getString("user_account").equals(Account.REMOVED.toString()) || tg_user.getString("user_state").equals(State.DISABLED.toString())) {
+				if(tg_user == null || tg_user.getString("user_account").equals(Account.REMOVED.toString()) || tg_user.getString("user_state").equals(State.BANNED.toString())) {
 					txn.rollback();
 					LOG.warning("User:" + rq_user.getString("user_id") + " is trying to change role of an inexistent or already removed user: " + data.user_id);
 					return Response.status(Status.FORBIDDEN).entity("No user with id " + data.user_id).build();
@@ -341,7 +341,7 @@ public class UpdateResource {
 						txn.commit();
 
 						LOG.fine("User: " + rq_user.getString("user_id") + " changed role of User: " + data.user_id + " to: " + data.role);
-						return Response.ok(data.user_id + " role set to: " + data.role).build();
+						return Response.status(Status.NO_CONTENT).build();
 					}
 				}
 			}

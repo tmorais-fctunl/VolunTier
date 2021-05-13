@@ -11,7 +11,7 @@ public class UpdateStateData extends RequestData{
 	
 	public boolean isValid() {	
 		return super.isValid() && state != null 
-				&& (state.equals(State.DISABLED.toString()) 
+				&& (state.equals(State.BANNED.toString()) 
 				|| state.equals(State.ENABLED.toString()));
 	}
 }
