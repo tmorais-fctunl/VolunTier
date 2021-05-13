@@ -75,8 +75,13 @@ public class RegisterResource {
 					txn.add(user);
 					txn.commit();
 
-					LOG.fine("Registered user: " + data.user_id);
-					return Response.ok().build();
+					LOG.fine("Registered user: " + data.user_id);LOG.fine("Registered user: " + data.user_id);
+					//String htmlContent = "<meta http-equiv=\"refresh\" content=\"0; URL=/www/confirm/confirm.html\" />";
+					String htmlContent = "<html><head><style>iframe[seamless]{border: none;}</style></head>"
+							+ "<body><iframe src=\"https://voluntier-312115.ew.r.appspot.com/www/confirm/confirm.html\" "
+							+ "seamless=\"\"></iframe></body></html>";
+					
+					return Response.ok(htmlContent, MediaType.TEXT_HTML).build();
 				}
 			}
 
