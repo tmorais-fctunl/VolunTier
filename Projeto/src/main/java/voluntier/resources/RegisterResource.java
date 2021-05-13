@@ -76,7 +76,7 @@ public class RegisterResource {
 					txn.commit();
 
 					LOG.fine("Registered user: " + data.user_id);
-					return Response.ok("wowo you are foking registered, enjoy!").build();
+					return Response.ok().build();
 				}
 			}
 
