@@ -7,7 +7,7 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Transaction;
 
-import voluntier.util.Roles;
+import voluntier.util.userdata.Roles;
 
 public class ActionsResource {
 	private static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
@@ -32,7 +32,7 @@ public class ActionsResource {
 		int user_level = getLevel(Action.LOOK_UP, Roles.valueOf(user.getString("user_role")), txn);
 		int target_level = getLevel(Action.LOOK_UP, Roles.valueOf(target.getString("user_role")), txn);
 		
-		return target_level < user_level;
+		return target_level < user_level || target.getString("user_id").equals(user.getString("user_id"));
 	}
 	
 	public static boolean hasAtribPermission(Entity user, Entity target, Transaction txn) {

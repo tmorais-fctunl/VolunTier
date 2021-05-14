@@ -1,5 +1,7 @@
 package voluntier.util;
 
+import voluntier.util.userdata.Roles;
+
 public class UpdateRoleData extends RequestData{
 	public String role;
 

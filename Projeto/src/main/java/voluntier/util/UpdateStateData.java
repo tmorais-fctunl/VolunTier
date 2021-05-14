@@ -1,5 +1,7 @@
 package voluntier.util;
 
+import voluntier.util.userdata.State;
+
 public class UpdateStateData extends RequestData{
 	public String state;
 	

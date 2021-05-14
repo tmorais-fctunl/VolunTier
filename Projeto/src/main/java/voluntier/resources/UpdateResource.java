@@ -17,14 +17,13 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Transaction;
 
-import voluntier.util.Account;
 import voluntier.util.RequestData;
-import voluntier.util.State;
 import voluntier.util.UpdateProfileData;
 import voluntier.util.UpdateRoleData;
 import voluntier.util.UpdateStateData;
-import voluntier.util.UserData;
-import voluntier.util.UserDataFull;
+import voluntier.util.userdata.Account;
+import voluntier.util.userdata.State;
+import voluntier.util.userdata.UserData_Modifiable;
 
 @Path("/update")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
@@ -237,7 +236,7 @@ public class UpdateResource {
 						return Response.status(Status.FORBIDDEN).entity("").build();
 					} else {
 
-						if(data.password != null && !tg_user.getString("user_pwd").equals(UserData.hashPassword(data.old_password))) {	
+						if(data.password != null && !tg_user.getString("user_pwd").equals(UserData_Modifiable.hashPassword(data.old_password))) {	
 							txn.rollback();
 							return Response.status(Status.NOT_ACCEPTABLE).entity("Current password is not correct.").build();
 						}

@@ -1,12 +1,13 @@
-package voluntier.util;
+package voluntier.util.userdata;
 
-import org.apache.commons.codec.digest.DigestUtils;
+import com.google.cloud.datastore.Entity;
 
-public class UserData {
+import voluntier.util.RegisterData;
+
+public class UserData_Minimal {
 	
 	public String user_id;
 	public String email;
-	public String password;
 	
 	public String profile;
 	
@@ -17,15 +18,12 @@ public class UserData {
 	public String region;
 	public String pc;
 	
-	public UserData(){}
+	public UserData_Minimal(){}
 	
-	public UserData(RegisterData data){
+	public UserData_Minimal(RegisterData data){
 		user_id = data.user_id;
 		email = data.email;
-		password = hashPassword(data.password);
-		
 		profile = Profile.PUBLIC.toString();
-		
 		landline = "";
 		mobile = "";
 		address = "";
@@ -33,13 +31,17 @@ public class UserData {
 		region = "";
 		pc = "";
 	}
-
-	public String getHashedPassword() {
-		return hashPassword(password);
-	}
 	
-	public static String hashPassword(String password) {
-		return DigestUtils.sha512Hex(password);
+	public UserData_Minimal(Entity user) {
+		this.user_id = user.getString("user_id");
+		this.email = user.getString("user_email");
+		this.profile = user.getString("user_profile");
+		this.landline = user.getString("user_landline");
+		this.mobile = user.getString("user_mobile");
+		this.address = user.getString("user_address");
+		this.address2 = user.getString("user_address2");
+		this.region = user.getString("user_region");
+		this.pc = user.getString("user_pc");
 	}
 	
 	public static boolean passwordValid(String password) {
@@ -75,7 +77,7 @@ public class UserData {
 	}
 	
 	boolean isValid() {
-		return passwordValid(password) && emailValid(email) 
+		return emailValid(email) 
 				&& pcValid(pc) && mobileValid(mobile) 
 				&& landlineValid(landline) && addressValid(address)
 				&& addressValid(address2) && regionValid(region) 

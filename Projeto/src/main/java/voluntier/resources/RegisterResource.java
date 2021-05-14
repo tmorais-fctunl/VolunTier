@@ -20,12 +20,12 @@ import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Transaction;
 
-import voluntier.util.Account;
 import voluntier.util.RegisterData;
-import voluntier.util.UserData;
-import voluntier.util.UserDataFull;
 import voluntier.util.email.ConfirmationData;
 import voluntier.util.email.ConfirmationEmail;
+import voluntier.util.userdata.Account;
+import voluntier.util.userdata.UserData_AllProperties;
+import voluntier.util.userdata.UserData_Modifiable;
 
 @Path("/register")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
@@ -62,7 +62,7 @@ public class RegisterResource {
 					return Response.status(Status.FORBIDDEN).entity("User already exist: " + user_id).build();
 				} else {
 					
-					UserDataFull data = new UserDataFull(new RegisterData(user_id, confirmation.getString("email"), confirmation.getString("pwd")));
+					UserData_AllProperties data = new UserData_AllProperties(new RegisterData(user_id, confirmation.getString("email"), confirmation.getString("pwd")));
 					
 					user = Entity.newBuilder(userKey).set("user_id", data.user_id).set("user_pwd", data.password)
 							.set("user_email", data.email).set("user_role", data.getRole().toString())

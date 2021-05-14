@@ -1,4 +1,4 @@
-package voluntier.util;
+package voluntier.util.userdata;
 
 public enum Profile {
 	PUBLIC,

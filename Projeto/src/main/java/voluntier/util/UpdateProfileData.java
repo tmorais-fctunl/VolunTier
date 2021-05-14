@@ -1,5 +1,7 @@
 package voluntier.util;
 
+import voluntier.util.userdata.UserData_Modifiable;
+
 public class UpdateProfileData extends RequestData {
 	public String email;
 	public String password;
@@ -31,7 +33,7 @@ public class UpdateProfileData extends RequestData {
 	}
 
 	public String getPassword(String a_default) {
-		return password == null ? a_default : UserData.hashPassword(password);
+		return password == null ? a_default : UserData_Modifiable.hashPassword(password);
 	}
 	public String getEmail(String a_default) {
 		return email == null ? a_default : email;
@@ -61,15 +63,15 @@ public class UpdateProfileData extends RequestData {
 	public boolean isValid() {	
 		if(!super.isValid()) return false;
 
-		return super.isValid() && (password == null || (UserData.passwordValid(password) && confirmation_password.equals(password) && old_password != null))
-				&& (email == null || UserData.emailValid(email))
-				&& (pc == null || pc.equals("") || UserData.pcValid(pc))
-				&& (mobile == null || mobile.equals("") || UserData.mobileValid(mobile))
-				&& (landline == null || landline.equals("") || UserData.landlineValid(landline))
-				&& (address == null || address.equals("") || UserData.addressValid(address))
-				&& (address2 == null || address2.equals("") || UserData.addressValid(address2))
-				&& (region == null || region.equals("") || UserData.regionValid(region))
-				&& (profile == null || profile.equals("") || UserData.profileValid(profile));
+		return super.isValid() && (password == null || (UserData_Modifiable.passwordValid(password) && confirmation_password.equals(password) && old_password != null))
+				&& (email == null || UserData_Modifiable.emailValid(email))
+				&& (pc == null || pc.equals("") || UserData_Modifiable.pcValid(pc))
+				&& (mobile == null || mobile.equals("") || UserData_Modifiable.mobileValid(mobile))
+				&& (landline == null || landline.equals("") || UserData_Modifiable.landlineValid(landline))
+				&& (address == null || address.equals("") || UserData_Modifiable.addressValid(address))
+				&& (address2 == null || address2.equals("") || UserData_Modifiable.addressValid(address2))
+				&& (region == null || region.equals("") || UserData_Modifiable.regionValid(region))
+				&& (profile == null || profile.equals("") || UserData_Modifiable.profileValid(profile));
 	}
 
 	private static final String S = " ";	
