@@ -174,6 +174,9 @@ public class UpdateResource {
 								.set("user_account", tg_user.getString("user_account"))
 								.build();				
 
+						if (data.state.equals(State.BANNED.toString()))
+							SessionResource.invalidateAllSessionsOfUser(data.user_id, txn);
+						
 						txn.put(tg_user);
 						txn.commit();
 

@@ -1,6 +1,7 @@
 package voluntier.util;
 
 public class RequestData {
+	
 	public String user_id;
 	public String token;
 	
