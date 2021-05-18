@@ -64,7 +64,7 @@ public class RegisterResource {
 					
 					UserData_AllProperties data = new UserData_AllProperties(new RegisterData(user_id, confirmation.getString("email"), confirmation.getString("pwd")));
 					
-					user = Entity.newBuilder(userKey).set("user_id", data.user_id).set("user_pwd", data.password)
+					user = Entity.newBuilder(userKey).set("user_id", data.user_id).set("user_pwd", data.getHashedPassword())
 							.set("user_email", data.email).set("user_role", data.getRole().toString())
 							.set("user_state", data.getState().toString()).set("user_profile", data.profile)
 							.set("user_landline", data.landline).set("user_mobile", data.mobile)
