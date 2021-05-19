@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html style="font-size: 16px;">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <meta name="keywords" content="VolunTier">
+    <meta name="description" content="">
+    <meta name="page_type" content="np-template-header-footer-from-plugin">
+    <title>Register</title>
+    <link rel="stylesheet" href="nicepage.css" media="screen">
+    <link rel="stylesheet" href="Register.css" media="screen">
+    <script class="u-script" type="text/javascript" src="jquery.js" defer=""></script>
+    <script class="u-script" type="text/javascript" src="nicepage.js" defer=""></script>
+    <meta name="generator" content="Nicepage 3.14.0, nicepage.com">
+    <link id="u-theme-google-font" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:100,100i,300,300i,400,400i,500,500i,700,700i,900,900i|Open+Sans:300,300i,400,400i,600,600i,700,700i,800,800i">
+    <link id="u-page-google-font" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lobster:400">
+    <!-- Hash function -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
+
+    <script type="application/ld+json">        {
+                "@context": "http://schema.org",
+                "@type": "Organization",
+                "name": "",
+                "url": "index.html"
+        }</script>
+
+    <script type="text/javascript" language="javascript">
+
+        function register() {
+
+            var urlvariable;
+
+            urlvariable = "/rest/register";
+            var encryptedP = sha256(document.getElementById("passwordID").value);
+            var encryptedCP = sha256(document.getElementById("confpasswordID").value);
+            var ItemJSON;
+            ItemJSON = '{"user_id": "' + document.getElementById("usernameID").value + '", "password": "' + encryptedP + '", "email":"' + document.getElementById("emailID").value + '"}' ;
+
+
+            URL = "https://voluntier-312115.ew.r.appspot.com" + urlvariable;  //Your URL
+
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.onreadystatechange = callbackFunction(xmlhttp);
+            xmlhttp.open("POST", URL, false);
+            xmlhttp.setRequestHeader("Content-Type", "application/json");
+            // xmlhttp.setRequestHeader('Authorization', 'Basic ' + window.btoa('apiusername:apiuserpassword')); //in prod, you should encrypt user name and password and provide encrypted keys here instead
+            xmlhttp.onreadystatechange = function () {
+                if (xmlhttp.readyState == 4 && xmlhttp.status == 204) {
+                    //const obj = JSON.parse(xmlhttp.responseText);
+                    //localStorage.setItem('jwt', obj.accessToken);
+                    //localStorage.setItem('jwrt', obj.refreshToken);
+                    document.getElementById("ThankingMsg").innerHTML = document.getElementById("ThankingMsg").innerHTML + " " + document.getElementById("usernameID").value;
+                    document.getElementById("RegisterForm").remove();
+                    window.location.href = "Home.html";
+
+                }
+                else {
+                    document.getElementById("ThankingMsg").innerHTML = "Registration wasn't successful";
+                }
+            }
+            xmlhttp.send(ItemJSON);
+            //alert(xmlhttp.responseText);
+            //document.getElementById("WelcomeMsg").innerHTML =
+            // document.getElementById("div").innerHTML = xmlhttp.statusText + ":" + xmlhttp.status + "<BR><textarea rows='100' cols='100'>" + xmlhttp.responseText + "</textarea>";
+        }
+
+        function callbackFunction(xmlhttp) {
+            //alert(xmlhttp.responseXML);
+        }
+    </script>
+
+
+    <meta property="og:title" content="Register">
+    <meta property="og:type" content="website">
+    <meta name="theme-color" content="#478ac9">
+    <link rel="canonical" href="index.html">
+    <meta property="og:url" content="index.html">
+</head>
+  <body class="u-body"><header class="u-align-left u-clearfix u-header" id="sec-ff6f"><div class="u-clearfix u-sheet u-sheet-1">
+        <nav data-position="" class="u-menu u-menu-dropdown u-offcanvas u-menu-1">
+          <div class="menu-collapse">
+            <a class="u-button-style u-nav-link" href="#">
+              <svg><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#menu-hamburger"></use></svg>
+              <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><defs><symbol id="menu-hamburger" viewBox="0 0 16 16" style="width: 16px; height: 16px;"><rect y="1" width="16" height="2"></rect><rect y="7" width="16" height="2"></rect><rect y="13" width="16" height="2"></rect>
+</symbol>
+</defs></svg>
+            </a>
+          </div>
+          <div class="u-custom-menu u-nav-container">
+            <ul class="u-nav u-unstyled"><li class="u-nav-item"><a class="u-button-style u-nav-link" href="Home.html">Home</a>
+</li><li class="u-nav-item"><a class="u-button-style u-nav-link" href="About.html">About</a>
+</li><li class="u-nav-item"><a class="u-button-style u-nav-link" href="Contact.html">Contact</a>
+</li></ul>
+          </div>
+          <div class="u-custom-menu u-nav-container-collapse">
+            <div class="u-black u-container-style u-inner-container-layout u-opacity u-opacity-95 u-sidenav">
+              <div class="u-sidenav-overflow">
+                <div class="u-menu-close"></div>
+                <ul class="u-align-center u-nav u-popupmenu-items u-unstyled u-nav-2"><li class="u-nav-item"><a class="u-button-style u-nav-link" href="Home.html">Home</a>
+</li><li class="u-nav-item"><a class="u-button-style u-nav-link" href="About.html">About</a>
+</li><li class="u-nav-item"><a class="u-button-style u-nav-link" href="Contact.html">Contact</a>
+</li></ul>
+              </div>
+            </div>
+            <div class="u-black u-menu-overlay u-opacity u-opacity-70"></div>
+          </div>
+        </nav>
+        <h1 class="u-custom-font u-font-lobster u-text u-text-palette-3-dark-1 u-text-1" data-animation-name="bounceIn" data-animation-duration="1000" data-animation-delay="0" data-animation-direction="">VolunTier</h1>
+      </div></header> 
+    <section class="u-align-left u-clearfix u-image u-shading u-section-1" src="" id="sec-eaef" data-image-width="256" data-image-height="256">
+      <div class="u-clearfix u-sheet u-sheet-1">
+        <h3 class="u-align-center u-custom-font u-font-georgia u-text u-text-1" id="ThankingMsg">Thank you for wanting to make the world a better place</h3>
+        <div class="u-form u-form-1" id="RegisterForm">
+          <form action="#" method="POST" class="u-clearfix u-form-spacing-10 u-form-vertical u-inner-form" style="padding: 10px" source="custom" name="form">
+            <div class="u-form-group u-form-name">
+              <label for="usernameID" class="u-form-control-hidden u-label">Name</label>
+              <input type="text" placeholder="Enter your username" id="usernameID" name="username" class="u-border-3 u-border-grey-30 u-input u-input-rectangle u-radius-13 u-white" required="">
+            </div>
+            <div class="u-form-email u-form-group">
+              <label for="emailID" class="u-form-control-hidden u-label">Email</label>
+              <input type="email" placeholder="Enter your email address" id="emailID" name="email" class="u-border-3 u-border-grey-30 u-input u-input-rectangle u-radius-13 u-white" required="">
+            </div>
+            <div class="u-form-group u-form-group-3">
+              <label for="confEmailID" class="u-form-control-hidden u-label"></label>
+              <input type="email" onpaste="return false;" ondrop="return false;" autocomplete="off" placeholder="Confirm your email address" id="confEmailID" name="confemail" class="u-border-3 u-border-grey-30 u-input u-input-rectangle u-radius-13 u-white" required="required">
+            </div>
+            <div class="u-form-group u-form-group-4">
+              <label for="passwordID" class="u-label">Minimum 8, needs atleast an uppercase letter and number</label>
+              <input type="password" placeholder="Enter your password" id="passwordID" name="password" class="u-border-3 u-border-grey-30 u-input u-input-rectangle u-radius-13 u-white" required="required">
+            </div>
+            <div class="u-form-group u-form-group-5">
+              <label for="confpasswordID" class="u-form-control-hidden u-label"></label>
+              <input type="password" onpaste="return false;" ondrop="return false;" autocomplete="off" placeholder="Confirm your password" id="confpasswordID" name="confpassword" class="u-border-3 u-border-grey-30 u-input u-input-rectangle u-radius-13 u-white" required="required">
+            </div>
+            <div class="u-align-center u-form-group u-form-submit">
+
+              <a href="#" class="u-btn u-btn-submit u-button-style" onclick="register()">Register</a>
+            
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+    
+    
+    <footer class="u-align-center u-clearfix u-footer u-grey-80 u-footer" id="sec-7039"><div class="u-clearfix u-sheet u-valign-middle u-sheet-1">
+        <p class="u-small-text u-text u-text-variant u-text-1">We are a group of Software Engineering students at NOVA FCT and this is our project for the class of APDC.<br>We hope to make this project the best we can so it's purpose can move past evaluation and become a useful tool to help change the world.
+        </p>
+      </div></footer>
+   
+  </body>
+</html>
