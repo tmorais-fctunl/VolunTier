@@ -64,7 +64,7 @@ public class RegisterResource {
 					
 					UserData_AllProperties data = new UserData_AllProperties(new RegisterData(user_id, confirmation.getString("email"), confirmation.getString("pwd")));
 					
-					user = Entity.newBuilder(userKey).set("user_id", data.user_id).set("user_pwd", data.getHashedPassword())
+					user = Entity.newBuilder(userKey).set("user_id", data.user_id).set("user_pwd", data.password)
 							.set("user_email", data.email).set("user_role", data.getRole().toString())
 							.set("user_state", data.getState().toString()).set("user_profile", data.profile)
 							.set("user_landline", data.landline).set("user_mobile", data.mobile)
@@ -78,7 +78,7 @@ public class RegisterResource {
 					LOG.fine("Registered user: " + data.user_id);LOG.fine("Registered user: " + data.user_id);
 					//String htmlContent = "<meta http-equiv=\"refresh\" content=\"0; URL=/www/confirm/confirm.html\" />";
 					String htmlContent = "<html><head><style>iframe[seamless]{border: none;}</style></head>"
-							+ "<body><iframe src=\"https://voluntier-312115.ew.r.appspot.com/www/confirm/confirm.html\" "
+							+ "<body><iframe src=\"https://voluntier-312115.ew.r.appspot.com/www/pages/confirm/confirm.html\" "
 							+ "seamless=\"\"></iframe></body></html>";
 					
 					return Response.ok(htmlContent, MediaType.TEXT_HTML).build();

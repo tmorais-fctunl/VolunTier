@@ -5,7 +5,7 @@
 	version="3.1">
 	<display-name>VolunTier</display-name>
 	<welcome-file-list>
-		<welcome-file>/www/html/Home.html</welcome-file>
+		<welcome-file>Home.html</welcome-file>
 	</welcome-file-list>
 	
 	<error-page>
