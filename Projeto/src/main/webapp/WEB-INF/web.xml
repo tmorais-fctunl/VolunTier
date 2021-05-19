@@ -10,11 +10,11 @@
 	
 	<error-page>
 		<error-code>404</error-code>
-		<location>/www/error/404.html</location>
+		<location>/www/pages/error/404.html</location>
 	</error-page>
 	<error-page>
 		<error-code>500</error-code>
-		<location>/www/error/5XX.html</location>
+		<location>/www/pages/error/5XX.html</location>
 	</error-page>
 	
 	<servlet>

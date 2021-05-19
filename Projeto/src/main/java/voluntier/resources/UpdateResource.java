@@ -244,6 +244,9 @@ public class UpdateResource {
 							return Response.status(Status.NOT_ACCEPTABLE).entity("Current password is not correct.").build();
 						}
 
+						if (data.password != null)
+							SessionResource.invalidateAllSessionsOfUser(data.user_id, txn, data.token);
+						
 						// set state flag for target user
 						tg_user = Entity.newBuilder(tg_userKey)
 								.set("user_id", tg_user.getString("user_id"))

@@ -22,6 +22,7 @@ import voluntier.util.userdata.State;
 import voluntier.util.userdata.UserData_Modifiable;
 
 import com.google.cloud.datastore.*;
+import com.google.cloud.datastore.StructuredQuery.CompositeFilter;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 
 @Path("/")
@@ -224,6 +225,20 @@ public class SessionResource {
 
 		res.forEachRemaining(accessToken -> {
 			invalidateSession(accessToken, txn);
+		});
+	}
+	
+	public static void invalidateAllSessionsOfUser(String user_id, Transaction txn, String exceptToken) {
+		Query<Entity> query = Query.newEntityQueryBuilder()
+				.setKind("Session")
+				.setFilter(PropertyFilter.eq("token_user_id", user_id))
+				.build();
+
+		QueryResults<Entity> res = datastore.run(query);
+
+		res.forEachRemaining(accessToken -> {
+			if (!accessToken.getString("access_token").equals(exceptToken))
+				invalidateSession(accessToken, txn);
 		});
 	}
 

@@ -16,6 +16,7 @@ public class UpdateProfileData extends RequestData {
 	public String pc;
 
 	public UpdateProfileData() {}
+	
 	public UpdateProfileData(String user_id, String token, 
 			String email, String password, String confirmation_password, 
 			String profile, String landline, String mobile, 
@@ -61,8 +62,6 @@ public class UpdateProfileData extends RequestData {
 	}
 
 	public boolean isValid() {	
-		if(!super.isValid()) return false;
-
 		return super.isValid() && (password == null || (UserData_Modifiable.passwordValid(password) && confirmation_password.equals(password) && old_password != null))
 				&& (email == null || UserData_Modifiable.emailValid(email))
 				&& (pc == null || pc.equals("") || UserData_Modifiable.pcValid(pc))
