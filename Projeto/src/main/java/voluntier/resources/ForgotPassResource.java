@@ -20,19 +20,13 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Transaction;
 
-import voluntier.util.ChangePassData;
-import voluntier.util.ForgotPassData;
-import voluntier.util.RegisterData;
-import voluntier.util.RequestData;
-import voluntier.util.email.ConfirmationData;
-import voluntier.util.email.ConfirmationEmail;
-import voluntier.util.email.ForgotConfirmationEmail;
+import voluntier.util.consumes.ChangePassData;
+import voluntier.util.consumes.ForgotPassData;
+import voluntier.util.email.ChangePasswordEmail;
 import voluntier.util.email.ForgotData;
-import voluntier.util.userdata.Account;
-import voluntier.util.userdata.UserData_AllProperties;
-import voluntier.util.userdata.UserData_Modifiable;
+import voluntier.util.userdata.DB_User;
 
-@Path("/forgotPass")
+@Path("/forgotpassword")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class ForgotPassResource {
 	private static final Logger LOG = Logger.getLogger(RegisterResource.class.getName());
@@ -41,74 +35,65 @@ public class ForgotPassResource {
 	private static KeyFactory serviceEmailFactory = datastore.newKeyFactory().setKind("ServiceEmail");
 	private static KeyFactory confirmationFactory = datastore.newKeyFactory().setKind("Confirmation");
 
-	public ForgotPassResource () {
+	private static final String htmlContent = "<html><head><style>iframe[seamless]{border: none;}</style></head>"
+			+ "<body><iframe src=\"https://voluntier-312115.ew.r.appspot.com/www/pages/pass/change_pass.html\" "
+			+ "seamless=\"\"></iframe></body></html>";
+
+	public ForgotPassResource() {
 	}
 
 	@POST
 	@Path("/{code}/change")
 	@Consumes(MediaType.APPLICATION_JSON)
-	//@Produces(MediaType)
-	public Response changePass (@PathParam("code") String code, ChangePassData data) {
+	// @Produces(MediaType)
+	public Response changePass(@PathParam("code") String code, ChangePassData data) {
 		Transaction txn = datastore.newTransaction();
-		
+
 		try {
 			Key confirmationKey = confirmationFactory.newKey(code);
 			Entity confirmation = txn.get(confirmationKey);
-			
-			if (confirmation == null || confirmation.getLong("confirmation_expiration_date") < System.currentTimeMillis()) {
+
+			if (confirmation == null
+					|| confirmation.getLong("confirmation_expiration_date") < System.currentTimeMillis()) {
 				txn.rollback();
 				return Response.status(Status.FORBIDDEN).entity("Invalid confirmation url").build();
 			} else {
-				
+
 				String user_id = confirmation.getString("user_id");
 
 				Key userKey = usersFactory.newKey(user_id);
 				Entity user = txn.get(userKey);
-				
+
 				if (user == null) {
 					txn.rollback();
 					return Response.status(Status.FORBIDDEN).entity("User does not exist: " + user_id).build();
 				} else {
-					
+
 					if (!data.isValid()) {
 						txn.rollback();
 						return Response.status(Status.BAD_REQUEST).entity("Passwords don't match").build();
 					}
-					
-					user = Entity.newBuilder(userKey)
-							.set("user_id", user.getString("user_id"))
-							.set("user_pwd", UserData_Modifiable.hashPassword(data.password))
-							.set("user_email", user.getString("user_email"))
-							.set("user_role", user.getString("user_role"))
-							.set("user_state", user.getString("user_state"))
-							.set("user_profile", user.getString("user_profile"))
-							.set("user_landline", user.getString("user_landline"))
-							.set("user_mobile", user.getString("user_mobile"))
-							.set("user_address", user.getString("user_address"))
-							.set("user_address2", user.getString("user_address2"))
-							.set("user_region", user.getString("user_region"))
-							.set("user_pc", user.getString("user_pc"))
-							.set("user_account", user.getString("user_account"))
-							.build();	
-					
+
+					user = DB_User.changePassword(data.password, userKey, user);
+
 					SessionResource.invalidateAllSessionsOfUser(user_id, txn);
-					
-					confirmation = Entity.newBuilder(confirmationKey).set("confirmation_code", confirmation.getString("confirmation_code"))
+
+					confirmation = Entity.newBuilder(confirmationKey)
+							.set("confirmation_code", confirmation.getString("confirmation_code"))
 							.set("user_id", confirmation.getString("user_id"))
 							.set("confirmation_email", confirmation.getString("confirmation_email"))
 							.set("confirmation_creation_date", confirmation.getLong("confirmation_expiration_date"))
-							.set("confirmation_expiration_date", System.currentTimeMillis())
-							.build();
-					
+							.set("confirmation_expiration_date", System.currentTimeMillis()).build();
+
 					txn.put(user, confirmation);
 					txn.commit();
-					
+
 					LOG.fine("User: " + user_id + " changed password.");
 					return Response.status(Status.NO_CONTENT).build();
 				}
-				
+
 			}
-			
+
 		} catch (Exception e) {
 			txn.rollback();
 			LOG.severe(e.getMessage());
@@ -123,21 +108,19 @@ public class ForgotPassResource {
 
 	@GET
 	@Path("/{code}/confirm")
-	//@Consumes(MediaType.APPLICATION_JSON)
-	public Response doConfirmation(@PathParam("code") String code ) {
+	// @Consumes(MediaType.APPLICATION_JSON)
+	public Response doConfirmation(@PathParam("code") String code) {
 		Transaction txn = datastore.newTransaction();
 
 		try {
 			Key confirmationKey = confirmationFactory.newKey(code);
 			Entity confirmation = txn.get(confirmationKey);
 
-			if (confirmation == null || confirmation.getLong("confirmation_expiration_date") < System.currentTimeMillis()) {
+			if (confirmation == null
+					|| confirmation.getLong("confirmation_expiration_date") < System.currentTimeMillis()) {
 				txn.rollback();
 				return Response.status(Status.FORBIDDEN).entity("Invalid confirmation url").build();
 			} else {
-				String htmlContent = "<html><head><style>iframe[seamless]{border: none;}</style></head>"
-						+ "<body><iframe src=\"https://voluntier-312115.ew.r.appspot.com/www/pages/pass/change_pass.html\" "
-						+ "seamless=\"\"></iframe></body></html>";
 
 				txn.rollback();
 				return Response.ok(htmlContent, MediaType.TEXT_HTML).build();
@@ -172,24 +155,28 @@ public class ForgotPassResource {
 				txn.rollback();
 				return Response.status(Status.FORBIDDEN).entity("User does not exist: " + data.user_id).build();
 			} else {
-				
-				if (!user.getString("user_email").equals(data.email)) {
+
+				if (!user.getString(DB_User.EMAIL).equals(data.email)) {
 					txn.rollback();
-					return Response.status(Status.FORBIDDEN).entity("User email does not match the email given.").build();
+					return Response.status(Status.FORBIDDEN).entity("User email does not match the email given.")
+							.build();
 				}
-				
+
 				Key emailKey = serviceEmailFactory.newKey("confirmation-email");
 				Entity serviceEmail = txn.get(emailKey);
 
 				if (serviceEmail != null) {
 					try {
-						ForgotData url = ForgotConfirmationEmail.sendConfirmationEmail(serviceEmail.getString("email"), data);
+						ForgotData url = ChangePasswordEmail.sendConfirmationEmail(serviceEmail.getString("email"),
+								data);
 
 						Key confirmationKey = confirmationFactory.newKey(url.code);
-						Entity confirmation = Entity.newBuilder(confirmationKey).set("confirmation_code", url.code)
-								.set("user_id", url.user_id).set("confirmation_email", url.email)/*.set("pwd", url.password)*/
-								.set("confirmation_creation_date", url.creationDate).set("confirmation_expiration_date", url.expirationDate)
-								.build();
+						Entity confirmation = Entity
+								.newBuilder(confirmationKey).set("confirmation_code", url.code).set("user_id",
+										url.user_id)
+								.set("confirmation_email", url.email)/* .set("pwd", url.password) */
+								.set("confirmation_creation_date", url.creationDate)
+								.set("confirmation_expiration_date", url.expirationDate).build();
 
 						txn.add(confirmation);
 						txn.commit();

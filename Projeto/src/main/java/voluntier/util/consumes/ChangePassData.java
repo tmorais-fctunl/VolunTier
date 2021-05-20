@@ -1,4 +1,4 @@
-package voluntier.util;
+package voluntier.util.consumes;
 
 public class ChangePassData {
 

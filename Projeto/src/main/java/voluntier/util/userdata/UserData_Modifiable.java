@@ -4,7 +4,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 
 import com.google.cloud.datastore.Entity;
 
-import voluntier.util.RegisterData;
+import voluntier.util.consumes.RegisterData;
 
 public class UserData_Modifiable extends UserData_Minimal{
 
@@ -19,7 +19,7 @@ public class UserData_Modifiable extends UserData_Minimal{
 	
 	public UserData_Modifiable(Entity user) {
 		super(user);
-		this.password = user.getString("user_pwd");
+		this.password = user.getString(DB_User.PASSWORD);
 	}
 
 	public String getHashedPassword() {
@@ -31,7 +31,7 @@ public class UserData_Modifiable extends UserData_Minimal{
 	}
 	
 	public static boolean passwordValid(String password) {
-		return (password != null && password.length() >= 8 && password.length() < 20);
+		return (password != null && password.length() >= 8 && password.length() < 64);
 	}
 	
 	boolean isValid() {

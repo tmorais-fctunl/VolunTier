@@ -15,14 +15,14 @@ import org.javatuples.Triplet;
 import com.google.gson.Gson;
 
 import voluntier.util.AuthToken;
-import voluntier.util.LoginData;
-import voluntier.util.RequestData;
+import voluntier.util.consumes.LoginData;
+import voluntier.util.consumes.RequestData;
 import voluntier.util.userdata.Account;
+import voluntier.util.userdata.DB_User;
 import voluntier.util.userdata.State;
 import voluntier.util.userdata.UserData_Modifiable;
 
 import com.google.cloud.datastore.*;
-import com.google.cloud.datastore.StructuredQuery.CompositeFilter;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 
 @Path("/")
@@ -92,11 +92,11 @@ public class SessionResource {
 			Entity user = txn.get(userKey);
 
 			// check if user exists
-			if(user == null || user.getString("user_state").equals(State.BANNED.toString()) || user.getString("user_account").equals(Account.REMOVED.toString())) {
+			if(user == null || user.getString(DB_User.STATE).equals(State.BANNED.toString()) || user.getString(DB_User.ACCOUNT).equals(Account.REMOVED.toString())) {
 				txn.rollback();
 				return Response.status(Status.FORBIDDEN).build();
 			} else {
-				String hsh_pwd = user.getString("user_pwd");
+				String hsh_pwd = user.getString(DB_User.PASSWORD);
 
 				// check for correct password
 				if(!hsh_pwd.equals(UserData_Modifiable.hashPassword(data.password))) {

@@ -1,4 +1,6 @@
-package voluntier.util;
+package voluntier.util.consumes;
+
+import voluntier.util.userdata.UserData_Modifiable;
 
 public class ForgotPassData {
 
@@ -13,6 +15,6 @@ public class ForgotPassData {
 	}
 	
 	public boolean isValid() {
-		return user_id.length() > 4 && email.matches(".+@.+[.].+");
+		return UserData_Modifiable.idValid(user_id) && UserData_Modifiable.emailValid(email);
 	}
 }

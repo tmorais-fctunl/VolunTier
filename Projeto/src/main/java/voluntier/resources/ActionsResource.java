@@ -7,6 +7,7 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Transaction;
 
+import voluntier.util.userdata.DB_User;
 import voluntier.util.userdata.Roles;
 
 public class ActionsResource {
@@ -22,37 +23,37 @@ public class ActionsResource {
 	}
 
 	public static boolean hasRemovePermission(Entity user, Entity target, Transaction txn) {
-		int user_level = getLevel(Action.REMOVE, Roles.valueOf(user.getString("user_role")), txn);
-		int target_level = getLevel(Action.REMOVE, Roles.valueOf(target.getString("user_role")), txn);
+		int user_level = getLevel(Action.REMOVE, Roles.valueOf(user.getString(DB_User.ROLE)), txn);
+		int target_level = getLevel(Action.REMOVE, Roles.valueOf(target.getString(DB_User.ROLE)), txn);
 		
-		return target_level < user_level || target.getString("user_id").equals(user.getString("user_id"));
+		return target_level < user_level || target.getString(DB_User.ID).equals(user.getString(DB_User.ID));
 	}
 	
 	public static boolean hasLookUpPermission(Entity user, Entity target, Transaction txn) {
-		int user_level = getLevel(Action.LOOK_UP, Roles.valueOf(user.getString("user_role")), txn);
-		int target_level = getLevel(Action.LOOK_UP, Roles.valueOf(target.getString("user_role")), txn);
+		int user_level = getLevel(Action.LOOK_UP, Roles.valueOf(user.getString(DB_User.ROLE)), txn);
+		int target_level = getLevel(Action.LOOK_UP, Roles.valueOf(target.getString(DB_User.ROLE)), txn);
 		
-		return target_level < user_level || target.getString("user_id").equals(user.getString("user_id"));
+		return target_level < user_level || target.getString(DB_User.ID).equals(user.getString(DB_User.ID));
 	}
 	
 	public static boolean hasAtribPermission(Entity user, Entity target, Transaction txn) {
-		int user_level = getLevel(Action.MODIFY_ATRIB, Roles.valueOf(user.getString("user_role")), txn);
-		int target_level = getLevel(Action.MODIFY_ATRIB, Roles.valueOf(target.getString("user_role")), txn);
+		int user_level = getLevel(Action.MODIFY_ATRIB, Roles.valueOf(user.getString(DB_User.ROLE)), txn);
+		int target_level = getLevel(Action.MODIFY_ATRIB, Roles.valueOf(target.getString(DB_User.ROLE)), txn);
 		
-		return target_level < user_level || target.getString("user_id").equals(user.getString("user_id"));
+		return target_level < user_level || target.getString(DB_User.ID).equals(user.getString(DB_User.ID));
 	}
 	
 	public static boolean hasRolePermission(Entity user, Entity target, Transaction txn, String to) {
-		int user_level = getLevel(Action.MODIFY_ROLE, Roles.valueOf(user.getString("user_role")), txn);
-		int target_level = getLevel(Action.MODIFY_ROLE, Roles.valueOf(target.getString("user_role")), txn);
+		int user_level = getLevel(Action.MODIFY_ROLE, Roles.valueOf(user.getString(DB_User.ROLE)), txn);
+		int target_level = getLevel(Action.MODIFY_ROLE, Roles.valueOf(target.getString(DB_User.ROLE)), txn);
 		int desired_level = getLevel(Action.MODIFY_ROLE, Roles.valueOf(to), txn);
 		
 		return target_level + 1 < user_level && desired_level < user_level && desired_level != target_level;
 	}
 	
 	public static boolean hasStatePermission(Entity user, Entity target, Transaction txn) {
-		int user_level = getLevel(Action.MODIFY_STATE, Roles.valueOf(user.getString("user_role")), txn);
-		int target_level = getLevel(Action.MODIFY_STATE, Roles.valueOf(target.getString("user_role")), txn);
+		int user_level = getLevel(Action.MODIFY_STATE, Roles.valueOf(user.getString(DB_User.ROLE)), txn);
+		int target_level = getLevel(Action.MODIFY_STATE, Roles.valueOf(target.getString(DB_User.ROLE)), txn);
 		
 		return target_level < user_level;
 	}

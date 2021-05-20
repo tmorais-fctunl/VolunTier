@@ -3,7 +3,7 @@ package voluntier.util.email;
 import java.util.UUID;
 
 import voluntier.util.AuthToken;
-import voluntier.util.RegisterData;
+import voluntier.util.consumes.RegisterData;
 import voluntier.util.userdata.UserData_Modifiable;
 
 public class ConfirmationData extends RegisterData {

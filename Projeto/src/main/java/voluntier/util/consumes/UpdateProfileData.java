@@ -1,4 +1,4 @@
-package voluntier.util;
+package voluntier.util.consumes;
 
 import voluntier.util.userdata.UserData_Modifiable;
 

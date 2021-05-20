@@ -3,7 +3,7 @@ package voluntier.util.email;
 import java.util.UUID;
 
 import voluntier.util.AuthToken;
-import voluntier.util.ForgotPassData;
+import voluntier.util.consumes.ForgotPassData;
 
 public class ForgotData extends ForgotPassData{
 

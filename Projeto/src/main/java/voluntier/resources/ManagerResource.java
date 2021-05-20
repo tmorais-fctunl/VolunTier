@@ -19,9 +19,9 @@ import com.google.cloud.datastore.Transaction;
 
 import com.google.gson.Gson;
 
-import voluntier.util.RequestData;
+import voluntier.util.consumes.RequestData;
+import voluntier.util.userdata.DB_User;
 import voluntier.util.userdata.UserData_Minimal;
-import voluntier.util.userdata.UserData_Modifiable;
 
 @Path("/user")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
@@ -68,7 +68,7 @@ public class ManagerResource {
 					// check permissions
 					if (!ActionsResource.hasLookUpPermission(rq_user, tg_user, txn)) {
 						txn.rollback();
-						LOG.warning("User:" + rq_user.getString("user_id")
+						LOG.warning("User:" + rq_user.getString(DB_User.ID)
 								+ " does not have enough permissions to look up: " + data.user_id);
 						return Response.status(Status.FORBIDDEN).build();
 					} else {

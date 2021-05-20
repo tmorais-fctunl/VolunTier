@@ -17,11 +17,12 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Transaction;
 
-import voluntier.util.RequestData;
-import voluntier.util.UpdateProfileData;
-import voluntier.util.UpdateRoleData;
-import voluntier.util.UpdateStateData;
+import voluntier.util.consumes.RequestData;
+import voluntier.util.consumes.UpdateProfileData;
+import voluntier.util.consumes.UpdateRoleData;
+import voluntier.util.consumes.UpdateStateData;
 import voluntier.util.userdata.Account;
+import voluntier.util.userdata.DB_User;
 import voluntier.util.userdata.State;
 import voluntier.util.userdata.UserData_Modifiable;
 
@@ -65,33 +66,19 @@ public class UpdateResource {
 				Entity rq_user = txn.get(rq_userKey);
 
 				// check if user being removed exists and is not already removed
-				if(tg_user == null || tg_user.getString("user_account").equals(Account.REMOVED.toString())) {
+				if(tg_user == null || tg_user.getString(DB_User.ACCOUNT).equals(Account.REMOVED.toString())) {
 					txn.rollback();
-					LOG.warning("User:" + rq_user.getString("user_id") + " is trying to remove an inexistent or already removed user: " + data.user_id);
+					LOG.warning("User:" + rq_user.getString(DB_User.ID) + " is trying to remove an inexistent or already removed user: " + data.user_id);
 					return Response.status(Status.FORBIDDEN).entity("").build();
 				} else {
 					// check permissions
 					if(!ActionsResource.hasRemovePermission(rq_user, tg_user, txn)) {
 						txn.rollback();
-						LOG.warning("User:" + rq_user.getString("user_id") + " does not have enough permissions to remove: " + data.user_id);
+						LOG.warning("User:" + rq_user.getString(DB_User.ID) + " does not have enough permissions to remove: " + data.user_id);
 						return Response.status(Status.FORBIDDEN).entity("").build();
 					} else {
 						// set removed flag for user
-						tg_user = Entity.newBuilder(tg_userKey)
-								.set("user_id", tg_user.getString("user_id"))
-								.set("user_pwd", tg_user.getString("user_pwd"))
-								.set("user_email", tg_user.getString("user_email"))
-								.set("user_role", tg_user.getString("user_role"))
-								.set("user_state", tg_user.getString("user_state"))
-								.set("user_profile", tg_user.getString("user_profile"))
-								.set("user_landline", tg_user.getString("user_landline"))
-								.set("user_mobile", tg_user.getString("user_mobile"))
-								.set("user_address", tg_user.getString("user_address"))
-								.set("user_address2", tg_user.getString("user_address2"))
-								.set("user_region", tg_user.getString("user_region"))
-								.set("user_pc", tg_user.getString("user_pc"))
-								.set("user_account", Account.REMOVED.toString())
-								.build();
+						tg_user = DB_User.remove(tg_userKey, tg_user);
 
 						// invalidate all sessions related to this user
 						SessionResource.invalidateAllSessionsOfUser(data.user_id, txn);						
@@ -99,7 +86,7 @@ public class UpdateResource {
 						txn.put(tg_user);
 						txn.commit();
 
-						LOG.fine("User: " + rq_user.getString("user_id") + " removed User: " + data.user_id);
+						LOG.fine("User: " + rq_user.getString(DB_User.ID) + " removed User: " + data.user_id);
 						return Response.status(Status.NO_CONTENT).build();
 					}
 				}
@@ -146,33 +133,19 @@ public class UpdateResource {
 				Entity rq_user = txn.get(rq_userKey);
 
 				// check if target user exists and is not removed
-				if(tg_user == null || tg_user.getString("user_account").equals(Account.REMOVED.toString())) {
+				if(tg_user == null || tg_user.getString(DB_User.ACCOUNT).equals(Account.REMOVED.toString())) {
 					txn.rollback();
-					LOG.warning("User:" + rq_user.getString("user_id") + " is trying to change state of an inexistent or already removed user: " + data.user_id);
+					LOG.warning("User:" + rq_user.getString(DB_User.ID) + " is trying to change state of an inexistent or already removed user: " + data.user_id);
 					return Response.status(Status.FORBIDDEN).entity("").build();
 				} else {
 					// check permissions
 					if(!ActionsResource.hasStatePermission(rq_user, tg_user, txn)) {
 						txn.rollback();
-						LOG.warning("User:" + rq_user.getString("user_id") + " does not have enough permissions to change state of user: " + data.user_id);
+						LOG.warning("User:" + rq_user.getString(DB_User.ID) + " does not have enough permissions to change state of user: " + data.user_id);
 						return Response.status(Status.FORBIDDEN).entity("").build();
 					} else {
 						// set state flag for target user
-						tg_user = Entity.newBuilder(tg_userKey)
-								.set("user_id", tg_user.getString("user_id"))
-								.set("user_pwd", tg_user.getString("user_pwd"))
-								.set("user_email", tg_user.getString("user_email"))
-								.set("user_role", tg_user.getString("user_role"))
-								.set("user_state", data.state)
-								.set("user_profile", tg_user.getString("user_profile"))
-								.set("user_landline", tg_user.getString("user_landline"))
-								.set("user_mobile", tg_user.getString("user_mobile"))
-								.set("user_address", tg_user.getString("user_address"))
-								.set("user_address2", tg_user.getString("user_address2"))
-								.set("user_region", tg_user.getString("user_region"))
-								.set("user_pc", tg_user.getString("user_pc"))
-								.set("user_account", tg_user.getString("user_account"))
-								.build();				
+						tg_user = DB_User.setState(data.state, tg_userKey, tg_user);		
 
 						if (data.state.equals(State.BANNED.toString()))
 							SessionResource.invalidateAllSessionsOfUser(data.user_id, txn);
@@ -180,7 +153,7 @@ public class UpdateResource {
 						txn.put(tg_user);
 						txn.commit();
 
-						LOG.fine("User: " + rq_user.getString("user_id") + " changed state of User: " + data.user_id + " to: " + data.state);
+						LOG.fine("User: " + rq_user.getString(DB_User.ID) + " changed state of User: " + data.user_id + " to: " + data.state);
 						return Response.status(Status.NO_CONTENT).build();
 					}
 				}
@@ -227,19 +200,19 @@ public class UpdateResource {
 				Entity rq_user = txn.get(rq_userKey);
 
 				// check if target user exists and is not removed
-				if(tg_user == null || tg_user.getString("user_account").equals(Account.REMOVED.toString())) {
+				if(tg_user == null || tg_user.getString(DB_User.ACCOUNT).equals(Account.REMOVED.toString())) {
 					txn.rollback();
-					LOG.warning("User:" + rq_user.getString("user_id") + " is trying to change profile attributes of an inexistent or already removed user: " + data.user_id);
+					LOG.warning("User:" + rq_user.getString(DB_User.ID) + " is trying to change profile attributes of an inexistent or already removed user: " + data.user_id);
 					return Response.status(Status.FORBIDDEN).entity("").build();
 				} else {
 					// check permissions
 					if(!ActionsResource.hasAtribPermission(rq_user, tg_user, txn)) {
 						txn.rollback();
-						LOG.warning("User:" + rq_user.getString("user_id") + " does not have enough permissions to change profile of user: " + data.user_id);
+						LOG.warning("User:" + rq_user.getString(DB_User.ID) + " does not have enough permissions to change profile of user: " + data.user_id);
 						return Response.status(Status.FORBIDDEN).entity("").build();
 					} else {
 
-						if(data.password != null && !tg_user.getString("user_pwd").equals(UserData_Modifiable.hashPassword(data.old_password))) {	
+						if(data.password != null && !tg_user.getString(DB_User.PASSWORD).equals(UserData_Modifiable.hashPassword(data.old_password))) {	
 							txn.rollback();
 							return Response.status(Status.NOT_ACCEPTABLE).entity("Current password is not correct.").build();
 						}
@@ -248,26 +221,12 @@ public class UpdateResource {
 							SessionResource.invalidateAllSessionsOfUser(data.user_id, txn, data.token);
 						
 						// set state flag for target user
-						tg_user = Entity.newBuilder(tg_userKey)
-								.set("user_id", tg_user.getString("user_id"))
-								.set("user_pwd", data.getPassword(tg_user.getString("user_pwd")))
-								.set("user_email", data.getEmail(tg_user.getString("user_email")))
-								.set("user_role", tg_user.getString("user_role"))
-								.set("user_state", tg_user.getString("user_state"))
-								.set("user_profile", data.getProfile(tg_user.getString("user_profile")))
-								.set("user_landline", data.getLandline(tg_user.getString("user_landline")))
-								.set("user_mobile", data.getMobile(tg_user.getString("user_mobile")))
-								.set("user_address", data.getAddress(tg_user.getString("user_address")))
-								.set("user_address2", data.getAddress2(tg_user.getString("user_address2")))
-								.set("user_region", data.getRegion(tg_user.getString("user_region")))
-								.set("user_pc", data.getPc(tg_user.getString("user_pc")))
-								.set("user_account", tg_user.getString("user_account"))
-								.build();				
+						tg_user = DB_User.changeProperty(data, tg_userKey, tg_user);				
 
 						txn.put(tg_user);
 						txn.commit();
 
-						LOG.fine("User: " + rq_user.getString("user_id") + " changed profile of User: " + data.user_id);
+						LOG.fine("User: " + rq_user.getString(DB_User.ID) + " changed profile of User: " + data.user_id);
 						return Response.status(Status.NO_CONTENT).build();
 					}
 				}
@@ -314,38 +273,24 @@ public class UpdateResource {
 				Entity rq_user = txn.get(rq_userKey);
 
 				// check if target user exists and is not removed
-				if(tg_user == null || tg_user.getString("user_account").equals(Account.REMOVED.toString()) || tg_user.getString("user_state").equals(State.BANNED.toString())) {
+				if(tg_user == null || tg_user.getString(DB_User.ACCOUNT).equals(Account.REMOVED.toString()) || tg_user.getString(DB_User.STATE).equals(State.BANNED.toString())) {
 					txn.rollback();
-					LOG.warning("User:" + rq_user.getString("user_id") + " is trying to change role of an inexistent or already removed user: " + data.user_id);
+					LOG.warning("User:" + rq_user.getString(DB_User.ID) + " is trying to change role of an inexistent or already removed user: " + data.user_id);
 					return Response.status(Status.FORBIDDEN).entity("No user with id " + data.user_id).build();
 				} else {
 					// check permissions
 					if(!ActionsResource.hasRolePermission(rq_user, tg_user, txn, data.role)) {
 						txn.rollback();
-						LOG.warning("User:" + rq_user.getString("user_id") + " does not have enough permissions to change role of user: " + data.user_id);
+						LOG.warning("User:" + rq_user.getString(DB_User.ID) + " does not have enough permissions to change role of user: " + data.user_id);
 						return Response.status(Status.FORBIDDEN).entity("Not enough permissions .").build();
 					} else {
 						// set state flag for target user
-						tg_user = Entity.newBuilder(tg_userKey)
-								.set("user_id", tg_user.getString("user_id"))
-								.set("user_pwd", tg_user.getString("user_pwd"))
-								.set("user_email", tg_user.getString("user_email"))
-								.set("user_role", data.role)
-								.set("user_state", tg_user.getString("user_state"))
-								.set("user_profile", tg_user.getString("user_profile"))
-								.set("user_landline", tg_user.getString("user_landline"))
-								.set("user_mobile", tg_user.getString("user_mobile"))
-								.set("user_address", tg_user.getString("user_address"))
-								.set("user_address2", tg_user.getString("user_address2"))
-								.set("user_region", tg_user.getString("user_region"))
-								.set("user_pc", tg_user.getString("user_pc"))
-								.set("user_account", tg_user.getString("user_account"))
-								.build();				
+						tg_user = DB_User.changeRole(data.role, tg_userKey, tg_user);			
 
 						txn.put(tg_user);
 						txn.commit();
 
-						LOG.fine("User: " + rq_user.getString("user_id") + " changed role of User: " + data.user_id + " to: " + data.role);
+						LOG.fine("User: " + rq_user.getString(DB_User.ID) + " changed role of User: " + data.user_id + " to: " + data.role);
 						return Response.status(Status.NO_CONTENT).build();
 					}
 				}

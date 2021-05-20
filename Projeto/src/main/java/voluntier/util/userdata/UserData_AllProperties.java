@@ -2,7 +2,7 @@ package voluntier.util.userdata;
 
 import com.google.cloud.datastore.Entity;
 
-import voluntier.util.RegisterData;
+import voluntier.util.consumes.RegisterData;
 
 public class UserData_AllProperties extends UserData_Modifiable {
 
@@ -22,9 +22,9 @@ public class UserData_AllProperties extends UserData_Modifiable {
 	
 	public UserData_AllProperties(Entity user) {
 		super(user);
-		this.role = Roles.valueOf(user.getString("user_role"));
-		this.state = State.valueOf(user.getString("user_state"));
-		this.account = Account.valueOf(user.getString("user_account"));
+		this.role = Roles.valueOf(user.getString(DB_User.ROLE));
+		this.state = State.valueOf(user.getString(DB_User.STATE));
+		this.account = Account.valueOf(user.getString(DB_User.ACCOUNT));
 	}
 
 	public Roles getRole() {

@@ -20,12 +20,10 @@ import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Transaction;
 
-import voluntier.util.RegisterData;
+import voluntier.util.consumes.RegisterData;
 import voluntier.util.email.ConfirmationData;
-import voluntier.util.email.ConfirmationEmail;
-import voluntier.util.userdata.Account;
-import voluntier.util.userdata.UserData_AllProperties;
-import voluntier.util.userdata.UserData_Modifiable;
+import voluntier.util.email.ConfirmRegistrationEmail;
+import voluntier.util.userdata.DB_User;
 
 @Path("/register")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
@@ -36,23 +34,28 @@ public class RegisterResource {
 	private static KeyFactory serviceEmailFactory = datastore.newKeyFactory().setKind("ServiceEmail");
 	private static KeyFactory confirmationFactory = datastore.newKeyFactory().setKind("Confirmation");
 
+	private static final String htmlContent = "<html><head><style>iframe[seamless]{border: none;}</style></head>"
+			+ "<body><iframe src=\"https://voluntier-312115.ew.r.appspot.com/www/pages/confirm/confirm.html\" "
+			+ "seamless=\"\"></iframe></body></html>";
+
 	public RegisterResource() {
 	}
 
 	@GET
 	@Path("/{code}/confirm")
-	//@Consumes(MediaType.APPLICATION_JSON)
+	// @Consumes(MediaType.APPLICATION_JSON)
 	public Response doConfirmation(@PathParam("code") String code) {
 		Transaction txn = datastore.newTransaction();
 		try {
 			Key confirmationKey = confirmationFactory.newKey(code);
 			Entity confirmation = txn.get(confirmationKey);
-			
-			if (confirmation == null || confirmation.getLong("confirmation_expiration_date") < System.currentTimeMillis()) {
+
+			if (confirmation == null
+					|| confirmation.getLong("confirmation_expiration_date") < System.currentTimeMillis()) {
 				txn.rollback();
 				return Response.status(Status.FORBIDDEN).entity("Invalid confirmation url").build();
 			} else {
-				
+
 				String user_id = confirmation.getString("user_id");
 
 				Key userKey = usersFactory.newKey(user_id);
@@ -61,27 +64,17 @@ public class RegisterResource {
 					txn.rollback();
 					return Response.status(Status.FORBIDDEN).entity("User already exist: " + user_id).build();
 				} else {
-						
-					UserData_AllProperties data = new UserData_AllProperties(new RegisterData(user_id, confirmation.getString("confirmation_email"), 
-							confirmation.getString("confirmation_pwd")));
-					
-					user = Entity.newBuilder(userKey).set("user_id", data.user_id).set("user_pwd", data.password)
-							.set("user_email", data.email).set("user_role", data.getRole().toString())
-							.set("user_state", data.getState().toString()).set("user_profile", data.profile)
-							.set("user_landline", data.landline).set("user_mobile", data.mobile)
-							.set("user_address", data.address).set("user_address2", data.address2)
-							.set("user_region", data.region).set("user_pc", data.pc)
-							.set("user_account", Account.ACTIVE.toString()).build();
+
+					user = DB_User.createNew(user_id, confirmation.getString("confirmation_email"),
+							confirmation.getString("confirmation_pwd"), userKey, user);
 
 					txn.add(user);
 					txn.commit();
 
-					LOG.fine("Registered user: " + data.user_id);LOG.fine("Registered user: " + data.user_id);
-					//String htmlContent = "<meta http-equiv=\"refresh\" content=\"0; URL=/www/confirm/confirm.html\" />";
-					String htmlContent = "<html><head><style>iframe[seamless]{border: none;}</style></head>"
-							+ "<body><iframe src=\"https://voluntier-312115.ew.r.appspot.com/www/pages/confirm/confirm.html\" "
-							+ "seamless=\"\"></iframe></body></html>";
-					
+					LOG.fine("Registered user: " + user_id);
+					// String htmlContent = "<meta http-equiv=\"refresh\" content=\"0;
+					// URL=/www/confirm/confirm.html\" />";
+
 					return Response.ok(htmlContent, MediaType.TEXT_HTML).build();
 				}
 			}
@@ -122,13 +115,15 @@ public class RegisterResource {
 
 				if (serviceEmail != null) {
 					try {
-						ConfirmationData url = ConfirmationEmail.sendConfirmationEmail(serviceEmail.getString("email"), reg_data);
+						ConfirmationData url = ConfirmRegistrationEmail.sendConfirmationEmail(serviceEmail.getString("email"),
+								reg_data);
 
 						Key confirmationKey = confirmationFactory.newKey(url.code);
 						Entity confirmation = Entity.newBuilder(confirmationKey).set("confirmation_code", url.code)
-								.set("user_id", url.user_id).set("confirmation_email", url.email).set("confirmation_pwd", url.password)
-								.set("confirmation_creation_date", url.creationDate).set("confirmation_expiration_date", url.expirationDate)
-								.build();
+								.set("user_id", url.user_id).set("confirmation_email", url.email)
+								.set("confirmation_pwd", url.password)
+								.set("confirmation_creation_date", url.creationDate)
+								.set("confirmation_expiration_date", url.expirationDate).build();
 
 						txn.add(confirmation);
 						txn.commit();
