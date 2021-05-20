@@ -41,7 +41,7 @@ public class RegisterResource {
 
 	@GET
 	@Path("/{code}/confirm")
-	@Consumes(MediaType.APPLICATION_JSON)
+	//@Consumes(MediaType.APPLICATION_JSON)
 	public Response doConfirmation(@PathParam("code") String code) {
 		Transaction txn = datastore.newTransaction();
 		try {
@@ -61,8 +61,9 @@ public class RegisterResource {
 					txn.rollback();
 					return Response.status(Status.FORBIDDEN).entity("User already exist: " + user_id).build();
 				} else {
-					
-					UserData_AllProperties data = new UserData_AllProperties(new RegisterData(user_id, confirmation.getString("email"), confirmation.getString("pwd")));
+						
+					UserData_AllProperties data = new UserData_AllProperties(new RegisterData(user_id, confirmation.getString("confirmation_email"), 
+							confirmation.getString("confirmation_pwd")));
 					
 					user = Entity.newBuilder(userKey).set("user_id", data.user_id).set("user_pwd", data.password)
 							.set("user_email", data.email).set("user_role", data.getRole().toString())
@@ -125,7 +126,7 @@ public class RegisterResource {
 
 						Key confirmationKey = confirmationFactory.newKey(url.code);
 						Entity confirmation = Entity.newBuilder(confirmationKey).set("confirmation_code", url.code)
-								.set("user_id", url.user_id).set("email", url.email).set("pwd", url.password)
+								.set("user_id", url.user_id).set("confirmation_email", url.email).set("confirmation_pwd", url.password)
 								.set("confirmation_creation_date", url.creationDate).set("confirmation_expiration_date", url.expirationDate)
 								.build();
 
