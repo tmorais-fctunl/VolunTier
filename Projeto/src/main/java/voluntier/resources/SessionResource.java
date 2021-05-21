@@ -92,7 +92,7 @@ public class SessionResource {
 			Entity user = txn.get(userKey);
 
 			// check if user exists
-			if(user == null || user.getString(DB_User.STATE).equals(State.BANNED.toString()) || user.getString(DB_User.ACCOUNT).equals(Account.REMOVED.toString())) {
+			if(user == null || ActionsResource.isRemovedOrBannedUser(user)) {
 				txn.rollback();
 				return Response.status(Status.FORBIDDEN).build();
 			} else {

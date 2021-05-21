@@ -19,12 +19,21 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Transaction;
+import com.google.gson.Gson;
 
 import voluntier.util.consumes.ChangePassData;
 import voluntier.util.consumes.ForgotPassData;
 import voluntier.util.email.ChangePasswordEmail;
 import voluntier.util.email.ForgotData;
+import voluntier.util.userdata.Account;
 import voluntier.util.userdata.DB_User;
+import voluntier.util.userdata.State;
+
+import java.time.Duration;
+import java.time.Instant;
+import de.mkammerer.argon2.Argon2;
+import de.mkammerer.argon2.Argon2Factory;
+import de.mkammerer.argon2.Argon2Factory.Argon2Types;
 
 @Path("/forgotpassword")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
@@ -40,6 +49,34 @@ public class ForgotPassResource {
 			+ "seamless=\"\"></iframe></body></html>";
 
 	public ForgotPassResource() {
+	}
+
+	@GET
+	@Path("/test")
+	// @Produces(MediaType)
+	public Response test() {
+
+		String password = "Hello World!";
+		Instant beginHash = Instant.now();
+
+		Argon2 argon2 = Argon2Factory.create(Argon2Types.ARGON2id);
+
+		String hash = argon2.hash(10, 8192, 1, password);
+
+		Instant endHash = Instant.now();
+
+		String hashing = String.format("Process took %f s", Duration.between(beginHash, endHash).toMillis() / 1024.0);
+
+		Instant beginVerify = Instant.now();
+
+		boolean success = argon2.verify(hash, password);
+
+		Instant endVerify = Instant.now();
+
+		String verifying = String.format("Process took %f s",
+				Duration.between(beginVerify, endVerify).toMillis() / 1024.0);
+
+		return Response.ok("HASH: " + hash + " HASHING: " + hashing + " VERIFYING: " + verifying).build();
 	}
 
 	@POST
@@ -64,7 +101,7 @@ public class ForgotPassResource {
 				Key userKey = usersFactory.newKey(user_id);
 				Entity user = txn.get(userKey);
 
-				if (user == null) {
+				if (user == null || ActionsResource.isRemovedOrBannedUser(user)) {
 					txn.rollback();
 					return Response.status(Status.FORBIDDEN).entity("User does not exist: " + user_id).build();
 				} else {
@@ -151,7 +188,7 @@ public class ForgotPassResource {
 			Key userKey = usersFactory.newKey(data.user_id);
 			Entity user = txn.get(userKey);
 
-			if (user == null) {
+			if (user == null || ActionsResource.isRemovedOrBannedUser(user)) {
 				txn.rollback();
 				return Response.status(Status.FORBIDDEN).entity("User does not exist: " + data.user_id).build();
 			} else {

@@ -48,10 +48,6 @@ public class UserData_Minimal {
 		this.pc = user.getString(DB_User.POSTAL_CODE);
 	}
 	
-	public static boolean passwordValid(String password) {
-		return (password != null && password.length() >= 8 && password.length() < 20);
-	}
-	
 	public static boolean emailValid(String email) {
 		return (email != null && email.matches(EMAIL_REGEX));
 	}

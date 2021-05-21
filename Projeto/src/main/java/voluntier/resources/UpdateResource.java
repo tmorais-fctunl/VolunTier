@@ -66,7 +66,7 @@ public class UpdateResource {
 				Entity rq_user = txn.get(rq_userKey);
 
 				// check if user being removed exists and is not already removed
-				if(tg_user == null || tg_user.getString(DB_User.ACCOUNT).equals(Account.REMOVED.toString())) {
+				if(tg_user == null) {
 					txn.rollback();
 					LOG.warning("User:" + rq_user.getString(DB_User.ID) + " is trying to remove an inexistent or already removed user: " + data.user_id);
 					return Response.status(Status.FORBIDDEN).entity("").build();
@@ -133,7 +133,7 @@ public class UpdateResource {
 				Entity rq_user = txn.get(rq_userKey);
 
 				// check if target user exists and is not removed
-				if(tg_user == null || tg_user.getString(DB_User.ACCOUNT).equals(Account.REMOVED.toString())) {
+				if(tg_user == null) {
 					txn.rollback();
 					LOG.warning("User:" + rq_user.getString(DB_User.ID) + " is trying to change state of an inexistent or already removed user: " + data.user_id);
 					return Response.status(Status.FORBIDDEN).entity("").build();
@@ -200,7 +200,7 @@ public class UpdateResource {
 				Entity rq_user = txn.get(rq_userKey);
 
 				// check if target user exists and is not removed
-				if(tg_user == null || tg_user.getString(DB_User.ACCOUNT).equals(Account.REMOVED.toString())) {
+				if(tg_user == null) {
 					txn.rollback();
 					LOG.warning("User:" + rq_user.getString(DB_User.ID) + " is trying to change profile attributes of an inexistent or already removed user: " + data.user_id);
 					return Response.status(Status.FORBIDDEN).entity("").build();
@@ -273,7 +273,7 @@ public class UpdateResource {
 				Entity rq_user = txn.get(rq_userKey);
 
 				// check if target user exists and is not removed
-				if(tg_user == null || tg_user.getString(DB_User.ACCOUNT).equals(Account.REMOVED.toString()) || tg_user.getString(DB_User.STATE).equals(State.BANNED.toString())) {
+				if(tg_user == null) {
 					txn.rollback();
 					LOG.warning("User:" + rq_user.getString(DB_User.ID) + " is trying to change role of an inexistent or already removed user: " + data.user_id);
 					return Response.status(Status.FORBIDDEN).entity("No user with id " + data.user_id).build();
