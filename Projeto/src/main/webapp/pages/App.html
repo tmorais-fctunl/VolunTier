@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="description" content="">
+        <meta name="author" content="">
+        <title>Pinegrow | Bootstrap Blocks Template</title>
+        <!-- Bootstrap core CSS -->
+        <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="../css/blocks.css">
+        <!-- Custom styles for this template -->
+        <link href="../css/style.css" rel="stylesheet">
+        <link rel="stylesheet" href="../css/blocks.css">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Alfa+Slab+One&display=swap">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Alice&display=swap">
+        <link rel="stylesheet" href="../blocks.css">
+    </head>
+    <header>
+</header>
+    <body class="text-secondary">
+        <nav class="bg-light navbar navbar-custo navbar-custom navbar-expand-lg navbar-light">
+           <a class="navbar-brand" href="index.html" style="font-family: 'Alfa Slab One', cursive; font-size: 26px; color: #e7822c; letter-spacing: 1px;">VolunTier</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggler30" aria-controls="" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarToggler30">
+                <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html#About-section">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html#Contacts-section">Contact</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="return logout()">Logout</a>
+                    </li>
+                </ul>
+            </div>
+            <a style="font-family: 'Alice', serif; font-size: 15px; color: #000000; letter-spacing: 1px; text-align: center;" id="user_tag"></a>
+        </nav>
+        <main class="app">
+            <aside class="sidebar" style="background-color:white;">
+                <ul>
+                    <li>This right here is your panel</li>
+                    <li>(In development)</li>
+                </ul>
+            </aside>
+            <section class="map-area" id="map">
+                <!-- Async script executes immediately and must be after any DOM elements used in callback. -->
+                <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyApuxZ0qx7PVVbZt9F2R-Hd_wmOfXcGN4E&callback=initMap&libraries=&v=weekly" async></script>
+            </section>
+        </main>
+        <footer class="bg-dark pt-5 text-white-50">
+            <div class="container">
+                <div class="row">
+</div>
+            </div>
+        </footer>
+        <script src="../assets/js/jquery.min.js"></script>
+        <script src="../assets/js/popper.js"></script>
+        <script src="../bootstrap/js/bootstrap.min.js"></script>
+        <script src="../scripts/formLoader.js"></script>
+        <!-- Hash function -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
+        <script src="../scripts/login.js"></script>
+        <script src="../scripts/register.js"></script>
+        <script src="../scripts/login_ok_fields.js"></script>
+        <script src="../scripts/register_ok_fields.js"></script>
+        <script src="../scripts/authenticate.js"></script>
+        <script src="../scripts/loadMap.js"></script>
+        <script src="../scripts/logout.js"></script>
+        <script>
+        window.onload = function () {
+            if (!tryAuthentication()) {
+                window.location = "../pages/index.html";
+                return false;
+            }
+            document.getElementById("user_tag").innerHTML = "Logged in as " + localStorage.getItem("user_id");
+
+        }
+        </script>
+
+    </body>
