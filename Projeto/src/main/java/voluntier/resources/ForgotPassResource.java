@@ -9,6 +9,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -80,10 +81,9 @@ public class ForgotPassResource {
 	}
 
 	@POST
-	@Path("/{code}/change")
+	@Path("/change")
 	@Consumes(MediaType.APPLICATION_JSON)
-	// @Produces(MediaType)
-	public Response changePass(@PathParam("code") String code, ChangePassData data) {
+	public Response changePass(@QueryParam("t") String code, ChangePassData data) {
 		Transaction txn = datastore.newTransaction();
 
 		try {
@@ -144,9 +144,8 @@ public class ForgotPassResource {
 	}
 
 	@GET
-	@Path("/{code}/confirm")
-	// @Consumes(MediaType.APPLICATION_JSON)
-	public Response doConfirmation(@PathParam("code") String code) {
+	@Path("/confirm")
+	public Response doConfirmation(@QueryParam("t") String code) {
 		Transaction txn = datastore.newTransaction();
 
 		try {

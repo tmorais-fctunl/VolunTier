@@ -2,7 +2,6 @@ package voluntier.util.consumes;
 
 public class ChangePassData {
 
-	public String user_id;
 	public String password;
 	public String confirmation_password;
 	
@@ -15,6 +14,6 @@ public class ChangePassData {
 	}
 	
 	public boolean isValid () {
-		return password.equals(confirmation_password);
+		return password != null && confirmation_password != null && password.equals(confirmation_password);
 	}
 }
