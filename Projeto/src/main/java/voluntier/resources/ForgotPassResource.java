@@ -45,9 +45,7 @@ public class ForgotPassResource {
 	private static KeyFactory serviceEmailFactory = datastore.newKeyFactory().setKind("ServiceEmail");
 	private static KeyFactory confirmationFactory = datastore.newKeyFactory().setKind("Confirmation");
 
-	private static final String htmlContent = "<html><head><style>iframe[seamless]{border: none;}</style></head>"
-			+ "<body><iframe src=\"https://voluntier-312115.ew.r.appspot.com/www/pages/pass/change_pass.html\" "
-			+ "seamless=\"\"></iframe></body></html>";
+	
 
 	public ForgotPassResource() {
 	}
@@ -157,6 +155,12 @@ public class ForgotPassResource {
 				txn.rollback();
 				return Response.status(Status.FORBIDDEN).entity("Invalid confirmation url").build();
 			} else {
+				
+				String htmlContent = "<html><head><style>iframe[seamless]{border: none;}</style></head>"
+						+ "<body><iframe src=\"https://voluntier-312115.ew.r.appspot.com/pages/changepwd.html?t=" + code + "\" "
+						+ "style=\"position:fixed; top:0; left:0; bottom:0; right:0; width:100%; "
+						+ "height:100%; border:none; margin:0; padding:0; "
+						+ "overflow:hidden; z-index:999999;\" seamless=\"\"></iframe></body></html>";
 
 				txn.rollback();
 				return Response.ok(htmlContent, MediaType.TEXT_HTML).build();
