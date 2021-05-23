@@ -1,0 +1,36 @@
+<resources>
+    <string name="app_name">VolunTier</string>
+    <!-- Strings related to login -->
+    <string name="prompt_email">Username</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Sign in</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="welcome">"Welcome !"</string>
+    <string name="invalid_username">Not a valid username</string>
+    <string name="invalid_password">Password must be >7 characters</string>
+    <string name="login_failed">"Login failed"</string>
+    <string name="login_success">"Login success"</string>
+    <string name="to_register">"Create Account"</string>
+    <!-- Strings related to maps -->
+    <string name="title_activity_maps">Map</string>
+    <string name="maps_logout">Logout</string>
+    <!-- Strings related to register -->
+    <string name="Email">Email</string>
+    <string name="Password">Password</string>
+    <string name="action_register">Register</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="register_username">Username</string>
+    <string name="register_success">Register completed successfully</string>
+    <string name="register_failed">Register failed...</string>
+    <string name="invalid_email">Not a valid email address</string>
+    <string name="invalid_pwConfirmation">The passwords dont match</string>
+    <string name="new_registration">"Your registration was a success! Please confirm your email by clicking the link we just sent you!"</string>
+    <!-- Strings related to recover password -->
+    <string name="to_recoverPw">Forgot your password?</string>
+    <string name="recoverPw_button">Recover Password</string>
+    <string name="recoverPw_success">Password Recovery was a success. Check your email! </string>
+    <string name="recoverPw_failed">Password Recovery failed. Check your data and try again </string>
+    <!-- Strings related to login -->
+    <string name="logout_failed">"Logout failed"</string>
+    <string name="logout_success">"Logout success"</string>
+</resources>
