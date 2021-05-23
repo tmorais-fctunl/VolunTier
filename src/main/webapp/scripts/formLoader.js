@@ -1,4 +1,4 @@
-var login = true;
+var loginForm = true;
 $(document).ready(function () {
                 //Set trigger and container variables
                 var trigger = $("#login-registerLink"), container = $("#login-register-box");
@@ -15,7 +15,7 @@ $(document).ready(function () {
                     $.ajax({
                         complete: function () {
                         	
-                            if (login) {
+                            if (loginForm) {
                                 $this.data('target', 'login-box');
                                 $this.text("Have an account? Log in");
                                 updateRegisterInputs();
@@ -25,7 +25,7 @@ $(document).ready(function () {
                                 $this.text("Don't have an account? Register");
                                 updateLoginInputs();
                             }
-                            login = !login;
+                            loginForm = !loginForm;
                         
                         }
                     });

@@ -23,6 +23,7 @@ function login() {
             $('body').css('cursor', 'default');
             document.getElementById("result").innerHTML = "Login successful";
             window.location = "/pages/App.html";
+            return false;
         }, 2000);
 
 
@@ -34,10 +35,10 @@ function login() {
                 document.getElementById("result").innerHTML = "Login unsuccessful";
                 break;
             case 500:
-                document.getElementById("result").innerHTML = "Something went wrong on our side, please try again at a later time";
+                document.getElementById("result").innerHTML = "Server error, try later";
                 break;
             case 400:
-                document.getElementById("result").innerHTML = "Make sure you're respecting requirements";
+                document.getElementById("result").innerHTML = "Check requirements";
                 break;
             default: break;
         }     
