@@ -8,11 +8,11 @@
     box-sizing: border-box;
 }
 
-body {
+body,
+html {
+    height: 100%;
     margin: 0;
-    background: #222;
-    font-family: "Work Sans", sans-serif;
-    font-weight: 400;
+    font-family: Arial;
 }
 
 .content {
@@ -42,39 +42,44 @@ header {
     height: 500px;
 }
 
-            * {
-  box-sizing: border-box;
+* {
+    box-sizing: border-box;
 }
 
-html, body {
-  height: 100%;
+html,
+body {
+    height: 100%;
 }
 
 .app {
-  display: flex;
-  flex-direction: row;
-  height: 100%;
+    display: flex;
+    flex-direction: row;
+    height: 100%;
 }
 
 .sidebar {
-  flex-basis: 300px;
-  flex-shrink: 0; /* just one way to do it */
-  height: 100%;
-  overflow: auto;
-  padding: 5px;
+    flex-basis: 300px;
+    flex-shrink: 0;
+
+    /* just one way to do it */
+    height: 100%;
+    overflow: auto;
+    padding: 5px;
 }
 
 .map-area {
-  flex-basis: 100%;
+    flex-basis: 100%;
 }
+
 /* Always set the map height explicitly to define the size of the div
-       * element that contains the map. */ 
+       * element that contains the map. */
 #map {
     height: 100%;
 }
-/* Optional: Makes the sample page fill the window. */
 
-html, body {
+/* Optional: Makes the sample page fill the window. */
+html,
+body {
     height: 100%;
     margin: 0;
     padding: 0;
@@ -94,6 +99,56 @@ html, body {
     overflow: hidden;
 }
 
-    .custom-map-control-button:hover {
-        background: #ebebeb;
-    }
+.custom-map-control-button:hover {
+    background: #ebebeb;
+}
+
+/* Style the tab */
+.tab {
+    overflow: hidden;
+    border: 1px double #f1f1f1;
+    background-color: #f8f9fa;
+}
+
+/* Style the buttons inside the tab */
+.tab button {
+    background-color: inherit;
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    transition: 0.3s;
+    font-size: 17px;
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+    background-color: #ddd;
+}
+
+/* Create an active/current tablink class */
+.tab button.active {
+    background-color: #ccc;
+}
+
+/* Style the tab content */
+.tabcontent {
+    display: none;
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-top: none;
+    height: 100%;
+    background-color: lightgray;
+}
+
+/* Style the close button */
+.topright {
+    float: right;
+    cursor: pointer;
+    font-size: 28px;
+}
+
+.topright:hover {
+    color: red;
+}

@@ -16,12 +16,16 @@
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Alfa+Slab+One&display=swap">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Alice&display=swap">
         <link rel="stylesheet" href="../blocks.css">
+        <!--<script src="../scripts/csi.min.js"></script>-->
+        <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.bundle.min.js"></script>
     </head>
     <header>
 </header>
     <body class="text-secondary">
         <nav class="bg-light navbar navbar-custo navbar-custom navbar-expand-lg navbar-light">
-           <a class="navbar-brand" href="index.html" style="font-family: 'Alfa Slab One', cursive; font-size: 26px; color: #e7822c; letter-spacing: 1px;">VolunTier</a>
+            <a class="navbar-brand" href="index.html" style="font-family: 'Alfa Slab One', cursive; font-size: 26px; color: #e7822c; letter-spacing: 1px;">VolunTier</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggler30" aria-controls="" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -40,18 +44,43 @@
             </div>
             <a style="font-family: 'Alice', serif; font-size: 15px; color: #000000; letter-spacing: 1px; text-align: center;" id="user_tag"></a>
         </nav>
-        <main class="app">
-            <aside class="sidebar" style="background-color:white;">
-                <ul>
-                    <li>This right here is your panel</li>
-                    <li>(In development)</li>
-                </ul>
-            </aside>
-            <section class="map-area" id="map">
-                <!-- Async script executes immediately and must be after any DOM elements used in callback. -->
-                <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyApuxZ0qx7PVVbZt9F2R-Hd_wmOfXcGN4E&callback=initMap&libraries=&v=weekly" async></script>
-            </section>
-        </main>
+        <div class="tab">
+            <button class="tablinks" onclick="openTab(event, 'Map')" id="defaultOpen">Map</button>
+            <button class="tablinks" onclick="openTab(event, 'Profile')">Profile</button>
+            <button class="tablinks" onclick="openTab(event, 'EmptyTab1')">EmptyTab</button>
+            <button class="tablinks" onclick="openTab(event, 'EmptyTab2')">EmptyTab</button>
+        </div>
+        <!-- Tab contents-->
+        <div id="Map" class="tabcontent">
+            <span onclick="this.parentElement.style.display='none'" class="topright">&times</span>
+            <main class="app">
+                <aside class="sidebar" style="background-color:white;">
+                    <ul>
+                        <li>This right here is your panel</li>
+                        <li>(In development)</li>
+                    </ul>
+                </aside>
+                <section class="map-area " id="map">
+                    <!-- Async script executes immediately and must be after any DOM elements used in callback. -->
+                    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyApuxZ0qx7PVVbZt9F2R-Hd_wmOfXcGN4E&callback=initMap&libraries=&v=weekly" async></script>
+                </section>
+            </main>
+        </div>
+        <div id="Profile" class="tabcontent">
+            <span onclick="this.parentElement.style.display='none'" class="topright">&times</span>
+            <div data-include="./contents/profile.html">
+</div>
+        </div>
+        <div id="EmptyTab1" class="tabcontent">
+            <span onclick="this.parentElement.style.display='none'" class="topright">&times</span>
+            <h3>EmptyTab1</h3>
+            <p>Nothing but void.</p> 
+        </div>
+        <div id="EmptyTab2" class="tabcontent">
+            <span onclick="this.parentElement.style.display='none'" class="topright">&times</span>
+            <h3>EmptyTab2</h3>
+            <p>Nothing but void.</p>
+        </div>
         <footer class="bg-dark pt-5 text-white-50">
             <div class="container">
                 <div class="row">
@@ -71,15 +100,35 @@
         <script src="../scripts/authenticate.js"></script>
         <script src="../scripts/loadMap.js"></script>
         <script src="../scripts/logout.js"></script>
+        <!-- Gotta put this in a separate file-->
         <script>
         window.onload = function () {
             if (!tryAuthentication()) {
-                window.location = "../pages/index.html";
+                //window.location = "../pages/index.html";
                 return false;
             }
             document.getElementById("user_tag").innerHTML = "Logged in as " + localStorage.getItem("user_id");
 
         }
         </script>
+        <script src="../scripts/csi.min.js"></script>
+        <script>
+function openTab(evt, tab) {
+  var i, tabcontent, tablinks;
+  tabcontent = document.getElementsByClassName("tabcontent");
+  for (i = 0; i < tabcontent.length; i++) {
+    tabcontent[i].style.display = "none";
+  }
+  tablinks = document.getElementsByClassName("tablinks");
+  for (i = 0; i < tablinks.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" active", "");
+  }
+  document.getElementById(tab).style.display = "block";
+  evt.currentTarget.className += " active";
+}
 
+// Get the element with id="defaultOpen" and click on it
+document.getElementById("defaultOpen").click();
+</script>
     </body>
+</html>
