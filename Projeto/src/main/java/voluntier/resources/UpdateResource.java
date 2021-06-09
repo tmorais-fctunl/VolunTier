@@ -17,6 +17,7 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Transaction;
 
+import voluntier.util.Argon2Util;
 import voluntier.util.consumes.RequestData;
 import voluntier.util.consumes.UpdateProfileData;
 import voluntier.util.consumes.UpdateRoleData;
@@ -212,7 +213,7 @@ public class UpdateResource {
 						return Response.status(Status.FORBIDDEN).entity("").build();
 					} else {
 
-						if(data.password != null && !tg_user.getString(DB_User.PASSWORD).equals(UserData_Modifiable.hashPassword(data.old_password))) {	
+						if(data.password != null && Argon2Util.verify(tg_user.getString(DB_User.PASSWORD), data.old_password)) {	
 							txn.rollback();
 							return Response.status(Status.NOT_ACCEPTABLE).entity("Current password is not correct.").build();
 						}
@@ -244,7 +245,7 @@ public class UpdateResource {
 			}
 		}
 	}
-
+	
 	@POST
 	@Path("/role")
 	@Consumes(MediaType.APPLICATION_JSON)

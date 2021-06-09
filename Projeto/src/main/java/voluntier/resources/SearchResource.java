@@ -25,7 +25,7 @@ import voluntier.util.userdata.UserData_Minimal;
 
 @Path("/user")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
-public class ManagerResource {
+public class SearchResource {
 	private static final Logger LOG = Logger.getLogger(RegisterResource.class.getName());
 
 	private final Gson g = new Gson();
@@ -34,7 +34,7 @@ public class ManagerResource {
 	private static KeyFactory usersFactory = datastore.newKeyFactory().setKind("User");
 	private static KeyFactory sessionFactory = datastore.newKeyFactory().setKind("Session");
 
-	public ManagerResource() { }
+	public SearchResource() { }
 
 	@POST
 	@Path("/")

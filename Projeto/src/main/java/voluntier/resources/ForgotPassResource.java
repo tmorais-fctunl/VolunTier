@@ -7,7 +7,6 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
@@ -20,15 +19,13 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Transaction;
-import com.google.gson.Gson;
 
+import voluntier.util.Argon2Util;
 import voluntier.util.consumes.ChangePassData;
 import voluntier.util.consumes.ForgotPassData;
 import voluntier.util.email.ChangePasswordEmail;
 import voluntier.util.email.ForgotData;
-import voluntier.util.userdata.Account;
 import voluntier.util.userdata.DB_User;
-import voluntier.util.userdata.State;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -45,43 +42,38 @@ public class ForgotPassResource {
 	private static KeyFactory serviceEmailFactory = datastore.newKeyFactory().setKind("ServiceEmail");
 	private static KeyFactory confirmationFactory = datastore.newKeyFactory().setKind("Confirmation");
 
-	
-
 	public ForgotPassResource() {
 	}
 
 	@GET
-	@Path("/test")
+	@Path("/hash")
 	// @Produces(MediaType)
-	public Response test() {
-
+	public Response hash() {
 		String password = "Hello World!";
-		Instant beginHash = Instant.now();
-
-		Argon2 argon2 = Argon2Factory.create(Argon2Types.ARGON2id);
-
-		String hash = argon2.hash(10, 8192, 1, password);
-
-		Instant endHash = Instant.now();
-
-		String hashing = String.format("Process took %f s", Duration.between(beginHash, endHash).toMillis() / 1024.0);
-
-		Instant beginVerify = Instant.now();
-
-		boolean success = argon2.verify(hash, password);
-
-		Instant endVerify = Instant.now();
-
-		String verifying = String.format("Process took %f s",
-				Duration.between(beginVerify, endVerify).toMillis() / 1024.0);
-
-		return Response.ok("HASH: " + hash + " HASHING: " + hashing + " VERIFYING: " + verifying).build();
+		
+		return Response.ok(Argon2Util.hashPassword(password)).build();
+	}
+	
+	@GET
+	@Path("/verify")
+	// @Produces(MediaType)
+	public Response verify() {
+		String password = "Hello World!";
+		String hash = "$argon2id$v=19$m=16384,t=3,p=1$6hfHL5P7T6U$JlQdJK+ePnVyhWiLOIZgQKwuJL5SpVUKp7XuQb4w8L0";
+		Argon2Util.verify(hash, password);
+		return Response.ok().build();
 	}
 
 	@POST
 	@Path("/change")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response changePass(@QueryParam("t") String code, ChangePassData data) {
+		
+		if (!data.isValid() || code == null) {
+			LOG.fine("Bad request while trying to change password t=" + code);
+			return Response.status(Status.BAD_REQUEST).build();
+		}
+		
 		Transaction txn = datastore.newTransaction();
 
 		try {
@@ -103,11 +95,6 @@ public class ForgotPassResource {
 					txn.rollback();
 					return Response.status(Status.FORBIDDEN).entity("User does not exist: " + user_id).build();
 				} else {
-
-					if (!data.isValid()) {
-						txn.rollback();
-						return Response.status(Status.BAD_REQUEST).entity("Passwords don't match").build();
-					}
 
 					user = DB_User.changePassword(data.password, userKey, user);
 

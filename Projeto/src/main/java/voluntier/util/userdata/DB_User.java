@@ -114,7 +114,6 @@ public class DB_User {
 	}
 	
 	public static Entity createNew(String user_id, String email, String password, Key userKey, Entity user) {
-
 		UserData_AllProperties data = new UserData_AllProperties(new RegisterData(user_id, email, password));
 		return Entity.newBuilder(userKey)
 				.set(ID, data.user_id)
@@ -132,5 +131,4 @@ public class DB_User {
 				.set(ACCOUNT, Account.ACTIVE.toString())
 				.build();
 	}
-
 }

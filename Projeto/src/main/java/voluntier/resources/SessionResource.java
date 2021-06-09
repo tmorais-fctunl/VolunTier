@@ -14,6 +14,7 @@ import org.javatuples.Triplet;
 
 import com.google.gson.Gson;
 
+import voluntier.util.Argon2Util;
 import voluntier.util.AuthToken;
 import voluntier.util.consumes.LoginData;
 import voluntier.util.consumes.RequestData;
@@ -99,7 +100,7 @@ public class SessionResource {
 				String hsh_pwd = user.getString(DB_User.PASSWORD);
 
 				// check for correct password
-				if(!hsh_pwd.equals(UserData_Modifiable.hashPassword(data.password))) {
+				if(!Argon2Util.verify(hsh_pwd, data.password)) {
 					txn.rollback();
 					LOG.warning("Failed login attempt by user: " + data.user_id);
 					return Response.status(Status.FORBIDDEN).build();
@@ -228,7 +229,7 @@ public class SessionResource {
 		});
 	}
 	
-	public static void invalidateAllSessionsOfUser(String user_id, Transaction txn, String exceptToken) {
+	public static void invalidateAllSessionsOfUser(String user_id, Transaction txn, String except) {
 		Query<Entity> query = Query.newEntityQueryBuilder()
 				.setKind("Session")
 				.setFilter(PropertyFilter.eq("token_user_id", user_id))
@@ -237,7 +238,7 @@ public class SessionResource {
 		QueryResults<Entity> res = datastore.run(query);
 
 		res.forEachRemaining(accessToken -> {
-			if (!accessToken.getString("access_token").equals(exceptToken))
+			if (!accessToken.getString("access_token").equals(except))
 				invalidateSession(accessToken, txn);
 		});
 	}

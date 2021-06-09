@@ -4,6 +4,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 
 import com.google.cloud.datastore.Entity;
 
+import voluntier.util.Argon2Util;
 import voluntier.util.consumes.RegisterData;
 
 public class UserData_Modifiable extends UserData_Minimal{
@@ -26,8 +27,13 @@ public class UserData_Modifiable extends UserData_Minimal{
 		return hashPassword(password);
 	}
 	
-	public static String hashPassword(String password) {
+	public static String hashPasswordOLD(String password) {
 		return DigestUtils.sha512Hex(password);
+	}
+	
+	public static String hashPassword(String password) {
+		return Argon2Util.hashPassword(password);
+		//return DigestUtils.sha512Hex(password);
 	}
 	
 	public static boolean passwordValid(String password) {
