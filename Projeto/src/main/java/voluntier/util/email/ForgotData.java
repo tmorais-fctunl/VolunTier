@@ -15,8 +15,8 @@ public static final long EXPIRATION_TIME = 1000*60*15; //15min
 	
 	public ForgotData() {}
 	
-	public ForgotData(String user_id, String email/*, String password*/) {
-		super(user_id, email/*, UserData_Modifiable.hashPassword(password)*/);
+	public ForgotData(String email/*, String password*/) {
+		super(email/*, UserData_Modifiable.hashPassword(password)*/);
 		this.code = UUID.randomUUID().toString();
 		this.creationDate = System.currentTimeMillis();
 		this.expirationDate = this.creationDate + AuthToken.EXPIRATION_TIME;

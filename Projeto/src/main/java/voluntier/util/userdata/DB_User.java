@@ -9,28 +9,35 @@ import voluntier.util.consumes.UpdateProfileData;
 
 public class DB_User {
 
-	public static final String ID = "user_id";
-	public static final String PASSWORD = "user_pwd";
+	public static final String USERNAME = "username";
 	public static final String EMAIL = "user_email";
-	public static final String ROLE = "user_role";
-	public static final String STATE = "user_state";
-	public static final String PROFILE = "user_profile";
+	
+	public static final String PASSWORD = "user_pwd";
+	
+	public static final String FULL_NAME = "user_full_name";
 	public static final String LANDLINE = "user_landline";
 	public static final String MOBILE = "user_mobile";
 	public static final String ADDRESS = "user_address";
 	public static final String ADDRESS2 = "user_address2";
 	public static final String REGION = "user_region";
 	public static final String POSTAL_CODE = "user_pc";
-	public static final String ACCOUNT = "user_account";
 	
+	public static final String ACCOUNT = "user_account";
+	public static final String ROLE = "user_role";
+	public static final String STATE = "user_state";
+	public static final String PROFILE = "user_profile";
+
+	public static final String WEBSITE = "user_website";
+	public static final String FACEBOOK = "user_facebook";
+	public static final String INSTAGRAM = "user_instagram";
+	public static final String TWITTER = "user_twitter";
+		
 	public static Entity changePassword(String new_password, Key userKey, Entity user) {
 		return Entity.newBuilder(userKey)
-				.set(ID, user.getString(ID))
-				.set(PASSWORD, UserData_Modifiable.hashPassword(new_password))
+				.set(USERNAME, user.getString(USERNAME))
 				.set(EMAIL, user.getString(EMAIL))
-				.set(ROLE, user.getString(ROLE))
-				.set(STATE, user.getString(STATE))
-				.set(PROFILE, user.getString(PROFILE))
+				.set(PASSWORD, UserData_Modifiable.hashPassword(new_password))
+				.set(FULL_NAME, user.getString(FULL_NAME))
 				.set(LANDLINE, user.getString(LANDLINE))
 				.set(MOBILE, user.getString(MOBILE))
 				.set(ADDRESS, user.getString(ADDRESS))
@@ -38,17 +45,22 @@ public class DB_User {
 				.set(REGION, user.getString(REGION))
 				.set(POSTAL_CODE, user.getString(POSTAL_CODE))
 				.set(ACCOUNT, user.getString(ACCOUNT))
+				.set(ROLE, user.getString(ROLE))
+				.set(STATE, user.getString(STATE))
+				.set(PROFILE, user.getString(PROFILE))
+				.set(WEBSITE, user.getString(WEBSITE))
+				.set(FACEBOOK, user.getString(FACEBOOK))
+				.set(INSTAGRAM, user.getString(INSTAGRAM))
+				.set(TWITTER, user.getString(TWITTER))
 				.build();
 	}
 	
 	public static Entity remove(Key userKey, Entity user) {
 		return Entity.newBuilder(userKey)
-				.set(ID, user.getString(ID))
-				.set(PASSWORD, user.getString(PASSWORD))
+				.set(USERNAME, user.getString(USERNAME))
 				.set(EMAIL, user.getString(EMAIL))
-				.set(ROLE, user.getString(ROLE))
-				.set(STATE, user.getString(STATE))
-				.set(PROFILE, user.getString(PROFILE))
+				.set(PASSWORD, user.getString(PASSWORD))
+				.set(FULL_NAME, user.getString(FULL_NAME))
 				.set(LANDLINE, user.getString(LANDLINE))
 				.set(MOBILE, user.getString(MOBILE))
 				.set(ADDRESS, user.getString(ADDRESS))
@@ -56,17 +68,22 @@ public class DB_User {
 				.set(REGION, user.getString(REGION))
 				.set(POSTAL_CODE, user.getString(POSTAL_CODE))
 				.set(ACCOUNT, Account.REMOVED.toString())
+				.set(ROLE, user.getString(ROLE))
+				.set(STATE, user.getString(STATE))
+				.set(PROFILE, user.getString(PROFILE))
+				.set(WEBSITE, user.getString(WEBSITE))
+				.set(FACEBOOK, user.getString(FACEBOOK))
+				.set(INSTAGRAM, user.getString(INSTAGRAM))
+				.set(TWITTER, user.getString(TWITTER))
 				.build();
 	}
 	
 	public static Entity setState(String state, Key userKey, Entity user) {
 		return Entity.newBuilder(userKey)
-				.set(ID, user.getString(ID))
-				.set(PASSWORD, user.getString(PASSWORD))
+				.set(USERNAME, user.getString(USERNAME))
 				.set(EMAIL, user.getString(EMAIL))
-				.set(ROLE, user.getString(ROLE))
-				.set(STATE, state)
-				.set(PROFILE, user.getString(PROFILE))
+				.set(PASSWORD, user.getString(PASSWORD))
+				.set(FULL_NAME, user.getString(FULL_NAME))
 				.set(LANDLINE, user.getString(LANDLINE))
 				.set(MOBILE, user.getString(MOBILE))
 				.set(ADDRESS, user.getString(ADDRESS))
@@ -74,17 +91,22 @@ public class DB_User {
 				.set(REGION, user.getString(REGION))
 				.set(POSTAL_CODE, user.getString(POSTAL_CODE))
 				.set(ACCOUNT, user.getString(ACCOUNT))
+				.set(ROLE, user.getString(ROLE))
+				.set(STATE, state)
+				.set(PROFILE, user.getString(PROFILE))
+				.set(WEBSITE, user.getString(WEBSITE))
+				.set(FACEBOOK, user.getString(FACEBOOK))
+				.set(INSTAGRAM, user.getString(INSTAGRAM))
+				.set(TWITTER, user.getString(TWITTER))
 				.build();
 	}
 	
 	public static Entity changeProperty(UpdateProfileData data, Key userKey, Entity user) {
 		return Entity.newBuilder(userKey)
-				.set(ID, user.getString(ID))
+				.set(USERNAME, user.getString(USERNAME))
+				.set(EMAIL, user.getString(EMAIL))
 				.set(PASSWORD, data.getPassword(user.getString(PASSWORD)))
-				.set(EMAIL, data.getEmail(user.getString(EMAIL)))
-				.set(ROLE, user.getString(ROLE))
-				.set(STATE, user.getString(STATE))
-				.set(PROFILE, data.getProfile(user.getString(PROFILE)))
+				.set(FULL_NAME, data.getFullName(user.getString(FULL_NAME)))
 				.set(LANDLINE, data.getLandline(user.getString(LANDLINE)))
 				.set(MOBILE, data.getMobile(user.getString(MOBILE)))
 				.set(ADDRESS, data.getAddress(user.getString(ADDRESS)))
@@ -92,17 +114,22 @@ public class DB_User {
 				.set(REGION, data.getRegion(user.getString(REGION)))
 				.set(POSTAL_CODE, data.getPc(user.getString(POSTAL_CODE)))
 				.set(ACCOUNT, user.getString(ACCOUNT))
+				.set(ROLE, user.getString(ROLE))
+				.set(STATE, user.getString(STATE))
+				.set(PROFILE, data.getProfile(user.getString(PROFILE)))
+				.set(WEBSITE, data.getWebsite(user.getString(WEBSITE)))
+				.set(FACEBOOK, data.getFacebook(user.getString(FACEBOOK)))
+				.set(INSTAGRAM, data.getInstagram(user.getString(INSTAGRAM)))
+				.set(TWITTER, data.getTwitter(user.getString(TWITTER)))
 				.build();
 	}
 	
 	public static Entity changeRole(String role, Key userKey, Entity user) {
 		return Entity.newBuilder(userKey)
-				.set(ID, user.getString(ID))
-				.set(PASSWORD, user.getString(PASSWORD))
+				.set(USERNAME, user.getString(USERNAME))
 				.set(EMAIL, user.getString(EMAIL))
-				.set(ROLE, role)
-				.set(STATE, user.getString(STATE))
-				.set(PROFILE, user.getString(PROFILE))
+				.set(PASSWORD, user.getString(PASSWORD))
+				.set(FULL_NAME, user.getString(FULL_NAME))
 				.set(LANDLINE, user.getString(LANDLINE))
 				.set(MOBILE, user.getString(MOBILE))
 				.set(ADDRESS, user.getString(ADDRESS))
@@ -110,14 +137,29 @@ public class DB_User {
 				.set(REGION, user.getString(REGION))
 				.set(POSTAL_CODE, user.getString(POSTAL_CODE))
 				.set(ACCOUNT, user.getString(ACCOUNT))
+				.set(ROLE, role)
+				.set(STATE, user.getString(STATE))
+				.set(PROFILE, user.getString(PROFILE))
+				.set(WEBSITE, user.getString(WEBSITE))
+				.set(FACEBOOK, user.getString(FACEBOOK))
+				.set(INSTAGRAM, user.getString(INSTAGRAM))
+				.set(TWITTER, user.getString(TWITTER))
 				.build();
 	}
 	
-	public static Entity createNew(String user_id, String email, String password, Key userKey, Entity user) {
-		UserData_AllProperties data = new UserData_AllProperties(new RegisterData(user_id, email, password));
+	public static Entity createID(String username, String email, Key usernameKey) {
+		return Entity.newBuilder(usernameKey)
+				.set(USERNAME, username)
+				.set(EMAIL, email)
+				.build();
+	}
+	
+	public static Entity createNew(String email, String username, String password, Key userKey) {
+		UserData_AllProperties data = new UserData_AllProperties(new RegisterData(email, username, password));
 		return Entity.newBuilder(userKey)
-				.set(ID, data.user_id)
+				.set(USERNAME, data.username)
 				.set(PASSWORD, data.password)
+				.set(FULL_NAME, data.full_name)
 				.set(EMAIL, data.email)
 				.set(ROLE, data.getRole().toString())
 				.set(STATE, data.getState().toString())
@@ -128,7 +170,11 @@ public class DB_User {
 				.set(ADDRESS2, data.address2)
 				.set(REGION, data.region)
 				.set(POSTAL_CODE, data.pc)
-				.set(ACCOUNT, Account.ACTIVE.toString())
+				.set(ACCOUNT, data.getAccount().toString())
+				.set(WEBSITE, data.website)
+				.set(FACEBOOK, data.facebook)
+				.set(INSTAGRAM, data.instagram)
+				.set(TWITTER, data.twitter)
 				.build();
 	}
 }

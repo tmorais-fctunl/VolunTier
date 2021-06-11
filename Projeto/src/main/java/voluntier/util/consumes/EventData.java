@@ -8,8 +8,8 @@ public class EventData extends Event {
 	
 	public EventData() {}
 	
-	public EventData (String user_id, String token, String event_name, double[] latlng, String timestamp) {
-		super(user_id, event_name, latlng, timestamp);
+	public EventData (String user_email, String token, String event_name, double[] latlng, String timestamp) {
+		super(user_email, event_name, latlng, timestamp);
 		this.token = token;
 	}
 	

@@ -33,7 +33,6 @@ public class UserData_Modifiable extends UserData_Minimal{
 	
 	public static String hashPassword(String password) {
 		return Argon2Util.hashPassword(password);
-		//return DigestUtils.sha512Hex(password);
 	}
 	
 	public static boolean passwordValid(String password) {

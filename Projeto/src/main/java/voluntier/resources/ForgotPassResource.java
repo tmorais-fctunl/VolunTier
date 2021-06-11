@@ -27,12 +27,6 @@ import voluntier.util.email.ChangePasswordEmail;
 import voluntier.util.email.ForgotData;
 import voluntier.util.userdata.DB_User;
 
-import java.time.Duration;
-import java.time.Instant;
-import de.mkammerer.argon2.Argon2;
-import de.mkammerer.argon2.Argon2Factory;
-import de.mkammerer.argon2.Argon2Factory.Argon2Types;
-
 @Path("/forgotpassword")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class ForgotPassResource {
@@ -50,10 +44,10 @@ public class ForgotPassResource {
 	// @Produces(MediaType)
 	public Response hash() {
 		String password = "Hello World!";
-		
+
 		return Response.ok(Argon2Util.hashPassword(password)).build();
 	}
-	
+
 	@GET
 	@Path("/verify")
 	// @Produces(MediaType)
@@ -68,12 +62,12 @@ public class ForgotPassResource {
 	@Path("/change")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response changePass(@QueryParam("t") String code, ChangePassData data) {
-		
+
 		if (!data.isValid() || code == null) {
 			LOG.fine("Bad request while trying to change password t=" + code);
 			return Response.status(Status.BAD_REQUEST).build();
 		}
-		
+
 		Transaction txn = datastore.newTransaction();
 
 		try {
@@ -86,23 +80,22 @@ public class ForgotPassResource {
 				return Response.status(Status.FORBIDDEN).entity("Invalid confirmation url").build();
 			} else {
 
-				String user_id = confirmation.getString("user_id");
+				String user_email = confirmation.getString("confirmation_email");
 
-				Key userKey = usersFactory.newKey(user_id);
+				Key userKey = usersFactory.newKey(user_email);
 				Entity user = txn.get(userKey);
 
 				if (user == null || ActionsResource.isRemovedOrBannedUser(user)) {
 					txn.rollback();
-					return Response.status(Status.FORBIDDEN).entity("User does not exist: " + user_id).build();
+					return Response.status(Status.FORBIDDEN).entity("User does not exist: " + user_email).build();
 				} else {
 
 					user = DB_User.changePassword(data.password, userKey, user);
 
-					SessionResource.invalidateAllSessionsOfUser(user_id, txn);
+					SessionResource.invalidateAllSessionsOfUser(user_email, txn);
 
 					confirmation = Entity.newBuilder(confirmationKey)
 							.set("confirmation_code", confirmation.getString("confirmation_code"))
-							.set("user_id", confirmation.getString("user_id"))
 							.set("confirmation_email", confirmation.getString("confirmation_email"))
 							.set("confirmation_creation_date", confirmation.getLong("confirmation_expiration_date"))
 							.set("confirmation_expiration_date", System.currentTimeMillis()).build();
@@ -110,7 +103,7 @@ public class ForgotPassResource {
 					txn.put(user, confirmation);
 					txn.commit();
 
-					LOG.fine("User: " + user_id + " changed password.");
+					LOG.fine("User: " + user_email + " changed password.");
 					return Response.status(Status.NO_CONTENT).build();
 				}
 
@@ -142,12 +135,17 @@ public class ForgotPassResource {
 				txn.rollback();
 				return Response.status(Status.FORBIDDEN).entity("Invalid confirmation url").build();
 			} else {
-				
-				String htmlContent = "<html><head><style>iframe[seamless]{border: none;}</style></head>"
-						+ "<body><iframe src=\"https://voluntier-312115.ew.r.appspot.com/pages/changepwd.html?t=" + code + "\" "
-						+ "style=\"position:fixed; top:0; left:0; bottom:0; right:0; width:100%; "
-						+ "height:100%; border:none; margin:0; padding:0; "
-						+ "overflow:hidden; z-index:999999;\" seamless=\"\"></iframe></body></html>";
+
+				// String htmlContent = "<html><head><style>iframe[seamless]{border:
+				// none;}</style></head>"
+				// + "<body><iframe
+				// src=\"https://voluntier-312115.ew.r.appspot.com/pages/changepwd.html?t=" +
+				// code + "\" "
+				// + "style=\"position:fixed; top:0; left:0; bottom:0; right:0; width:100%; "
+				// + "height:100%; border:none; margin:0; padding:0; "
+				// + "overflow:hidden; z-index:999999;\" seamless=\"\"></iframe></body></html>";
+				String htmlContent = "<meta http-equiv=\"refresh\" "
+						+ "content=\"0;URL=https://voluntier-312115.ew.r.appspot.com/pages/changepwd.html?t=" + code + "\" />";
 
 				txn.rollback();
 				return Response.ok(htmlContent, MediaType.TEXT_HTML).build();
@@ -175,12 +173,12 @@ public class ForgotPassResource {
 
 		Transaction txn = datastore.newTransaction();
 		try {
-			Key userKey = usersFactory.newKey(data.user_id);
+			Key userKey = usersFactory.newKey(data.email);
 			Entity user = txn.get(userKey);
 
 			if (user == null || ActionsResource.isRemovedOrBannedUser(user)) {
 				txn.rollback();
-				return Response.status(Status.FORBIDDEN).entity("User does not exist: " + data.user_id).build();
+				return Response.status(Status.FORBIDDEN).entity("User does not exist: " + data.email).build();
 			} else {
 
 				if (!user.getString(DB_User.EMAIL).equals(data.email)) {
@@ -198,9 +196,7 @@ public class ForgotPassResource {
 								data);
 
 						Key confirmationKey = confirmationFactory.newKey(url.code);
-						Entity confirmation = Entity
-								.newBuilder(confirmationKey).set("confirmation_code", url.code).set("user_id",
-										url.user_id)
+						Entity confirmation = Entity.newBuilder(confirmationKey).set("confirmation_code", url.code)
 								.set("confirmation_email", url.email)/* .set("pwd", url.password) */
 								.set("confirmation_creation_date", url.creationDate)
 								.set("confirmation_expiration_date", url.expirationDate).build();

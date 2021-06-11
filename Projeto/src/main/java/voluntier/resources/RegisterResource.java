@@ -33,12 +33,17 @@ public class RegisterResource {
 	private static KeyFactory usersFactory = datastore.newKeyFactory().setKind("User");
 	private static KeyFactory serviceEmailFactory = datastore.newKeyFactory().setKind("ServiceEmail");
 	private static KeyFactory confirmationFactory = datastore.newKeyFactory().setKind("Confirmation");
+	private static KeyFactory usernamesFactory = datastore.newKeyFactory().setKind("ID");
 
-	private static final String htmlContent = "<html><head><style>iframe[seamless]{border: none;}</style></head>"
-			+ "<body><iframe src=\"https://voluntier-312115.ew.r.appspot.com/pages/registerconfirmed.html\" "
-			+ "style=\"position:fixed; top:0; left:0; bottom:0; "
-			+ "right:0; width:100%; height:100%; border:none; margin:0; "
-			+ "padding:0; overflow:hidden; z-index:999999;\"seamless=\"\"></iframe></body></html>";
+	// private static final String htmlContent =
+	// "<html><head><style>iframe[seamless]{border: none;}</style></head>"
+	// + "<body><iframe
+	// src=\"https://voluntier-312115.ew.r.appspot.com/pages/registerconfirmed.html\"
+	// "
+	// + "style=\"position:fixed; top:0; left:0; bottom:0; "
+	// + "right:0; width:100%; height:100%; border:none; margin:0; "
+	// + "padding:0; overflow:hidden;
+	// z-index:999999;\"seamless=\"\"></iframe></body></html>";
 
 	public RegisterResource() {
 	}
@@ -55,27 +60,34 @@ public class RegisterResource {
 			if (confirmation == null
 					|| confirmation.getLong("confirmation_expiration_date") < System.currentTimeMillis()) {
 				txn.rollback();
-				return Response.status(Status.FORBIDDEN).entity("Invalid confirmation url").build();
+				return Response.status(Status.FORBIDDEN).entity("Invalid url").build();
 			} else {
 
-				String user_id = confirmation.getString("user_id");
+				String user_email = confirmation.getString("confirmation_email");
 
-				Key userKey = usersFactory.newKey(user_id);
+				Key userKey = usersFactory.newKey(user_email);
 				Entity user = txn.get(userKey);
 				if (user != null) {
 					txn.rollback();
-					return Response.status(Status.FORBIDDEN).entity("User already exist: " + user_id).build();
+					return Response.status(Status.FORBIDDEN).entity("Email already in use: " + user_email).build();
 				} else {
 
-					user = DB_User.createNew(user_id, confirmation.getString("confirmation_email"),
-							confirmation.getString("confirmation_pwd"), userKey, user);
+					String username = confirmation.getString("confirmation_username");
+					Key usernameKey = usernamesFactory.newKey(username);
+					Entity usernameEnt = txn.get(usernameKey);
+					if(usernameEnt != null) {
+						txn.rollback();
+						return Response.status(Status.FORBIDDEN).entity("Username already in use: " + username).build();
+					}
 
-					txn.add(user);
+					usernameEnt = DB_User.createID(username, user_email, usernameKey);
+					user = DB_User.createNew(user_email, username, confirmation.getString("confirmation_pwd"), userKey);
+
+					txn.put(user, usernameEnt);
 					txn.commit();
 
-					LOG.fine("Registered user: " + user_id);
-					// String htmlContent = "<meta http-equiv=\"refresh\" content=\"0;
-					// URL=/www/confirm/confirm.html\" />";
+					LOG.fine("Registered user with email: " + user_email + ", username:" + username);
+					String htmlContent = "<meta http-equiv=\"refresh\" content=\"0;URL=https://voluntier-312115.ew.r.appspot.com/pages/registerconfirmed.html\" />";
 
 					return Response.ok(htmlContent, MediaType.TEXT_HTML).build();
 				}
@@ -97,33 +109,39 @@ public class RegisterResource {
 	@Path("/")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response doRegistration(RegisterData reg_data) {
-		LOG.fine("Attempt to register by user: " + reg_data.user_id);
+		LOG.fine("Attempt to register by user: " + reg_data.email);
 
 		if (!reg_data.isValid())
 			return Response.status(Status.BAD_REQUEST).entity("Invalid").build();
 
 		Transaction txn = datastore.newTransaction();
 		try {
-			Key userKey = usersFactory.newKey(reg_data.user_id);
+			Key userKey = usersFactory.newKey(reg_data.email);
 			Entity user = txn.get(userKey);
-
+			
 			if (user != null) {
 				txn.rollback();
-				return Response.status(Status.FORBIDDEN).entity("User already exist: " + reg_data.user_id).build();
+				return Response.status(Status.FORBIDDEN).entity("Email already in use: " + reg_data.email).build();
 			} else {
+				Key usernameKey = usernamesFactory.newKey(reg_data.username);
+				Entity usernameEnt = txn.get(usernameKey);
+				if(usernameEnt != null) {
+					txn.rollback();
+					return Response.status(Status.FORBIDDEN).entity("Username already in use: " + reg_data.username).build();
+				}
 
 				Key emailKey = serviceEmailFactory.newKey("confirmation-email");
 				Entity serviceEmail = txn.get(emailKey);
 
 				if (serviceEmail != null) {
 					try {
-						ConfirmationData url = ConfirmRegistrationEmail.sendConfirmationEmail(serviceEmail.getString("email"),
-								reg_data);
+						ConfirmationData url = ConfirmRegistrationEmail
+								.sendConfirmationEmail(serviceEmail.getString("email"), reg_data);
 
 						Key confirmationKey = confirmationFactory.newKey(url.code);
 						Entity confirmation = Entity.newBuilder(confirmationKey).set("confirmation_code", url.code)
-								.set("user_id", url.user_id).set("confirmation_email", url.email)
-								.set("confirmation_pwd", url.password)
+								.set("confirmation_email", url.email).set("confirmation_pwd", url.password)
+								.set("confirmation_username", url.username)
 								.set("confirmation_creation_date", url.creationDate)
 								.set("confirmation_expiration_date", url.expirationDate).build();
 

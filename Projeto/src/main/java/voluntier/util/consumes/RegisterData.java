@@ -4,21 +4,22 @@ import voluntier.util.userdata.UserData_Modifiable;
 
 public class RegisterData {
 
-	public String user_id;
 	public String email;
+	public String username;
 	public String password;
 
 	public RegisterData() {
 	}
 
-	public RegisterData(String user_id, String email, String password) {
-		this.user_id = user_id;
+	public RegisterData(String email, String username, String password) {
 		this.email = email;
+		this.username = username;
 		this.password = password;
 	}
 
 	public boolean isValid() {
-		return UserData_Modifiable.idValid(user_id) && UserData_Modifiable.passwordValid(password)
-				&& UserData_Modifiable.emailValid(email);
+		return UserData_Modifiable.passwordValid(password)
+				&& UserData_Modifiable.emailValid(email)
+		&& UserData_Modifiable.usernameValid(username);
 	}
 }

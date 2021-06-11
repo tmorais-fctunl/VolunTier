@@ -6,7 +6,7 @@ import com.google.cloud.Timestamp;
 
 public class Event {
 
-	public String user_id;
+	public String email;
 	public String event_name;
 	public double[] point;
 	public String event_id;
@@ -19,8 +19,8 @@ public class Event {
 		event_id = UUID.randomUUID().toString();
 	}
 	
-	public Event (String user_id, String event_name, double[] point, String timestamp) {
-		this.user_id = user_id;
+	public Event (String user_email, String event_name, double[] point, String timestamp) {
+		this.email = user_email;
 		this.event_name = event_name;
 		this.point = point;
 		event_id = UUID.randomUUID().toString();
@@ -28,7 +28,7 @@ public class Event {
 	}
 	
 	public boolean isValid() {
-		return user_id != null && point!=null;
+		return email != null && point!=null;
 	}
 	
 	public Timestamp getTimestamp () {

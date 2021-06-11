@@ -6,7 +6,7 @@ public class AuthToken {
 	public static final long EXPIRATION_TIME = 1000*60*15; //15min
 	public static final long REFRESH_TOKEN_EXPIRATION_TIME = 1000*60*60*24*10; //10days
 	
-	public String user_id;
+	public String email;
 	public String accessToken;
 	public String refreshToken;
 	public long creationDate;
@@ -15,8 +15,8 @@ public class AuthToken {
 	
 	public AuthToken() {}
 	
-	public AuthToken(String user_id) {
-		this.user_id = user_id;
+	public AuthToken(String email) {
+		this.email = email;
 		this.accessToken = UUID.randomUUID().toString();
 		this.refreshToken = UUID.randomUUID().toString();
 		this.creationDate = System.currentTimeMillis();

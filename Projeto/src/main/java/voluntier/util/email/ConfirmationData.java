@@ -15,8 +15,8 @@ public class ConfirmationData extends RegisterData {
 	
 	public ConfirmationData() {}
 	
-	public ConfirmationData(String user_id, String email, String password) {
-		super(user_id, email, UserData_Modifiable.hashPassword(password));
+	public ConfirmationData(String email, String username, String password) {
+		super(email, username, UserData_Modifiable.hashPassword(password));
 		this.code = UUID.randomUUID().toString();
 		this.creationDate = System.currentTimeMillis();
 		this.expirationDate = this.creationDate + AuthToken.EXPIRATION_TIME;

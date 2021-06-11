@@ -18,10 +18,7 @@ import voluntier.util.Argon2Util;
 import voluntier.util.AuthToken;
 import voluntier.util.consumes.LoginData;
 import voluntier.util.consumes.RequestData;
-import voluntier.util.userdata.Account;
 import voluntier.util.userdata.DB_User;
-import voluntier.util.userdata.State;
-import voluntier.util.userdata.UserData_Modifiable;
 
 import com.google.cloud.datastore.*;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
@@ -46,7 +43,7 @@ public class SessionResource {
 	public Response doValidation(RequestData data) {
 
 		if(!data.isValid())
-			return Response.status(Status.BAD_REQUEST).entity("").build();
+			return Response.status(Status.BAD_REQUEST).build();
 
 		Transaction txn = datastore.newTransaction();
 		try {
@@ -55,9 +52,9 @@ public class SessionResource {
 			Entity token = txn.get(tokenKey);
 
 			// check if the token corresponds to the user received and hasnt expired yet
-			if(!TokensResource.isValidAccess(token, data.user_id)) {
+			if(!TokensResource.isValidAccess(token, data.email)) {
 				txn.rollback();
-				LOG.warning("Failed logout attempt by user: " + data.user_id);
+				LOG.warning("Failed logout attempt by user: " + data.email);
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 			
@@ -85,11 +82,11 @@ public class SessionResource {
 	public Response doLogin(LoginData data) {
 
 		if(!data.isValid())
-			return Response.status(Status.BAD_REQUEST).entity("").build();
+			return Response.status(Status.BAD_REQUEST).build();
 
 		Transaction txn = datastore.newTransaction();
 		try {
-			Key userKey = usersFactory.newKey(data.user_id);
+			Key userKey = usersFactory.newKey(data.email);
 			Entity user = txn.get(userKey);
 
 			// check if user exists
@@ -102,16 +99,16 @@ public class SessionResource {
 				// check for correct password
 				if(!Argon2Util.verify(hsh_pwd, data.password)) {
 					txn.rollback();
-					LOG.warning("Failed login attempt by user: " + data.user_id);
+					LOG.warning("Failed login attempt by user: " + data.email);
 					return Response.status(Status.FORBIDDEN).build();
 				} else {
 					// create a new refresh and access token
-					Triplet<Entity, Entity, AuthToken> tokens = TokensResource.createNewAccessAndRefreshTokens(data.user_id);
+					Triplet<Entity, Entity, AuthToken> tokens = TokensResource.createNewAccessAndRefreshTokens(data.email);
 
 					txn.put(tokens.getValue0(), tokens.getValue1());
 					txn.commit();
 
-					LOG.fine("Login by user: " + data.user_id);
+					LOG.fine("Login by user: " + data.email);
 					return Response.ok(g.toJson(tokens.getValue2())).build();
 				}
 			}
@@ -135,7 +132,7 @@ public class SessionResource {
 	public Response doLogout(RequestData data) {
 
 		if(!data.isValid())
-			return Response.status(Status.BAD_REQUEST).entity("").build();
+			return Response.status(Status.BAD_REQUEST).build();
 
 		Transaction txn = datastore.newTransaction();
 		try {
@@ -144,16 +141,16 @@ public class SessionResource {
 			Entity token = txn.get(tokenKey);
 
 			// check if the token corresponds to the user received and hasnt expired yet
-			if(!TokensResource.isValidAccess(token, data.user_id)) {
+			if(!TokensResource.isValidAccess(token, data.email)) {
 				txn.rollback();
-				LOG.warning("Failed logout attempt by user: " + data.user_id);
-				return Response.status(Status.FORBIDDEN).entity("Token expired or invalid: " + data.user_id).build();
+				LOG.warning("Failed logout attempt by user: " + data.email);
+				return Response.status(Status.FORBIDDEN).entity("Token expired or invalid: " + data.email).build();
 			}
 
 			invalidateSession(token, txn);
 			txn.commit();
 			
-			LOG.fine("Logout by user: " + data.user_id);
+			LOG.fine("Logout by user: " + data.email);
 			return Response.status(Status.NO_CONTENT).build();
 
 		} catch(Exception e) {
@@ -175,7 +172,7 @@ public class SessionResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response doRefresh(RequestData data) {
 		if(!data.isValid())
-			return Response.status(Status.BAD_REQUEST).entity("").build();
+			return Response.status(Status.BAD_REQUEST).build();
 
 		Transaction txn = datastore.newTransaction();
 		try {
@@ -185,10 +182,10 @@ public class SessionResource {
 			Entity old_refresh = txn.get(old_refreshKey);
 
 			// check if the token corresponds to the user received and hasnt expired yet
-			if(!TokensResource.isValidRefresh(old_refresh, data.user_id)) {
+			if(!TokensResource.isValidRefresh(old_refresh, data.email)) {
 				txn.rollback();
-				LOG.warning("Failed refreshing session for user: " + data.user_id);
-				return Response.status(Status.FORBIDDEN).entity("Token expired or invalid: " + data.user_id).build();
+				LOG.warning("Failed refreshing session for user: " + data.email);
+				return Response.status(Status.FORBIDDEN).entity("Token expired or invalid: " + data.email).build();
 			}
 
 			// invalidate old refresh token
@@ -196,12 +193,12 @@ public class SessionResource {
 			
 			
 			// create a new refresh and access token
-			Triplet<Entity, Entity, AuthToken> tokens = TokensResource.createNewAccessAndRefreshTokens(data.user_id);
+			Triplet<Entity, Entity, AuthToken> tokens = TokensResource.createNewAccessAndRefreshTokens(data.email);
 
 			txn.put(tokens.getValue0(), tokens.getValue1(), old_refresh);
 			txn.commit();
 
-			LOG.fine("Refreshed session by user: " + data.user_id);
+			LOG.fine("Refreshed session by user: " + data.email);
 			return Response.ok(g.toJson(tokens.getValue2())).build();
 		} catch(Exception e) {
 			txn.rollback();
@@ -216,10 +213,10 @@ public class SessionResource {
 		}
 	}
 
-	public static void invalidateAllSessionsOfUser(String user_id, Transaction txn) {
+	public static void invalidateAllSessionsOfUser(String user_email, Transaction txn) {
 		Query<Entity> query = Query.newEntityQueryBuilder()
 				.setKind("Session")
-				.setFilter(PropertyFilter.eq("token_user_id", user_id))
+				.setFilter(PropertyFilter.eq(TokensResource.ACCESS_EMAIL, user_email))
 				.build();
 
 		QueryResults<Entity> res = datastore.run(query);
@@ -229,22 +226,22 @@ public class SessionResource {
 		});
 	}
 	
-	public static void invalidateAllSessionsOfUser(String user_id, Transaction txn, String except) {
+	public static void invalidateAllSessionsOfUser(String user_email, Transaction txn, String except) {
 		Query<Entity> query = Query.newEntityQueryBuilder()
 				.setKind("Session")
-				.setFilter(PropertyFilter.eq("token_user_id", user_id))
+				.setFilter(PropertyFilter.eq(TokensResource.ACCESS_EMAIL, user_email))
 				.build();
 
 		QueryResults<Entity> res = datastore.run(query);
 
 		res.forEachRemaining(accessToken -> {
-			if (!accessToken.getString("access_token").equals(except))
+			if (!accessToken.getString(TokensResource.ACCESS_TOKEN).equals(except))
 				invalidateSession(accessToken, txn);
 		});
 	}
 
 	public static void invalidateSession(Entity token, Transaction txn) {
-		Key refreshKey = refreshFactory.newKey(token.getString("refresh_token"));
+		Key refreshKey = refreshFactory.newKey(token.getString(TokensResource.REFESH_TOKEN));
 		Entity refresh = txn.get(refreshKey);
 		refresh = TokensResource.invalidateRefreshToken(refresh, refreshKey);
 

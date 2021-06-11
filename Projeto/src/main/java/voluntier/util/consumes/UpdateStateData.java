@@ -6,8 +6,8 @@ public class UpdateStateData extends RequestData{
 	public String state;
 	
 	public UpdateStateData() {}
-	public UpdateStateData(String username, String token, String state) {
-		super(username, token);
+	public UpdateStateData(String email, String token, String state) {
+		super(email, token);
 		this.state = state;
 	}
 	

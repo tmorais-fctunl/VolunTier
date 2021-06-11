@@ -47,11 +47,11 @@ public class EventResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response addEvent(EventData data) {
-		LOG.fine("Trying to add event to user: " + data.user_id);
+		LOG.fine("Trying to add event to user: " + data.email);
 
 		// returns error if there is a bad request
 		if (!data.isValid())
-			return Response.status(Status.BAD_REQUEST).entity("").build();
+			return Response.status(Status.BAD_REQUEST).build();
 
 		Transaction txn = datastore.newTransaction();
 
@@ -61,33 +61,33 @@ public class EventResource {
 			Entity token = txn.get(tokenKey);
 
 			// check if the token corresponds to the user received and hasn't expired yet
-			if (!TokensResource.isValidAccess(token, data.user_id)) {
+			if (!TokensResource.isValidAccess(token, data.email)) {
 				txn.rollback();
-				LOG.warning("Failed logout attempt by user: " + data.user_id);
-				return Response.status(Status.FORBIDDEN).entity("Token expired or invalid: " + data.user_id).build();
+				LOG.warning("Failed logout attempt by user: " + data.email);
+				return Response.status(Status.FORBIDDEN).entity("Token expired or invalid: " + data.email).build();
 			}
 
-			Key userKey = usersFactory.newKey(data.user_id);
+			Key userKey = usersFactory.newKey(data.email);
 			Entity user = txn.get(userKey);
 
 			if (user == null || user.getString(DB_User.ACCOUNT).equals(Account.REMOVED.toString())) {
 				txn.rollback();
-				LOG.warning("User:" + user.getString(DB_User.ID)
-						+ " is trying to remove an inexistent or already removed user: " + data.user_id);
-				return Response.status(Status.FORBIDDEN).entity("").build();
+				LOG.warning("User:" + user.getString(DB_User.EMAIL)
+						+ " is trying to remove an inexistent or already removed user: " + data.email);
+				return Response.status(Status.FORBIDDEN).build();
 			} else {
 				Key eventKey = eventFactory.newKey(data.event_id);
 
 				LatLng latlng = LatLng.of(data.point[0], data.point[1]);
 
-				Entity event = Entity.newBuilder(eventKey).set("event_id", data.event_id).set("user_id", data.user_id)
+				Entity event = Entity.newBuilder(eventKey).set("event_id", data.event_id).set("user_email", data.email)
 						.set("event_name", data.event_name).set("geo_point", latlng).set("date", data.getTimestamp())
 						.build();
 
 				txn.put(event);
 				txn.commit();
 
-				LOG.fine("User: " + data.user_id + " inserted correctly.");
+				LOG.fine("User: " + data.email + " inserted correctly.");
 				return Response.ok(g.toJson(data)).build();
 			}
 

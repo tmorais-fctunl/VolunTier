@@ -27,7 +27,7 @@ public class ActionsResource {
 		int user_level = getLevel(Action.REMOVE, Roles.valueOf(user.getString(DB_User.ROLE)), txn);
 		int target_level = getLevel(Action.REMOVE, Roles.valueOf(target.getString(DB_User.ROLE)), txn);
 
-		return target_level < user_level || target.getString(DB_User.ID).equals(user.getString(DB_User.ID));
+		return target_level < user_level || target.getString(DB_User.EMAIL).equals(user.getString(DB_User.EMAIL));
 	}
 
 	public static boolean hasLookUpPermission(Entity user, Entity target, Transaction txn) {
@@ -37,7 +37,7 @@ public class ActionsResource {
 		int user_level = getLevel(Action.LOOK_UP, Roles.valueOf(user.getString(DB_User.ROLE)), txn);
 		int target_level = getLevel(Action.LOOK_UP, Roles.valueOf(target.getString(DB_User.ROLE)), txn);
 
-		return target_level < user_level || target.getString(DB_User.ID).equals(user.getString(DB_User.ID));
+		return target_level < user_level || target.getString(DB_User.EMAIL).equals(user.getString(DB_User.EMAIL));
 	}
 
 	public static boolean hasAtribPermission(Entity user, Entity target, Transaction txn) {
@@ -47,7 +47,7 @@ public class ActionsResource {
 		int user_level = getLevel(Action.MODIFY_ATRIB, Roles.valueOf(user.getString(DB_User.ROLE)), txn);
 		int target_level = getLevel(Action.MODIFY_ATRIB, Roles.valueOf(target.getString(DB_User.ROLE)), txn);
 
-		return target_level < user_level || target.getString(DB_User.ID).equals(user.getString(DB_User.ID));
+		return target_level < user_level || target.getString(DB_User.EMAIL).equals(user.getString(DB_User.EMAIL));
 	}
 
 	public static boolean hasRolePermission(Entity user, Entity target, Transaction txn, String to) {

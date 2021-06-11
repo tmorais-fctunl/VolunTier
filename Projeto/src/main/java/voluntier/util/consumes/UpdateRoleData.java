@@ -6,8 +6,8 @@ public class UpdateRoleData extends RequestData{
 	public String role;
 
 	public UpdateRoleData() {}
-	public UpdateRoleData(String username, String token, String role) {
-		super(username, token);
+	public UpdateRoleData(String email, String token, String role) {
+		super(email, token);
 		this.role = role;
 	}
 

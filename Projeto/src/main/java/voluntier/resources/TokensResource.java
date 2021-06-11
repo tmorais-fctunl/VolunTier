@@ -14,64 +14,73 @@ public class TokensResource {
 	private static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	private static KeyFactory sessionFactory = datastore.newKeyFactory().setKind("Session");
 	private static KeyFactory refreshFactory = datastore.newKeyFactory().setKind("RefreshSession");
+
+	public static final String REFESH_TOKEN = "refresh_token";
+	public static final String ACCESS_TOKEN = "access_token";
+	public static final String REFESH_EXPIRATION = "refresh_expiration_date";
+	public static final String REFRESH_CREATION = "refresh_creation_date";
+	public static final String ACCESS_EXPIRATION = "token_expiration_date";
+	public static final String ACCESS_CREATION = "token_creation_date";
+	public static final String ACCESS_EMAIL = "token_user_email";
+	public static final String REFESH_EMAIL = "refresh_user_email";
 	
 	public static Entity invalidateRefreshToken(Entity refresh, Key refreshKey) {
 		return Entity.newBuilder(refreshKey)
-				.set("refresh_token", refresh.getString("refresh_token"))
-				.set("access_token", refresh.getString("access_token"))
-				.set("refresh_expiration_date", System.currentTimeMillis())
-				.set("refresh_user_id", refresh.getString("refresh_user_id"))
-				.set("refresh_creation_date", refresh.getLong("refresh_creation_date"))
+				.set(REFESH_TOKEN, refresh.getString(REFESH_TOKEN))
+				.set(ACCESS_TOKEN, refresh.getString(ACCESS_TOKEN))
+				.set(REFESH_EXPIRATION, System.currentTimeMillis())
+				.set(REFESH_EMAIL, refresh.getString(REFESH_EMAIL))
+				.set(REFRESH_CREATION, refresh.getLong(REFRESH_CREATION))
 				.build();
 	}
 
 	public static Entity invalidateAccessToken(Entity token, Key tokenKey) {
 		return Entity.newBuilder(tokenKey)
-				.set("refresh_token", token.getString("refresh_token"))
-				.set("access_token", token.getString("access_token"))
-				.set("token_expiration_date", System.currentTimeMillis())
-				.set("token_user_id", token.getString("token_user_id"))
-				.set("token_creation_date", token.getLong("token_creation_date"))
+				.set(REFESH_TOKEN, token.getString(REFESH_TOKEN))
+				.set(ACCESS_TOKEN, token.getString(ACCESS_TOKEN))
+				.set(ACCESS_EXPIRATION, System.currentTimeMillis())
+				.set(ACCESS_EMAIL, token.getString(ACCESS_EMAIL))
+				.set(ACCESS_CREATION, token.getLong(ACCESS_CREATION))
 				.build();
 	}
 
-	public static Triplet<Entity, Entity, AuthToken> createNewAccessAndRefreshTokens(String user_id){
-		AuthToken authToken = new AuthToken(user_id);
+	public static Triplet<Entity, Entity, AuthToken> createNewAccessAndRefreshTokens(String email){
+		AuthToken authToken = new AuthToken(email);
 
 		Key refreshKey = refreshFactory.newKey(authToken.refreshToken);
 		Entity refresh = Entity.newBuilder(refreshKey)
-				.set("refresh_token", authToken.refreshToken)
-				.set("access_token", authToken.accessToken)
-				.set("refresh_expiration_date", authToken.refresh_expirationDate)
-				.set("refresh_user_id", authToken.user_id)
-				.set("refresh_creation_date", authToken.creationDate)
+				.set(REFESH_TOKEN, authToken.refreshToken)
+				.set(ACCESS_TOKEN, authToken.accessToken)
+				.set(REFESH_EXPIRATION, authToken.refresh_expirationDate)
+				.set(REFESH_EMAIL, authToken.email)
+				.set(REFRESH_CREATION, authToken.creationDate)
 				.build();
 
 		Key tokenKey = sessionFactory.newKey(authToken.accessToken);
 		Entity token = Entity.newBuilder(tokenKey)
-				.set("access_token", authToken.accessToken)
-				.set("refresh_token", authToken.refreshToken)
-				.set("token_user_id", authToken.user_id)
-				.set("token_creation_date", authToken.creationDate)
-				.set("token_expiration_date", authToken.expirationDate)
+				.set(ACCESS_TOKEN, authToken.accessToken)
+				.set(REFESH_TOKEN, authToken.refreshToken)
+				.set(ACCESS_EMAIL, authToken.email)
+				.set(ACCESS_CREATION, authToken.creationDate)
+				.set(ACCESS_EXPIRATION, authToken.expirationDate)
 				.build();
 
 		return new Triplet<>(refresh, token, authToken);
 	}
 	
 	public static boolean isValidAccess(Entity token) {
-		return token != null && token.getLong("token_expiration_date") > System.currentTimeMillis();
+		return token != null && token.getLong(ACCESS_EXPIRATION) > System.currentTimeMillis();
 	}
 	
-	public static boolean isValidAccess(Entity token, String user_id) {
-		return isValidAccess(token) && token.getString("token_user_id").equals(user_id);
+	public static boolean isValidAccess(Entity token, String email) {
+		return isValidAccess(token) && token.getString(ACCESS_EMAIL).equals(email);
 	}
 	
 	public static boolean isValidRefresh(Entity token) {
-		return token != null && token.getLong("refresh_expiration_date") > System.currentTimeMillis();
+		return token != null && token.getLong(REFESH_EXPIRATION) > System.currentTimeMillis();
 	}
 	
-	public static boolean isValidRefresh(Entity token, String user_id) {
-		return isValidRefresh(token) && token.getString("refresh_user_id").equals(user_id);
+	public static boolean isValidRefresh(Entity token, String email) {
+		return isValidRefresh(token) && token.getString(REFESH_EMAIL).equals(email);
 	}
 }

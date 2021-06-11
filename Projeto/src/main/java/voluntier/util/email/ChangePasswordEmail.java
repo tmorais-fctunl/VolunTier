@@ -7,7 +7,7 @@ import voluntier.util.consumes.ForgotPassData;
 public class ChangePasswordEmail {
 
 	public static ForgotData sendConfirmationEmail(String From, ForgotPassData data) throws MessagingException {
-		ForgotData confirmation = new ForgotData(data.user_id, data.email);
+		ForgotData confirmation = new ForgotData(data.email);
 		
 		String url = "https://voluntier-312115.ew.r.appspot.com/rest/forgotpassword/confirm?t=" + confirmation.code;
 		String subject = "Please change your password";
