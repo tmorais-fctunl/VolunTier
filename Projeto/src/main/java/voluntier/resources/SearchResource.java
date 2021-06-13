@@ -1,5 +1,7 @@
 package voluntier.resources;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.logging.Logger;
 
 import javax.ws.rs.Consumes;
@@ -20,9 +22,11 @@ import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.Transaction;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
+import com.google.cloud.datastore.StructuredQuery.CompositeFilter;
 import com.google.gson.Gson;
 
 import voluntier.util.consumes.RequestData;
+import voluntier.util.produces.SearchData;
 import voluntier.util.userdata.DB_User;
 import voluntier.util.userdata.UserData_Minimal;
 
@@ -31,7 +35,7 @@ import voluntier.util.userdata.UserData_Minimal;
 public class SearchResource {
 	private static final Logger LOG = Logger.getLogger(RegisterResource.class.getName());
 
-	private final Gson g = new Gson();
+	private final Gson json = new Gson();
 
 	private static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	private static KeyFactory usersFactory = datastore.newKeyFactory().setKind("User");
@@ -78,7 +82,7 @@ public class SearchResource {
 					} else {
 						UserData_Minimal user_data = new UserData_Minimal(tg_user);
 						txn.rollback();
-						return Response.ok(g.toJson(user_data)).build();
+						return Response.ok(json.toJson(user_data)).build();
 					}
 				}
 			}
@@ -102,7 +106,7 @@ public class SearchResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response doSearch(@QueryParam("q") String query, RequestData data) {
 
-		if (!data.isValid())
+		if (!data.isValid() || !query.matches(UserData_Minimal.USERNAME_REGEX))
 			return Response.status(Status.BAD_REQUEST).entity("Invalid").build();
 
 		Transaction txn = datastore.newTransaction();
@@ -117,10 +121,11 @@ public class SearchResource {
 				LOG.warning("Failed logout attempt by user: " + data.email);
 				return Response.status(Status.FORBIDDEN).entity("Token expired or invalid: " + data.email).build();
 			}
-			
-			
-			
-			return Response.ok().build();
+
+			SearchData res = new SearchData(searchUser(query));
+			txn.rollback();
+
+			return Response.ok(json.toJson(res)).build();
 
 		} catch (Exception e) {
 			txn.rollback();
@@ -135,15 +140,42 @@ public class SearchResource {
 		}
 	}
 	
-	public static void searchUser(String q) {
-		Query<Entity> query = Query.newEntityQueryBuilder()
-				.setKind("User")
+	public static List<Entity> searchUser(String q) {
+		List<Entity> users = searchUsername(q);
+		users.addAll(searchFullName(q));
+		return users;
+	}
+
+	public static List<Entity> searchUsername(String q) {
+		Query<Entity> query = Query
+				.newEntityQueryBuilder().setKind("User").setFilter(CompositeFilter
+						.and(PropertyFilter.ge(DB_User.USERNAME, q), PropertyFilter.lt(DB_User.USERNAME, q + "z")))
 				.build();
 
 		QueryResults<Entity> res = datastore.run(query);
-		
+
+		List<Entity> users = new LinkedList<>();
 		res.forEachRemaining(user -> {
-			
+			users.add(user);
 		});
+		
+		return users;
 	}
+	
+	public static List<Entity> searchFullName(String q) {
+		Query<Entity> query = Query
+				.newEntityQueryBuilder().setKind("User").setFilter(CompositeFilter
+						.and(PropertyFilter.ge(DB_User.FULL_NAME, q), PropertyFilter.lt(DB_User.FULL_NAME, q + "z")))
+				.build();
+
+		QueryResults<Entity> res = datastore.run(query);
+
+		List<Entity> users = new LinkedList<>();
+		res.forEachRemaining(user -> {
+			users.add(user);
+		});
+		
+		return users;
+	}
+	
 }

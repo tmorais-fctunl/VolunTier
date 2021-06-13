@@ -1,7 +1,6 @@
 package voluntier.util.userdata;
 
 import java.util.Random;
-import java.util.regex.Pattern;
 
 import com.google.cloud.datastore.Entity;
 
@@ -12,7 +11,7 @@ public class UserData_Minimal {
 	public static final String EMAIL_REGEX = ".+@.+[.].+";
 	public static final String POSTAL_CODE_REGEX = "[0-9]{4}-[0-9]{3}";
 	public static final String MOBILE_REGEX = "([+]351\\s)?[789][0-9]{8}";
-	public static final String USERNAME_REGEX = "^[a-zA-Z][a-zA-Z0-9][.]?[a-zA-Z0-9]+$";
+	public static final String USERNAME_REGEX = "^[a-zA-Z][a-zA-Z0-9][.]?[a-zA-Z0-9]?+$";
 
 	public String username;
 	public String email;
@@ -81,7 +80,7 @@ public class UserData_Minimal {
 	}
 
 	public static boolean usernameValid(String username) {
-		return (username != null && username.length() > 4 && username.length() < 30) && username.matches(USERNAME_REGEX);
+		return (username != null && username.length() > 4 && username.length() < 30 && username.matches(USERNAME_REGEX));
 	}
 	
 	public static boolean pcValid(String pc) {
