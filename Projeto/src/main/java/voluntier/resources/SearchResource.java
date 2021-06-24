@@ -13,19 +13,27 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.javatuples.Triplet;
+
+import com.google.cloud.datastore.Cursor;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Query;
+import com.google.cloud.datastore.StructuredQuery.Builder;
 import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.Transaction;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
+import com.google.datastore.v1.QueryResultBatch;
+import com.google.datastore.v1.QueryResultBatch.MoreResultsType;
 import com.google.cloud.datastore.StructuredQuery.CompositeFilter;
+import com.google.cloud.datastore.StructuredQuery.Filter;
 import com.google.gson.Gson;
 
 import voluntier.util.consumes.RequestData;
+import voluntier.util.consumes.SearchUserData;
 import voluntier.util.produces.SearchData;
 import voluntier.util.userdata.DB_User;
 import voluntier.util.userdata.UserData_Minimal;
@@ -34,6 +42,8 @@ import voluntier.util.userdata.UserData_Minimal;
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class SearchResource {
 	private static final Logger LOG = Logger.getLogger(RegisterResource.class.getName());
+
+	private static final int SEARCH_RESULTS_LIMIT = 2;
 
 	private final Gson json = new Gson();
 
@@ -104,7 +114,7 @@ public class SearchResource {
 	@Path("/search")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response doSearch(@QueryParam("q") String query, RequestData data) {
+	public Response doSearch(@QueryParam("q") String query, SearchUserData data) {
 
 		if (!data.isValid() || !query.matches(UserData_Minimal.USERNAME_REGEX))
 			return Response.status(Status.BAD_REQUEST).entity("Invalid").build();
@@ -122,7 +132,7 @@ public class SearchResource {
 				return Response.status(Status.FORBIDDEN).entity("Token expired or invalid: " + data.email).build();
 			}
 
-			SearchData res = new SearchData(searchUser(query));
+			SearchData res = new SearchData(searchUser(query, data.cursor));
 			txn.rollback();
 
 			return Response.ok(json.toJson(res)).build();
@@ -139,18 +149,58 @@ public class SearchResource {
 			}
 		}
 	}
-	
-	public static List<Entity> searchUser(String q) {
-		List<Entity> users = searchUsername(q);
-		users.addAll(searchFullName(q));
+
+	private static List<Entity> removeDuplicates(List<Entity> usernames, List<Entity> full_names) {
+		List<Entity> users = usernames;
+		full_names.forEach(user -> {
+			if (!users.contains(user))
+				users.add(user);
+		});
+		
 		return users;
 	}
 
-	public static List<Entity> searchUsername(String q) {
-		Query<Entity> query = Query
-				.newEntityQueryBuilder().setKind("User").setFilter(CompositeFilter
-						.and(PropertyFilter.ge(DB_User.USERNAME, q), PropertyFilter.lt(DB_User.USERNAME, q + "z")))
-				.build();
+	public static Triplet<List<Entity>, Cursor[], QueryResultBatch.MoreResultsType> searchUser(String q,
+			String[] cursor) {
+
+		Triplet<List<Entity>, Cursor, QueryResultBatch.MoreResultsType> usernames = searchUsername(q,
+				cursor != null ? cursor[0] : null);
+		Triplet<List<Entity>, Cursor, QueryResultBatch.MoreResultsType> full_names = searchFullName(q,
+				cursor != null ? cursor[1] : null);
+
+		List<Entity> users = removeDuplicates(usernames.getValue0(), full_names.getValue0());
+
+		if (users.size() < SEARCH_RESULTS_LIMIT || (usernames.getValue2() == MoreResultsType.NO_MORE_RESULTS
+				&& full_names.getValue2() == MoreResultsType.NO_MORE_RESULTS))
+			return new Triplet<List<Entity>, Cursor[], QueryResultBatch.MoreResultsType>(users,
+					new Cursor[] { usernames.getValue1(), full_names.getValue1() }, MoreResultsType.NO_MORE_RESULTS);
+
+		return new Triplet<List<Entity>, Cursor[], QueryResultBatch.MoreResultsType>(users,
+				new Cursor[] { usernames.getValue1(), full_names.getValue1() },
+				MoreResultsType.MORE_RESULTS_AFTER_LIMIT);
+	}
+
+	public static Triplet<List<Entity>, Cursor, QueryResultBatch.MoreResultsType> searchUsername(String q,
+			String cursor) {
+		return runQuery(CompositeFilter.and(PropertyFilter.ge(DB_User.USERNAME, q),
+				PropertyFilter.lt(DB_User.USERNAME, q + "z")), cursor);
+	}
+
+	public static Triplet<List<Entity>, Cursor, QueryResultBatch.MoreResultsType> searchFullName(String q,
+			String cursor) {
+		return runQuery(CompositeFilter.and(PropertyFilter.ge(DB_User.FULL_NAME, q),
+				PropertyFilter.lt(DB_User.FULL_NAME, q + "z")), cursor);
+	}
+
+	public static Triplet<List<Entity>, Cursor, QueryResultBatch.MoreResultsType> runQuery(Filter filter,
+			String cursor) {
+		Builder<Entity> b = Query.newEntityQueryBuilder().setKind("User").setFilter(filter)
+				.setLimit(SEARCH_RESULTS_LIMIT);
+
+		if (cursor != null)
+			b.setStartCursor(Cursor.fromUrlSafe(cursor));
+
+		Query<Entity> query = b.build();
 
 		QueryResults<Entity> res = datastore.run(query);
 
@@ -158,24 +208,8 @@ public class SearchResource {
 		res.forEachRemaining(user -> {
 			users.add(user);
 		});
-		
-		return users;
-	}
-	
-	public static List<Entity> searchFullName(String q) {
-		Query<Entity> query = Query
-				.newEntityQueryBuilder().setKind("User").setFilter(CompositeFilter
-						.and(PropertyFilter.ge(DB_User.FULL_NAME, q), PropertyFilter.lt(DB_User.FULL_NAME, q + "z")))
-				.build();
 
-		QueryResults<Entity> res = datastore.run(query);
-
-		List<Entity> users = new LinkedList<>();
-		res.forEachRemaining(user -> {
-			users.add(user);
-		});
-		
-		return users;
+		return new Triplet<List<Entity>, Cursor, QueryResultBatch.MoreResultsType>(users, res.getCursorAfter(),
+				res.getMoreResults());
 	}
-	
 }

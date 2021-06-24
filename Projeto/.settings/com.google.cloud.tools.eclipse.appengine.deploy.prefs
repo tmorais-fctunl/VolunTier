@@ -1,8 +1,8 @@
-account.email=me.franca@campus.fct.unl.pt
+account.email=voluntier.devs@gmail.com
 eclipse.preferences.version=1
 include.optional.configuration.files=true
 project.bucket=
 project.id=voluntier-312115
 project.previousVersion.stop=true
 project.promote=true
-project.version=11
+project.version=12
