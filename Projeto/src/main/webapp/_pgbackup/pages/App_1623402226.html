@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="description" content="">
+        <meta name="author" content="">
+        <title>Pinegrow | Bootstrap Blocks Template</title>
+        <!-- Bootstrap core CSS -->
+        <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="../css/blocks.css">
+        <!-- Custom styles for this template -->
+        <link href="../css/style.css" rel="stylesheet">
+        <link rel="stylesheet" href="../css/blocks.css">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Alfa+Slab+One&display=swap">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Alice&display=swap">
+        <link rel="stylesheet" href="../blocks.css">
+        <!--<script src="../scripts/csi.min.js"></script>-->
+        <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.bundle.min.js"></script>
+    </head>
+    <header>
+</header>
+    <body class="text-secondary">
+        <nav class="bg-light navbar navbar-custo navbar-custom navbar-expand-lg navbar-light">
+            <a class="navbar-brand" href="index.html" style="font-family: 'Alfa Slab One', cursive; font-size: 26px; color: #e7822c; letter-spacing: 1px;">VolunTier</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggler30" aria-controls="" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarToggler30">
+                <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html#About-section">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html#Contacts-section">Contact</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="return logout()">Logout</a>
+                    </li>
+                </ul>
+            </div>
+            <a style="font-family: 'Alice', serif; font-size: 15px; color: #000000; letter-spacing: 1px; text-align: center;" id="user_tag"></a>
+        </nav>
+        <div class="tab">
+            <button class="tablinks" onclick="openTab(event, 'Map')" id="defaultOpen">Map</button>
+            <button class="tablinks" onclick="openTab(event, 'Profile')">Profile</button>
+            <button class="tablinks" onclick="openTab(event, 'EmptyTab1')">EmptyTab</button>
+            <button class="tablinks" onclick="openTab(event, 'EmptyTab2')">EmptyTab</button>
+        </div>
+        <!-- Tab contents-->
+        <div id="Map" class="tabcontent">
+            <span onclick="this.parentElement.style.display='none'" class="topright">&times</span>
+            <main class="app">
+                <aside class="sidebar" style="background-color:white;">
+                    <ul>
+                        <li>This right here is your panel</li>
+                        <li>(In development)</li>
+                    </ul>
+                </aside>
+                <section class="map-area " id="map">
+                    <!-- Async script executes immediately and must be after any DOM elements used in callback. -->
+                    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyApuxZ0qx7PVVbZt9F2R-Hd_wmOfXcGN4E&callback=initMap&libraries=&v=weekly" async></script>
+                </section>
+            </main>
+        </div>
+        <div id="Profile" class="tabcontent">
+            <span onclick="this.parentElement.style.display='none'" class="topright">&times</span>
+            <div data-include="./contents/profile.html">
+</div>
+        </div>
+        <div id="EmptyTab1" class="tabcontent">
+            <span onclick="this.parentElement.style.display='none'" class="topright">&times</span>
+            <h3>EmptyTab1</h3>
+            <p>Nothing but void.</p> 
+        </div>
+        <div id="EmptyTab2" class="tabcontent">
+            <span onclick="this.parentElement.style.display='none'" class="topright">&times</span>
+            <h3>EmptyTab2</h3>
+            <p>Nothing but void.</p>
+        </div>
+        <footer class="bg-dark pt-5 text-white-50">
+            <div class="container">
+                <div class="row">
+</div>
+            </div>
+        </footer>
+        <script src="../assets/js/jquery.min.js"></script>
+        <script src="../assets/js/popper.js"></script>
+        <script src="../bootstrap/js/bootstrap.min.js"></script>
+        <script src="../scripts/formLoader.js"></script>
+        <!-- Hash function -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
+        <script src="../scripts/login.js"></script>
+        <script src="../scripts/register.js"></script>
+        <script src="../scripts/login_ok_fields.js"></script>
+        <script src="../scripts/register_ok_fields.js"></script>
+        <script src="../scripts/authenticate.js"></script>
+        <script src="../scripts/loadMap.js"></script>
+        <script src="../scripts/logout.js"></script>
+        <script src="../scripts/csi.min.js"></script>
+        <!-- Gotta put this in a separate file-->
+        <!-- Load the page with the user info-->
+        <script>
+        window.onload = function () {
+            console.log("lol");
+            if (!tryAuthentication()) {
+              
+                //window.location = "../pages/index.html";
+                return false;
+            }
+            document.getElementById("user_tag").innerHTML = "Logged in as " + localStorage.getItem("user_id");
+            loadContents();
+            
+            var urlvariable = "/rest/user";
+            var URL = "https://voluntier-312115.ew.r.appspot.com" + urlvariable;  //LookUp REST URL
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.open("POST", URL, false);
+            xmlhttp.setRequestHeader("Content-Type", "application/json");
+            var userId = localStorage.getItem("user_id"), token = localStorage.getItem("jwt");
+            var ItemJSON = '{"user_id": "' + userId + '", "token": "' + token + '"}';
+            xmlhttp.send(ItemJSON);
+
+            if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200))
+                return false;
+            
+            //Get the content from the json response and fill in the spots with the correct info
+            const obj = JSON.parse(xmlhttp.responseText);
+             $.ajax({
+                 //We need to wait fror the page to load before changing any fields.
+                        complete: function () {
+                            
+                        	document.getElementById("profile_username").innerHTML = obj.user_id;
+                            document.getElementById("profile_visibility").innerHTML = obj.profile;
+                            if (obj.region)
+                            	document.getElementById("profile_region").innerHTML = obj.region;
+                            document.getElementById("profile_email").innerHTML = obj.email;
+                            if (obj.address)
+                            document.getElementById("profile_address").innerHTML = obj.address;
+                            if (obj.mobile)
+                            document.getElementById("profile_mobile").innerHTML = obj.mobile;
+                            
+                            
+                           
+                        
+                        }
+                    });
+            
+            
+            
+            
+
+        }
+        </script>
+        <script>
+function openTab(evt, tab) {
+  var i, tabcontent, tablinks;
+  tabcontent = document.getElementsByClassName("tabcontent");
+  for (i = 0; i < tabcontent.length; i++) {
+    tabcontent[i].style.display = "none";
+  }
+  tablinks = document.getElementsByClassName("tablinks");
+  for (i = 0; i < tablinks.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" active", "");
+  }
+  document.getElementById(tab).style.display = "block";
+  evt.currentTarget.className += " active";
+}
+
+// Get the element with id="defaultOpen" and click on it
+document.getElementById("defaultOpen").click();
+</script>
+    </body>
+</html>

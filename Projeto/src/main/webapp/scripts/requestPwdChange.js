@@ -1,7 +1,7 @@
 function requestChangePwd() {
     $('body').css('cursor', 'progress');
     var urlvariable = "/rest/forgotpassword";
-    var ItemJSON = '{"user_id": "' + document.getElementById("username").value + '", "email": "' + document.getElementById("email").value + '"}';
+    var ItemJSON = '{"email": "' + document.getElementById("email").value + '"}';
     var URL = "https://voluntier-312115.ew.r.appspot.com" + urlvariable;  //FORGOT PWD REST URL
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.open("POST", URL, false);

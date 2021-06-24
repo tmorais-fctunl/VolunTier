@@ -100,18 +100,60 @@
         <script src="../scripts/authenticate.js"></script>
         <script src="../scripts/loadMap.js"></script>
         <script src="../scripts/logout.js"></script>
+        <script src="../scripts/csi.min.js"></script>
         <!-- Gotta put this in a separate file-->
+        <!-- Load the page with the user info-->
         <script>
         window.onload = function () {
+            
             if (!tryAuthentication()) {
+              
                 //window.location = "../pages/index.html";
                 return false;
             }
-            document.getElementById("user_tag").innerHTML = "Logged in as " + localStorage.getItem("user_id");
+            
+            loadContents();
+            
+            var urlvariable = "/rest/user";
+            var URL = "https://voluntier-312115.ew.r.appspot.com" + urlvariable;  //LookUp REST URL
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.open("POST", URL, false);
+            xmlhttp.setRequestHeader("Content-Type", "application/json");
+            var userId = localStorage.getItem("email"), token = localStorage.getItem("jwt");
+            var ItemJSON = '{"email": "' + userId + '", "token": "' + token + '"}';
+            xmlhttp.send(ItemJSON);
+
+            if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200))
+                return false;
+            
+            //Get the content from the json response and fill in the spots with the correct info
+            const obj = JSON.parse(xmlhttp.responseText);
+             $.ajax({
+                 //We need to wait fror the page to load before changing any fields.
+                        complete: function () {
+                            document.getElementById("user_tag").innerHTML = obj.username;
+                        	document.getElementById("profile_username").innerHTML = obj.username;
+                            document.getElementById("profile_visibility").innerHTML = obj.profile;
+                            if (obj.region)
+                            	document.getElementById("profile_region").innerHTML = obj.region;
+                            document.getElementById("profile_email").innerHTML = obj.email;
+                            if (obj.address)
+                            document.getElementById("profile_address").innerHTML = obj.address;
+                            if (obj.mobile)
+                            document.getElementById("profile_mobile").innerHTML = obj.mobile;
+                            
+                            
+                           
+                        
+                        }
+                    });
+            
+            
+            
+            
 
         }
         </script>
-        <script src="../scripts/csi.min.js"></script>
         <script>
 function openTab(evt, tab) {
   var i, tabcontent, tablinks;
@@ -130,5 +172,62 @@ function openTab(evt, tab) {
 // Get the element with id="defaultOpen" and click on it
 document.getElementById("defaultOpen").click();
 </script>
+        <script>
+    		
+            //Content on = true, off = false
+            
+            function editBtn() {
+                console.log("Now hiding edit button and showing save button");
+                //needs to turn the content editable on
+                turnContent(true);
+                profileBtnSwap();
+            }
+            
+            function saveBtn() {
+                console.log("Now hiding save button and showing edit button");
+                //needs to send request to server to save new element values
+                //needs to turn the content editable off
+                saveInfo();
+                turnContent(false);
+                profileBtnSwap();
+            }
+
+            
+            
+            function profileBtnSwap(){
+            	var x = document.getElementById("editBtn");
+                var y = document.getElementById("saveBtn");
+  				if (x.style.display === "none") {
+   					x.style.display = "block";
+                    y.style.display = "none";
+			  	} else {
+   					x.style.display = "none";
+  					y.style.display = "block";
+				}
+            }
+            
+            function turnContent(on) {
+       			if(on)
+					$('#profileContainer .editable').each(function () {
+                       // console.log($(this.value));
+						$(this).attr("contenteditable", "true");
+					});
+                else
+                    $('#profileContainer .editable').each(function () {
+                        //console.log($(this.value));
+						$(this).attr("contenteditable", "false");
+					});
+				return false;
+			}
+                
+                
+            
+            
+            function saveInfo() {
+            
+            }
+                
+            
+        </script>
     </body>
 </html>

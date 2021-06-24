@@ -1,10 +1,10 @@
 window.onload = function onLoad() {
 
     //Check if there's any data that implies a signed in user
-    if ("user_id" in localStorage) {
+    if ("email" in localStorage) {
         console.log("User in storage");
         //Authenticate user
-        var authenticated = authenticate(localStorage.getItem("user_id"), localStorage.getItem("jwt"));
+        var authenticated = authenticate(localStorage.getItem("email"), localStorage.getItem("jwt"));
 
         if (authenticated) {
             console.log("validated user");
@@ -25,10 +25,10 @@ window.onload = function onLoad() {
             expired = expRefDate < currDate;
             if (expired) {
                 console.log("jwrt expired");
-                localStorage.clear();
+                clearLoggedInfo();
                 return;
             }
-            if (refreshToken(localStorage.getItem("user_id"), localStorage.getItem("jwrt"))) {
+            if (refreshToken(localStorage.getItem("email"), localStorage.getItem("jwrt"))) {
                 console.log("jwrt refreshed and validated");
                 /* document.getElementById("introductionID").innerHTML =
                      '<h3 class="u-align-center u-custom-font u-font-georgia u-text u-text-1">Logged in! ' + localStorage.getItem("user_id") + '</h3>';*/
@@ -37,7 +37,7 @@ window.onload = function onLoad() {
             }
             else {
                 console.log("jwrt could not be refreshed");
-                localStorage.clear();
+                clearLoggedInfo();
                 return;
             }
         }
@@ -60,16 +60,16 @@ function refreshToken(userId, rtoken) {
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.open("POST", URL, false);
     xmlhttp.setRequestHeader("Content-Type", "application/json");
-    var ItemJSON = '{"user_id": "' + userId + '", "token": "' + rtoken + '"}';
+    var ItemJSON = '{"email": "' + userId + '", "token": "' + rtoken + '"}';
     xmlhttp.send(ItemJSON);
 
     if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
         const obj = JSON.parse(xmlhttp.responseText);
         localStorage.setItem('jwt', obj.accessToken);
         localStorage.setItem('jwrt', obj.refreshToken);
-        localStorage.setItem("jwt_creation_date", creationDate)
-        localStorage.setItem("jwt_expiration_date", expirationDate)
-        localStorage.setItem("jwrt_expiration_date", refresh_expirationDate)
+        localStorage.setItem("jwt_creation_date", creationDate);
+        localStorage.setItem("jwt_expiration_date", expirationDate);
+        localStorage.setItem("jwrt_expiration_date", refresh_expirationDate);
         return true;
     }
     else return false;
@@ -82,9 +82,18 @@ function authenticate(userId, token) {
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.open("POST", URL, false);
     xmlhttp.setRequestHeader("Content-Type", "application/json");
-    var ItemJSON = '{"user_id": "' + userId + '", "token": "' + token + '"}';
+    var ItemJSON = '{"email": "' + userId + '", "token": "' + token + '"}';
     xmlhttp.send(ItemJSON);
     if (xmlhttp.readyState == 4 && xmlhttp.status == 204)
         return true;
     else return false;
+}
+
+function clearLoggedInfo() {
+    localStorage.removeItem('email');
+    localStorage.removeItem('jwt');
+    localStorage.removeItem('jwrt');
+    localStorage.removeItem("jwt_creation_date");
+    localStorage.removeItem("jwt_expiration_date");
+    localStorage.removeItem("jwrt_expiration_date");
 }

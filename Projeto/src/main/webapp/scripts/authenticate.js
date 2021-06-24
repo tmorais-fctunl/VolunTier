@@ -2,14 +2,14 @@
 
 function tryAuthentication() {
 
-    if (!("user_id" in localStorage)) {
+    if (!("email" in localStorage)) {
         console.log("User not in storage");
-        localStorage.clear();
+        clearLoggedInfo();
         return false;
     }
     console.log("User in storage");
     //Authenticate user
-    var authenticated = authenticate(localStorage.getItem("user_id"), localStorage.getItem("jwt"));
+    var authenticated = authenticate(localStorage.getItem("email"), localStorage.getItem("jwt"));
 
     if (authenticated) {
         console.log("validated user");
@@ -21,7 +21,7 @@ function tryAuthentication() {
     var expired = expDate < currDate;
     if (!expired) {
         console.log("jwt not expired, incorrect token");
-        localStorage.clear();
+        clearLoggedInfo();
         return false;
     }
     console.log("jwt expired");
@@ -29,12 +29,12 @@ function tryAuthentication() {
     expired = expRefDate < currDate;
     if (expired) {
         console.log("jwrt expired");
-        localStorage.clear();
+        clearLoggedInfo();
         return false;
     }
-    if (!refreshToken(localStorage.getItem("user_id"), localStorage.getItem("jwrt"))) {
+    if (!refreshToken(localStorage.getItem("email"), localStorage.getItem("jwrt"))) {
         console.log("jwrt could not be refreshed");
-        localStorage.clear();
+        clearLoggedInfo();
         return false;
     }
     console.log("jwrt refreshed and validated");
@@ -52,7 +52,7 @@ function refreshToken(userId, rtoken) {
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.open("POST", URL, false);
     xmlhttp.setRequestHeader("Content-Type", "application/json");
-    var ItemJSON = '{"user_id": "' + userId + '", "token": "' + rtoken + '"}';
+    var ItemJSON = '{"email": "' + userId + '", "token": "' + rtoken + '"}';
     xmlhttp.send(ItemJSON);
 
     if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200))
@@ -75,7 +75,16 @@ function authenticate(userId, token) {
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.open("POST", URL, false);
     xmlhttp.setRequestHeader("Content-Type", "application/json");
-    var ItemJSON = '{"user_id": "' + userId + '", "token": "' + token + '"}';
+    var ItemJSON = '{"email": "' + userId + '", "token": "' + token + '"}';
     xmlhttp.send(ItemJSON);
     return (xmlhttp.readyState == 4 && xmlhttp.status == 204);
+}
+
+function clearLoggedInfo() {
+    localStorage.removeItem('email');
+    localStorage.removeItem('jwt');
+    localStorage.removeItem('jwrt');
+    localStorage.removeItem("jwt_creation_date");
+    localStorage.removeItem("jwt_expiration_date");
+    localStorage.removeItem("jwrt_expiration_date");
 }

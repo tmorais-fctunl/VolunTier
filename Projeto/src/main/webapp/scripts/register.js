@@ -10,7 +10,7 @@ function register() {
     var encryptedP = sha256(document.getElementById("password").value);
     //var encryptedCP = sha256(document.getElementById("confirm_password").value);
     var ItemJSON;
-    ItemJSON = '{"user_id": "' + document.getElementById("username").value + '", "password": "' + encryptedP + '", "email":"' + document.getElementById("email").value + '"}';
+    ItemJSON = '{"username": "' + document.getElementById("username").value + '", "password": "' + encryptedP + '", "email":"' + document.getElementById("email").value + '"}';
 
 
     URL = "https://voluntier-312115.ew.r.appspot.com" + urlvariable;  //Your URL

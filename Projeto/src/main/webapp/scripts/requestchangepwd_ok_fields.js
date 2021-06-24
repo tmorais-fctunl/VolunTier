@@ -3,7 +3,7 @@ window.onload = function () {
 };
 
 function updateRequestChangePwdInputs() {
-	$('#username, #email').bind('keyup', function () {
+	$('#email').bind('keyup', function () {
 		if (allFilled()) $('#requestChangeBtn').removeAttr('disabled');
 		else $('#requestChangeBtn').prop("disabled", true);
 	});

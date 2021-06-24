@@ -10,7 +10,7 @@ $(document).ready(function () {
                     target = $this.data('target');
 
                     //load target page into the container
-                    container.load("/pages/contents/"+target + '.php');
+                    container.load("../pages/contents/"+target + '.php');
                  
                     $.ajax({
                         complete: function () {

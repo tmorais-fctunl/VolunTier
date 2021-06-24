@@ -2,7 +2,7 @@ function login() {
     $('body').css('cursor', 'progress');
     var urlvariable = "/rest/login";
     var encryptedP = sha256(document.getElementById("password").value);
-    var ItemJSON = '{"user_id": "' + document.getElementById("username").value + '", "password": "' + encryptedP + '"}';
+    var ItemJSON = '{"email": "' + document.getElementById("email").value + '", "password": "' + encryptedP + '"}';
     var URL = "https://voluntier-312115.ew.r.appspot.com" + urlvariable;  //LOGIN REST URL
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.open("POST", URL, false);
@@ -14,7 +14,7 @@ function login() {
 
         localStorage.setItem('jwt', obj.accessToken);
         localStorage.setItem('jwrt', obj.refreshToken);
-        localStorage.setItem("user_id", obj.user_id);
+        localStorage.setItem("email", obj.email);
         localStorage.setItem("jwt_creation_date", obj.creationDate)
         localStorage.setItem("jwt_expiration_date", obj.expirationDate)
         localStorage.setItem("jwrt_expiration_date", obj.refresh_expirationDate)
@@ -22,7 +22,7 @@ function login() {
         var timer = setTimeout(function () {
             $('body').css('cursor', 'default');
             document.getElementById("result").innerHTML = "Login successful";
-            window.location = "/pages/App.html";
+            window.location = "../pages/App.html";
             return false;
         }, 2000);
 

@@ -1,6 +1,6 @@
 function updateLoginInputs() {
 	$(document).ready(function(){
-		$('body').on("keyup",'#username, #password', function(){
+		$('body').on("keyup",'#email, #password', function(){
         	if (allFilled()) $('#loginButton').removeAttr('disabled');
 			else $('#loginButton').prop("disabled", true);
    		});
