@@ -145,7 +145,7 @@ public class ForgotPassResource {
 				// + "height:100%; border:none; margin:0; padding:0; "
 				// + "overflow:hidden; z-index:999999;\" seamless=\"\"></iframe></body></html>";
 				String htmlContent = "<meta http-equiv=\"refresh\" "
-						+ "content=\"0;URL=https://voluntier-312115.ew.r.appspot.com/pages/changepwd.html?t=" + code + "\" />";
+						+ "content=\"0;URL=https://voluntier-317915.ew.r.appspot.com/pages/changepwd.html?t=" + code + "\" />";
 
 				txn.rollback();
 				return Response.ok(htmlContent, MediaType.TEXT_HTML).build();

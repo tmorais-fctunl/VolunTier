@@ -87,7 +87,7 @@ public class RegisterResource {
 					txn.commit();
 
 					LOG.fine("Registered user with email: " + user_email + ", username:" + username);
-					String htmlContent = "<meta http-equiv=\"refresh\" content=\"0;URL=https://voluntier-312115.ew.r.appspot.com/pages/registerconfirmed.html\" />";
+					String htmlContent = "<meta http-equiv=\"refresh\" content=\"0;URL=https://voluntier-317915.ew.r.appspot.com/pages/registerconfirmed.html\" />";
 
 					return Response.ok(htmlContent, MediaType.TEXT_HTML).build();
 				}
@@ -152,7 +152,7 @@ public class RegisterResource {
 						return Response.status(Status.NO_CONTENT).build();
 					} catch (MessagingException e) {
 						txn.rollback();
-						LOG.severe("Something went wrong while sending confirmation email.");
+						LOG.severe("Something went wrong while sending confirmation email." + e.getMessage());
 						return Response.status(Status.BAD_GATEWAY).build();
 					}
 				} else {

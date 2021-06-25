@@ -15,7 +15,6 @@ public class GmailUtil {
 
 	public static void sendEmail(String From, String To, String subject, String content)
 			throws MessagingException {
-		// [START simple_example]
 	    Properties props = new Properties();
 	    Session session = Session.getDefaultInstance(props, null);
 
