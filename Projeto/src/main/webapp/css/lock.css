@@ -1,0 +1,97 @@
+/* :::::::::::::: Presentation css */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    --locked-color: gray;
+    --unlocked-color: gray;
+}
+
+.container_lock {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+}
+
+/* :::::::::::::: Required CSS */
+/* Locked */
+.lock {
+    width: 14px;
+    height: 12px;
+    border: 2px solid var(--locked-color);
+    border-radius: 2.66px;
+    position: relative;
+    cursor: pointer;
+    -webkit-transition: all 0.1s ease-in-out;
+    transition: all 0.1s ease-in-out;
+}
+
+.lock:after {
+    content: "";
+    display: block;
+    background: var(--locked-color);
+    width: 2px;
+    height: 4.66px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin: -2.33px 0 0 -1.33px;
+    -webkit-transition: all 0.1s ease-in-out;
+    transition: all 0.1s ease-in-out;
+}
+
+.lock:before {
+    content: "";
+    display: block;
+    width: 6px;
+    height: 6px;
+    bottom: 100%;
+    position: absolute;
+    left: 50%;
+    margin-left: -5.33px;
+    border: 2px solid var(--locked-color);
+    border-top-right-radius: 50%;
+    border-top-left-radius: 50%;
+    border-bottom: 0;
+    -webkit-transition: all 0.1s ease-in-out;
+    transition: all 0.1s ease-in-out;
+}
+
+/* Locked Hover */
+.lock:hover:before {
+    height: 8px;
+}
+
+/* Unlocked */
+.unlocked {
+    transform: rotate(0deg);
+}
+
+.unlocked:before {
+    bottom: 130%;
+    left: 31%;
+    margin-left: -7.66px;
+    transform: rotate(-45deg);
+}
+
+.unlocked,
+	.unlocked:before {
+    border-color: var(--unlocked-color);
+}
+
+.unlocked:after {
+    background: var(--unlocked-color);
+}
+
+/* Unlocked Hover */
+.unlocked:hover {
+    transform: rotate(0deg);
+}
+
+.unlocked:hover:before {
+    height: 6.66px;
+    left: 40%;
+    bottom: 124%;
+    transform: rotate(-30deg);
+}

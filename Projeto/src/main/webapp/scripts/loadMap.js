@@ -6,7 +6,8 @@
 
           function initMap() {
               map = new google.maps.Map(document.getElementById("map"), {
-                  center: { lat: -34.397, lng: 150.644 },
+                  //center at FCT NOVA
+                  center: { lat: 38.66128, lng: - 9.20343 },
                   zoom: 6,
               });
               infoWindow = new google.maps.InfoWindow();

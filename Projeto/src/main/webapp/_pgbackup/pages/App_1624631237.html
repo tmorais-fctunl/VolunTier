@@ -1,26 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <meta name="description" content="">
-        <meta name="author" content="">
-        <title>Pinegrow | Bootstrap Blocks Template</title>
-        <!-- Bootstrap core CSS -->
-        <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
-        <!--<script src="../scripts/csi.min.js"></script>-->
-        <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
-        <!--<link href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" rel="stylesheet">-->
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.bundle.min.js"></script>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Alfa+Slab+One&display=swap">
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Alice&display=swap">
-        <link rel="stylesheet" href="../css/blocks.css">
-        <link rel="stylesheet" href="../blocks.css">
-        <!-- Custom styles for this template -->
-        <link href="../css/style.css" rel="stylesheet">
-        <link rel="stylesheet" href="../css/lock.css">
-    </head>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Pinegrow | Bootstrap Blocks Template</title>
+    <!-- Bootstrap core CSS -->
+    <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <!--<script src="../scripts/csi.min.js"></script>-->
+    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Alfa+Slab+One&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Alice&display=swap">
+    <link rel="stylesheet" href="../css/blocks.css">
+    <link rel="stylesheet" href="../blocks.css">
+
+    <!-- Custom styles for this template -->
+    <link href="../css/style.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/lock.css">
+
+
+
+</head>
     <body class="text-secondary">
         <nav class="bg-light navbar navbar-custo navbar-custom navbar-expand-lg navbar-light">
             <a class="navbar-brand" href="index.html" style="font-family: 'Alfa Slab One', cursive; font-size: 26px; color: #e7822c; letter-spacing: 1px;">VolunTier</a>
@@ -42,7 +46,6 @@
             </div>
             <a style="font-family: 'Alice', serif; font-size: 15px; color: #000000; letter-spacing: 1px; text-align: center;" id="user_tag"></a>
         </nav>
-        
         <div class="tab">
             <button class="tablinks" onclick="openTab(event, 'Map')" id="defaultOpen">Map</button>
             <button class="tablinks" onclick="openTab(event, 'Profile')">Profile</button>
@@ -61,13 +64,18 @@
                 </aside>
                 <section class="map-area " id="map">
                     <!-- Async script executes immediately and must be after any DOM elements used in callback. -->
-                    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCxgVR80ZfBsHQjmUlAJVsHrEZRP4Irk50&callback=initMap&libraries=&v=weekly" async></script>
+                    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyApuxZ0qx7PVVbZt9F2R-Hd_wmOfXcGN4E&callback=initMap&libraries=&v=weekly" async></script>
                 </section>
             </main>
         </div>
         <div id="Profile" class="tabcontent">
             <span onclick="this.parentElement.style.display='none'" class="topright">&times</span>
+            <div class="container_lock">
+                <span class="lock"></span>
+            </div>
             <div data-include="./contents/profile.html"></div>
+
+
         </div>
         <div id="EmptyTab1" class="tabcontent">
             <span onclick="this.parentElement.style.display='none'" class="topright">&times</span>
@@ -82,7 +90,7 @@
         <footer class="bg-dark pt-5 text-white-50">
             <div class="container">
                 <div class="row">
-</div>
+                </div>
             </div>
         </footer>
         <script src="../assets/js/jquery.min.js"></script>
@@ -103,7 +111,7 @@
         <!-- Load the page with the user info-->
         <script>
 
-
+            
 
             window.onload = function () {
                 loadContents();
@@ -115,7 +123,9 @@
 
                 //loadContents();
 
-                
+                $(".lock").click(function () {
+                    $(this).toggleClass('unlocked');
+                });
 
                 var urlvariable = "/rest/user";
                 var URL = "https://voluntier-312115.ew.r.appspot.com" + urlvariable;  //LookUp REST URL
@@ -129,17 +139,13 @@
                 if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200))
                     return false;
 
-                /*
-                 * Do token refresh or logout if it fails*/
-
-
                 //Get the content from the json response and fill in the spots with the correct info
                 const obj = JSON.parse(xmlhttp.responseText);
                 $.ajax({
                     //We need to wait fror the page to load before changing any fields.
                     complete: function () {
+                        document.getElementById("user_tag").innerHTML = obj.username;
                         document.getElementById("profile_username").innerHTML = obj.username;
-                        document.getElementById("profile_fullname").innerHTML = obj.full_name;
                         document.getElementById("profile_visibility").innerHTML = obj.profile;
                         if (obj.region)
                             document.getElementById("profile_region").innerHTML = obj.region;
@@ -162,7 +168,12 @@
             }
         </script>
 
-      
+        <script>
+            $(".lock").click(function () {
+                console.log("clicked");
+                $(this).toggleClass('unlocked');
+            });
+        </script>
 
         <script>
             function openTab(evt, tab) {
@@ -216,8 +227,6 @@
                 }
             }
 
-            var profileVisibility = false;
-
             function turnContent(on) {
                 if (on) {
                     $('#profileContainer .editable').each(function () {
@@ -225,32 +234,18 @@
                         $(this).attr("contenteditable", "true");
                     });
 
-                    var profile = document.getElementById("profile_visibility").innerHTML;
-                    console.log(profile);
-                    var data = 'Profile visibility: <pan class="lock" style = "margin-left:10px" ></span>'
-                    $('#profile_visibility').html(data);
-                    if (profile == "Public") {
-                        $(".lock").toggleClass('unlocked');
-                        profileVisibility = true;
-                    }
-                    $(".lock").click(function () {
-                        $(this).toggleClass('unlocked');
-                        profileVisibility = !profileVisibility;
-                    });
-                    console.log(profileVisibility);
-
-                    var prevRegion = document.getElementById("profile_region").innerHTML;
-                    console.log(prevRegion);
+                    var prev = document.getElementById("profile_region").innerHTML;
+                    console.log(prev);
                     $.get("contents/profile_region_list.html", function (data) {
                         $('#profile_region_div').html(data);
-                       // alert("Load was performed.");
+                        alert("Load was performed.");
                     });
-                    if (prevRegion != "Country") {
+                    if (prev != "Country") {
                         $.ajax({
                             //We need to wait fror the page to load before changing any fields.
                             complete: function () {
-                                $('[name="country"]').val(prevRegion);
-                                $('[name="country"]').attr("placeholder", prevRegion);
+                                $('[name="country"]').val(prev);
+                                $('[name="country"]').attr("placeholder", prev);
                             }
                         });
                     }
@@ -260,21 +255,10 @@
                         //console.log($(this.value));
                         $(this).attr("contenteditable", "false");
                     });
-
-                    var profile = document.getElementById("profile_visibility");
-                    var data;
-                    if (profileVisibility)
-                        data = "Public";
-                    else
-                        data = "Private";
-
-                    $('#profile_visibility').html(data);
-                    console.log(profileVisibility);
-
-                    var prevRegion = $('[name="country"]').val();
-                    if (prevRegion == '') prevRegion = $('[name="country"]').attr("placeholder");
-                    console.log(prevRegion);
-                    var data = '<p class="text-muted font-size-sm editable" id="profile_region">' + prevRegion + '</p>';
+                    var prev = $('[name="country"]').val();
+                    if (prev == '') prev = $('[name="country"]').attr("placeholder");
+                    console.log(prev);
+                    var data = '<p class="text-muted font-size-sm editable" id="profile_region">' + prev + '</p>';
                     $('#profile_region_div').html(data);
 
                 }
@@ -285,41 +269,11 @@
 
 
             function saveInfo() {
-                var urlvariable = "/rest/user";
-                var URL = "https://voluntier-312115.ew.r.appspot.com" + urlvariable;  //LookUp REST URL
-                var xmlhttp = new XMLHttpRequest();
-                xmlhttp.open("POST", URL, false);
-                xmlhttp.setRequestHeader("Content-Type", "application/json");
-                var userId = localStorage.getItem("email"), token = localStorage.getItem("jwt");
-
-                var ItemJSON = '{"email": "' + userId +
-                    '", "token": "' + token +
-                    '", "full_name": "' + document.getElementById("profile_fullname") +
-                    '", "profile": "' + document.getElementById("profile_visibility") +
-                    '", "landline": "' + document.getElementById("profile_landline") +
-                    '", "mobile": "' + document.getElementById("profile_mobile") +
-                    '", "address": "' + document.getElementById("profile_address") +
-                    //'", "address2": "' + address2 +
-                    '", "region": "' + document.getElementById("profile_region") +
-                    //'", "pc": "' + pc + 
-                    //'", "website": "' + website + 
-                    //'", "facebook": "' + facebook + 
-                    //'", "instagram": "' + instagram + 
-                    //'", "twitter": "' + twitter + 
-                    '"}';
-                xmlhttp.send(ItemJSON);
-
-                if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200))
-                    return false;
-
-            /*
-             * Do token refresh or logout if it fails*/
-
-
 
             }
 
 
         </script>
+
     </body>
 </html>

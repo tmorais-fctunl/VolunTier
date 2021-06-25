@@ -50,7 +50,6 @@ header {
     height: 100%;
     overflow: auto;
     padding: 5px;
-    box-sizing: border-box;
 }
 
 .map-area {
