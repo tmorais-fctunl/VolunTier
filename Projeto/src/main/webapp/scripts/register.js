@@ -7,7 +7,7 @@ function register() {
         return false;
     }
 
-    var encryptedP = sha256(document.getElementById("password").value);
+    var encryptedP = sha512(document.getElementById("password").value);
     //var encryptedCP = sha256(document.getElementById("confirm_password").value);
     var ItemJSON;
     ItemJSON = '{"username": "' + document.getElementById("username").value + '", "password": "' + encryptedP + '", "email":"' + document.getElementById("email").value + '"}';

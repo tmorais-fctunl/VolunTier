@@ -1,7 +1,7 @@
 function login() {
     $('body').css('cursor', 'progress');
     var urlvariable = "/rest/login";
-    var encryptedP = sha256(document.getElementById("password").value);
+    var encryptedP = sha512(document.getElementById("password").value);
     var ItemJSON = '{"email": "' + document.getElementById("email").value + '", "password": "' + encryptedP + '"}';
     var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //LOGIN REST URL
     var xmlhttp = new XMLHttpRequest();

@@ -28,21 +28,11 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarToggler30">
-                <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link" href="index.html#About-section">About</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="index.html#Contacts-section">Contact</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="return logout()">Logout</a>
-                    </li>
-                </ul>
+                <ul class="navbar-nav mr-auto mt-2 mt-lg-0" id="appTab"></ul>
             </div>
             <a style="font-family: 'Alice', serif; font-size: 15px; color: #000000; letter-spacing: 1px; text-align: center;" id="user_tag"></a>
         </nav>
-        
+
         <div class="tab">
             <button class="tablinks" onclick="openTab(event, 'Map')" id="defaultOpen">Map</button>
             <button class="tablinks" onclick="openTab(event, 'Profile')">Profile</button>
@@ -82,7 +72,7 @@
         <footer class="bg-dark pt-5 text-white-50">
             <div class="container">
                 <div class="row">
-</div>
+                </div>
             </div>
         </footer>
         <script src="../assets/js/jquery.min.js"></script>
@@ -90,7 +80,7 @@
         <script src="../bootstrap/js/bootstrap.min.js"></script>
         <script src="../scripts/formLoader.js"></script>
         <!-- Hash function -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha512/0.8.0/sha512.min.js"></script>
         <script src="../scripts/login.js"></script>
         <script src="../scripts/register.js"></script>
         <script src="../scripts/login_ok_fields.js"></script>
@@ -106,16 +96,18 @@
 
 
             window.onload = function () {
-                loadContents();
+                // For debugging purposes: loadContents();
                 if (!tryAuthentication()) {
-
+                    loadContent("appTab", "../pages/contents/logoutTab.html");
                     //window.location = "../pages/index.html";
                     return false;
                 }
-
-                //loadContents();
+                loadContents();
+                loadContent("appTab", "../pages/contents/loggedTab.html");
 
                 
+
+
 
                 var urlvariable = "/rest/user";
                 var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //LookUp REST URL
@@ -139,6 +131,7 @@
                     //We need to wait fror the page to load before changing any fields.
                     complete: function () {
                         document.getElementById("profile_username").innerHTML = obj.username;
+                        document.getElementById("user_tag").innerHTML = obj.username;
                         document.getElementById("profile_fullname").innerHTML = obj.full_name;
                         document.getElementById("profile_visibility").innerHTML = obj.profile;
                         if (obj.region)
@@ -162,7 +155,7 @@
             }
         </script>
 
-      
+
 
         <script>
             function openTab(evt, tab) {
@@ -197,8 +190,9 @@
                 console.log("Now hiding save button and showing edit button");
                 //needs to send request to server to save new element values
                 //needs to turn the content editable off
-                saveInfo();
+                
                 turnContent(false);
+                saveInfo();
                 profileBtnSwap();
             }
 
@@ -229,7 +223,7 @@
                     console.log(profile);
                     var data = 'Profile visibility: <pan class="lock" style = "margin-left:10px" ></span>'
                     $('#profile_visibility').html(data);
-                    if (profile == "Public") {
+                    if (profile == "PUBLIC") {
                         $(".lock").toggleClass('unlocked');
                         profileVisibility = true;
                     }
@@ -243,7 +237,7 @@
                     console.log(prevRegion);
                     $.get("contents/profile_region_list.html", function (data) {
                         $('#profile_region_div').html(data);
-                       // alert("Load was performed.");
+                        // alert("Load was performed.");
                     });
                     if (prevRegion != "Country") {
                         $.ajax({
@@ -264,9 +258,9 @@
                     var profile = document.getElementById("profile_visibility");
                     var data;
                     if (profileVisibility)
-                        data = "Public";
+                        data = "PUBLIC";
                     else
-                        data = "Private";
+                        data = "PRIVATE";
 
                     $('#profile_visibility').html(data);
                     console.log(profileVisibility);
@@ -285,7 +279,7 @@
 
 
             function saveInfo() {
-                var urlvariable = "/rest/user";
+                var urlvariable = "/rest/update/profile";
                 var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //LookUp REST URL
                 var xmlhttp = new XMLHttpRequest();
                 xmlhttp.open("POST", URL, false);
@@ -294,26 +288,27 @@
 
                 var ItemJSON = '{"email": "' + userId +
                     '", "token": "' + token +
-                    '", "full_name": "' + document.getElementById("profile_fullname") +
-                    '", "profile": "' + document.getElementById("profile_visibility") +
-                    '", "landline": "' + document.getElementById("profile_landline") +
-                    '", "mobile": "' + document.getElementById("profile_mobile") +
-                    '", "address": "' + document.getElementById("profile_address") +
+                    '", "full_name": "' + document.getElementById("profile_fullname").innerHTML +
+                    '", "profile": "' + document.getElementById("profile_visibility").innerHTML +
+                    '", "landline": "' + document.getElementById("profile_landline").innerHTML +
+                    '", "mobile": "' + document.getElementById("profile_mobile").innerHTML +
+                    '", "address": "' + document.getElementById("profile_address").innerHTML +
                     //'", "address2": "' + address2 +
-                    '", "region": "' + document.getElementById("profile_region") +
-                    //'", "pc": "' + pc + 
-                    //'", "website": "' + website + 
-                    //'", "facebook": "' + facebook + 
-                    //'", "instagram": "' + instagram + 
-                    //'", "twitter": "' + twitter + 
+                    '", "region": "' + document.getElementById("profile_region").innerHTML +
+                    //'", "pc": "' + pc +
+                    //'", "website": "' + website +
+                    //'", "facebook": "' + facebook +
+                    //'", "instagram": "' + instagram +
+                    //'", "twitter": "' + twitter +
                     '"}';
+                console.log(ItemJSON);
                 xmlhttp.send(ItemJSON);
 
                 if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200))
                     return false;
 
-            /*
-             * Do token refresh or logout if it fails*/
+                /*
+                 * Do token refresh or logout if it fails*/
 
 
 
