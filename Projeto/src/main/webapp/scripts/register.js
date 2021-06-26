@@ -13,7 +13,7 @@ function register() {
     ItemJSON = '{"username": "' + document.getElementById("username").value + '", "password": "' + encryptedP + '", "email":"' + document.getElementById("email").value + '"}';
 
 
-    URL = "https://voluntier-312115.ew.r.appspot.com" + urlvariable;  //Your URL
+    URL = "https://voluntier-317915.appspot.com" + urlvariable;  //Your URL
 
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.open("POST", URL, false);

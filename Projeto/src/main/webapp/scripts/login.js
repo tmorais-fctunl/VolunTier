@@ -3,7 +3,7 @@ function login() {
     var urlvariable = "/rest/login";
     var encryptedP = sha256(document.getElementById("password").value);
     var ItemJSON = '{"email": "' + document.getElementById("email").value + '", "password": "' + encryptedP + '"}';
-    var URL = "https://voluntier-312115.ew.r.appspot.com" + urlvariable;  //LOGIN REST URL
+    var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //LOGIN REST URL
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.open("POST", URL, false);
     xmlhttp.setRequestHeader("Content-Type", "application/json");

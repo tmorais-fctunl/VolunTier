@@ -10,7 +10,7 @@ function changePwd() {
     var encryptedCP = sha256(document.getElementById("confirm_password").value);
     var urlvariable = "/rest/forgotpassword/change?t=" + token  ;
     var ItemJSON = '{"password": "' + encryptedP + '", "confirmation_password": "' + encryptedCP + '"}';
-    var URL = "https://voluntier-312115.ew.r.appspot.com" + urlvariable;  //CHANGE PWD REST URL
+    var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //CHANGE PWD REST URL
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.open("POST", URL, false);
     xmlhttp.setRequestHeader("Content-Type", "application/json");

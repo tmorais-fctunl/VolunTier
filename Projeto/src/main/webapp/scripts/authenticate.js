@@ -48,7 +48,7 @@ function tryAuthentication() {
 //Returns true if it successfuly refreshed token
 function refreshToken(userId, rtoken) {
     var urlvariable = "/rest/refresh";
-    var URL = "https://voluntier-312115.ew.r.appspot.com" + urlvariable;  //REFRESH REST URL
+    var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //REFRESH REST URL
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.open("POST", URL, false);
     xmlhttp.setRequestHeader("Content-Type", "application/json");
@@ -71,7 +71,7 @@ function refreshToken(userId, rtoken) {
 //Returns true if was successful to authenticate
 function authenticate(userId, token) {
     var urlvariable = "/rest/validate";
-    var URL = "https://voluntier-312115.ew.r.appspot.com" + urlvariable;  //VALIDATE REST URL
+    var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //VALIDATE REST URL
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.open("POST", URL, false);
     xmlhttp.setRequestHeader("Content-Type", "application/json");
