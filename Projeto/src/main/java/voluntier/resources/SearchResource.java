@@ -116,37 +116,23 @@ public class SearchResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response doSearch(@QueryParam("q") String query, SearchUserData data) {
 
-		if (!data.isValid() || !query.matches(UserData_Minimal.USERNAME_REGEX))
+		if (!data.isValid() || query == null)
 			return Response.status(Status.BAD_REQUEST).entity("Invalid").build();
 
-		Transaction txn = datastore.newTransaction();
 		try {
-
-			Key tokenKey = sessionFactory.newKey(data.token);
-			Entity token = txn.get(tokenKey);
-
 			// check if the token corresponds to the user received and hasnt expired yet
-			if (!TokensResource.isValidAccess(token, data.email)) {
-				txn.rollback();
+			if (!TokensResource.isValidAccess(data.token, data.email)) {
 				LOG.warning("Failed logout attempt by user: " + data.email);
 				return Response.status(Status.FORBIDDEN).entity("Token expired or invalid: " + data.email).build();
 			}
 
 			SearchData res = new SearchData(searchUser(query, data.cursor));
-			txn.rollback();
 
 			return Response.ok(json.toJson(res)).build();
 
 		} catch (Exception e) {
-			txn.rollback();
 			LOG.severe(e.getMessage());
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-
-		} finally {
-			if (txn.isActive()) {
-				txn.rollback();
-				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-			}
 		}
 	}
 

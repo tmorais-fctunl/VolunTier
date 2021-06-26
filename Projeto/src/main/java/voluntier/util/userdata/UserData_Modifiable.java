@@ -36,7 +36,7 @@ public class UserData_Modifiable extends UserData_Minimal{
 	}
 	
 	public static boolean passwordValid(String password) {
-		return (password != null && password.length() >= 8 && password.length() <= 64);
+		return (password != null && password.length() >= 8 && password.length() <= 128);
 	}
 	
 	boolean isValid() {

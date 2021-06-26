@@ -76,6 +76,13 @@ public class TokensResource {
 		return isValidAccess(token) && token.getString(ACCESS_EMAIL).equals(email);
 	}
 	
+	public static boolean isValidAccess(String tokenString, String email) {
+		Key tokenKey = sessionFactory.newKey(tokenString);
+		Entity token = datastore.get(tokenKey);
+		
+		return isValidAccess(token, email);
+	}
+	
 	public static boolean isValidRefresh(Entity token) {
 		return token != null && token.getLong(REFESH_EXPIRATION) > System.currentTimeMillis();
 	}

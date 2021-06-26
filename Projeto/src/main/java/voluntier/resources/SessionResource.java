@@ -45,33 +45,19 @@ public class SessionResource {
 		if(!data.isValid())
 			return Response.status(Status.BAD_REQUEST).build();
 
-		Transaction txn = datastore.newTransaction();
 		try {
-
-			Key tokenKey = sessionFactory.newKey(data.token);
-			Entity token = txn.get(tokenKey);
-
 			// check if the token corresponds to the user received and hasnt expired yet
-			if(!TokensResource.isValidAccess(token, data.email)) {
-				txn.rollback();
+			if(!TokensResource.isValidAccess(data.token, data.email)) {
 				LOG.warning("Failed logout attempt by user: " + data.email);
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 			
-			txn.rollback();
-			
 			return Response.status(Status.NO_CONTENT).build();
 
 		} catch(Exception e) {
-			txn.rollback();
 			LOG.severe(e.getMessage());
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 
-		} finally {
-			if(txn.isActive()) {
-				txn.rollback();
-				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-			}
 		}
 	}
 
