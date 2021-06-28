@@ -18,6 +18,7 @@ import voluntier.util.Argon2Util;
 import voluntier.util.AuthToken;
 import voluntier.util.consumes.LoginData;
 import voluntier.util.consumes.RequestData;
+import voluntier.util.produces.LoginReturn;
 import voluntier.util.userdata.DB_User;
 
 import com.google.cloud.datastore.*;
@@ -48,7 +49,7 @@ public class SessionResource {
 		try {
 			// check if the token corresponds to the user received and hasnt expired yet
 			if(!TokensResource.isValidAccess(data.token, data.email)) {
-				LOG.warning("Failed logout attempt by user: " + data.email);
+				LOG.warning("Failed validate attempt by user: " + data.email);
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 			
@@ -95,7 +96,7 @@ public class SessionResource {
 					txn.commit();
 
 					LOG.fine("Login by user: " + data.email);
-					return Response.ok(g.toJson(tokens.getValue2())).build();
+					return Response.ok(g.toJson(new LoginReturn(tokens.getValue2(), user.getString(DB_User.USERNAME)))).build();
 				}
 			}
 

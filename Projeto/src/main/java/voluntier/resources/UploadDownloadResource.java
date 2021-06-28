@@ -12,6 +12,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.HttpMethod;
@@ -19,9 +20,10 @@ import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
 import com.google.gson.Gson;
 import voluntier.util.consumes.RequestUploadDownloadData;
-import voluntier.util.produces.SignedURLReturn;
+import voluntier.util.produces.DownloadSignedURLReturn;
+import voluntier.util.produces.UploadSignedURLReturn;
 
-@Path("/user")
+@Path("/request")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class UploadDownloadResource {
 	private static final Logger LOG = Logger.getLogger(RegisterResource.class.getName());
@@ -51,8 +53,18 @@ public class UploadDownloadResource {
 
 			URL signedURL = storage.signUrl(blobInfo, 15, TimeUnit.MINUTES, Storage.SignUrlOption.httpMethod(method));
 
-			return Response.ok(json.toJson(new SignedURLReturn(signedURL))).build();
+			if (method == HttpMethod.PUT)
+				return Response.ok(json.toJson(new UploadSignedURLReturn(signedURL))).build();
+			else if (method == HttpMethod.GET) {
+				Blob obj = storage.get(blobId);
+				if (obj != null) {
+					long size = obj.getSize();
+					return Response.ok(json.toJson(new DownloadSignedURLReturn(signedURL, size))).build();
+				} else
+					return Response.status(Status.NOT_FOUND).build();
+			}
 
+			return Response.status(Status.BAD_REQUEST).build();
 		} catch (Exception e) {
 			LOG.severe(e.getMessage());
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
@@ -60,7 +72,7 @@ public class UploadDownloadResource {
 	}
 
 	@POST
-	@Path("/upload/request")
+	@Path("/upload")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response requestUploadSignedURL(RequestUploadDownloadData data) {
@@ -68,7 +80,7 @@ public class UploadDownloadResource {
 	}
 
 	@POST
-	@Path("/download/request")
+	@Path("/download")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response requestDownloadSignedURL(RequestUploadDownloadData data) {

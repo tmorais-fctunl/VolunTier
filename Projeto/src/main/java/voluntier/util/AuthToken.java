@@ -15,6 +15,15 @@ public class AuthToken {
 	
 	public AuthToken() {}
 	
+	public AuthToken(AuthToken other) {
+		this.email = other.email;
+		this.accessToken = other.accessToken;
+		this.refreshToken = other.refreshToken;
+		this.creationDate = other.creationDate;
+		this.expirationDate = other.expirationDate;
+		this.refresh_expirationDate = other.refresh_expirationDate;
+	}
+	
 	public AuthToken(String email) {
 		this.email = email;
 		this.accessToken = UUID.randomUUID().toString();

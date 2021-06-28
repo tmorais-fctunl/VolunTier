@@ -10,7 +10,6 @@ import voluntier.util.userdata.DB_User;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.javatuples.Pair;
 import org.javatuples.Triplet;
 
 public class SearchData {
