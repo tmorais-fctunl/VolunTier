@@ -46,7 +46,7 @@ public class EventResource {
 	@Path("/")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response addEvent(EventData data) {
+	public Response createEvent(EventData data) {
 		LOG.fine("Trying to add event to user: " + data.email);
 
 		// returns error if there is a bad request

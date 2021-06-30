@@ -21,12 +21,14 @@ public class SearchData {
 		public String full_name;
 		public String profile;
 		public String email;
+		public String pic_64;
 
-		public UserSearchData(String username, String full_name, String email, String profile) {
+		public UserSearchData(String username, String full_name, String email, String profile, String encodedPicture) {
 			this.username = username;
 			this.full_name = full_name;
 			this.profile = profile;
 			this.email = email;
+			this.pic_64 = encodedPicture;
 		}
 	}
 
@@ -36,8 +38,9 @@ public class SearchData {
 		List<Entity> entities = data.getValue0();
 		users = new LinkedList<>();
 		entities.forEach(entity -> {
+			String pic = entity.getString(DB_User.PROFILE_PICTURE_MINIATURE);
 			users.add(new UserSearchData(entity.getString(DB_User.USERNAME), entity.getString(DB_User.FULL_NAME),
-					entity.getString(DB_User.EMAIL), entity.getString(DB_User.PROFILE)));
+					entity.getString(DB_User.EMAIL), entity.getString(DB_User.PROFILE), pic.equals("") ? null : pic ));
 		});
 
 		results = data.getValue2().toString();

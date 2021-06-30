@@ -1,5 +1,6 @@
 package voluntier.resources;
 
+import java.net.URL;
 import java.util.logging.Logger;
 
 import javax.ws.rs.Consumes;
@@ -16,12 +17,16 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Transaction;
+import com.google.gson.Gson;
 
 import voluntier.util.Argon2Util;
+import voluntier.util.GoogleStorageUtil;
 import voluntier.util.consumes.RequestData;
 import voluntier.util.consumes.UpdateProfileData;
 import voluntier.util.consumes.UpdateRoleData;
 import voluntier.util.consumes.UpdateStateData;
+import voluntier.util.consumes.UploadImageData;
+import voluntier.util.produces.UploadSignedURLReturn;
 import voluntier.util.userdata.DB_User;
 import voluntier.util.userdata.State;
 
@@ -30,6 +35,8 @@ import voluntier.util.userdata.State;
 public class UpdateResource {
 
 	private static final Logger LOG = Logger.getLogger(UpdateResource.class.getName());
+
+	private final Gson json = new Gson();
 
 	private static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	private static KeyFactory usersFactory = datastore.newKeyFactory().setKind("User");
@@ -315,6 +322,45 @@ public class UpdateResource {
 			LOG.severe(e.getMessage());
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 
+		} finally {
+			if (txn.isActive()) {
+				txn.rollback();
+				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+			}
+		}
+	}
+	
+	@POST
+	@Path("/picture")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response doUpdateProfilePicture(UploadImageData data) {
+		if (!data.isValid())
+			return Response.status(Status.BAD_REQUEST).entity("Invalid").build();
+
+		Transaction txn = datastore.newTransaction();
+		try {
+			if (!TokensResource.isValidAccess(txn, data.token, data.email)) {
+				LOG.warning("Failed request to get a signed URL attempt by user: " + data.email);
+				return Response.status(Status.FORBIDDEN).entity("Token expired or invalid: " + data.email).build();
+			}
+			
+			Key userKey = usersFactory.newKey(data.email);
+			Entity user = txn.get(userKey);
+			String username = user.getString(DB_User.USERNAME);
+			
+			user = DB_User.changeProfilePicture(data.data, userKey, user);
+			
+			txn.put(user);
+			txn.commit();
+
+			URL signedURL = GoogleStorageUtil.signURLForUpload(DB_User.getProfilePictureFilename(username));
+
+			return Response.ok(json.toJson(new UploadSignedURLReturn(signedURL))).build();
+
+		} catch (Exception e) {
+			LOG.severe(e.getMessage());
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		} finally {
 			if (txn.isActive()) {
 				txn.rollback();

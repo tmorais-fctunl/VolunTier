@@ -10,16 +10,17 @@ public class UserData_AllProperties extends UserData_Modifiable {
 	private State state;
 	private Account account;
 
-	public UserData_AllProperties(){}
-	
-	public UserData_AllProperties(RegisterData data){
+	public UserData_AllProperties() {
+	}
+
+	public UserData_AllProperties(RegisterData data) {
 		super(data);
-		
+
 		this.setRole(Roles.USER);
 		this.setState(State.ENABLED);
 		this.setAccount(Account.ACTIVE);
 	}
-	
+
 	public UserData_AllProperties(Entity user) {
 		super(user);
 		this.role = Roles.valueOf(user.getString(DB_User.ROLE));
@@ -42,7 +43,7 @@ public class UserData_AllProperties extends UserData_Modifiable {
 	public void setState(State state) {
 		this.state = state;
 	}
-	
+
 	public Account getAccount() {
 		return account;
 	}
@@ -50,9 +51,24 @@ public class UserData_AllProperties extends UserData_Modifiable {
 	public void setAccount(Account account) {
 		this.account = account;
 	}
-	
+
+	public static boolean roleValid(String role) {
+		return role != null && (role.equals(Roles.USER.toString()) || role.equals(Roles.GBO.toString())
+				|| role.equals(Roles.GA.toString()) || role.equals(Roles.SU.toString()));
+	}
+
+	public static boolean stateValid(String state) {
+		return state != null && (state.equals(State.BANNED.toString()) || state.equals(State.ENABLED.toString()));
+	}
+
+	public static boolean accountValid(String account) {
+		return account != null
+				&& (account.equals(Account.ACTIVE.toString()) || account.equals(Account.REMOVED.toString()));
+	}
+
 	boolean isValid() {
-		return super.isValid();
+		return super.isValid() && roleValid(role.toString()) && stateValid(state.toString())
+				&& accountValid(account.toString());
 	}
 
 }

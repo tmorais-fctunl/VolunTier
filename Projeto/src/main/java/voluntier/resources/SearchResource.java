@@ -1,5 +1,6 @@
 package voluntier.resources;
 
+import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -7,6 +8,7 @@ import java.util.logging.Logger;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
@@ -32,8 +34,10 @@ import com.google.cloud.datastore.StructuredQuery.CompositeFilter;
 import com.google.cloud.datastore.StructuredQuery.Filter;
 import com.google.gson.Gson;
 
+import voluntier.util.GoogleStorageUtil;
 import voluntier.util.consumes.RequestData;
 import voluntier.util.consumes.SearchUserData;
+import voluntier.util.produces.GetPictureReturn;
 import voluntier.util.produces.SearchData;
 import voluntier.util.userdata.DB_User;
 import voluntier.util.userdata.UserData_Minimal;
@@ -50,6 +54,7 @@ public class SearchResource {
 	private static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	private static KeyFactory usersFactory = datastore.newKeyFactory().setKind("User");
 	private static KeyFactory sessionFactory = datastore.newKeyFactory().setKind("Session");
+	private static KeyFactory usernamesFactory = datastore.newKeyFactory().setKind("ID");
 
 	public SearchResource() {
 	}
@@ -136,13 +141,52 @@ public class SearchResource {
 		}
 	}
 
+	@POST
+	@Path("/picture/{username}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response doGetPicture(@PathParam("username") String username, RequestData data) {
+
+		if (!data.isValid() || !UserData_Minimal.usernameValid(username))
+			return Response.status(Status.BAD_REQUEST).entity("Invalid").build();
+
+		try {
+			if (!TokensResource.isValidAccess(data.token, data.email)) {
+				LOG.warning("Failed logout attempt by user: " + data.email);
+				return Response.status(Status.FORBIDDEN).entity("Token expired or invalid: " + data.email).build();
+			}
+
+			Key usernameKey = usernamesFactory.newKey(username);
+			Entity usernameEnt = datastore.get(usernameKey);
+
+			if (usernameEnt != null) {
+				Key emailKey = usersFactory.newKey(usernameEnt.getString(DB_User.EMAIL));
+				Entity emailEnt = datastore.get(emailKey);
+				String encodedMiniature = emailEnt.getString(DB_User.PROFILE_PICTURE_MINIATURE);
+				String GCS_filename = DB_User.getProfilePictureFilename(username);
+				URL signedURL = GoogleStorageUtil.signURLForDownload(GCS_filename);
+
+				return Response
+						.ok(json.toJson(
+								new GetPictureReturn(signedURL, encodedMiniature.equals("") ? null : encodedMiniature)))
+						.build();
+			}
+
+			return Response.status(Status.NOT_FOUND).build();
+
+		} catch (Exception e) {
+			LOG.severe(e.getMessage());
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
+	}
+
 	private static List<Entity> removeDuplicates(List<Entity> usernames, List<Entity> full_names) {
 		List<Entity> users = usernames;
 		full_names.forEach(user -> {
 			if (!users.contains(user))
 				users.add(user);
 		});
-		
+
 		return users;
 	}
 

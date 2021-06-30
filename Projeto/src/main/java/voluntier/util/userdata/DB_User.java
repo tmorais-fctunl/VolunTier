@@ -3,6 +3,7 @@ package voluntier.util.userdata;
 import com.google.cloud.datastore.Entity;
 
 import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.StringValue;
 
 import voluntier.util.consumes.RegisterData;
 import voluntier.util.consumes.UpdateProfileData;
@@ -31,6 +32,13 @@ public class DB_User {
 	public static final String FACEBOOK = "user_facebook";
 	public static final String INSTAGRAM = "user_instagram";
 	public static final String TWITTER = "user_twitter";
+	
+	public static final String PROFILE_PICTURE_MINIATURE = "profile_pic_100x100";
+	
+	public static final String EMAIL_REGEX = ".+@.+[.].+";
+	public static final String POSTAL_CODE_REGEX = "[0-9]{4}-[0-9]{3}";
+	public static final String MOBILE_REGEX = "([+]351\\s)?[789][0-9]{8}";
+	public static final String USERNAME_REGEX = "[a-zA-Z][a-zA-Z0-9]*([.][a-zA-Z0-9]+|[a-zA-Z0-9]*)";
 		
 	public static Entity changePassword(String new_password, Key userKey, Entity user) {
 		return Entity.newBuilder(userKey)
@@ -52,6 +60,9 @@ public class DB_User {
 				.set(FACEBOOK, user.getString(FACEBOOK))
 				.set(INSTAGRAM, user.getString(INSTAGRAM))
 				.set(TWITTER, user.getString(TWITTER))
+				.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(user.getString(PROFILE_PICTURE_MINIATURE))
+						.setExcludeFromIndexes(true)
+						.build())
 				.build();
 	}
 	
@@ -75,6 +86,9 @@ public class DB_User {
 				.set(FACEBOOK, user.getString(FACEBOOK))
 				.set(INSTAGRAM, user.getString(INSTAGRAM))
 				.set(TWITTER, user.getString(TWITTER))
+				.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(user.getString(PROFILE_PICTURE_MINIATURE))
+						.setExcludeFromIndexes(true)
+						.build())
 				.build();
 	}
 	
@@ -98,6 +112,9 @@ public class DB_User {
 				.set(FACEBOOK, user.getString(FACEBOOK))
 				.set(INSTAGRAM, user.getString(INSTAGRAM))
 				.set(TWITTER, user.getString(TWITTER))
+				.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(user.getString(PROFILE_PICTURE_MINIATURE))
+						.setExcludeFromIndexes(true)
+						.build())
 				.build();
 	}
 	
@@ -121,6 +138,9 @@ public class DB_User {
 				.set(FACEBOOK, data.getFacebook(user.getString(FACEBOOK)))
 				.set(INSTAGRAM, data.getInstagram(user.getString(INSTAGRAM)))
 				.set(TWITTER, data.getTwitter(user.getString(TWITTER)))
+				.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(user.getString(PROFILE_PICTURE_MINIATURE))
+						.setExcludeFromIndexes(true)
+						.build())
 				.build();
 	}
 	
@@ -144,6 +164,35 @@ public class DB_User {
 				.set(FACEBOOK, user.getString(FACEBOOK))
 				.set(INSTAGRAM, user.getString(INSTAGRAM))
 				.set(TWITTER, user.getString(TWITTER))
+				.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(user.getString(PROFILE_PICTURE_MINIATURE))
+						.setExcludeFromIndexes(true)
+						.build())
+				.build();
+	}
+	
+	public static Entity changeProfilePicture(String data, Key userKey, Entity user) {
+		return Entity.newBuilder(userKey)
+				.set(USERNAME, user.getString(USERNAME))
+				.set(EMAIL, user.getString(EMAIL))
+				.set(PASSWORD, user.getString(PASSWORD))
+				.set(FULL_NAME, user.getString(FULL_NAME))
+				.set(LANDLINE, user.getString(LANDLINE))
+				.set(MOBILE, user.getString(MOBILE))
+				.set(ADDRESS, user.getString(ADDRESS))
+				.set(ADDRESS2, user.getString(ADDRESS2))
+				.set(REGION, user.getString(REGION))
+				.set(POSTAL_CODE, user.getString(POSTAL_CODE))
+				.set(ACCOUNT, user.getString(ACCOUNT))
+				.set(ROLE, user.getString(ROLE))
+				.set(STATE, user.getString(STATE))
+				.set(PROFILE, user.getString(PROFILE))
+				.set(WEBSITE, user.getString(WEBSITE))
+				.set(FACEBOOK, user.getString(FACEBOOK))
+				.set(INSTAGRAM, user.getString(INSTAGRAM))
+				.set(TWITTER, user.getString(TWITTER))
+				.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(data)
+						.setExcludeFromIndexes(true)
+						.build())
 				.build();
 	}
 	
@@ -175,6 +224,13 @@ public class DB_User {
 				.set(FACEBOOK, data.facebook)
 				.set(INSTAGRAM, data.instagram)
 				.set(TWITTER, data.twitter)
+				.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(data.profile_pic)
+						.setExcludeFromIndexes(true)
+						.build())
 				.build();
+	}
+	
+	public static String getProfilePictureFilename(String username) {
+		return username + "_profile_picture";
 	}
 }

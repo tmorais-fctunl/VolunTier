@@ -7,6 +7,7 @@ import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
+import com.google.cloud.datastore.Transaction;
 
 import voluntier.util.AuthToken;
 
@@ -79,6 +80,13 @@ public class TokensResource {
 	public static boolean isValidAccess(String tokenString, String email) {
 		Key tokenKey = sessionFactory.newKey(tokenString);
 		Entity token = datastore.get(tokenKey);
+		
+		return isValidAccess(token, email);
+	}
+	
+	public static boolean isValidAccess(Transaction txn, String tokenString, String email) {
+		Key tokenKey = sessionFactory.newKey(tokenString);
+		Entity token = txn.get(tokenKey);
 		
 		return isValidAccess(token, email);
 	}

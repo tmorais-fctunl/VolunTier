@@ -8,11 +8,6 @@ import voluntier.util.consumes.RegisterData;
 
 public class UserData_Minimal {
 
-	public static final String EMAIL_REGEX = ".+@.+[.].+";
-	public static final String POSTAL_CODE_REGEX = "[0-9]{4}-[0-9]{3}";
-	public static final String MOBILE_REGEX = "([+]351\\s)?[789][0-9]{8}";
-	public static final String USERNAME_REGEX = "[a-zA-Z][a-zA-Z0-9]*([.][a-zA-Z0-9]+|[a-zA-Z0-9]*)";
-
 	public String username;
 	public String email;
 
@@ -68,55 +63,54 @@ public class UserData_Minimal {
 		this.facebook = user.getString(DB_User.FACEBOOK);
 		this.instagram = user.getString(DB_User.INSTAGRAM);
 		this.twitter = user.getString(DB_User.TWITTER);
-
 	}
 
 	public static boolean emailValid(String email) {
-		return (email != null && email.matches(EMAIL_REGEX));
+		return (email != null && email.matches(DB_User.EMAIL_REGEX));
 	}
 
-	public static boolean fullNameValid(String fullName) {
-		return fullName != null;
+	public static boolean fullNameValid(String full_name) {
+		return full_name != null && full_name.length() < 120;
 	}
 
 	public static boolean usernameValid(String username) {
-		return (username != null && username.length() > 4 && username.length() < 30 && username.matches(USERNAME_REGEX));
+		return (username != null && username.length() > 4 && username.length() < 30 && username.matches(DB_User.USERNAME_REGEX));
 	}
 	
 	public static boolean pcValid(String pc) {
-		return (pc != null && (pc.matches(POSTAL_CODE_REGEX) || pc.equals("")));
+		return (pc != null && (pc.matches(DB_User.POSTAL_CODE_REGEX) || pc.equals("")));
 	}
 
 	public static boolean mobileValid(String mobile) {
-		return (mobile != null && (mobile.matches(MOBILE_REGEX) || mobile.equals("")));
+		return (mobile != null && (mobile.matches(DB_User.MOBILE_REGEX) || mobile.equals("")));
 	}
 
 	public static boolean landlineValid(String landline) {
-		return (landline != null && (landline.matches(MOBILE_REGEX) || landline.equals("")));
+		return (landline != null && (landline.matches(DB_User.MOBILE_REGEX) || landline.equals("")));
 	}
 
 	public static boolean addressValid(String address) {
-		return (address != null && (address.length() > 5 || address.equals("")));
+		return (address != null && ((address.length() > 5 && address.length() < 120) || address.equals("")));
 	}
 
 	public static boolean regionValid(String region) {
-		return (region != null && (region.length() > 3 || region.equals("")));
+		return (region != null && ((region.length() > 3 && region.length() < 120) || region.equals("")));
 	}
 
 	public static boolean websiteValid(String website) {
-		return website != null;
+		return website != null && website.length() < 120;
 	}
 
 	public static boolean facebookValid(String facebook) {
-		return facebook != null;
+		return facebook != null && facebook.length() < 120;
 	}
 
 	public static boolean instagramValid(String instagram) {
-		return instagram != null;
+		return instagram != null && instagram.length() < 120;
 	}
 
 	public static boolean twitterValid(String twitter) {
-		return twitter != null;
+		return twitter != null && twitter.length() < 120;
 	}
 
 	public static boolean profileValid(String profile) {

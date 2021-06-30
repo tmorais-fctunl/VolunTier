@@ -1,6 +1,6 @@
 package voluntier.util.consumes;
 
-import voluntier.util.userdata.Roles;
+import voluntier.util.userdata.UserData_AllProperties;
 
 public class UpdateRoleData extends RequestData{
 	public String role;
@@ -12,10 +12,6 @@ public class UpdateRoleData extends RequestData{
 	}
 
 	public boolean isValid() {	
-		return super.isValid() && role != null 
-				&& (role.equals(Roles.USER.toString()) 
-						|| role.equals(Roles.GBO.toString())
-						|| role.equals(Roles.GA.toString())
-						|| role.equals(Roles.SU.toString()));
+		return super.isValid() && UserData_AllProperties.roleValid(role);
 	}
 }

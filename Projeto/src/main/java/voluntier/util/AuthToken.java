@@ -3,7 +3,7 @@ package voluntier.util;
 import java.util.UUID;
 public class AuthToken {
 
-	public static final long EXPIRATION_TIME = 1000*60*15; //15min
+	public static final long EXPIRATION_TIME = 1000*60*60; //1h
 	public static final long REFRESH_TOKEN_EXPIRATION_TIME = 1000*60*60*24*10; //10days
 	
 	public String email;
