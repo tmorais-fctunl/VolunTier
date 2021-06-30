@@ -33,7 +33,7 @@ public class DB_User {
 	public static final String INSTAGRAM = "user_instagram";
 	public static final String TWITTER = "user_twitter";
 	
-	public static final String PROFILE_PICTURE_MINIATURE = "profile_pic_100x100";
+	public static final String PROFILE_PICTURE_MINIATURE = "profile_pic_200x200";
 	
 	public static final String EMAIL_REGEX = ".+@.+[.].+";
 	public static final String POSTAL_CODE_REGEX = "[0-9]{4}-[0-9]{3}";

@@ -15,6 +15,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.javatuples.Pair;
 import org.javatuples.Triplet;
 
 import com.google.cloud.datastore.Cursor;
@@ -164,12 +165,10 @@ public class SearchResource {
 				Entity emailEnt = datastore.get(emailKey);
 				String encodedMiniature = emailEnt.getString(DB_User.PROFILE_PICTURE_MINIATURE);
 				String GCS_filename = DB_User.getProfilePictureFilename(username);
-				URL signedURL = GoogleStorageUtil.signURLForDownload(GCS_filename);
+				Pair<URL, Long> downloadData = GoogleStorageUtil.signURLForDownload(GCS_filename);
 
-				return Response
-						.ok(json.toJson(
-								new GetPictureReturn(signedURL, encodedMiniature.equals("") ? null : encodedMiniature)))
-						.build();
+				return Response.ok(json.toJson(new GetPictureReturn(downloadData.getValue0(), downloadData.getValue1(),
+						encodedMiniature.equals("") ? null : encodedMiniature))).build();
 			}
 
 			return Response.status(Status.NOT_FOUND).build();
