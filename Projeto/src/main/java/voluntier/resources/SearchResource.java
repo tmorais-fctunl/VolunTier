@@ -128,7 +128,7 @@ public class SearchResource {
 		try {
 			// check if the token corresponds to the user received and hasnt expired yet
 			if (!TokensResource.isValidAccess(data.token, data.email)) {
-				LOG.warning("Failed logout attempt by user: " + data.email);
+				LOG.warning("Failed search attempt by user: " + data.email);
 				return Response.status(Status.FORBIDDEN).entity("Token expired or invalid: " + data.email).build();
 			}
 

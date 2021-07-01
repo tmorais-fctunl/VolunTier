@@ -1,4 +1,4 @@
-package voluntier.util;
+package voluntier.util.consumes.event;
 
 import java.util.UUID;
 

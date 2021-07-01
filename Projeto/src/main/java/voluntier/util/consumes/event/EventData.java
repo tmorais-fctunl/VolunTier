@@ -1,6 +1,4 @@
-package voluntier.util.consumes;
-
-import voluntier.util.Event;
+package voluntier.util.consumes.event;
 
 public class EventData extends Event {
 	
