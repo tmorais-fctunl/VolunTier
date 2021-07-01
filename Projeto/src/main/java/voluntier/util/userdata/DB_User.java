@@ -37,7 +37,7 @@ public class DB_User {
 	
 	public static final String EMAIL_REGEX = ".+@.+[.].+";
 	public static final String POSTAL_CODE_REGEX = "[0-9]{4}-[0-9]{3}";
-	public static final String MOBILE_REGEX = "([+]351\\s)?[789][0-9]{8}";
+	public static final String MOBILE_REGEX = "([+][0-9]{2,3}\\s)?[2789][0-9]{8}";
 	public static final String USERNAME_REGEX = "[a-zA-Z][a-zA-Z0-9]*([.][a-zA-Z0-9]+|[a-zA-Z0-9]*)";
 		
 	public static Entity changePassword(String new_password, Key userKey, Entity user) {
