@@ -151,9 +151,10 @@ public class EventResource {
 			Entity event = txn.get(eventKey);
 
 			if ( event == null || !UpdateEventResource.isActive(event.getString(DB_Event.STATE)) 
-					|| !UpdateEventResource.isPublic(event.getString(DB_Event.PROFILE))) {
+					|| !UpdateEventResource.isPublic(event.getString(DB_Event.PROFILE))
+					|| !UpdateEventResource.isFull(event.getLong(DB_Event.CAPACITY), event.getLong(DB_Event.N_PARTICIPANTS) + 1)) {
 				txn.rollback();
-				LOG.warning("There is no event with the name " + data.event_name);
+				LOG.warning("There is no event with the name " + data.event_name + " or event is already full.");
 				return Response.status(Status.FORBIDDEN).build();
 			}
 			

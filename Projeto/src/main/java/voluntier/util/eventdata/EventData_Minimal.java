@@ -94,7 +94,7 @@ public class EventData_Minimal {
 	}
 	
 	public static boolean contactValid (String contact) {
-		return (contact != null && (contact.matches(DB_Event.MOBILE_REGEX) || contact.equals("")));
+		return (contact != null && (contact.matches(DB_Event.MOBILE_REGEX)));
 	}
 	
 	public static boolean capacityValid (long capacity) {

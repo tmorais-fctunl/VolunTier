@@ -3,6 +3,8 @@ package voluntier.util.consumes.event;
 import voluntier.util.consumes.RequestData;
 
 public class PostCommentData extends RequestData {
+	
+	private static final int DEFALUT_COMMENT_SIZE = 500;
 
 	public String username;
 	public String comment;
@@ -21,6 +23,6 @@ public class PostCommentData extends RequestData {
 	}
 	
 	public boolean isValid () {
-		return super.isValid() && username != null && comment != null;
+		return super.isValid() && username != null && comment != null && Integer.parseInt(comment) < DEFALUT_COMMENT_SIZE;
 	}
 }

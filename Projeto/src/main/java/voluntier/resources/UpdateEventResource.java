@@ -195,7 +195,7 @@ public class UpdateEventResource {
 	@POST
 	@Path("/profile")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response updateStateEvent (UpdateProfileData data) {
+	public Response updateProfileEvent (UpdateProfileData data) {
 		LOG.fine("Trying to update state of event " + data.event_name);
 		
 		if (!data.isValid())
@@ -275,6 +275,10 @@ public class UpdateEventResource {
 	
 	static boolean isPublic (String profile) {
 		return profile.equals(Profile.PUBLIC.toString());
+	}
+	
+	static boolean isFull (long capacity, long num_participants) {
+		return num_participants <= capacity;
 	}
 	
 
