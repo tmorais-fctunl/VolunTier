@@ -67,6 +67,7 @@ public class RegisterResource {
 
 				Key userKey = usersFactory.newKey(user_email);
 				Entity user = txn.get(userKey);
+				
 				if (user != null) {
 					txn.rollback();
 					return Response.status(Status.FORBIDDEN).entity("Email already in use: " + user_email).build();
@@ -75,6 +76,7 @@ public class RegisterResource {
 					String username = confirmation.getString("confirmation_username");
 					Key usernameKey = usernamesFactory.newKey(username);
 					Entity usernameEnt = txn.get(usernameKey);
+					
 					if(usernameEnt != null) {
 						txn.rollback();
 						return Response.status(Status.FORBIDDEN).entity("Username already in use: " + username).build();

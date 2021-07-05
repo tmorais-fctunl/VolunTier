@@ -1,17 +1,21 @@
 package voluntier.util.consumes.event;
 
-public class EventData extends Event {
+import voluntier.util.consumes.RequestData;
+
+public class EventData extends RequestData{
+
+	//public String username;
+	public String event_name;
 	
-	public String token;
+	public EventData () {
+	}
 	
-	public EventData() {}
-	
-	public EventData (String user_email, String token, String event_name, double[] latlng, String timestamp) {
-		super(user_email, event_name, latlng, timestamp);
-		this.token = token;
+	public EventData (String email, String token, String event_name) {
+		super(email, token);
+		this.event_name = event_name;
 	}
 	
 	public boolean isValid () {
-		return token!= null && super.isValid();
+		return super.isValid() && event_name != null;
 	}
 }

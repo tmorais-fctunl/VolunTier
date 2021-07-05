@@ -90,4 +90,5 @@ public class ActionsResource {
 
 		return (int) user_role.getLong(action.toString());
 	}
+
 }

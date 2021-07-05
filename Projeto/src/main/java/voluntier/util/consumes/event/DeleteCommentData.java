@@ -11,15 +11,15 @@ public class DeleteCommentData extends RequestData{
 	public DeleteCommentData() {
 	}
 	
-	public DeleteCommentData(String email, String token, String username, String event_name, String commment_number) {
+	public DeleteCommentData(String email, String token, String username, String event_name, int commment_number) {
 		super(email, token);
 		this.username = username;
 		this.event_name = event_name;
-		this.comment_number = Integer.parseInt(commment_number)-1;
+		this.comment_number = commment_number;
 	}
 	
 	public boolean isValid () {
-		return super.isValid() && username != null && event_name != null && comment_number >= 0;
+		return super.isValid() && username != null && event_name != null && comment_number > 0;
 	}
 	
 }

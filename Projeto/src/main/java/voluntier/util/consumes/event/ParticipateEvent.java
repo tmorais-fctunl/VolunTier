@@ -1,0 +1,17 @@
+package voluntier.util.consumes.event;
+
+import voluntier.util.consumes.RequestData;
+
+public class ParticipateEvent extends RequestData{
+
+	public ParticipateEvent () {
+	}
+	
+	public ParticipateEvent (String email, String token, String event_name) {
+		
+	}
+	
+}
+
+
+// OBSOLETO PARA JA
