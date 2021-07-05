@@ -1,28 +1,30 @@
 package voluntier.util.consumes.event;
 
-import voluntier.util.consumes.RequestData;
+import java.util.Random;
 
-public class PostCommentData extends RequestData {
+public class PostCommentData extends EventData {
 	
 	private static final int DEFALUT_COMMENT_SIZE = 500;
 
-	public String username;
 	public String comment;
-	public String event_name;
-	public String timestamp;
+	public String comment_id;
+	Random rand = new Random();
 	
 	public PostCommentData() {
 	}
 	
-	public PostCommentData (String email, String token, String username, String comment, String event_name, String timestamp) {
-		super(email, token);
-		this.username = username;
+	public PostCommentData (String email, String token, String event_id, String comment) {
+		super(email, token, event_id);
 		this.comment = comment;
-		this.event_name = event_name;
-		this.timestamp = timestamp;
+		this.comment_id = String.valueOf(rand.nextInt(1000));
+	}
+	
+	public String setId(int n_comment) {
+		this.comment_id = "Comment" + n_comment + rand.nextInt(10000);
+		return comment_id;
 	}
 	
 	public boolean isValid () {
-		return super.isValid() && username != null && comment != null && Integer.parseInt(comment) < DEFALUT_COMMENT_SIZE;
+		return super.isValid() && comment != null && comment.length() < DEFALUT_COMMENT_SIZE;
 	}
 }

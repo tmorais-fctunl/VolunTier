@@ -3,13 +3,13 @@ package voluntier.util.consumes.event;
 import com.google.cloud.Timestamp;
 import com.google.cloud.datastore.LatLng;
 
-import voluntier.util.consumes.RequestData;
 import voluntier.util.eventdata.EventData_Minimal;
 
 public class UpdateEventData extends EventData {
 	
 	public double[] location;
-	public String date;
+	public String start_date;
+	public String end_date;
 	
 	public String owner_email;
 	public String contact;
@@ -30,12 +30,13 @@ public class UpdateEventData extends EventData {
 	public UpdateEventData () {
 	}
 	
-	public UpdateEventData (String email, String token, String name, double[] location, String date, String owner_email, 
-			String contact, String description, String category, long capacity, 
-			String website, String facebook, String instagram,String twitter) {
-		super (email, token, name);
+	public UpdateEventData (String email, String token, String event_id, double[] location, String start_date, 
+			String end_date, String owner_email, String contact, String description, String category, 
+			long capacity, String website, String facebook, String instagram,String twitter) {
+		super (email, token, event_id);
 		this.location = location;
-		this.date = date;
+		this.start_date = start_date;
+		this.end_date = end_date;
 		this.owner_email = owner_email;
 		this.contact = contact;
 		this.description = description;
@@ -52,8 +53,12 @@ public class UpdateEventData extends EventData {
 		return location == null ? a_default : LatLng.of(location[0], location[1]);
 	}
 	
-	public Timestamp getDate (Timestamp a_default) {
-		return date == null ? a_default :  Timestamp.parseTimestamp(date);
+	public Timestamp getStartDate (Timestamp a_default) {
+		return start_date == null ? a_default :  Timestamp.parseTimestamp(start_date);
+	}
+	
+	public Timestamp getEndDate (Timestamp a_default) {
+		return end_date == null ?a_default : Timestamp.parseTimestamp(end_date);
 	}
 	
 	public String getOwnerEmail (String a_default) {
@@ -96,7 +101,8 @@ public class UpdateEventData extends EventData {
 		return super.isValid()
 				//&& (name == null || EventData_Minimal.nameValid(name))
 				&& (location == null || EventData_Minimal.locationValid(location))
-				&& (date == null || EventData_Minimal.dateValid(date))
+				&& (start_date == null || EventData_Minimal.startDateValid(start_date))
+				&& (end_date == null || EventData_Minimal.endDateValid(end_date))
 				&& (contact == null || EventData_Minimal.contactValid(contact))
 				&& (description == null || EventData_Minimal.descriptionValid(description))
 				&& (category == null || EventData_Minimal.categoryValid(category))

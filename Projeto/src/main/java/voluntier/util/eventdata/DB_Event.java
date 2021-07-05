@@ -22,8 +22,9 @@ public class DB_Event {
 	public static final String NAME = "event_name";
 	public static final String ID = "event_id";
 	public static final String LOCATION = "location";
-	public static final String DATE = "date";		//timestamp
-	//public static final String CREATION_DATE = "creation_date";
+	public static final String START_DATE = "start_date";		//timestamp
+	public static final String END_DATE = "end_date";
+	public static final String CREATION_DATE = "creation_date";
 
 	public static final String OWNER_EMAIL = "owner_email";
 	public static final String CONTACT = "contact";
@@ -53,11 +54,12 @@ public class DB_Event {
 				.set(NAME, event.getString(NAME))
 				.set(ID, event.getString(ID))
 				.set(LOCATION, data.getLocation(event.getLatLng(LOCATION)))
-				.set(DATE, data.getDate(event.getTimestamp(DATE)))
+				.set(START_DATE, data.getStartDate(event.getTimestamp(START_DATE)))
+				.set(END_DATE, data.getEndDate(event.getTimestamp(END_DATE)))
+				.set(CREATION_DATE, event.getTimestamp(CREATION_DATE))
 				.set(CHAT, event.getList(CHAT))
 				.set(PARTICIPANTS, event.getList(PARTICIPANTS))
 				.set(N_PARTICIPANTS, event.getLong(N_PARTICIPANTS))
-				//.set(CREATION_DATE, data.creation_date)
 				.set(OWNER_EMAIL, data.getOwnerEmail(event.getString(OWNER_EMAIL)))
 				.set(CONTACT, data.getContact(event.getString(CONTACT)))
 				.set(DESCRIPTION, data.getDescription(event.getString(DESCRIPTION)))
@@ -79,11 +81,12 @@ public class DB_Event {
 				.set(NAME, event.getString(NAME))
 				.set(ID, event.getString(ID))
 				.set(LOCATION, event.getLatLng(LOCATION))
-				.set(DATE, event.getTimestamp(DATE))
+				.set(START_DATE, event.getTimestamp(START_DATE))
+				.set(END_DATE, event.getTimestamp(END_DATE))
+				.set(CREATION_DATE, event.getTimestamp(CREATION_DATE))
 				.set(CHAT, event.getList(CHAT))
 				.set(PARTICIPANTS, event.getList(PARTICIPANTS))
 				.set(N_PARTICIPANTS, event.getLong(N_PARTICIPANTS))
-				//.set(CREATION_DATE, data.creation_date)
 				.set(OWNER_EMAIL, event.getString(OWNER_EMAIL))
 				.set(CONTACT, event.getString(CONTACT))
 				.set(DESCRIPTION, event.getString(DESCRIPTION))
@@ -105,11 +108,12 @@ public class DB_Event {
 				.set(NAME, event.getString(NAME))
 				.set(ID, event.getString(ID))
 				.set(LOCATION, event.getLatLng(LOCATION))
-				.set(DATE, event.getTimestamp(DATE))
+				.set(START_DATE, event.getTimestamp(START_DATE))
+				.set(END_DATE, event.getTimestamp(END_DATE))
+				.set(CREATION_DATE, event.getTimestamp(CREATION_DATE))
 				.set(CHAT, event.getList(CHAT))
 				.set(PARTICIPANTS, event.getList(PARTICIPANTS))
 				.set(N_PARTICIPANTS, event.getLong(N_PARTICIPANTS))
-				//.set(CREATION_DATE, data.creation_date)
 				.set(OWNER_EMAIL, event.getString(OWNER_EMAIL))
 				.set(CONTACT, event.getString(CONTACT))
 				.set(DESCRIPTION, event.getString(DESCRIPTION))
@@ -128,7 +132,6 @@ public class DB_Event {
 
 	public static Entity createNew (CreateEventData event_data, Key eventKey) {
 		EventData_Minimal data = new EventData_Minimal(event_data);
-		Timestamp event_date = Timestamp.parseTimestamp(data.date);
 		LatLng event_location = LatLng.of(data.location[0], data.location[1]);
 		ListValue.Builder chat = ListValue.newBuilder();
 		ListValue.Builder participants = ListValue.newBuilder();
@@ -137,11 +140,12 @@ public class DB_Event {
 				.set(NAME, data.name)
 				.set(ID, data.id)
 				.set(LOCATION, event_location)
-				.set(DATE, event_date)
+				.set(START_DATE, data.getStartDateTimestamp())
+				.set(END_DATE, data.getEndDateTimestamp())
+				.set(CREATION_DATE, Timestamp.now())
 				.set(CHAT, chat.build())
 				.set(PARTICIPANTS, participants.build())
 				.set(N_PARTICIPANTS, 1)
-				//.set(CREATION_DATE, data.creation_date)
 				.set(OWNER_EMAIL, data.owner_email)
 				.set(CONTACT, data.contact)
 				.set(DESCRIPTION, data.description)
@@ -161,27 +165,24 @@ public class DB_Event {
 				.build();
 	}
 
-	public static Entity postComment (Key eventKey, Entity event, EventReturn comment) {
-		List<Value<?>> chat = event.getList(DB_Event.CHAT);
-
-		ListValue.Builder newChat = ListValue.newBuilder().set(chat);
-
+	public static Entity postComment (Key eventKey, Entity event, EventReturn comment, ListValue.Builder newChat) {
 		newChat.addValue(g.toJson(comment));
 
 		return updateChat (eventKey, event, newChat.build());
 	}
 
-	public static Entity deleteComment (Key eventKey, Entity event, int index) {
+	public static Entity deleteComment (Key eventKey, Entity event, String comment_id) {
 		List<Value<?>> chat = event.getList(DB_Event.CHAT);
 
 		ListValue.Builder newChat = ListValue.newBuilder();
 
 		Iterator<Value<?>> it = chat.iterator();
-		int i = 0;
 
-		while (it.hasNext())
-			if (i++ != index)
-				newChat.addValue(it.next());
+		while (it.hasNext()) {
+			Value<?> comment = it.next();
+			if (!comment.toString().contains(comment_id))
+				newChat.addValue(comment);
+		}
 
 		return updateChat (eventKey, event, newChat.build());
 	}
@@ -203,11 +204,12 @@ public class DB_Event {
 				.set(NAME, event.getString(NAME))
 				.set(ID, event.getString(ID))
 				.set(LOCATION, event.getLatLng(LOCATION))
-				.set(DATE, event.getTimestamp(DATE))
+				.set(START_DATE, event.getTimestamp(START_DATE))
+				.set(END_DATE, event.getTimestamp(END_DATE))
+				.set(CREATION_DATE, event.getTimestamp(CREATION_DATE))
 				.set(CHAT, newChat)
 				.set(PARTICIPANTS, event.getList(PARTICIPANTS))
 				.set(N_PARTICIPANTS, event.getLong(N_PARTICIPANTS))
-				//.set(CREATION_DATE, data.creation_date)
 				.set(OWNER_EMAIL, event.getString(OWNER_EMAIL))
 				.set(CONTACT, event.getString(CONTACT))
 				.set(DESCRIPTION, event.getString(DESCRIPTION))
@@ -235,10 +237,11 @@ public class DB_Event {
 				.set(NAME, event.getString(NAME))
 				.set(ID, event.getString(ID))
 				.set(LOCATION, event.getLatLng(LOCATION))
-				.set(DATE, event.getTimestamp(DATE))
+				.set(START_DATE, event.getTimestamp(START_DATE))
+				.set(END_DATE, event.getTimestamp(END_DATE))
+				.set(CREATION_DATE, event.getTimestamp(CREATION_DATE))
 				.set(CHAT, event.getList(CHAT))
 				.set(PARTICIPANTS, newParticipants)
-				//.set(CREATION_DATE, data.creation_date)
 				.set(OWNER_EMAIL, event.getString(OWNER_EMAIL))
 				.set(CONTACT, event.getString(CONTACT))
 				.set(DESCRIPTION, event.getString(DESCRIPTION))

@@ -46,7 +46,7 @@ public class UpdateEventResource {
 	@Path("/attributes")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response updateAttributes (UpdateEventData data) {
-		LOG.fine("Attempt to change event " + data.event_name + " attributes.");
+		LOG.fine("Attempt to change event " + data.event_id + " attributes.");
 		
 		if (!data.isValid())
 			return Response.status(Status.BAD_REQUEST).build();
@@ -61,7 +61,7 @@ public class UpdateEventResource {
 			//o token tem de pertencer a quem faz o request
 			if (!TokensResource.isValidAccess(token, data.email)) {
 				txn.rollback();
-				LOG.warning("Failed request to change attributes of event " + data.event_name + " by user " + data.email);
+				LOG.warning("Failed request to change attributes of event " + data.event_id + " by user " + data.email);
 				return Response.status(Status.FORBIDDEN).entity("Invalid token").build();
 			}
 			
@@ -75,12 +75,12 @@ public class UpdateEventResource {
 				return Response.status(Status.FORBIDDEN).entity("Invalid user").build();
 			}
 			
-			Key eventKey = eventFactory.newKey(data.event_name);
+			Key eventKey = eventFactory.newKey(data.event_id);
 			Entity event = txn.get(eventKey);
 			
 			if (event == null) {
 				txn.rollback();
-				LOG.warning("Event named " + data.event_name + " does not exist.");
+				LOG.warning("Event named " + data.event_id + " does not exist.");
 				return Response.status(Status.BAD_REQUEST).entity("Invalid event").build();
 			} else {
 				String owner_email = event.getString(DB_Event.OWNER_EMAIL);
@@ -89,7 +89,7 @@ public class UpdateEventResource {
 				// se nao for owner, nao pode alterar nada. vamos querer adicionar mais condicoes eventualmente...
 				if ( !isOwner(data.email, owner_email) || !isActive(state) ) {
 					txn.rollback();
-					LOG.warning("User " + data.email + " can not change properties of event " + data.event_name + " or event does not exist");
+					LOG.warning("User " + data.email + " can not change properties of event " + data.event_id + " or event does not exist");
 					return Response.status(Status.FORBIDDEN).build();
 				}
 				
@@ -98,7 +98,7 @@ public class UpdateEventResource {
 				txn.put(event);
 				txn.commit();
 				
-				LOG.fine("User " + data.email  + " updated the attributes of event " + data.event_name);
+				LOG.fine("User " + data.email  + " updated the attributes of event " + data.event_id);
 				return Response.status(Status.NO_CONTENT).build();
 			}
 			
@@ -121,7 +121,7 @@ public class UpdateEventResource {
 	@Path("/remove")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response removeEvent (EventData data) {
-		LOG.fine("Trying to delete event " + data.event_name);
+		LOG.fine("Trying to delete event " + data.event_id);
 		
 		if (!data.isValid())
 			return Response.status(Status.BAD_REQUEST).build();
@@ -136,7 +136,7 @@ public class UpdateEventResource {
 			//o token tem de pertencer a quem faz o request
 			if (!TokensResource.isValidAccess(token, data.email)) {
 				txn.rollback();
-				LOG.warning("Failed request to delete event " + data.event_name + " by user " + data.email);
+				LOG.warning("Failed request to delete event " + data.event_id + " by user " + data.email);
 				return Response.status(Status.FORBIDDEN).entity("Invalid token").build();
 			}
 			
@@ -150,12 +150,12 @@ public class UpdateEventResource {
 				return Response.status(Status.FORBIDDEN).entity("Invalid user").build();
 			}
 			
-			Key eventKey = eventFactory.newKey(data.event_name);
+			Key eventKey = eventFactory.newKey(data.event_id);
 			Entity event = txn.get(eventKey);
 			
 			if (event == null) {
 				txn.rollback();
-				LOG.warning("Event named " + data.event_name + " does not exist.");
+				LOG.warning("Event named " + data.event_id + " does not exist.");
 				return Response.status(Status.BAD_REQUEST).entity("Invalid event").build();
 			} else {
 				String owner_email = event.getString(DB_Event.OWNER_EMAIL);
@@ -164,7 +164,7 @@ public class UpdateEventResource {
 				// se nao for owner, nao pode alterar nada. vamos querer adicionar mais condicoes eventualmente...
 				if ( !isOwner(data.email, owner_email) || !isActive(state)) {
 					txn.rollback();
-					LOG.warning("User " + data.email + " can not delete event " + data.event_name);
+					LOG.warning("User " + data.email + " can not delete event " + data.event_id);
 					return Response.status(Status.FORBIDDEN).build();
 				}
 				
@@ -173,7 +173,7 @@ public class UpdateEventResource {
 				txn.put(event);
 				txn.commit();
 				
-				LOG.fine("User " + data.email  + " deleted event " + data.event_name);
+				LOG.fine("User " + data.email  + " deleted event " + data.event_id);
 				return Response.status(Status.NO_CONTENT).build();
 			}
 			
@@ -196,7 +196,7 @@ public class UpdateEventResource {
 	@Path("/profile")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response updateProfileEvent (UpdateProfileData data) {
-		LOG.fine("Trying to update state of event " + data.event_name);
+		LOG.fine("Trying to update state of event " + data.event_id);
 		
 		if (!data.isValid())
 			return Response.status(Status.BAD_REQUEST).build();
@@ -211,7 +211,7 @@ public class UpdateEventResource {
 			//o token tem de pertencer a quem faz o request
 			if (!TokensResource.isValidAccess(token, data.email)) {
 				txn.rollback();
-				LOG.warning("Failed request to delete event " + data.event_name + " by user " + data.email);
+				LOG.warning("Failed request to delete event " + data.event_id + " by user " + data.email);
 				return Response.status(Status.FORBIDDEN).entity("Invalid token").build();
 			}
 			
@@ -225,12 +225,12 @@ public class UpdateEventResource {
 				return Response.status(Status.FORBIDDEN).entity("Invalid user").build();
 			}
 			
-			Key eventKey = eventFactory.newKey(data.event_name);
+			Key eventKey = eventFactory.newKey(data.event_id);
 			Entity event = txn.get(eventKey);
 			
 			if (event == null) {
 				txn.rollback();
-				LOG.warning("Event named " + data.event_name + " does not exist.");
+				LOG.warning("Event named " + data.event_id + " does not exist.");
 				return Response.status(Status.BAD_REQUEST).entity("Invalid event").build();
 			} else {
 				String owner_email = event.getString(DB_Event.OWNER_EMAIL);
@@ -239,7 +239,7 @@ public class UpdateEventResource {
 				// se nao for owner, nao pode alterar nada. vamos querer adicionar mais condicoes eventualmente...
 				if ( !isOwner(data.email, owner_email) || !isActive(state)) {
 					txn.rollback();
-					LOG.warning("User " + data.email + " can not update state of event " + data.event_name);
+					LOG.warning("User " + data.email + " can not update profile of event " + data.event_id);
 					return Response.status(Status.FORBIDDEN).build();
 				}
 				
@@ -248,7 +248,7 @@ public class UpdateEventResource {
 				txn.put(event);
 				txn.commit();
 				
-				LOG.fine("User " + data.email  + " deleted event " + data.event_name);
+				LOG.fine("User " + data.email  + " deleted event " + data.event_id);
 				return Response.status(Status.NO_CONTENT).build();
 			}
 			

@@ -1,5 +1,9 @@
 package voluntier.util.eventdata;
 
+import java.time.format.DateTimeParseException;
+
+import com.google.cloud.Timestamp;
+
 import voluntier.util.consumes.event.CreateEventData;
 import voluntier.util.userdata.Profile;
 import voluntier.util.userdata.State;
@@ -14,7 +18,8 @@ public class EventData_Minimal {
 	public String name;
 	public String id;
 	public double[] location;
-	public String date;
+	public String start_date;
+	public String end_date;
 	
 	public String owner_email;
 	public String contact;
@@ -42,7 +47,8 @@ public class EventData_Minimal {
 		name = data.event_name;
 		id = data.event_id;
 		location = data.location;
-		date = data.date;
+		start_date = data.start_date;
+		end_date = data.end_date;
 		owner_email = data.email;
 		
 		contact = "";
@@ -55,6 +61,14 @@ public class EventData_Minimal {
 		facebook = "";
 		instagram = "";
 		twitter = "";
+	}
+	
+	public Timestamp getStartDateTimestamp () {
+		return Timestamp.parseTimestamp(start_date);
+	}
+	
+	public Timestamp getEndDateTimestamp () {
+		return Timestamp.parseTimestamp(end_date);
 	}
 	
 	public State getState() {
@@ -81,8 +95,24 @@ public class EventData_Minimal {
 		return location != null;
 	}
 	
-	public static boolean dateValid (String date) {
-		return date != null;
+	public static boolean startDateValid (String start_date) {
+		try {
+			Timestamp.parseTimestamp(start_date);
+			return true;
+		} catch (DateTimeParseException e) {
+			return false;
+		}
+		
+	}
+	
+	public static boolean endDateValid (String end_date) {
+		try {
+			Timestamp.parseTimestamp(end_date);
+			return true;
+		} catch (DateTimeParseException e) {
+			return false;
+		}
+		
 	}
 	
 	public static boolean descriptionValid (String description) {
@@ -126,7 +156,8 @@ public class EventData_Minimal {
 	}
 
 	boolean isValid() {
-		return nameValid(name) && locationValid(location) && dateValid(date) && descriptionValid(description)
+		return nameValid(name) && locationValid(location) && startDateValid(start_date) 
+				&& endDateValid(end_date) && descriptionValid(description)
 				&& categoryValid(category) && contactValid(contact) && websiteValid(website) 
 				&& facebookValid(facebook) && instagramValid(instagram) && twitterValid(twitter);
 	}

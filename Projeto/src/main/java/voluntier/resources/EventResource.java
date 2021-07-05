@@ -11,11 +11,13 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import com.google.cloud.Timestamp;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
+import com.google.cloud.datastore.ListValue;
 import com.google.cloud.datastore.Transaction;
 import com.google.cloud.datastore.Value;
 import com.google.gson.Gson;
@@ -55,11 +57,12 @@ public class EventResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response createEvent(CreateEventData data) {
+		LOG.severe("1");
 		LOG.fine("Trying to add event to user: " + data.email);
 
 		// returns error if there is a bad request
 		if (!data.isValid())
-			return Response.status(Status.BAD_REQUEST).build();
+			return Response.status(Status.BAD_GATEWAY).build();
 
 		Transaction txn = datastore.newTransaction();
 
@@ -84,8 +87,8 @@ public class EventResource {
 				LOG.warning("User:" + user.getString(DB_User.EMAIL) + " cannot do this operation.");
 				return Response.status(Status.FORBIDDEN).build();
 			} else {
-				
-				Key eventKey = eventFactory.newKey(data.event_name);
+				data.generateID();
+				Key eventKey = eventFactory.newKey(data.event_id);
 				Entity event = txn.get(eventKey);
 
 				if (event != null) {
@@ -100,7 +103,7 @@ public class EventResource {
 				txn.commit();
 
 				LOG.fine("Event: " + data.event_name + " inserted correctly.");
-				return Response.ok(g.toJson(data)).build();
+				return Response.ok(g.toJson(data.event_id)).build();
 			}
 
 		} catch (Exception e) {
@@ -119,7 +122,7 @@ public class EventResource {
 	@Path("/participateEvent")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response participateEvent (EventData data) {
-		LOG.fine("User " + data.email + "trying to participate in event " + data.event_name);
+		LOG.fine("User " + data.email + "trying to participate in event " + data.event_id);
 		
 		if (!data.isValid())
 			return Response.status(Status.BAD_REQUEST).build();
@@ -147,14 +150,14 @@ public class EventResource {
 				return Response.status(Status.FORBIDDEN).entity("Session expired or invalid: " + data.email).build();
 			}
 
-			Key eventKey = eventFactory.newKey(data.event_name);
+			Key eventKey = eventFactory.newKey(data.event_id);
 			Entity event = txn.get(eventKey);
 
 			if ( event == null || !UpdateEventResource.isActive(event.getString(DB_Event.STATE)) 
 					|| !UpdateEventResource.isPublic(event.getString(DB_Event.PROFILE))
 					|| !UpdateEventResource.isFull(event.getLong(DB_Event.CAPACITY), event.getLong(DB_Event.N_PARTICIPANTS) + 1)) {
 				txn.rollback();
-				LOG.warning("There is no event with the name " + data.event_name + " or event is already full.");
+				LOG.warning("There is no event with the name " + data.event_id + " or event is already full.");
 				return Response.status(Status.FORBIDDEN).build();
 			}
 			
@@ -183,7 +186,7 @@ public class EventResource {
 	@Path("/postComment")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response addMessage (PostCommentData data) {
-		LOG.fine("Trying to add comment to event: " + data.event_name);
+		LOG.fine("Trying to add comment to event: " + data.event_id);
 
 		// returns error if there is a bad request
 		if (!data.isValid())
@@ -212,24 +215,30 @@ public class EventResource {
 				return Response.status(Status.FORBIDDEN).entity("Session expired or invalid: " + data.email).build();
 			}
 
-			Key eventKey = eventFactory.newKey(data.event_name);
+			Key eventKey = eventFactory.newKey(data.event_id);
 			Entity event = txn.get(eventKey);
 
 			if (event == null || UpdateEventResource.isActive(event.getString(DB_Event.PROFILE)) ) {
 				txn.rollback();
-				LOG.warning("There is no event with the name " + data.event_name);
+				LOG.warning("There is no event with the name " + data.event_id);
 				return Response.status(Status.BAD_REQUEST).build();
 			}
 			
-			EventReturn comment = new EventReturn (data.email, data.comment, data.timestamp);
+			EventReturn comment = new EventReturn (data.email, data.comment, Timestamp.now().toString());
 			
-			event = DB_Event.postComment(eventKey, event, comment);
+			List<Value<?>> chat = event.getList(DB_Event.CHAT);
+
+			ListValue.Builder newChat = ListValue.newBuilder().set(chat);
+			
+			comment.setCommentID(data.setId(chat.size()));
+			
+			event = DB_Event.postComment(eventKey, event, comment, newChat);
 			
 			txn.put(event);
 			txn.commit();
 
 			LOG.fine("Comment inserted correctly.");
-			return Response.status(Status.NO_CONTENT).build();
+			return Response.ok(g.toJson(data.comment_id)).build();
 
 		} catch (Exception e) {
 			txn.rollback();
@@ -248,7 +257,7 @@ public class EventResource {
 	@Path("/deleteComment")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response deleteMessage (DeleteCommentData data) {
-		LOG.fine("Trying to delete comment from event: " + data.event_name);
+		LOG.fine("Trying to delete comment from event: " + data.event_id);
 
 		// returns error if there is a bad request
 		if (!data.isValid())
@@ -268,16 +277,16 @@ public class EventResource {
 				return Response.status(Status.FORBIDDEN).entity("Token expired or invalid: " + data.email).build();
 			}
 
-			Key eventKey = eventFactory.newKey(data.event_name);
+			Key eventKey = eventFactory.newKey(data.event_id);
 			Entity event = txn.get(eventKey);
 
 			if (event == null) {
 				txn.rollback();
-				LOG.warning("There is no event with the name " + data.event_name);
+				LOG.warning("There is no event with the name " + data.event_id);
 				return Response.status(Status.BAD_REQUEST).build();
 			}
 
-			event = DB_Event.deleteComment(eventKey, event, data.comment_number-1);
+			event = DB_Event.deleteComment(eventKey, event, data.comment_id);
 			
 			txn.put(event);
 			txn.commit();
@@ -301,7 +310,7 @@ public class EventResource {
 	@Path("/getEventChat")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getChat (EventData data) {
-		LOG.fine("Trying to get chat from event: " + data.event_name);
+		LOG.fine("Trying to get chat from event: " + data.event_id);
 
 		// returns error if there is a bad request
 		if (!data.isValid())
@@ -319,12 +328,12 @@ public class EventResource {
 			return Response.status(Status.FORBIDDEN).entity("Token expired or invalid: " + data.email).build();
 		}
 
-		Key eventKey = eventFactory.newKey(data.event_name);
+		Key eventKey = eventFactory.newKey(data.event_id);
 		Entity event = txn.get(eventKey);
 
 		if (event == null) {
 			txn.rollback();
-			LOG.warning("There is no event with the name " + data.event_name);
+			LOG.warning("There is no event with the name " + data.event_id);
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 

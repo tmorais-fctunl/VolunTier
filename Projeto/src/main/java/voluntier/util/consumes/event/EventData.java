@@ -5,17 +5,17 @@ import voluntier.util.consumes.RequestData;
 public class EventData extends RequestData{
 
 	//public String username;
-	public String event_name;
+	public String event_id;
 	
 	public EventData () {
 	}
 	
-	public EventData (String email, String token, String event_name) {
+	public EventData (String email, String token, String event_id) {
 		super(email, token);
-		this.event_name = event_name;
+		this.event_id = event_id;
 	}
 	
 	public boolean isValid () {
-		return super.isValid() && event_name != null;
+		return super.isValid() && event_id != null;
 	}
 }
