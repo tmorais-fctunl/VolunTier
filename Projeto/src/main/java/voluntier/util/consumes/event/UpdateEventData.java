@@ -1,6 +1,5 @@
 package voluntier.util.consumes.event;
 
-import com.google.cloud.Timestamp;
 import com.google.cloud.datastore.LatLng;
 
 import voluntier.util.eventdata.EventData_Minimal;
@@ -53,12 +52,12 @@ public class UpdateEventData extends EventData {
 		return location == null ? a_default : LatLng.of(location[0], location[1]);
 	}
 	
-	public Timestamp getStartDate (Timestamp a_default) {
-		return start_date == null ? a_default :  Timestamp.parseTimestamp(start_date);
+	public String getStartDate (String a_default) {
+		return start_date == null ? a_default :  start_date;
 	}
 	
-	public Timestamp getEndDate (Timestamp a_default) {
-		return end_date == null ?a_default : Timestamp.parseTimestamp(end_date);
+	public String getEndDate (String a_default) {
+		return end_date == null ? a_default : end_date;
 	}
 	
 	public String getOwnerEmail (String a_default) {

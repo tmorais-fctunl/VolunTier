@@ -1,8 +1,6 @@
 package voluntier.util;
 
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.javatuples.Pair;

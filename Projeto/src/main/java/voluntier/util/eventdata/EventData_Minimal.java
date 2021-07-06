@@ -29,8 +29,7 @@ public class EventData_Minimal {
 	public String description;
 	public String category;
 	public long capacity;
-	//public int number_participants;
-	//public String creation_date;
+	public String creation_date;
 	
 	public String website;
 	public String facebook;
@@ -55,20 +54,12 @@ public class EventData_Minimal {
 		description = "";
 		category = "";
 		capacity = DEFAUL_CAPACITY;
-		//this.creation_date = System.currentTimeMillis();
+		creation_date = Timestamp.now().toString();
 		
 		website = "";
 		facebook = "";
 		instagram = "";
 		twitter = "";
-	}
-	
-	public Timestamp getStartDateTimestamp () {
-		return Timestamp.parseTimestamp(start_date);
-	}
-	
-	public Timestamp getEndDateTimestamp () {
-		return Timestamp.parseTimestamp(end_date);
 	}
 	
 	public State getState() {
