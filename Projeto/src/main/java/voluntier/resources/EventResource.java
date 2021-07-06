@@ -32,8 +32,7 @@ import voluntier.util.consumes.event.UpdateCommentData;
 import voluntier.util.eventdata.DB_Event;
 import voluntier.util.produces.ChatReturn;
 import voluntier.util.produces.EventDataReturn;
-
-//import static com.google.datastore.v1.client.DatastoreHelper.makeValue;
+import voluntier.util.produces.EventParticipantsReturn;
 
 import voluntier.util.userdata.*;
 
@@ -47,11 +46,6 @@ public class EventResource {
 	private static KeyFactory sessionFactory = datastore.newKeyFactory().setKind("Session");
 	private static KeyFactory eventFactory = datastore.newKeyFactory().setKind("Event");
 
-	// private static KeyFactory chatFactory =
-	// datastore.newKeyFactory().setKind("Chat");
-	// private static KeyFactory confirmationFactory =
-	// datastore.newKeyFactory().setKind("Confirmation");
-
 	public EventResource() {
 	}
 
@@ -63,7 +57,6 @@ public class EventResource {
 		LOG.severe("1");
 		LOG.fine("Trying to add event to user: " + data.email);
 
-		// returns error if there is a bad request
 		if (!data.isValid())
 			return Response.status(Status.BAD_GATEWAY).build();
 
@@ -74,7 +67,6 @@ public class EventResource {
 			Key tokenKey = sessionFactory.newKey(data.token);
 			Entity token = txn.get(tokenKey);
 
-			// check if the token corresponds to the user received and hasn't expired yet
 			if (!TokensResource.isValidAccess(token, data.email)) {
 				txn.rollback();
 				LOG.warning("Failed event creation attempt by user: " + data.email);
@@ -84,8 +76,7 @@ public class EventResource {
 			Key userKey = usersFactory.newKey(data.email);
 			Entity user = txn.get(userKey);
 
-			if (user == null || /* user.getString(DB_User.ACCOUNT).equals(Account.REMOVED.toString()) */
-					ActionsResource.isRemovedOrBannedUser(user)) {
+			if (user == null || ActionsResource.isRemovedOrBannedUser(user)) {
 				txn.rollback();
 				LOG.warning("User:" + user.getString(DB_User.EMAIL) + " cannot do this operation.");
 				return Response.status(Status.FORBIDDEN).build();
@@ -100,7 +91,7 @@ public class EventResource {
 					return Response.status(Status.FORBIDDEN).build();
 				}
 
-				event = DB_Event.createNew(data, eventKey);
+				event = DB_Event.createNew(data, eventKey, data.email);
 
 				txn.put(event);
 				txn.commit();
@@ -422,6 +413,37 @@ public class EventResource {
 			}
 
 			return Response.ok(JsonUtil.json.toJson(new EventDataReturn(event))).build();
+		} catch (Exception e) {
+			LOG.severe(e.getMessage());
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
+	}
+	
+	@POST
+	@Path("/getParticipants")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response getParticipants(EventData data) {
+		LOG.fine("Trying to get event participants: " + data.event_id);
+
+		if (!data.isValid())
+			return Response.status(Status.BAD_REQUEST).build();
+
+		try {
+			if (!TokensResource.isValidAccess(data.token, data.email)) {
+				LOG.warning("Failed retrieve event participants attempt by user: " + data.email);
+				return Response.status(Status.FORBIDDEN).entity("Token expired or invalid: " + data.email).build();
+			}
+
+			Key eventKey = eventFactory.newKey(data.event_id);
+			Entity event = datastore.get(eventKey);
+
+			if (event == null) {
+				LOG.warning("There is no event with the name " + data.event_id);
+				return Response.status(Status.BAD_REQUEST).build();
+			}
+
+			return Response.ok(JsonUtil.json.toJson(new EventParticipantsReturn(event))).build();
 		} catch (Exception e) {
 			LOG.severe(e.getMessage());
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();

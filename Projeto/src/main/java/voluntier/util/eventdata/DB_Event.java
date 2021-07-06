@@ -134,11 +134,12 @@ public class DB_Event {
 				.build();
 	}
 
-	public static Entity createNew (CreateEventData event_data, Key eventKey) {
+	public static Entity createNew (CreateEventData event_data, Key eventKey, String user_email) {
 		EventData_Minimal data = new EventData_Minimal(event_data);
 		LatLng event_location = LatLng.of(data.location[0], data.location[1]);
 		ListValue.Builder chat = ListValue.newBuilder();
 		ListValue.Builder participants = ListValue.newBuilder();
+		participants.addValue(user_email);
 
 		return Entity.newBuilder(eventKey)
 				.set(NAME, data.name)
