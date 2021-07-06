@@ -17,10 +17,10 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Transaction;
-import com.google.gson.Gson;
 
 import voluntier.util.Argon2Util;
 import voluntier.util.GoogleStorageUtil;
+import voluntier.util.JsonUtil;
 import voluntier.util.consumes.RequestData;
 import voluntier.util.consumes.UpdateProfileData;
 import voluntier.util.consumes.UpdateRoleData;
@@ -35,8 +35,6 @@ import voluntier.util.userdata.State;
 public class UpdateResource {
 
 	private static final Logger LOG = Logger.getLogger(UpdateResource.class.getName());
-
-	private final Gson json = new Gson();
 
 	private static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	private static KeyFactory usersFactory = datastore.newKeyFactory().setKind("User");
@@ -356,7 +354,7 @@ public class UpdateResource {
 
 			URL signedURL = GoogleStorageUtil.signURLForUpload(DB_User.getProfilePictureFilename(username));
 
-			return Response.ok(json.toJson(new UploadSignedURLReturn(signedURL))).build();
+			return Response.ok(JsonUtil.json.toJson(new UploadSignedURLReturn(signedURL))).build();
 
 		} catch (Exception e) {
 			LOG.severe(e.getMessage());

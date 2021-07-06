@@ -23,7 +23,8 @@ import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.HttpMethod;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
-import com.google.gson.Gson;
+
+import voluntier.util.JsonUtil;
 import voluntier.util.consumes.RequestUploadDownloadData;
 import voluntier.util.consumes.UploadImageData;
 import voluntier.util.produces.DownloadSignedURLReturn;
@@ -33,8 +34,6 @@ import voluntier.util.produces.UploadSignedURLReturn;
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class UploadDownloadResource {
 	private static final Logger LOG = Logger.getLogger(RegisterResource.class.getName());
-
-	private final Gson json = new Gson();
 
 	private static Storage storage = StorageOptions.getDefaultInstance().getService();
 
@@ -131,7 +130,7 @@ public class UploadDownloadResource {
 			URL signedURL = storage.signUrl(blobInfo, 15, TimeUnit.MINUTES,
 					Storage.SignUrlOption.httpMethod(HttpMethod.PUT), Storage.SignUrlOption.withExtHeaders(extHeaders));
 
-			return Response.ok(json.toJson(new UploadSignedURLReturn(signedURL))).build();
+			return Response.ok(JsonUtil.json.toJson(new UploadSignedURLReturn(signedURL))).build();
 
 		} catch (Exception e) {
 			LOG.severe(e.getMessage());
@@ -165,7 +164,7 @@ public class UploadDownloadResource {
 			Blob obj = storage.get(blobId);
 			if (obj != null) {
 				long size = obj.getSize();
-				return Response.ok(json.toJson(new DownloadSignedURLReturn(signedURL, size))).build();
+				return Response.ok(JsonUtil.json.toJson(new DownloadSignedURLReturn(signedURL, size))).build();
 			} else
 				return Response.status(Status.NOT_FOUND).build();
 

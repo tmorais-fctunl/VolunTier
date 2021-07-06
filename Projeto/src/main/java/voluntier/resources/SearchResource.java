@@ -33,9 +33,9 @@ import com.google.datastore.v1.QueryResultBatch;
 import com.google.datastore.v1.QueryResultBatch.MoreResultsType;
 import com.google.cloud.datastore.StructuredQuery.CompositeFilter;
 import com.google.cloud.datastore.StructuredQuery.Filter;
-import com.google.gson.Gson;
 
 import voluntier.util.GoogleStorageUtil;
+import voluntier.util.JsonUtil;
 import voluntier.util.consumes.RequestData;
 import voluntier.util.consumes.SearchUserData;
 import voluntier.util.produces.GetPictureReturn;
@@ -49,8 +49,6 @@ public class SearchResource {
 	private static final Logger LOG = Logger.getLogger(RegisterResource.class.getName());
 
 	private static final int SEARCH_RESULTS_LIMIT = 2;
-
-	private final Gson json = new Gson();
 
 	private static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	private static KeyFactory usersFactory = datastore.newKeyFactory().setKind("User");
@@ -98,7 +96,7 @@ public class SearchResource {
 					} else {
 						UserData_Minimal user_data = new UserData_Minimal(tg_user);
 						txn.rollback();
-						return Response.ok(json.toJson(user_data)).build();
+						return Response.ok(JsonUtil.json.toJson(user_data)).build();
 					}
 				}
 			}
@@ -134,7 +132,7 @@ public class SearchResource {
 
 			SearchData res = new SearchData(searchUser(query, data.cursor));
 
-			return Response.ok(json.toJson(res)).build();
+			return Response.ok(JsonUtil.json.toJson(res)).build();
 
 		} catch (Exception e) {
 			LOG.severe(e.getMessage());
@@ -167,7 +165,7 @@ public class SearchResource {
 				String GCS_filename = DB_User.getProfilePictureFilename(username);
 				Pair<URL, Long> downloadData = GoogleStorageUtil.signURLForDownload(GCS_filename);
 
-				return Response.ok(json.toJson(new GetPictureReturn(downloadData.getValue0(), downloadData.getValue1(),
+				return Response.ok(JsonUtil.json.toJson(new GetPictureReturn(downloadData.getValue0(), downloadData.getValue1(),
 						encodedMiniature.equals("") ? null : encodedMiniature))).build();
 			}
 

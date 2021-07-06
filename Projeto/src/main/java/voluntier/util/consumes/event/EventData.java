@@ -4,7 +4,6 @@ import voluntier.util.consumes.RequestData;
 
 public class EventData extends RequestData{
 
-	//public String username;
 	public String event_id;
 	
 	public EventData () {

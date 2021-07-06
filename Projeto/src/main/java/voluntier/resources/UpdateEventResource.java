@@ -14,7 +14,6 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Transaction;
-//import com.google.gson.Gson;
 
 import voluntier.util.consumes.event.EventData;
 import voluntier.util.consumes.event.UpdateEventData;
@@ -31,8 +30,6 @@ import javax.ws.rs.core.Response.Status;
 public class UpdateEventResource {
 	
 	private static final Logger LOG = Logger.getLogger(UpdateResource.class.getName());
-
-	//private final Gson json = new Gson();
 
 	private static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	private static KeyFactory usersFactory = datastore.newKeyFactory().setKind("User");

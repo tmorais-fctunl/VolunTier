@@ -9,15 +9,13 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.LatLng;
 import com.google.cloud.datastore.ListValue;
 import com.google.cloud.datastore.Value;
-import com.google.gson.Gson;
 
+import voluntier.util.JsonUtil;
 import voluntier.util.consumes.event.CreateEventData;
 import voluntier.util.consumes.event.UpdateEventData;
 import voluntier.util.produces.EventReturn;
 
 public class DB_Event {
-
-	private static final Gson g = new Gson();
 
 	public static final String NAME = "event_name";
 	public static final String ID = "event_id";
@@ -166,7 +164,7 @@ public class DB_Event {
 	}
 
 	public static Entity postComment (Key eventKey, Entity event, EventReturn comment, ListValue.Builder newChat) {
-		newChat.addValue(g.toJson(comment));
+		newChat.addValue(JsonUtil.json.toJson(comment));
 
 		return updateChat (eventKey, event, newChat.build());
 	}

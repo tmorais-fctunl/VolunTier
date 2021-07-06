@@ -12,10 +12,9 @@ import javax.ws.rs.core.Response.Status;
 
 import org.javatuples.Triplet;
 
-import com.google.gson.Gson;
-
 import voluntier.util.Argon2Util;
 import voluntier.util.AuthToken;
+import voluntier.util.JsonUtil;
 import voluntier.util.consumes.LoginData;
 import voluntier.util.consumes.RequestData;
 import voluntier.util.produces.LoginReturn;
@@ -28,8 +27,6 @@ import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class SessionResource {
 	private static final Logger LOG = Logger.getLogger(SessionResource.class.getName());
-
-	private final Gson g = new Gson();
 
 	private static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	private static KeyFactory usersFactory = datastore.newKeyFactory().setKind("User");
@@ -96,7 +93,7 @@ public class SessionResource {
 					txn.commit();
 
 					LOG.fine("Login by user: " + data.email);
-					return Response.ok(g.toJson(new LoginReturn(tokens.getValue2(), user.getString(DB_User.USERNAME)))).build();
+					return Response.ok(JsonUtil.json.toJson(new LoginReturn(tokens.getValue2(), user.getString(DB_User.USERNAME)))).build();
 				}
 			}
 
@@ -186,7 +183,7 @@ public class SessionResource {
 			txn.commit();
 
 			LOG.fine("Refreshed session by user: " + data.email);
-			return Response.ok(g.toJson(tokens.getValue2())).build();
+			return Response.ok(JsonUtil.json.toJson(tokens.getValue2())).build();
 		} catch(Exception e) {
 			txn.rollback();
 			LOG.severe(e.getMessage());
