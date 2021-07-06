@@ -2,6 +2,9 @@ package voluntier.util.eventdata;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
+
+import org.javatuples.Pair;
 
 import com.google.cloud.Timestamp;
 import com.google.cloud.datastore.Entity;
@@ -10,10 +13,11 @@ import com.google.cloud.datastore.LatLng;
 import com.google.cloud.datastore.ListValue;
 import com.google.cloud.datastore.Value;
 
+import voluntier.exceptions.ImpossibleActionException;
+import voluntier.exceptions.InexistentCommentIdException;
 import voluntier.util.JsonUtil;
 import voluntier.util.consumes.event.CreateEventData;
 import voluntier.util.consumes.event.UpdateEventData;
-import voluntier.util.produces.EventReturn;
 
 public class DB_Event {
 
@@ -45,6 +49,8 @@ public class DB_Event {
 	public static final String PROFILE = "event_profile";
 
 	public static final String MOBILE_REGEX = "([+][0-9]{2,3}\\s)?[2789][0-9]{8}";
+	
+	public static final int DEFALUT_COMMENT_SIZE = 500;
 
 
 	public static Entity updateProperty (UpdateEventData data, Key eventKey, Entity event) {
@@ -163,10 +169,24 @@ public class DB_Event {
 				.build();
 	}
 
-	public static Entity postComment (Key eventKey, Entity event, EventReturn comment, ListValue.Builder newChat) {
-		newChat.addValue(JsonUtil.json.toJson(comment));
+	public static Pair<Entity, String> postComment (Key eventKey, Entity event, String email, String comment) {
+		List<Value<?>> chat = event.getList(DB_Event.CHAT);
 
-		return updateChat (eventKey, event, newChat.build());
+		ListValue.Builder newChat = ListValue.newBuilder().set(chat);
+		
+		String comment_id = setId(chat.size());
+		
+		CommentData comment_data = new CommentData(email, comment, Timestamp.now(), comment_id);
+		
+		newChat.addValue(JsonUtil.json.toJson(comment_data));
+
+		return new Pair<Entity, String>(updateChat (eventKey, event, newChat.build()), comment_id);
+	}
+	
+	private static String setId(int n_comment) {
+		Random rand = new Random ();
+		String comment_id = "Comment" + n_comment + rand.nextInt(10000);
+		return comment_id;
 	}
 
 	public static Entity deleteComment (Key eventKey, Entity event, String comment_id) {
@@ -183,6 +203,39 @@ public class DB_Event {
 		}
 
 		return updateChat (eventKey, event, newChat.build());
+	}
+	
+	public static Entity updateComment (Key eventKey, Entity event, String comment_id, String user_email, String comment_content) 
+			throws ImpossibleActionException, InexistentCommentIdException {
+		List<Value<?>> chat = event.getList(DB_Event.CHAT);
+		
+		ListValue.Builder newChat = ListValue.newBuilder();
+		
+		Iterator<Value<?>> it = chat.iterator();
+		boolean changed = false;
+		
+		while (it.hasNext()) {
+			Value<?> comment = it.next();
+			CommentData comment_data = JsonUtil.json.fromJson(comment.toString(), CommentData.class);
+			
+			if (!comment_id.equals(comment_data.comment_id)) 
+				newChat.addValue(comment);
+
+			else {
+				if (comment_data.email.equals(user_email)) {
+					comment_data.comment = comment_content;
+					newChat.addValue(JsonUtil.json.toJson(comment_data));
+					changed = true;
+				}
+				else 
+					throw new ImpossibleActionException(user_email + "can't update this comment.");
+			}
+			
+		}
+		if (!changed)
+			throw new InexistentCommentIdException("There is no such comment as " + comment_id + "." );
+		
+		return updateChat(eventKey, event, newChat.build());
 	}
 
 	public static Entity addParticipant (Key eventKey, Entity event, String user_email) {

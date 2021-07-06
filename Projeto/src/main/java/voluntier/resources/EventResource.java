@@ -11,24 +11,26 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import com.google.cloud.Timestamp;
+import org.javatuples.Pair;
+
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
-import com.google.cloud.datastore.ListValue;
 import com.google.cloud.datastore.Transaction;
 import com.google.cloud.datastore.Value;
 
 import voluntier.util.consumes.event.DeleteCommentData;
+import voluntier.exceptions.ImpossibleActionException;
+import voluntier.exceptions.InexistentCommentIdException;
 import voluntier.util.JsonUtil;
 import voluntier.util.consumes.event.CreateEventData;
 import voluntier.util.consumes.event.EventData;
 import voluntier.util.consumes.event.PostCommentData;
+import voluntier.util.consumes.event.UpdateCommentData;
 import voluntier.util.eventdata.DB_Event;
 import voluntier.util.produces.ChatReturn;
-import voluntier.util.produces.EventReturn;
 
 //import static com.google.datastore.v1.client.DatastoreHelper.makeValue;
 
@@ -155,9 +157,9 @@ public class EventResource {
 
 			if (event == null || !UpdateEventResource.isActive(event.getString(DB_Event.STATE))
 					|| !UpdateEventResource.isPublic(event.getString(DB_Event.PROFILE)) || !UpdateEventResource
-							.isFull(event.getLong(DB_Event.CAPACITY), event.getLong(DB_Event.N_PARTICIPANTS) + 1)) {
+					.isFull(event.getLong(DB_Event.CAPACITY), event.getLong(DB_Event.N_PARTICIPANTS) + 1)) {
 				txn.rollback();
-				LOG.warning("There is no event with the name " + data.event_id + " or event is already full.");
+				LOG.warning("There is no event with the name " + data.event_id + " or event is already full or it is a private event.");
 				return Response.status(Status.FORBIDDEN).build();
 			}
 
@@ -224,21 +226,13 @@ public class EventResource {
 				return Response.status(Status.BAD_REQUEST).build();
 			}
 
-			EventReturn comment = new EventReturn(data.email, data.comment, Timestamp.now().toString());
+			Pair<Entity, String> recieved_data = DB_Event.postComment(eventKey, event, data.comment, data.email);
 
-			List<Value<?>> chat = event.getList(DB_Event.CHAT);
-
-			ListValue.Builder newChat = ListValue.newBuilder().set(chat);
-
-			comment.setCommentID(data.setId(chat.size()));
-
-			event = DB_Event.postComment(eventKey, event, comment, newChat);
-
-			txn.put(event);
+			txn.put(recieved_data.getValue0());
 			txn.commit();
 
 			LOG.fine("Comment inserted correctly.");
-			return Response.ok(JsonUtil.json.toJson(data.comment_id)).build();
+			return Response.ok(JsonUtil.json.toJson(recieved_data.getValue1())).build();
 
 		} catch (Exception e) {
 			txn.rollback();
@@ -292,6 +286,63 @@ public class EventResource {
 			txn.commit();
 
 			LOG.fine("Comment deleted correctly.");
+			return Response.status(Status.NO_CONTENT).build();
+
+		} catch (Exception e) {
+			txn.rollback();
+			LOG.severe(e.getMessage());
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		} finally {
+			if (txn.isActive()) {
+				txn.rollback();
+				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+			}
+		}
+	}
+
+	@POST
+	@Path("/updateComment")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response updateMessage (UpdateCommentData data) {
+		LOG.fine("Trying to update comment from event: " + data.event_id);
+
+		// returns error if there is a bad request
+		if (!data.isValid())
+			return Response.status(Status.BAD_REQUEST).build();
+
+		Transaction txn = datastore.newTransaction();
+
+		try {
+
+			Key tokenKey = sessionFactory.newKey(data.token);
+			Entity token = txn.get(tokenKey);
+
+			// check if the token corresponds to the user received and hasn't expired yet
+			if (!TokensResource.isValidAccess(token, data.email)) {
+				txn.rollback();
+				LOG.warning("Failed update comment attempt by user: " + data.email);
+				return Response.status(Status.FORBIDDEN).entity("Token expired or invalid: " + data.email).build();
+			}
+
+			Key eventKey = eventFactory.newKey(data.event_id);
+			Entity event = txn.get(eventKey);
+
+			if (event == null) {
+				txn.rollback();
+				LOG.warning("There is no event with the name " + data.event_id);
+				return Response.status(Status.BAD_REQUEST).build();
+			}
+
+			try {
+				event = DB_Event.updateComment(eventKey, event, data.comment_id, data.email, data.comment);
+			} catch (ImpossibleActionException | InexistentCommentIdException e) {
+				return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
+			}
+
+			txn.put(event);
+			txn.commit();
+
+			LOG.fine("Comment updated correctly.");
 			return Response.status(Status.NO_CONTENT).build();
 
 		} catch (Exception e) {

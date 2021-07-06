@@ -4,7 +4,7 @@ import com.google.cloud.Timestamp;
 
 public class CommentData {
 	
-	public String username;
+	public String email;
 	public String comment;
 	public Timestamp timestamp;
 	public String comment_id;
@@ -12,8 +12,8 @@ public class CommentData {
 	public CommentData() {
 	}
 	
-	public CommentData (String username, String comment, Timestamp timestamp, String comment_id) {
-		this.username = username;
+	public CommentData (String email, String comment, Timestamp timestamp, String comment_id) {
+		this.email = email;
 		this.comment = comment;
 		this.timestamp = timestamp;
 		this.comment_id = comment_id;
