@@ -53,7 +53,6 @@ public class DB_Event {
 	
 	public static final int DEFALUT_COMMENT_SIZE = 500;
 
-
 	public static Entity updateProperty (UpdateEventData data, Key eventKey, Entity event) {
 		return Entity.newBuilder(eventKey)
 				.set(NAME, event.getString(NAME))

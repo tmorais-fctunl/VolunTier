@@ -9,7 +9,7 @@ public class EventDataReturn {
 	public String profile;
 	
 	public String name;
-	public String id;
+	public String event_id;
 	public LatLng location;
 	public String start_date;
 	public String end_date;
@@ -36,7 +36,7 @@ public class EventDataReturn {
 		
 		this.profile = event.getString(DB_Event.PROFILE);
 		this.name = event.getString(DB_Event.NAME);
-		this.id = event.getString(DB_Event.ID);
+		this.event_id = event.getString(DB_Event.ID);
 		this.location = event.getLatLng(DB_Event.LOCATION);
 		this.start_date = event.getString(DB_Event.START_DATE);
 		this.end_date = event.getString(DB_Event.END_DATE);
