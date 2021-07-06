@@ -111,7 +111,13 @@ public class EventData_Minimal {
 	}
 	
 	public static boolean categoryValid (String category) {
-		return category != null && category.length() < 30;	//posteriormente, ideia será ter categorias pre definidas...
+		if (category == null)
+			return false;
+		Category[] all = Category.values();
+		for (Category enum_category: all)
+			if (category.equals(enum_category.toString()))
+				return true;
+		return false;
 	}
 	
 	public static boolean contactValid (String contact) {
