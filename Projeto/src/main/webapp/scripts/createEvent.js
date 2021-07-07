@@ -39,13 +39,15 @@ function createEventRequest() {
   if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
     const obj = JSON.parse(xmlhttp.responseText);
     alert("Create event: SUCCESS. Id: "+obj.event_id);
-    $.get("contents/eventCreatedSuccess.html", function (data) {
-        $('#sidebar_content').html(data);
-    });
-    $.ajax({
-        //We need to wait fror the page to load before changing any fields.
-        complete: function () {
-            document.getElementById("successId").innerHTML = "Event successfuly created under ID: "+obj.event_id;
+
+    jQuery.ajax({
+        url: "../pages/contents/eventCreatedSuccess.html",
+        success: function (data) {
+            $('#sidebar_content').html(data);
+        },
+        async: false,
+        complete: function() {
+          document.getElementById("successId").innerHTML = "Event successfuly created under ID: "+obj.event_id;
         }
     });
 
