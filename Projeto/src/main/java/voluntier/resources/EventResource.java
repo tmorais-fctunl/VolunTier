@@ -55,7 +55,6 @@ public class EventResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response createEvent(CreateEventData data) {
-		LOG.severe("1");
 		LOG.fine("Trying to add event to user: " + data.email);
 
 		if (!data.isValid())
