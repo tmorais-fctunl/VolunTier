@@ -31,9 +31,10 @@ import voluntier.util.consumes.event.PostCommentData;
 import voluntier.util.consumes.event.UpdateCommentData;
 import voluntier.util.eventdata.DB_Event;
 import voluntier.util.produces.ChatReturn;
+import voluntier.util.produces.CreateEventReturn;
 import voluntier.util.produces.EventDataReturn;
 import voluntier.util.produces.EventParticipantsReturn;
-
+import voluntier.util.produces.PostCommentReturn;
 import voluntier.util.userdata.*;
 
 @Path("/")
@@ -97,7 +98,7 @@ public class EventResource {
 				txn.commit();
 
 				LOG.fine("Event: " + data.event_name + " inserted correctly.");
-				return Response.ok(JsonUtil.json.toJson(data.event_id)).build();
+				return Response.ok(JsonUtil.json.toJson(new CreateEventReturn(data.event_id))).build();
 			}
 
 		} catch (Exception e) {
@@ -223,7 +224,7 @@ public class EventResource {
 			txn.commit();
 
 			LOG.fine("Comment inserted correctly.");
-			return Response.ok(JsonUtil.json.toJson(recieved_data.getValue1())).build();
+			return Response.ok(JsonUtil.json.toJson(new PostCommentReturn(recieved_data.getValue1()))).build();
 
 		} catch (Exception e) {
 			txn.rollback();
