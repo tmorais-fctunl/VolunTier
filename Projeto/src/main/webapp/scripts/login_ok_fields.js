@@ -5,6 +5,7 @@ function updateLoginInputs() {
 			else $('#loginButton').prop("disabled", true);
    		});
 	});
+	initiateRememberMe();
 }
 
 function allFilled() {
@@ -24,5 +25,3 @@ function showPassword() {
 	}
 }
 updateLoginInputs();
-
-

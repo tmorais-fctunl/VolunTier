@@ -13,7 +13,6 @@
         <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
         <!--<link href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" rel="stylesheet">-->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="../scripts/loadMap.js"></script>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Alfa+Slab+One&display=swap">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Alice&display=swap">
         <link rel="stylesheet" href="../css/blocks.css">
@@ -33,6 +32,7 @@
             </div>
             <a style="font-family: 'Alice', serif; font-size: 15px; color: #000000; letter-spacing: 1px; text-align: center;" id="user_tag"></a>
         </nav>
+
         <div class="tab">
             <button class="tablinks" onclick="openTab(event, 'Map')" id="defaultOpen">Map</button>
             <button class="tablinks" onclick="openTab(event, 'Profile')">Profile</button>
@@ -41,26 +41,20 @@
         </div>
         <!-- Tab contents-->
         <div id="Map" class="tabcontent">
-            <!--  <span onclick="this.parentElement.style.display='none'" class="topright">&times</span>-->
+          <!--  <span onclick="this.parentElement.style.display='none'" class="topright">&times</span>-->
             <main class="app">
                 <aside class="sidebar" style="background-color:white;">
-                    <div id="sidebar_content">
-                            <h3>This right here is your panel.</h1>
-                            <br>
-                            <p> Your panel will display event details, event creation form and other tools that are in development</p>
-                            <br>
-                            <p style="display: inline"> Right now, you can click the "Create Event" button in the bottom right to open up the Create Event Form.
-                              In the future, we want to allow you to click events already marked on your map and display their information here.
-                              We also want to have a feed of events, which can make it easier for you to check them out without needlessly clicking through all of them.
-                              More tools may be developed as our project and ideas grow. </p>
-
-                    </div>
+                  <div id="sidebar_content">
+                    
+                    <ul>
+                        <li>This right here is your panel</li>
+                        <li>(In development)</li>
+                    </ul>
+                  </div>
                 </aside>
                 <section class="map-area " id="map">
                     <!-- Async script executes immediately and must be after any DOM elements used in callback. -->
-                    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCxgVR80ZfBsHQjmUlAJVsHrEZRP4Irk50&callback=initMap&libraries=places&v=weekly" async></script>
-
-
+                    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCxgVR80ZfBsHQjmUlAJVsHrEZRP4Irk50&callback=initMap&libraries=&v=weekly" async></script>
                 </section>
             </main>
         </div>
@@ -78,10 +72,11 @@
             <h3>EmptyTab2</h3>
             <p>Nothing but void.</p>
         </div>
+
         <footer class="bg-dark pt-5 text-white-50">
             <div class="container">
                 <div class="row">
-</div>
+                </div>
             </div>
         </footer>
         <script src="../assets/js/jquery.min.js"></script>
@@ -90,12 +85,12 @@
         <script src="../scripts/formLoader.js"></script>
         <!-- Hash function -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha512/0.8.0/sha512.min.js"></script>
-      <!--  <script src="../scripts/login.js"></script>-->
-      <!--  <script src="../scripts/register.js"></script>-->
-      <!--  <script src="../scripts/login_ok_fields.js"></script>-->
-        <!--  <script src="../scripts/register_ok_fields.js"></script>-->
+        <script src="../scripts/login.js"></script>
+        <script src="../scripts/register.js"></script>
+        <script src="../scripts/login_ok_fields.js"></script>
+        <script src="../scripts/register_ok_fields.js"></script>
         <script src="../scripts/authenticate.js"></script>
-
+        <script src="../scripts/loadMap.js"></script>
         <script src="../scripts/logout.js"></script>
         <script src="../scripts/csi.min.js"></script>
         <!-- Gotta put this in a separate file-->
@@ -103,6 +98,5 @@
         <script src="../scripts/AppLoading.js"></script>
         <script src="../scripts/tabLoader.js"></script>
         <script src="../scripts/profileEditer.js"></script>
-        <script src="../scripts/createEvent.js"></script>
     </body>
 </html>

@@ -97,4 +97,3 @@ function clearLoggedInfo() {
     localStorage.removeItem("jwt_creation_date", creationDate)
     localStorage.removeItem("jwt_expiration_date", expirationDate)
     localStorage.removeItem("jwrt_expiration_date", refresh_expirationDate)
-}

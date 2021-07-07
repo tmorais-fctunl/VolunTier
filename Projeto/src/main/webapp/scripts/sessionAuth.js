@@ -1,3 +1,5 @@
+//Not in use
+/*
 window.onload = function onLoad() {
 
     //Check if there's any data that implies a signed in user
@@ -9,7 +11,7 @@ window.onload = function onLoad() {
         if (authenticated) {
             console.log("validated user");
             /*document.getElementById("introductionID").innerHTML =
-                '<h3 class="u-align-center u-custom-font u-font-georgia u-text u-text-1">Logged in! ' + localStorage.getItem("user_id") + '</h3>';*/
+                '<h3 class="u-align-center u-custom-font u-font-georgia u-text u-text-1">Logged in! ' + localStorage.getItem("user_id") + '</h3>';/
             window.location = "Map.html"
             // return;
         }
@@ -31,7 +33,7 @@ window.onload = function onLoad() {
             if (refreshToken(localStorage.getItem("email"), localStorage.getItem("jwrt"))) {
                 console.log("jwrt refreshed and validated");
                 /* document.getElementById("introductionID").innerHTML =
-                     '<h3 class="u-align-center u-custom-font u-font-georgia u-text u-text-1">Logged in! ' + localStorage.getItem("user_id") + '</h3>';*/
+                     '<h3 class="u-align-center u-custom-font u-font-georgia u-text u-text-1">Logged in! ' + localStorage.getItem("user_id") + '</h3>';/
                 window.location = "Map.html"
                 //return;
             }
@@ -97,3 +99,4 @@ function clearLoggedInfo() {
     localStorage.removeItem("jwt_expiration_date");
     localStorage.removeItem("jwrt_expiration_date");
 }
+*/

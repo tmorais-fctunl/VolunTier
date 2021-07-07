@@ -1,5 +1,5 @@
 function login() {
-    $('body').css('cursor', 'progress');
+    $('body').addClass('waiting');
     var urlvariable = "/rest/login";
     var encryptedP = sha512(document.getElementById("password").value);
     var ItemJSON = '{"email": "' + document.getElementById("email").value + '", "password": "' + encryptedP + '"}';
@@ -19,17 +19,23 @@ function login() {
         localStorage.setItem("jwt_expiration_date", obj.expirationDate)
         localStorage.setItem("jwrt_expiration_date", obj.refresh_expirationDate)
 
-        var timer = setTimeout(function () {
-            $('body').css('cursor', 'default');
-            document.getElementById("result").innerHTML = "Login successful";
-            window.location = "../pages/App.html";
-            return false;
-        }, 2000);
 
+            $('body').removeClass('waiting');
+            document.getElementById("result").innerHTML = "Login successful";
+            console.log("Login successful");
+            $.ajax({
+                //We need to wait fror the page to load before changing any fields.
+                complete: function () {
+                  window.location = "../pages/App.html";
+                  return false;
+                }
+            });
+          /*  window.location = "../pages/App.html";
+            return false;*/
 
     }
     else {
-        $('body').css('cursor', 'default');
+        $('body').removeClass('waiting');
         switch (xmlhttp.status) {
             case 403:
                 document.getElementById("result").innerHTML = "Login unsuccessful";
@@ -41,7 +47,7 @@ function login() {
                 document.getElementById("result").innerHTML = "Check requirements";
                 break;
             default: break;
-        }     
+        }
     }
     return false;
 

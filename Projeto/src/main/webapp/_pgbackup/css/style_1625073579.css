@@ -19,10 +19,6 @@ html {
     place-items: center;
 }
 
-body.waiting * {
-    cursor: progress !important;
-}
-
 /* navigation styles start here */
 header {
     background: var(--background);
@@ -85,34 +81,12 @@ body {
     margin: 10px;
     padding: 0 0.5em;
     height: 40px;
-    width: 20%;
     font: 400 18px Roboto, Arial, sans-serif;
     overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 }
 
 .custom-map-control-button:hover {
     background: #ebebeb;
-}
-
-#pac-input {
-  /*background-color: #fff;
-  font-family: Roboto;
-  /*font-size: 15px;
-  font-weight: 300;*/
-  margin-left: 12px;
-  padding: 0 11px 0 13px;
-  text-overflow: ellipsis;
-  /*width: 400px;*/
-}
-
-#pac-input:focus {
-  border-color: #f1f1f1;
-}
-
-#pac-input:hover {
-  background: #fff;
 }
 
 /* Style the tab */
@@ -169,24 +143,11 @@ body {
 }
 
 .info {
+
 }
 
 [contentEditable=true]:empty:not(:focus):before {
     content: attr(data-text);
     color: lightgray;
     border-color: lightgray !important;
-}
-
-div.createEvent {
-    display: grid;
-    grid-template-columns: max-content 1fr;
-    grid-gap: 5px;
-}
-
-div.createEvent label {
-    text-align: right;
-}
-
-div.createEvent label:after {
-    content: ":";
 }

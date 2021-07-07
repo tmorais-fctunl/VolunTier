@@ -1,14 +1,9 @@
 {
   "ExpandedNodes": [
-    "",
     "\\bootstrap",
-    "\\bootstrap\\js",
     "\\css",
     "\\pages",
-    "\\pages\\contents",
-    "\\pages\\error",
     "\\scripts"
   ],
-  "SelectedNode": "\\scripts\\authenticate.js",
   "PreviewInSolutionExplorer": false
 }
