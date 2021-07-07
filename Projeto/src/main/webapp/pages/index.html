@@ -87,7 +87,7 @@
                 else {
                     loadContent("indexTab", "../pages/contents/logoutTab.html");
                     jQuery.ajax({
-                        url: "contents/login-box.php",
+                        url: "./contents/login-box.php",
                         success: function (data) {
                             $('#login-register-box').html(data);
                         },
