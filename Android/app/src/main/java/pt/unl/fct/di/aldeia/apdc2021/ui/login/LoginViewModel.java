@@ -10,13 +10,15 @@ import pt.unl.fct.di.aldeia.apdc2021.data.LoginRepository;
 import pt.unl.fct.di.aldeia.apdc2021.data.Result;
 import pt.unl.fct.di.aldeia.apdc2021.R;
 import pt.unl.fct.di.aldeia.apdc2021.data.model.UserAuthenticated;
-import pt.unl.fct.di.aldeia.apdc2021.data.model.UserLocalStore;
+import pt.unl.fct.di.aldeia.apdc2021.data.model.UserFullData;
 
 public class LoginViewModel extends ViewModel {
 
-    private MutableLiveData<LoginFormState> loginFormState = new MutableLiveData<>();
-    private MutableLiveData<LoginResult> loginResult = new MutableLiveData<>();
-    private LoginRepository loginRepository;
+    private final MutableLiveData<LoginFormState> loginFormState = new MutableLiveData<>();
+    private final MutableLiveData<LoginResult> loginResult = new MutableLiveData<>();
+
+    private final MutableLiveData<LookUpResult> lookUpResult = new MutableLiveData<>();
+    private final LoginRepository loginRepository;
 
     private final Executor executor;
 
@@ -33,6 +35,7 @@ public class LoginViewModel extends ViewModel {
         return loginResult;
     }
 
+    LiveData<LookUpResult> getLookUpResult(){return lookUpResult;}
 
     public void login(String username, String password) {
         executor.execute(new Runnable() {
@@ -49,30 +52,42 @@ public class LoginViewModel extends ViewModel {
         });
     }
 
-    public void loginDataChanged(String username, String password) {
+    public void lookUp(String email, String token) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                Result<UserFullData> result = loginRepository.lookUp(email, token);
+                if (result instanceof Result.Success) {
+                    UserFullData data = ((Result.Success<UserFullData>) result).getData();
+                    lookUpResult.postValue(new LookUpResult(data, null));
+                } else {
+                    lookUpResult.postValue(new LookUpResult(null, R.string.lookUp_fail));
+                }
+            }
+        });
+    }
+
+    public void loginDataChanged(String email, String password) {
         boolean somethingWrong=false;
-        Integer usernameError=null;
+        Integer emailError=null;
         Integer passwordError=null;
-        if (!isUserNameValid(username)) {
-            usernameError=R.string.invalid_username;
+        if (!isEmailValid(email)) {
+            emailError=R.string.invalid_email;
             somethingWrong=true;
         }if (!isPasswordValid(password)) {
             passwordError=R.string.invalid_password;
             somethingWrong=true;
         } if(somethingWrong){
-            loginFormState.setValue(new LoginFormState(usernameError,passwordError));
+            loginFormState.setValue(new LoginFormState(emailError,passwordError));
         }
         else {
             loginFormState.setValue(new LoginFormState(true));
         }
     }
 
-    // A placeholder username validation check
-    private boolean isUserNameValid(String username) {
-        if (username.length()>4) {
-            return true;
-        }
-        return false;
+    // A placeholder email validation check
+    private boolean isEmailValid(String email){
+        return email.matches(".+@.+[.].+");
     }
 
     // A placeholder password validation check

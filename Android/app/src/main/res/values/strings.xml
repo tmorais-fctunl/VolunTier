@@ -1,11 +1,11 @@
 <resources>
     <string name="app_name">VolunTier</string>
     <!-- Strings related to login -->
-    <string name="prompt_email">Username</string>
+    <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>
     <string name="action_sign_in">Sign in</string>
     <string name="action_sign_in_short">Sign in</string>
-    <string name="welcome">"Welcome !"</string>
+    <string name="welcome">"Welcome "</string>
     <string name="invalid_username">Not a valid username</string>
     <string name="invalid_password">Password must be >7 characters</string>
     <string name="login_failed">"Login failed"</string>
@@ -13,17 +13,26 @@
     <string name="to_register">"Create Account"</string>
     <!-- Strings related to maps -->
     <string name="title_activity_maps">Map</string>
-    <string name="maps_logout">Logout</string>
+    <string name="maps_createEvent">New Event</string>
+    <string name="maps_event_name">Event Name</string>
+    <string name="maps_event_point">Choose Meeting Point</string>
+    <string name="maps_event_start_time">Event starting date</string>
+    <string name="maps_event_end_time">Event end date</string>
+    <string name="maps_event_cancel">Cancel</string>
+    <string name="maps_event_confirm">Confirm</string>
+    <string name="AddEvent_success">Your event was successfully created</string>
+    <string name="AddEvent_failed">Something went wrong with creating your event!</string>
+
     <!-- Strings related to register -->
     <string name="Email">Email</string>
     <string name="Password">Password</string>
     <string name="action_register">Register</string>
     <string name="confirm_password">Confirm Password</string>
     <string name="register_username">Username</string>
-    <string name="register_success">Register completed successfully</string>
+    <string name="register_successes">Register completed successfully</string>
     <string name="register_failed">Register failed...</string>
     <string name="invalid_email">Not a valid email address</string>
-    <string name="invalid_pwConfirmation">The passwords dont match</string>
+    <string name="invalid_pwConfirmation">The passwords do not match</string>
     <string name="new_registration">"Your registration was a success! Please confirm your email by clicking the link we just sent you!"</string>
     <!-- Strings related to recover password -->
     <string name="to_recoverPw">Forgot your password?</string>
@@ -31,6 +40,70 @@
     <string name="recoverPw_success">Password Recovery was a success. Check your email! </string>
     <string name="recoverPw_failed">Password Recovery failed. Check your data and try again </string>
     <!-- Strings related to login -->
-    <string name="logout_failed">"Logout failed"</string>
-    <string name="logout_success">"Logout success"</string>
+    <string name="logout_failed">Logout failed</string>
+    <string name="logout_success">Logout success</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <!-- Strings related to profile -->
+    <string name="profile_Address">Address</string>
+    <string name="profile_Address2">Address2</string>
+    <string name="profile_FullName">Full Name</string>
+    <string name="profile_Privacy">Privacy:</string>
+    <string name="profile_PrivacyPublic">Public/Private</string>
+    <string name="profile_LandLine">Landline</string>
+    <string name="profile_Mobile">Mobile</string>
+    <string name="profile_Region">Region</string>
+    <string name="profile_ZipCode">ZipCode</string>
+    <string name="profile_Website">Website</string>
+    <string name="profile_Facebook">Facebook</string>
+    <string name="profile_Instagram">Instagram</string>
+    <string name="profile_Twitter">Twitter</string>
+    <string name="lookUp_success">Look up succeeded</string>
+    <string name="lookUp_fail">Look up failed</string>
+    <string name="save_changes">Save Changes</string>
+    <string name="change_password">Change Password</string>
+    <string name="delete_account">Delete Account</string>
+    <string name="postalCode_Error">Not a valid postal code format</string>
+    <string name="mobile_Error">Not a valid mobile number format</string>
+    <string name="landLine_Error">Not a valid landline number format</string>
+    <string name="address_Error">Not a valid address</string>
+    <string name="region_Error">Not a valid region</string>
+    <string name="fullName_Error">Please try a smaller name</string>
+    <string name="DataChange_success">Your data was changed</string>
+    <string name="DataChange_failed">Oops something went wrong!</string>
+    <string name="RemoveAcc_success">Your account was successfully removed</string>
+    <string name="RemoveAcc_failed">Something went wrong with removing your account!</string>
+    <string name="ChangePW_success">Your password was successfully changed</string>
+    <string name="ChangePW_failed">Something went wrong with changing your password!</string>
+    <string name="ChangePW_invalidPassword">Password must be >7 characters and different from the last one</string>
+    <string name="ChangePW_currentPassword">Current password</string>
+    <string name="ChangePW_password">New password</string>
+    <string name="ChangePW_passwordConfirmation">Confirm new password</string>
+    <string name="profile_logout">Logout</string>
+
+    <!-- Strings related to event page -->
+    <string name="event_page_name">Event Name</string>
+    <string name="event_page_owner_email">Event Owner Email</string>
+    <string name="event_page_owner_contact">Event Owner Contact</string>
+    <string name="event_page_description">Event Description</string>
+    <string name="event_page_category">Event Category</string>
+    <string name="event_page_capacity">Event Capacity</string>
+    <string name="event_page_website">Event Website</string>
+    <string name="event_page_facebook">Event Facebook</string>
+    <string name="event_page_instagram">Event Instagram</string>
+    <string name="event_page_twitter">Event Twitter</string>
+    <string name="event_page_profile">Public/Private</string>
+    <string name="event_page_delete">Delete Event</string>
+    <string name="event_page_change_location">Change Location</string>
+    <string name="event_page_comments">Chat</string>
+    <string name="get_event_success">Event was successfully retrieved</string>
+    <string name="get_event_failed">Something went wrong retrieving this event!</string>
+    <string name="update_event_success">Event was successfully updated</string>
+    <string name="update_event_failed">Something went wrong updating this event!</string>
+    <string name="update_event_commentError">Description has to be smaller...</string>
+    <string name="update_event_contactError">Not a valid contactNumber</string>
+    <string name="update_event_dateError">Not a valid date format</string>
+    <string name="update_event_websiteError">This is too long...</string>
+    <string name="update_event_categoryError">Not a valid category</string>
+
 </resources>

@@ -12,7 +12,7 @@ import pt.unl.fct.di.aldeia.apdc2021.data.ValidateTokenRepository;
 
 public class ValidateViewModelFactory implements ViewModelProvider.Factory {
 
-    private Executor executor;
+    private final Executor executor;
 
     public ValidateViewModelFactory (Executor executor) {
         this.executor = executor;

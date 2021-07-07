@@ -14,19 +14,19 @@ import java.io.IOException;
  */
 public class LoginDataSource {
 
-    private LoginService service;
+    private final LoginService service;
 
     public LoginDataSource() {
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://voluntier-312115.ew.r.appspot.com/")
+                .baseUrl("https://voluntier-317915.appspot.com/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         this.service = retrofit.create(LoginService.class);
     }
 
-    public Result<UserAuthenticated> login(String username, String password) {
+    public Result<UserAuthenticated> login(String email, String password) {
         //String encPassword= DigestUtils.sha512Hex(password);
-        Call<UserAuthenticated> userAuthenticationCall = service.authenticateUser(new UserCredentials(username, password));
+        Call<UserAuthenticated> userAuthenticationCall = service.authenticateUser(new UserCredentials(email, password));
         try {
             Response<UserAuthenticated> response = userAuthenticationCall.execute();
             if(response.isSuccessful()) {
@@ -37,9 +37,5 @@ public class LoginDataSource {
         } catch (IOException e) {
             return new Result.Error(new IOException("Error logging in", e));
         }
-    }
-
-    public void logout() {
-        // TODO: revoke authentication
     }
 }

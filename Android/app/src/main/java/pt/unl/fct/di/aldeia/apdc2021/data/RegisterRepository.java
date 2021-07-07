@@ -4,7 +4,7 @@ public class RegisterRepository {
 
     private static volatile RegisterRepository instance;
 
-    private RegisterDataSource dataSource;
+    private final RegisterDataSource dataSource;
 
     // private constructor : singleton access
     private RegisterRepository(RegisterDataSource dataSource) {

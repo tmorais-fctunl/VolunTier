@@ -12,7 +12,7 @@ import pt.unl.fct.di.aldeia.apdc2021.data.RecoverPwRepository;
 
 public class RecoverPwViewModelFactory implements ViewModelProvider.Factory {
 
-    private Executor executor;
+    private final Executor executor;
 
     public RecoverPwViewModelFactory (Executor executor) {
         this.executor = executor;

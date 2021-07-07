@@ -4,7 +4,7 @@ public class RecoverPwRepository {
 
     private static volatile RecoverPwRepository instance;
 
-    private RecoverPwDataSource dataSource;
+    private final RecoverPwDataSource dataSource;
 
     // private constructor : singleton access
     private RecoverPwRepository(RecoverPwDataSource dataSource) {
@@ -20,7 +20,7 @@ public class RecoverPwRepository {
     }
 
 
-    public Result<Void> recoverPassword(String username, String email) {
-        return dataSource.recoverPassword(username, email);
+    public Result<Void> recoverPassword(String email) {
+        return dataSource.recoverPassword(email);
     }
 }

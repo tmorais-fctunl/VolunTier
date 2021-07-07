@@ -9,8 +9,8 @@ import androidx.annotation.Nullable;
  */
 class RegisterResult {
     @Nullable
-    private Integer error;
-    private Integer success;
+    private final Integer error;
+    private final Integer success;
 
     RegisterResult(@Nullable Integer success ,@Nullable Integer error) {
         this.success=success;

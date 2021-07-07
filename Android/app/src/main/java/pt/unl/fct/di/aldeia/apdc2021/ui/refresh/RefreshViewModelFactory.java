@@ -13,7 +13,7 @@ import pt.unl.fct.di.aldeia.apdc2021.data.RefreshTokenRepository;
 import pt.unl.fct.di.aldeia.apdc2021.ui.login.LoginViewModel;
 
 public class RefreshViewModelFactory implements ViewModelProvider.Factory {
-    private Executor executor;
+    private final Executor executor;
 
     public RefreshViewModelFactory (Executor executor) {
         this.executor = executor;

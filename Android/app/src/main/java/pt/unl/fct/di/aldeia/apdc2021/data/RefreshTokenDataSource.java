@@ -11,11 +11,11 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RefreshTokenDataSource {
 
-        private RefreshTokenService service;
+        private final RefreshTokenService service;
 
         public RefreshTokenDataSource() {
             Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl("https://voluntier-312115.ew.r.appspot.com/")
+                    .baseUrl("https://voluntier-317915.appspot.com/")
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
             this.service = retrofit.create(RefreshTokenService.class);

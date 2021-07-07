@@ -1,6 +1,8 @@
 package pt.unl.fct.di.aldeia.apdc2021.ui.register;
 
 
+import android.widget.Toast;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -12,10 +14,10 @@ import pt.unl.fct.di.aldeia.apdc2021.data.Result;
 import pt.unl.fct.di.aldeia.apdc2021.R;
 
 public class RegisterViewModel extends ViewModel {
-
-    private MutableLiveData<RegisterFormState> registerFormState = new MutableLiveData<>();
-    private MutableLiveData<RegisterResult> registerResult = new MutableLiveData<>();
-    private RegisterRepository registerRepository;
+    public static final String USERNAME_REGEX = "^[a-zA-Z][a-zA-Z0-9][.]?[a-zA-Z0-9]+$";
+    private final MutableLiveData<RegisterFormState> registerFormState = new MutableLiveData<>();
+    private final MutableLiveData<RegisterResult> registerResult = new MutableLiveData<>();
+    private final RegisterRepository registerRepository;
 
     private final Executor executor;
 
@@ -40,7 +42,7 @@ public class RegisterViewModel extends ViewModel {
             public void run() {
                 Result<Void> result = registerRepository.register(username,email, password);
                 if (result instanceof Result.Success) {
-                    registerResult.postValue(new RegisterResult(R.string.register_success,null));
+                    registerResult.postValue(new RegisterResult(R.string.register_successes,null));
                 } else {
                     registerResult.postValue(new RegisterResult(null,R.string.register_failed));
                 }
@@ -54,7 +56,7 @@ public class RegisterViewModel extends ViewModel {
         Integer emailError=null;
         Integer passwordError=null;
         Integer password2Error=null;
-        if (!isUserNameValid(username)) {
+        if (!isUsernameValid(username)) {
             usernameError=R.string.invalid_username;
             somethingWrong=true;
         }
@@ -81,15 +83,8 @@ public class RegisterViewModel extends ViewModel {
 
 
     // A placeholder username validation check
-    private boolean isUserNameValid(String username) {
-        if (username == null) {
-            return false;
-        }
-        if (username.length()>4) {
-            return true;
-        } else {
-            return false;
-        }
+    public static boolean isUsernameValid(String username) {
+        return (username != null && username.length() > 4 && username.length() < 30) && username.matches(USERNAME_REGEX);
     }
 
     // A placeholder password validation check

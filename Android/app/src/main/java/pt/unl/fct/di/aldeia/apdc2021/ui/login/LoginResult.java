@@ -7,7 +7,7 @@ import pt.unl.fct.di.aldeia.apdc2021.data.model.UserAuthenticated;
 /**
  * Authentication result : success (user details) or error message.
  */
-class LoginResult {
+public class LoginResult {
     @Nullable
     private UserAuthenticated success;
     @Nullable

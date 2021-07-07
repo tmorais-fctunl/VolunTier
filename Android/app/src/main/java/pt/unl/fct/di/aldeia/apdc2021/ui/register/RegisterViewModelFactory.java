@@ -14,7 +14,7 @@ import pt.unl.fct.di.aldeia.apdc2021.ui.login.LoginViewModel;
 
 public class RegisterViewModelFactory implements ViewModelProvider.Factory {
 
-    private Executor executor;
+    private final Executor executor;
 
     public RegisterViewModelFactory (Executor executor) {
         this.executor = executor;

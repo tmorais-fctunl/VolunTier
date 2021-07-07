@@ -5,7 +5,7 @@ import pt.unl.fct.di.aldeia.apdc2021.data.model.UserAuthenticated;
 public class RefreshTokenRepository {
     private static volatile RefreshTokenRepository instance;
 
-    private RefreshTokenDataSource dataSource;
+    private final RefreshTokenDataSource dataSource;
 
     // If user credentials will be cached in local storage, it is recommended it be encrypted
     // @see https://developer.android.com/training/articles/keystore

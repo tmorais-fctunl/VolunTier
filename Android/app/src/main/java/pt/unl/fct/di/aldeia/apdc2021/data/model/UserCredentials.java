@@ -2,10 +2,10 @@ package pt.unl.fct.di.aldeia.apdc2021.data.model;
 
 public class UserCredentials {
     String password;
-    String user_id;
+    String email;
 
-    public UserCredentials(String username, String password) {
-        this.user_id=username;
+    public UserCredentials(String email, String password) {
+        this.email=email;
         this.password=password;
     }
 
@@ -13,7 +13,7 @@ public class UserCredentials {
         return password;
     }
 
-    public String getUsername() {
-        return user_id;
+    public String getEmail() {
+        return email;
     }
 }

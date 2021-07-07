@@ -8,6 +8,7 @@ import java.util.concurrent.Executor;
 
 import pt.unl.fct.di.aldeia.apdc2021.data.LoginDataSource;
 import pt.unl.fct.di.aldeia.apdc2021.data.LoginRepository;
+import pt.unl.fct.di.aldeia.apdc2021.data.LookUpDataSource;
 
 /**
  * ViewModel provider factory to instantiate LoginViewModel.
@@ -15,7 +16,7 @@ import pt.unl.fct.di.aldeia.apdc2021.data.LoginRepository;
  */
 public class LoginViewModelFactory implements ViewModelProvider.Factory {
 
-    private Executor executor;
+    private final Executor executor;
 
     public LoginViewModelFactory (Executor executor) {
         this.executor = executor;
@@ -26,7 +27,7 @@ public class LoginViewModelFactory implements ViewModelProvider.Factory {
     @SuppressWarnings("unchecked")
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         if (modelClass.isAssignableFrom(LoginViewModel.class)) {
-            return (T) new LoginViewModel(LoginRepository.getInstance(new LoginDataSource()), executor);
+            return (T) new LoginViewModel(LoginRepository.getInstance(new LoginDataSource(),new LookUpDataSource()), executor);
         } else {
             throw new IllegalArgumentException("Unknown ViewModel class");
         }

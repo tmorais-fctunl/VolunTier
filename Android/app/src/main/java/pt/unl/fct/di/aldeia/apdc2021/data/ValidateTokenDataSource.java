@@ -9,18 +9,18 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ValidateTokenDataSource {
-    private ValidateTokenService service;
+    private final ValidateTokenService service;
 
     public ValidateTokenDataSource() {
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://voluntier-312115.ew.r.appspot.com/")
+                .baseUrl("https://voluntier-317915.appspot.com/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         this.service = retrofit.create(ValidateTokenService.class);
     }
 
-    public Result<Void> validate(String username, String token) {
-        Call<Void> tokenValidationCall = service.validateToken(new TokenCredentials(username, token));
+    public Result<Void> validate(String email, String token) {
+        Call<Void> tokenValidationCall = service.validateToken(new TokenCredentials(email, token));
         try {
             Response<Void> response = tokenValidationCall.execute();
             if(response.isSuccessful()) {

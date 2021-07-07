@@ -4,7 +4,7 @@ public class ValidateTokenRepository {
 
     private static volatile ValidateTokenRepository instance;
 
-    private ValidateTokenDataSource dataSource;
+    private final ValidateTokenDataSource dataSource;
 
     // private constructor : singleton access
     private ValidateTokenRepository(ValidateTokenDataSource dataSource) {
@@ -19,8 +19,8 @@ public class ValidateTokenRepository {
     }
 
 
-    public Result<Void> validate(String username, String token) {
-        return dataSource.validate(username, token);
+    public Result<Void> validate(String email, String token) {
+        return dataSource.validate(email, token);
     }
 }
 

@@ -12,11 +12,11 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RegisterDataSource {
 
-    private RegisterService service;
+    private final RegisterService service;
 
     public RegisterDataSource() {
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://voluntier-312115.ew.r.appspot.com/")
+                .baseUrl("https://voluntier-317915.appspot.com/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         this.service = retrofit.create(RegisterService.class);

@@ -15,8 +15,8 @@ import pt.unl.fct.di.aldeia.apdc2021.data.ValidateTokenRepository;
 
 public class ValidateViewModel extends ViewModel {
 
-    private ValidateTokenRepository validateRepository;
-    private MutableLiveData<ValidateResult> validateResult = new MutableLiveData<>();
+    private final ValidateTokenRepository validateRepository;
+    private final MutableLiveData<ValidateResult> validateResult = new MutableLiveData<>();
     private final Executor executor;
     ValidateViewModel(ValidateTokenRepository validateRepository, Executor executor) {
         this.executor = executor;

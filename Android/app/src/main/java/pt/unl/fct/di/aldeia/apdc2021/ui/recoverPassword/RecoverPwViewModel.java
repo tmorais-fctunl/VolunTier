@@ -13,9 +13,9 @@ import pt.unl.fct.di.aldeia.apdc2021.data.model.UserAuthenticated;
 
 public class RecoverPwViewModel extends ViewModel {
 
-    private MutableLiveData<RecoverPwFormState> recoverPwFormState = new MutableLiveData<>();
-    private MutableLiveData<RecoverPwResult> recoverPwResult = new MutableLiveData<>();
-    private RecoverPwRepository recoverPwRepository;
+    private final MutableLiveData<RecoverPwFormState> recoverPwFormState = new MutableLiveData<>();
+    private final MutableLiveData<RecoverPwResult> recoverPwResult = new MutableLiveData<>();
+    private final RecoverPwRepository recoverPwRepository;
 
 
     private final Executor executor;
@@ -34,11 +34,11 @@ public class RecoverPwViewModel extends ViewModel {
     }
 
 
-    public void recoverPassword(String username, String email) {
+    public void recoverPassword(String email) {
         executor.execute(new Runnable() {
             @Override
             public void run() {
-                Result<Void> result = recoverPwRepository.recoverPassword(username, email);
+                Result<Void> result = recoverPwRepository.recoverPassword(email);
                 if (result instanceof Result.Success) {
                     UserAuthenticated data = ((Result.Success<UserAuthenticated>) result).getData();
                     recoverPwResult.postValue(new RecoverPwResult(R.string.recoverPw_success,null));
@@ -49,32 +49,19 @@ public class RecoverPwViewModel extends ViewModel {
         });
     }
 
-    public void recoverPwDataChanged(String username, String email) {
+    public void recoverPwDataChanged(String email) {
         boolean somethingWrong=false;
-        Integer usernameError=null;
         Integer emailError=null;
-        if (!isUserNameValid(username)) {
-            usernameError=R.string.invalid_username;
-            somethingWrong=true;
-        }
         if (!isEmailValid(email)) {
             emailError=R.string.invalid_email;
             somethingWrong=true;
         }
         if(somethingWrong){
-            recoverPwFormState.setValue(new RecoverPwFormState(usernameError,emailError));
+            recoverPwFormState.setValue(new RecoverPwFormState(emailError));
         }
         else {
             recoverPwFormState.setValue(new RecoverPwFormState(true));
         }
-    }
-
-    // A placeholder username validation check
-    private boolean isUserNameValid(String username) {
-        if (username.length()>4) {
-            return true;
-        }
-        return false;
     }
 
     // A placeholder email validation check

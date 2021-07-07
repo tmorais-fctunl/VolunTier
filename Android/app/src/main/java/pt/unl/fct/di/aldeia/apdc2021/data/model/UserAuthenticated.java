@@ -2,15 +2,15 @@ package pt.unl.fct.di.aldeia.apdc2021.data.model;
 
 public class UserAuthenticated {
 
-    String user_id;
+    String email;
     String accessToken;
     String refreshToken;
     long creationDate;
     long expirationDate;
     long refresh_expirationDate;
 
-    public UserAuthenticated (String username, String accessToken, String refreshToken, long creationDate, long expirationDate, long refresh_expirationDate) {
-        this.user_id = username;
+    public UserAuthenticated (String email, String accessToken, String refreshToken, long creationDate, long expirationDate, long refresh_expirationDate) {
+        this.email = email;
         this.accessToken=accessToken;
         this.refreshToken=refreshToken;
         this.creationDate=creationDate;
@@ -18,8 +18,8 @@ public class UserAuthenticated {
         this.refresh_expirationDate = refresh_expirationDate;
     }
 
-    public String getUsername() {
-        return user_id;
+    public String getEmail() {
+        return email;
     }
 
     public String getTokenID() {

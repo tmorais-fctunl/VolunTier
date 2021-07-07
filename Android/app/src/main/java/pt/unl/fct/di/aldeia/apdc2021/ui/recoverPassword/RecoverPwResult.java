@@ -4,9 +4,9 @@ import androidx.annotation.Nullable;
 
 public class RecoverPwResult {
     @Nullable
-    private Integer success;
+    private final Integer success;
     @Nullable
-    private Integer error;
+    private final Integer error;
 
     RecoverPwResult(@Nullable Integer success, @Nullable Integer error) {
         this.success = success;

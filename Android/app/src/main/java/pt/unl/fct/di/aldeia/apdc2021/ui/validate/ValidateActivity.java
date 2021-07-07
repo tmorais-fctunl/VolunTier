@@ -10,14 +10,8 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import pt.unl.fct.di.aldeia.apdc2021.App;
-import pt.unl.fct.di.aldeia.apdc2021.MapsActivity;
 import pt.unl.fct.di.aldeia.apdc2021.data.model.UserAuthenticated;
 import pt.unl.fct.di.aldeia.apdc2021.data.model.UserLocalStore;
-import pt.unl.fct.di.aldeia.apdc2021.ui.login.LoginActivity;
-import pt.unl.fct.di.aldeia.apdc2021.ui.refresh.RefreshActivity;
-import pt.unl.fct.di.aldeia.apdc2021.ui.refresh.RefreshResult;
-import pt.unl.fct.di.aldeia.apdc2021.ui.refresh.RefreshViewModel;
-import pt.unl.fct.di.aldeia.apdc2021.ui.refresh.RefreshViewModelFactory;
 
 public class ValidateActivity extends AppCompatActivity {
 
@@ -41,7 +35,6 @@ public class ValidateActivity extends AppCompatActivity {
                     return;
                 }
                 if (validateResult.getError() != null) {
-                    storage.clearUserData();
                     Intent intent = new Intent();
                     setResult(Activity.RESULT_CANCELED,intent);
                     finish();
@@ -56,6 +49,6 @@ public class ValidateActivity extends AppCompatActivity {
         });
 
         UserAuthenticated user = storage.getLoggedInUser();
-        validateViewModel.validateToken(user.getUsername(), user.getTokenID());
+        validateViewModel.validateToken(user.getEmail(), user.getTokenID());
     }
 }

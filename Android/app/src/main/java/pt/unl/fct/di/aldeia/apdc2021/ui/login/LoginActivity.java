@@ -14,9 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.KeyEvent;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -24,12 +22,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import pt.unl.fct.di.aldeia.apdc2021.App;
-import pt.unl.fct.di.aldeia.apdc2021.MapsActivity;
 import pt.unl.fct.di.aldeia.apdc2021.R;
 import pt.unl.fct.di.aldeia.apdc2021.data.model.UserAuthenticated;
-import pt.unl.fct.di.aldeia.apdc2021.data.model.UserCredentials;
+import pt.unl.fct.di.aldeia.apdc2021.data.model.UserFullData;
 import pt.unl.fct.di.aldeia.apdc2021.data.model.UserLocalStore;
 import pt.unl.fct.di.aldeia.apdc2021.databinding.ActivityLoginBinding;
+import pt.unl.fct.di.aldeia.apdc2021.ui.mainLoggedIn.MainLoggedInActivity;
 import pt.unl.fct.di.aldeia.apdc2021.ui.recoverPassword.RecoverPwActivity;
 import pt.unl.fct.di.aldeia.apdc2021.ui.refresh.RefreshActivity;
 import pt.unl.fct.di.aldeia.apdc2021.ui.register.RegisterActivity;
@@ -54,7 +52,7 @@ public class LoginActivity extends AppCompatActivity {
         loginViewModel = new ViewModelProvider(this, new LoginViewModelFactory(((App) getApplication()).getExecutorService()))
                 .get(LoginViewModel.class);
 
-        final EditText usernameEditText = binding.username;
+        final EditText emailEditText = binding.email;
         final EditText passwordEditText = binding.password;
         final Button loginButton = binding.login;
         final TextView registerButton = findViewById(R.id.redirectRegister);
@@ -62,15 +60,8 @@ public class LoginActivity extends AppCompatActivity {
         final ProgressBar loadingProgressBar = binding.loading;
 
         if(storage.getLoggedInUser()!=null){
-            UserAuthenticated user=storage.getLoggedInUser();
-            if (System.currentTimeMillis()<user.getExpirationDate()){
-                Intent intent = new Intent(mActivity, ValidateActivity.class);
-                startActivityForResult(intent,VALIDATION);
-            }
-            else if(System.currentTimeMillis()<user.getRefresh_expirationDate()){
-                Intent intent = new Intent(mActivity, RefreshActivity.class);
-                startActivityForResult(intent,REFRESH);
-            }
+            Intent intent = new Intent(mActivity, ValidateActivity.class);
+            startActivityForResult(intent,VALIDATION);
         }
 
         loginViewModel.getLoginFormState().observe(this, new Observer<LoginFormState>() {
@@ -80,8 +71,8 @@ public class LoginActivity extends AppCompatActivity {
                     return;
                 }
                 loginButton.setEnabled(loginFormState.isDataValid());
-                if (!usernameEditText.getText().toString().equals("") && loginFormState.getUsernameError() != null) {
-                    usernameEditText.setError(getString(loginFormState.getUsernameError()));
+                if (!emailEditText.getText().toString().equals("") && loginFormState.getUsernameError() != null) {
+                    emailEditText.setError(getString(loginFormState.getUsernameError()));
                 }
                 if (!passwordEditText.getText().toString().equals("") && loginFormState.getPasswordError() != null) {
                     passwordEditText.setError(getString(loginFormState.getPasswordError()));
@@ -95,14 +86,34 @@ public class LoginActivity extends AppCompatActivity {
                 if (loginResult == null) {
                     return;
                 }
-                loadingProgressBar.setVisibility(View.GONE);
                 if (loginResult.getError() != null) {
+                    loadingProgressBar.setVisibility(View.GONE);
                     showLoginFailed(loginResult.getError());
                 }
                 if (loginResult.getSuccess() != null) {
-                    updateUiWithUser(loginResult.getSuccess());
-                    setResult(Activity.RESULT_OK);
-                    Intent intent = new Intent(mActivity, MapsActivity.class);
+                    UserAuthenticated user =loginResult.getSuccess();
+                    loginViewModel.lookUp(user.getEmail(), user.getTokenID());
+                    storeUserAuthData(user);
+                }
+
+                //Complete and destroy login activity once successful
+                //finish();
+            }
+        });
+
+        loginViewModel.getLookUpResult().observe(this, new Observer<LookUpResult>() {
+            @Override
+            public void onChanged(@Nullable LookUpResult lookUpResult) {
+                if (lookUpResult == null) {
+                    return;
+                }
+                loadingProgressBar.setVisibility(View.GONE);
+                if (lookUpResult.getError() != null) {
+                }
+                if (lookUpResult.getSuccess() != null) {
+                    UserFullData userData =lookUpResult.getSuccess();
+                    updateUserFullData(userData);
+                    Intent intent = new Intent(mActivity, MainLoggedInActivity.class);
                     startActivity(intent);
                     finish();
                 }
@@ -111,8 +122,6 @@ public class LoginActivity extends AppCompatActivity {
                 //finish();
             }
         });
-
-
 
 
 
@@ -129,29 +138,17 @@ public class LoginActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                loginViewModel.loginDataChanged(usernameEditText.getText().toString(),
+                loginViewModel.loginDataChanged(emailEditText.getText().toString(),
                         passwordEditText.getText().toString());
             }
         };
-        usernameEditText.addTextChangedListener(afterTextChangedListener);
+        emailEditText.addTextChangedListener(afterTextChangedListener);
         passwordEditText.addTextChangedListener(afterTextChangedListener);
-        /*passwordEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    loginViewModel.login(usernameEditText.getText().toString(),
-                            passwordEditText.getText().toString());
-                }
-                return false;
-            }
-        });*/
-
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 loadingProgressBar.setVisibility(View.VISIBLE);
-                loginViewModel.login(usernameEditText.getText().toString(),
+                loginViewModel.login(emailEditText.getText().toString(),
                         passwordEditText.getText().toString());
             }
         });
@@ -175,12 +172,17 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    private void updateUiWithUser(UserAuthenticated model) {
-        String welcome = getString(R.string.welcome) + model.getUsername();
-        // TODO : initiate successful logged in experience
+    private void storeUserAuthData(UserAuthenticated model) {
         storage.storeUserData(model);
         storage.setUserLoggedIn(true);
-        Toast.makeText(getApplicationContext(), welcome, Toast.LENGTH_LONG).show();
+
+    }
+
+    private void updateUserFullData(UserFullData user){
+        String welcome = getString(R.string.welcome) + user.getEmail();
+        // TODO : initiate successful logged in experience
+        storage.storeUserFullData(user);
+        Toast.makeText(getApplicationContext(), welcome, Toast.LENGTH_SHORT).show();
     }
 
     private void showLoginFailed(@StringRes Integer errorString) {
@@ -192,15 +194,28 @@ public class LoginActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode==VALIDATION || requestCode==REFRESH)
+        UserAuthenticated user=storage.getLoggedInUser();
+        if(requestCode==VALIDATION )
         {
             if(resultCode==Activity.RESULT_OK){
-                Intent intent = new Intent(mActivity,MapsActivity.class);
+                loginViewModel.lookUp(user.getEmail(), user.getTokenID());
+                Intent intent = new Intent(mActivity,MainLoggedInActivity.class);
+                startActivity(intent);
+                finish();
+            }
+            else{
+                Intent intent = new Intent(mActivity, RefreshActivity.class);
+                startActivityForResult(intent,REFRESH);
+            }
+        }
+        if(requestCode==REFRESH){
+            if(resultCode==Activity.RESULT_OK){
+                loginViewModel.lookUp(user.getEmail(), user.getTokenID());
+                Intent intent = new Intent(mActivity,MainLoggedInActivity.class);
                 startActivity(intent);
                 finish();
             }
         }
-
     }
 
 }

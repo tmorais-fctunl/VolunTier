@@ -12,10 +12,8 @@ import android.os.Bundle;
 
 
 import pt.unl.fct.di.aldeia.apdc2021.App;
-import pt.unl.fct.di.aldeia.apdc2021.MapsActivity;
 import pt.unl.fct.di.aldeia.apdc2021.data.model.UserAuthenticated;
 import pt.unl.fct.di.aldeia.apdc2021.data.model.UserLocalStore;
-import pt.unl.fct.di.aldeia.apdc2021.ui.login.LoginActivity;
 
 
 public class RefreshActivity extends AppCompatActivity {
@@ -56,7 +54,7 @@ public class RefreshActivity extends AppCompatActivity {
         });
 
         UserAuthenticated user=storage.getLoggedInUser();
-        refreshViewModel.refreshToken(user.getUsername(), user.getRefreshToken());
+        refreshViewModel.refreshToken(user.getEmail(), user.getRefreshToken());
     }
 
     private void updateUiWithUser(UserAuthenticated model) {

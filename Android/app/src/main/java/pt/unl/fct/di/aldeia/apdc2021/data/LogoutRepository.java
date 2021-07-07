@@ -4,7 +4,7 @@ public class LogoutRepository {
 
     private static volatile LogoutRepository instance;
 
-    private LogoutDataSource dataSource;
+    private final LogoutDataSource dataSource;
 
     // private constructor : singleton access
     private LogoutRepository(LogoutDataSource dataSource) {
@@ -19,7 +19,5 @@ public class LogoutRepository {
     }
 
 
-    public Result<Void> logout(String username, String token) {
-        return dataSource.logout(username, token);
-    }
+
 }

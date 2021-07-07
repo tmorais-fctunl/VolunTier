@@ -14,8 +14,8 @@ import pt.unl.fct.di.aldeia.apdc2021.data.model.UserAuthenticated;
 
 public class RefreshViewModel extends ViewModel {
 
-    private RefreshTokenRepository refreshRepository;
-    private MutableLiveData<RefreshResult> refreshResult = new MutableLiveData<>();
+    private final RefreshTokenRepository refreshRepository;
+    private final MutableLiveData<RefreshResult> refreshResult = new MutableLiveData<>();
     private final Executor executor;
     RefreshViewModel(RefreshTokenRepository refreshRepository, Executor executor) {
         this.executor = executor;

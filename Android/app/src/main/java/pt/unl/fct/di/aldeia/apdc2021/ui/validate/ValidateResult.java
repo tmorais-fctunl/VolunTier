@@ -6,9 +6,9 @@ import pt.unl.fct.di.aldeia.apdc2021.data.model.UserAuthenticated;
 
 public class ValidateResult {
     @Nullable
-    private Integer success;
+    private final Integer success;
     @Nullable
-    private Integer error;
+    private final Integer error;
 
     ValidateResult(@Nullable Integer success,@Nullable Integer error) {
         this.error = error;

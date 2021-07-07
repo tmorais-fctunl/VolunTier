@@ -9,11 +9,11 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class LogoutDataSource {
-    private LogoutService service;
+    private final LogoutService service;
 
     public LogoutDataSource() {
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://voluntier-312115.ew.r.appspot.com/")
+                .baseUrl("https://voluntier-317915.appspot.com/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         this.service = retrofit.create(LogoutService.class);

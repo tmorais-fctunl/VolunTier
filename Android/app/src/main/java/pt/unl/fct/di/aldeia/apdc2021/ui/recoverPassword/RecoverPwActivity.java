@@ -42,7 +42,6 @@ public class RecoverPwActivity extends AppCompatActivity {
         recoverPwViewModel = new ViewModelProvider(this, new RecoverPwViewModelFactory(((App) getApplication()).getExecutorService()))
                 .get(RecoverPwViewModel.class);
 
-        final EditText usernameEditText = findViewById(R.id.recoverPw_username);
         final EditText emailEditText = findViewById(R.id.recoverPw_email);
         final Button recoverPwButton = findViewById(R.id.recoverPw_button);
         final ProgressBar loading =findViewById(R.id.recoverPw_ProgressBar);
@@ -54,9 +53,7 @@ public class RecoverPwActivity extends AppCompatActivity {
                     return;
                 }
                 recoverPwButton.setEnabled(recoverPwFormState.isDataValid());
-                if (!usernameEditText.getText().toString().equals("") && recoverPwFormState.getUsernameError() != null) {
-                    usernameEditText.setError(getString(recoverPwFormState.getUsernameError()));
-                }
+
                 if (!emailEditText.getText().toString().equals("") && recoverPwFormState.getEmailError() != null) {
                     emailEditText.setError(getString(recoverPwFormState.getEmailError()));
                 }
@@ -67,8 +64,7 @@ public class RecoverPwActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 loading.setVisibility(View.VISIBLE);
-                recoverPwViewModel.recoverPassword(usernameEditText.getText().toString(),
-                        emailEditText.getText().toString());
+                recoverPwViewModel.recoverPassword(emailEditText.getText().toString());
                 recoverPwButton.setEnabled(false);
 
             }
@@ -110,19 +106,17 @@ public class RecoverPwActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                recoverPwViewModel.recoverPwDataChanged(usernameEditText.getText().toString(),
-                        emailEditText.getText().toString());
+                recoverPwViewModel.recoverPwDataChanged(emailEditText.getText().toString());
             }
         };
-        usernameEditText.addTextChangedListener(afterTextChangedListener);
+
         emailEditText.addTextChangedListener(afterTextChangedListener);
         emailEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
 
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    recoverPwViewModel.recoverPassword(usernameEditText.getText().toString(),
-                            emailEditText.getText().toString());
+                    recoverPwViewModel.recoverPassword(emailEditText.getText().toString());
                 }
                 return false;
             }

@@ -11,18 +11,18 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RecoverPwDataSource {
 
-    private RecoverPwService service;
+    private final RecoverPwService service;
 
     public RecoverPwDataSource() {
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://voluntier-312115.ew.r.appspot.com/")
+                .baseUrl("https://voluntier-317915.appspot.com/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         this.service = retrofit.create(RecoverPwService.class);
     }
 
-    public Result<Void> recoverPassword(String username, String email) {
-        Call<Void> recoverPasswordCall = service.recoverPassword(new RecoverPwCredentials(username, email));
+    public Result<Void> recoverPassword(String email) {
+        Call<Void> recoverPasswordCall = service.recoverPassword(new RecoverPwCredentials(email));
         try {
             Response<Void> response = recoverPasswordCall.execute();
             if(response.isSuccessful()) {
