@@ -29,7 +29,7 @@ public class DB_MessageLog {
 	public static final String ID = "id";
 	public static final String START_INDEX = "start_index";
 
-	public static final int MAX_LOG_SIZE = 1000;
+	public static final int MAX_LOG_SIZE = 10000;
 
 	private static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	private static KeyFactory logFactory = datastore.newKeyFactory().setKind("MessageLog");
@@ -130,7 +130,7 @@ public class DB_MessageLog {
 		Entity log = datastore.get(idKey);
 
 		if (log == null)
-			throw new InexistentLogIdException();
+			throw new InexistentLogIdException("inexistent log");
 
 		List<Value<?>> messages = log.getList(MESSAGES);
 		ListValue.Builder newList = ListValue.newBuilder();

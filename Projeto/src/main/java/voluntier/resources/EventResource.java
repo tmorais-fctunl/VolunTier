@@ -278,7 +278,7 @@ public class EventResource {
 			if (event == null) {
 				txn.rollback();
 				LOG.warning("There is no event with the name " + data.event_id);
-				return Response.status(Status.FORBIDDEN).build();
+				return Response.status(Status.FORBIDDEN).entity("inexistent event").build();
 			}
 
 			try {

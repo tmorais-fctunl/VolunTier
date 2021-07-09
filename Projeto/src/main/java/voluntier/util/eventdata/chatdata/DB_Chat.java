@@ -120,6 +120,20 @@ public class DB_Chat {
 		return last_log_data;
 	}
 
+	private static MessageLog getMessageLogWithMessageId(Entity chat, Integer message_id) {
+		List<MessageLog> message_logs = getMessageLogs(chat);
+		MessageLog message_log = null;
+
+		for (MessageLog ml : message_logs) {
+			if (ml.start_index <= message_id)
+				message_log = ml;
+			else 
+				break;
+		}
+		
+		return message_log;
+	}
+
 	private static List<MessageLog> getMessageLogs(Entity chat) {
 		List<Value<?>> message_logs = chat.getList(MLs);
 		List<MessageLog> logs = new LinkedList<>();
@@ -159,7 +173,8 @@ public class DB_Chat {
 
 		} catch (MaximumSizeReachedException e) {
 			int last_start_index = last_log_data.start_index;
-			// need to create a new MessageLog and add it to current list with the message already added
+			// need to create a new MessageLog and add it to current list with the message
+			// already added
 			int new_start_index = last_start_index + DB_MessageLog.getMessages(last_log_id).size();
 
 			Triplet<Entity, String, Integer> new_message_log = DB_MessageLog.createLogAndAddMessage(chat_id,
@@ -184,17 +199,22 @@ public class DB_Chat {
 		Entity chat = datastore.get(idKey);
 
 		if (chat == null)
-			throw new InexistentChatIdException();
+			throw new InexistentChatIdException("inexistent chat");
 
-		MessageLog last_log_data = getLastMessageLog(chat);
+		System.out.println(1);
+		if(message_id < 0)
+			throw new InexistentMessageIdException("inexistent message");
 
-		MessageData message = DB_MessageLog.getMessage(last_log_data.id, message_id);
+		MessageLog log_data = getMessageLogWithMessageId(chat, message_id);
+
+		System.out.println(log_data.id + log_data.start_index);
+		MessageData message = DB_MessageLog.getMessage(log_data.id, message_id);
 
 		List<String> mods = getModeratorList(chat);
 		if (!message.email.equals(email) && !mods.contains(email))
-			throw new ImpossibleActionException();
+			throw new ImpossibleActionException("no permission");
 
-		Entity newMessageLog = DB_MessageLog.deleteMessage(last_log_data.id, message_id);
+		Entity newMessageLog = DB_MessageLog.deleteMessage(log_data.id, message_id);
 
 		return newMessageLog;
 	}
@@ -209,7 +229,7 @@ public class DB_Chat {
 		if (chat == null)
 			throw new InexistentChatIdException();
 
-		MessageLog last_log_data = getLastMessageLog(chat);
+		MessageLog last_log_data = getMessageLogWithMessageId(chat, message_id);
 
 		MessageData message = DB_MessageLog.getMessage(last_log_data.id, message_id);
 		if (!message.email.equals(email))
@@ -229,7 +249,7 @@ public class DB_Chat {
 		if (chat == null)
 			throw new InexistentChatIdException();
 
-		MessageLog last_log_data = getLastMessageLog(chat);
+		MessageLog last_log_data = getMessageLogWithMessageId(chat, message_id);
 
 		Entity newMessageLog = DB_MessageLog.editMessage(last_log_data.id, message_id, new_message);
 
