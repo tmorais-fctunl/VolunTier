@@ -10,7 +10,7 @@ import voluntier.util.userdata.State;
 
 public class EventData_Minimal {
 	
-	private static final long DEFAUL_CAPACITY = 100;
+	//private static final long DEFAUL_CAPACITY = 100;
 	
 	private State state;
 	private Profile profile;
@@ -49,11 +49,12 @@ public class EventData_Minimal {
 		start_date = data.start_date;
 		end_date = data.end_date;
 		owner_email = data.email;
+		description = data.description;
+		category = data.category;
 		
-		contact = "";
-		description = "";
-		category = "";
-		capacity = DEFAUL_CAPACITY;
+		contact = data.contact;
+		capacity = data.capacity;
+		
 		creation_date = Timestamp.now().toString();
 		
 		website = "";
@@ -107,7 +108,7 @@ public class EventData_Minimal {
 	}
 	
 	public static boolean descriptionValid (String description) {
-		return description != null && description.length() < 500;
+		return description != null && description != "" && description.length() < 500;
 	}
 	
 	public static boolean categoryValid (String category) {

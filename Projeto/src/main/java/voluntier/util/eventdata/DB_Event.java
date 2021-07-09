@@ -52,6 +52,9 @@ public class DB_Event {
 	public static final String MOBILE_REGEX = "([+][0-9]{2,3}\\s)?[2789][0-9]{8}";
 	
 	public static final int DEFALUT_COMMENT_SIZE = 500;
+	public static final long DEFAULT_CAPACITY = 100;
+	
+	//private static final Logger LOG = Logger.getLogger(RegisterResource.class.getName());
 
 	public static Entity updateProperty (UpdateEventData data, Key eventKey, Entity event) {
 		return Entity.newBuilder(eventKey)

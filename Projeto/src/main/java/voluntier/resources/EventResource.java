@@ -58,7 +58,7 @@ public class EventResource {
 		LOG.fine("Trying to add event to user: " + data.email);
 
 		if (!data.isValid())
-			return Response.status(Status.BAD_GATEWAY).build();
+			return Response.status(Status.BAD_REQUEST).build();
 
 		Transaction txn = datastore.newTransaction();
 
@@ -90,7 +90,7 @@ public class EventResource {
 					LOG.warning("There is already an event with the name " + data.event_name);
 					return Response.status(Status.FORBIDDEN).build();
 				}
-
+				
 				event = DB_Event.createNew(data, eventKey, data.email);
 
 				txn.put(event);
