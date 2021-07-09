@@ -12,6 +12,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.javatuples.Pair;
+import org.javatuples.Triplet;
 
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
@@ -19,17 +20,22 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Transaction;
-import com.google.cloud.datastore.Value;
+import com.google.datastore.v1.QueryResultBatch.MoreResultsType;
 
 import voluntier.util.consumes.event.DeleteCommentData;
+import voluntier.util.consumes.event.EventChatData;
 import voluntier.exceptions.ImpossibleActionException;
-import voluntier.exceptions.InexistentCommentIdException;
+import voluntier.exceptions.InexistentChatIdException;
+import voluntier.exceptions.InexistentLogIdException;
+import voluntier.exceptions.InexistentMessageIdException;
+import voluntier.exceptions.InvalidCursorException;
 import voluntier.util.JsonUtil;
 import voluntier.util.consumes.event.CreateEventData;
 import voluntier.util.consumes.event.EventData;
 import voluntier.util.consumes.event.PostCommentData;
 import voluntier.util.consumes.event.UpdateCommentData;
 import voluntier.util.eventdata.DB_Event;
+import voluntier.util.eventdata.MessageData;
 import voluntier.util.produces.ChatReturn;
 import voluntier.util.produces.CreateEventReturn;
 import voluntier.util.produces.EventDataReturn;
@@ -90,10 +96,10 @@ public class EventResource {
 					LOG.warning("There is already an event with the name " + data.event_name);
 					return Response.status(Status.FORBIDDEN).build();
 				}
-				
-				event = DB_Event.createNew(data, eventKey, data.email);
 
-				txn.put(event);
+				List<Entity> ents = DB_Event.createNew(data, eventKey, data.email);
+
+				ents.forEach(ent -> txn.put(ent));
 				txn.commit();
 
 				LOG.fine("Event: " + data.event_name + " inserted correctly.");
@@ -146,9 +152,7 @@ public class EventResource {
 			Key eventKey = eventFactory.newKey(data.event_id);
 			Entity event = txn.get(eventKey);
 
-			if (event == null || !UpdateEventResource.isActive(event.getString(DB_Event.STATE))
-					|| !UpdateEventResource.isPublic(event.getString(DB_Event.PROFILE)) || !UpdateEventResource
-							.isFull(event.getLong(DB_Event.CAPACITY), event.getLong(DB_Event.N_PARTICIPANTS) + 1)) {
+			if (event == null || !DB_Event.isActive(event) || !DB_Event.isPublic(event) || DB_Event.isFull(event)) {
 				txn.rollback();
 				LOG.warning("There is no event with the name " + data.event_id
 						+ " or event is already full or it is a private event.");
@@ -180,7 +184,7 @@ public class EventResource {
 	@Path("/postComment")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response addMessage(PostCommentData data) {
+	public Response addComment(PostCommentData data) {
 		LOG.fine("Trying to add comment to event: " + data.event_id);
 
 		if (!data.isValid())
@@ -211,19 +215,27 @@ public class EventResource {
 			Key eventKey = eventFactory.newKey(data.event_id);
 			Entity event = txn.get(eventKey);
 
-			if (event == null || UpdateEventResource.isActive(event.getString(DB_Event.PROFILE))) {
+			if (event == null || !DB_Event.isActive(event)) {
 				txn.rollback();
 				LOG.warning("There is no event with the name " + data.event_id);
 				return Response.status(Status.BAD_REQUEST).build();
 			}
 
-			Pair<Entity, String> recieved_data = DB_Event.postComment(eventKey, event, data.email, data.comment);
+			try {
+				Pair<List<Entity>, Integer> recieved_data = DB_Event.postComment(eventKey, event, data.email,
+						data.comment);
 
-			txn.put(recieved_data.getValue0());
-			txn.commit();
+				recieved_data.getValue0().forEach(ent -> txn.put(ent));
 
-			LOG.fine("Comment inserted correctly.");
-			return Response.ok(JsonUtil.json.toJson(new PostCommentReturn(recieved_data.getValue1()))).build();
+				txn.commit();
+
+				LOG.fine("Comment inserted correctly.");
+				return Response.ok(JsonUtil.json.toJson(new PostCommentReturn(recieved_data.getValue1()))).build();
+
+			} catch (InexistentChatIdException | InexistentLogIdException e) {
+				txn.rollback();
+				return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
+			}
 
 		} catch (Exception e) {
 			txn.rollback();
@@ -241,7 +253,7 @@ public class EventResource {
 	@POST
 	@Path("/deleteComment")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response deleteMessage(DeleteCommentData data) {
+	public Response deleteComment(DeleteCommentData data) {
 		LOG.fine("Trying to delete comment from event: " + data.event_id);
 
 		if (!data.isValid())
@@ -270,11 +282,13 @@ public class EventResource {
 			}
 
 			try {
-				event = DB_Event.deleteComment(eventKey, event, data.comment_id);
-			} catch (InexistentCommentIdException e) {
+				event = DB_Event.deleteComment(eventKey, event, data.comment_id, data.email);
+			} catch (ImpossibleActionException | InexistentMessageIdException | InexistentChatIdException
+					| InexistentLogIdException e) {
 				txn.rollback();
 				return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
 			}
+
 			txn.put(event);
 			txn.commit();
 
@@ -296,7 +310,7 @@ public class EventResource {
 	@POST
 	@Path("/updateComment")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response updateMessage(UpdateCommentData data) {
+	public Response updateComment(UpdateCommentData data) {
 		LOG.fine("Trying to update comment from event: " + data.event_id);
 
 		if (!data.isValid())
@@ -326,7 +340,8 @@ public class EventResource {
 
 			try {
 				event = DB_Event.updateComment(eventKey, event, data.comment_id, data.email, data.comment);
-			} catch (ImpossibleActionException | InexistentCommentIdException e) {
+			} catch (ImpossibleActionException | InexistentMessageIdException | InexistentChatIdException
+					| InexistentLogIdException e) {
 				txn.rollback();
 				return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
 			}
@@ -353,7 +368,7 @@ public class EventResource {
 	@Path("/getEventChat")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response getChat(EventData data) {
+	public Response getChat(EventChatData data) {
 		LOG.fine("Trying to get chat from event: " + data.event_id);
 
 		if (!data.isValid())
@@ -376,9 +391,17 @@ public class EventResource {
 				return Response.status(Status.BAD_REQUEST).build();
 			}
 
-			List<Value<?>> chat = event.getList("chat");
+			try {
+				Triplet<List<MessageData>, Integer, MoreResultsType> messages = DB_Event.getChat(eventKey, event,
+						data.cursor);
+				return Response
+						.ok(JsonUtil.json.toJson(
+								new ChatReturn(messages.getValue0(), messages.getValue1(), messages.getValue2())))
+						.build();
+			} catch (InexistentChatIdException | InvalidCursorException | InexistentLogIdException e) {
+				return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
+			}
 
-			return Response.ok(JsonUtil.json.toJson(new ChatReturn(chat))).build();
 		} catch (Exception e) {
 			LOG.severe(e.getMessage());
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
@@ -418,7 +441,7 @@ public class EventResource {
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 	}
-	
+
 	@POST
 	@Path("/getParticipants")
 	@Produces(MediaType.APPLICATION_JSON)

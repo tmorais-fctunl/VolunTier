@@ -1,10 +1,9 @@
 package voluntier.util.eventdata;
 
-import java.util.Iterator;
 import java.util.List;
-import java.util.Random;
 
 import org.javatuples.Pair;
+import org.javatuples.Triplet;
 
 import com.google.cloud.Timestamp;
 import com.google.cloud.datastore.Entity;
@@ -13,12 +12,19 @@ import com.google.cloud.datastore.LatLng;
 import com.google.cloud.datastore.ListValue;
 import com.google.cloud.datastore.StringValue;
 import com.google.cloud.datastore.Value;
+import com.google.datastore.v1.QueryResultBatch;
 
 import voluntier.exceptions.ImpossibleActionException;
-import voluntier.exceptions.InexistentCommentIdException;
-import voluntier.util.JsonUtil;
+import voluntier.exceptions.InexistentChatIdException;
+import voluntier.exceptions.InexistentLogIdException;
+import voluntier.exceptions.InexistentMessageIdException;
+import voluntier.exceptions.InvalidCursorException;
+import voluntier.exceptions.SomethingWrongException;
 import voluntier.util.consumes.event.CreateEventData;
 import voluntier.util.consumes.event.UpdateEventData;
+import voluntier.util.eventdata.chatdata.DB_Chat;
+import voluntier.util.userdata.Profile;
+import voluntier.util.userdata.State;
 
 public class DB_Event {
 
@@ -31,9 +37,8 @@ public class DB_Event {
 
 	public static final String OWNER_EMAIL = "owner_email";
 	public static final String CONTACT = "contact";
-	//public static final String MODS = "mods";
 
-	public static final String CHAT = "chat";
+	public static final String CHAT_ID = "chat_id";
 	public static final String PARTICIPANTS = "participants";
 	public static final String N_PARTICIPANTS = "num_participants";
 
@@ -64,7 +69,7 @@ public class DB_Event {
 				.set(START_DATE, data.getStartDate(event.getString(START_DATE)))
 				.set(END_DATE, data.getEndDate(event.getString(END_DATE)))
 				.set(CREATION_DATE, event.getString(CREATION_DATE))
-				.set(CHAT, event.getList(CHAT))
+				.set(CHAT_ID, event.getString(CHAT_ID))
 				.set(PARTICIPANTS, event.getList(PARTICIPANTS))
 				.set(N_PARTICIPANTS, event.getLong(N_PARTICIPANTS))
 				.set(OWNER_EMAIL, data.getOwnerEmail(event.getString(OWNER_EMAIL)))
@@ -74,8 +79,6 @@ public class DB_Event {
 				.set(CAPACITY, data.getCapacity(event.getLong(CAPACITY)))
 				.set(STATE, event.getString(STATE))
 				.set(PROFILE, event.getString(PROFILE))
-				//.set(REGION, data.region)
-				//.set(POSTAL_CODE, data.pc)
 				.set(WEBSITE, data.getWebsite(event.getString(WEBSITE)))
 				.set(FACEBOOK, data.getFacebook(event.getString(FACEBOOK)))
 				.set(INSTAGRAM, data.getInstagram(event.getString(INSTAGRAM)))
@@ -91,7 +94,7 @@ public class DB_Event {
 				.set(START_DATE, event.getString(START_DATE))
 				.set(END_DATE, event.getString(END_DATE))
 				.set(CREATION_DATE, event.getString(CREATION_DATE))
-				.set(CHAT, event.getList(CHAT))
+				.set(CHAT_ID, event.getString(CHAT_ID))
 				.set(PARTICIPANTS, event.getList(PARTICIPANTS))
 				.set(N_PARTICIPANTS, event.getLong(N_PARTICIPANTS))
 				.set(OWNER_EMAIL, event.getString(OWNER_EMAIL))
@@ -101,8 +104,6 @@ public class DB_Event {
 				.set(CAPACITY, event.getLong(CAPACITY))
 				.set(STATE, state)
 				.set(PROFILE, event.getString(PROFILE))
-				//.set(REGION, data.region)
-				//.set(POSTAL_CODE, data.pc)
 				.set(WEBSITE, event.getString(WEBSITE))
 				.set(FACEBOOK, event.getString(FACEBOOK))
 				.set(INSTAGRAM, event.getString(INSTAGRAM))
@@ -118,7 +119,7 @@ public class DB_Event {
 				.set(START_DATE, event.getString(START_DATE))
 				.set(END_DATE, event.getString(END_DATE))
 				.set(CREATION_DATE, event.getString(CREATION_DATE))
-				.set(CHAT, event.getList(CHAT))
+				.set(CHAT_ID, event.getString(CHAT_ID))
 				.set(PARTICIPANTS, event.getList(PARTICIPANTS))
 				.set(N_PARTICIPANTS, event.getLong(N_PARTICIPANTS))
 				.set(OWNER_EMAIL, event.getString(OWNER_EMAIL))
@@ -128,8 +129,6 @@ public class DB_Event {
 				.set(CAPACITY, event.getLong(CAPACITY))
 				.set(STATE, event.getString(STATE))
 				.set(PROFILE, profile)
-				//.set(REGION, data.region)
-				//.set(POSTAL_CODE, data.pc)
 				.set(WEBSITE, event.getString(WEBSITE))
 				.set(FACEBOOK, event.getString(FACEBOOK))
 				.set(INSTAGRAM, event.getString(INSTAGRAM))
@@ -137,21 +136,22 @@ public class DB_Event {
 				.build();
 	}
 
-	public static Entity createNew (CreateEventData event_data, Key eventKey, String user_email) {
+	public static List<Entity> createNew (CreateEventData event_data, Key eventKey, String user_email) {
 		EventData_Minimal data = new EventData_Minimal(event_data);
 		LatLng event_location = LatLng.of(data.location[0], data.location[1]);
-		ListValue.Builder chat = ListValue.newBuilder();
+		Pair<List<Entity>, String> chat = DB_Chat.createNew(user_email);
 		ListValue.Builder participants = ListValue.newBuilder();
 		participants.addValue(user_email);
+		List<Entity> entities = chat.getValue0();
 
-		return Entity.newBuilder(eventKey)
+		entities.add(Entity.newBuilder(eventKey)
 				.set(NAME, data.name)
 				.set(ID, data.id)
 				.set(LOCATION, event_location)
 				.set(START_DATE, data.start_date)
 				.set(END_DATE, data.end_date)
 				.set(CREATION_DATE, Timestamp.now().toString())
-				.set(CHAT, chat.build())
+				.set(CHAT_ID, chat.getValue1())
 				.set(PARTICIPANTS, participants.build())
 				.set(N_PARTICIPANTS, 1)
 				.set(OWNER_EMAIL, data.owner_email)
@@ -161,92 +161,38 @@ public class DB_Event {
 				.set(CAPACITY, data.capacity)
 				.set(STATE, data.getState().toString())
 				.set(PROFILE, data.getProfile().toString())
-				//.set(REGION, data.region)
-				//.set(POSTAL_CODE, data.pc)
 				.set(WEBSITE, data.website)
 				.set(FACEBOOK, data.facebook)
 				.set(INSTAGRAM, data.instagram)
 				.set(TWITTER, data.twitter)
-				/*.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(data.profile_pic)
-						.setExcludeFromIndexes(true)
-						.build())*/
-				.build();
+				.build());
+		
+		return entities;
 	}
 
-	public static Pair<Entity, String> postComment (Key eventKey, Entity event, String email, String comment) {
-		List<Value<?>> chat = event.getList(DB_Event.CHAT);
-
-		ListValue.Builder newChat = ListValue.newBuilder().set(chat);
+	public static Pair<List<Entity>, Integer> postComment (Key eventKey, Entity event, String email, String comment)
+			throws InexistentChatIdException, InexistentLogIdException,
+				SomethingWrongException {
 		
-		String comment_id = setId(chat.size());
+		String chat_id = event.getString(CHAT_ID);
 		
-		CommentData comment_data = new CommentData(email, comment, Timestamp.now().toString(), comment_id);
-		
-		newChat.addValue(JsonUtil.json.toJson(comment_data));
-
-		return new Pair<Entity, String>(updateChat (eventKey, event, newChat.build()), comment_id);
+		return DB_Chat.postMessage(chat_id, email, comment);
 	}
 	
-	private static String setId(int n_comment) {
-		Random rand = new Random ();
-		String comment_id = "Comment" + n_comment + rand.nextInt(10000);
-		return comment_id;
-	}
-
-	public static Entity deleteComment(Key eventKey, Entity event, String comment_id) throws InexistentCommentIdException {
-		List<Value<?>> chat = event.getList(DB_Event.CHAT);
-
-		ListValue.Builder newChat = ListValue.newBuilder();
-
-		Iterator<Value<?>> it = chat.iterator();
-
-		boolean changed = false;
-		while (it.hasNext()) {
-			Value<?> comment = it.next();
-			CommentData comment_data = JsonUtil.json.fromJson((String) comment.get(), CommentData.class);
-			if (!comment_id.equals(comment_data.comment_id)) {
-				newChat.addValue(comment);
-			} else
-				changed = true;
-
-		}
-		if (!changed)
-			throw new InexistentCommentIdException("There is no such comment as " + comment_id + ".");
+	public static Entity deleteComment(Key eventKey, Entity event, int comment_id, String email)
+			throws InexistentMessageIdException, InexistentChatIdException,
+				InexistentLogIdException, ImpossibleActionException {
 		
-		return updateChat(eventKey, event, newChat.build());
+		String chat_id = event.getString(CHAT_ID);
+		return DB_Chat.deleteMessage(chat_id, comment_id, email);
 	}
 	
-	public static Entity updateComment (Key eventKey, Entity event, String comment_id, String user_email, String comment_content) 
-			throws ImpossibleActionException, InexistentCommentIdException {
-		List<Value<?>> chat = event.getList(DB_Event.CHAT);
+	public static Entity updateComment (Key eventKey, Entity event, int comment_id, String user_email, String comment_content) 
+			throws ImpossibleActionException, InexistentMessageIdException,
+				InexistentChatIdException, InexistentLogIdException {
 		
-		ListValue.Builder newChat = ListValue.newBuilder();
-		
-		Iterator<Value<?>> it = chat.iterator();
-		boolean changed = false;
-		
-		while (it.hasNext()) {
-			Value<?> comment = it.next();
-			CommentData comment_data = JsonUtil.json.fromJson((String) comment.get(), CommentData.class);
-
-			if (!comment_id.equals(comment_data.comment_id)) 
-				newChat.addValue(comment);
-
-			else {
-				if (comment_data.email.equals(user_email)) {
-					comment_data.comment = comment_content;
-					newChat.addValue(JsonUtil.json.toJson(comment_data));
-					changed = true;
-				}
-				else 
-					throw new ImpossibleActionException(user_email + "can't update this comment.");
-			}
-			
-		}
-		if (!changed)
-			throw new InexistentCommentIdException("There is no such comment as " + comment_id + "." );
-
-		return updateChat(eventKey, event, newChat.build());
+		String chat_id = event.getString(CHAT_ID);
+		return DB_Chat.editMessage(chat_id, comment_id, user_email, comment_content);
 	}
 
 	public static Entity addParticipant (Key eventKey, Entity event, String user_email) {
@@ -261,34 +207,14 @@ public class DB_Event {
 
 		return updateParticipants(eventKey, event, newParticipants.build(), true);
 	}
-
-	//podemos fazer a funcionalidade de update comment com o postComment
-
-	public static Entity updateChat (Key eventKey, Entity event, ListValue newChat) {
-		return Entity.newBuilder(eventKey)
-				.set(NAME, event.getString(NAME))
-				.set(ID, event.getString(ID))
-				.set(LOCATION, event.getLatLng(LOCATION))
-				.set(START_DATE, event.getString(START_DATE))
-				.set(END_DATE, event.getString(END_DATE))
-				.set(CREATION_DATE, event.getString(CREATION_DATE))
-				.set(CHAT, newChat)
-				.set(PARTICIPANTS, event.getList(PARTICIPANTS))
-				.set(N_PARTICIPANTS, event.getLong(N_PARTICIPANTS))
-				.set(OWNER_EMAIL, event.getString(OWNER_EMAIL))
-				.set(CONTACT, event.getString(CONTACT))
-				.set(DESCRIPTION, event.getString(DESCRIPTION))
-				.set(CATEGORY, event.getString(CATEGORY))
-				.set(CAPACITY, event.getLong(CAPACITY))
-				.set(STATE, event.getString(STATE))
-				.set(PROFILE, event.getString(PROFILE))
-				//.set(REGION, data.region)
-				//.set(POSTAL_CODE, data.pc)
-				.set(WEBSITE, event.getString(WEBSITE))
-				.set(FACEBOOK, event.getString(FACEBOOK))
-				.set(INSTAGRAM, event.getString(INSTAGRAM))
-				.set(TWITTER, event.getString(TWITTER))
-				.build();
+	
+	public static Triplet<List<MessageData>, Integer, QueryResultBatch.MoreResultsType> getChat(Key eventKey, Entity event, Integer cursor) 
+			throws InexistentChatIdException, InvalidCursorException,
+				InexistentLogIdException{
+		
+		String chat_id = event.getString(CHAT_ID);
+		
+		return DB_Chat.getChat(chat_id, cursor == null ? 0 : cursor);
 	}
 
 	public static Entity updateParticipants (Key eventKey, Entity event, ListValue newParticipants, boolean add) {
@@ -305,7 +231,7 @@ public class DB_Event {
 				.set(START_DATE, event.getString(START_DATE))
 				.set(END_DATE, event.getString(END_DATE))
 				.set(CREATION_DATE, event.getString(CREATION_DATE))
-				.set(CHAT, event.getList(CHAT))
+				.set(CHAT_ID, event.getString(CHAT_ID))
 				.set(PARTICIPANTS, newParticipants)
 				.set(OWNER_EMAIL, event.getString(OWNER_EMAIL))
 				.set(CONTACT, event.getString(CONTACT))
@@ -314,13 +240,27 @@ public class DB_Event {
 				.set(CAPACITY, event.getLong(CAPACITY))
 				.set(STATE, event.getString(STATE))
 				.set(PROFILE, event.getString(PROFILE))
-				//.set(REGION, data.region)
-				//.set(POSTAL_CODE, data.pc)
 				.set(WEBSITE, event.getString(WEBSITE))
 				.set(FACEBOOK, event.getString(FACEBOOK))
 				.set(INSTAGRAM, event.getString(INSTAGRAM))
 				.set(TWITTER, event.getString(TWITTER))
 				.build();
 	}
-
+	
+	public static boolean isOwner (Entity event, String owner_email) {
+		return event.getString(OWNER_EMAIL).equals(owner_email);
+	}
+	
+	public static boolean isActive (Entity event) {
+		return event.getString(DB_Event.STATE).equals(State.ENABLED.toString());
+	}
+	
+	public static boolean isPublic (Entity event) {
+		return event.getString(DB_Event.PROFILE).equals(Profile.PUBLIC.toString());
+	}
+	
+	public static boolean isFull (Entity event) {
+		return event.getLong(DB_Event.N_PARTICIPANTS) >= event.getLong(DB_Event.CAPACITY);
+	}
+	
 }

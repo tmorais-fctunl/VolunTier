@@ -19,7 +19,6 @@ import voluntier.util.consumes.event.EventData;
 import voluntier.util.consumes.event.UpdateEventData;
 import voluntier.util.consumes.event.UpdateProfileData;
 import voluntier.util.eventdata.DB_Event;
-import voluntier.util.userdata.Profile;
 import voluntier.util.userdata.State;
 
 import javax.ws.rs.core.Response;
@@ -80,11 +79,8 @@ public class UpdateEventResource {
 				LOG.warning("Event named " + data.event_id + " does not exist.");
 				return Response.status(Status.BAD_REQUEST).entity("Invalid event").build();
 			} else {
-				String owner_email = event.getString(DB_Event.OWNER_EMAIL);
-				String state = event.getString(DB_Event.STATE);
-
 				// se nao for owner, nao pode alterar nada. vamos querer adicionar mais condicoes eventualmente...
-				if ( !isOwner(data.email, owner_email) || !isActive(state) ) {
+				if ( !DB_Event.isOwner(event, data.email) || !DB_Event.isActive(event) ) {
 					txn.rollback();
 					LOG.warning("User " + data.email + " can not change properties of event " + data.event_id + " or event does not exist");
 					return Response.status(Status.FORBIDDEN).build();
@@ -154,12 +150,9 @@ public class UpdateEventResource {
 				txn.rollback();
 				LOG.warning("Event named " + data.event_id + " does not exist.");
 				return Response.status(Status.BAD_REQUEST).entity("Invalid event").build();
-			} else {
-				String owner_email = event.getString(DB_Event.OWNER_EMAIL);
-				String state = event.getString(DB_Event.STATE);
-				
+			} else {				
 				// se nao for owner, nao pode alterar nada. vamos querer adicionar mais condicoes eventualmente...
-				if ( !isOwner(data.email, owner_email) || !isActive(state)) {
+				if ( !DB_Event.isOwner(event, data.email) || !DB_Event.isActive(event)) {
 					txn.rollback();
 					LOG.warning("User " + data.email + " can not delete event " + data.event_id);
 					return Response.status(Status.FORBIDDEN).build();
@@ -229,12 +222,9 @@ public class UpdateEventResource {
 				txn.rollback();
 				LOG.warning("Event named " + data.event_id + " does not exist.");
 				return Response.status(Status.BAD_REQUEST).entity("Invalid event").build();
-			} else {
-				String owner_email = event.getString(DB_Event.OWNER_EMAIL);
-				String state = event.getString(DB_Event.STATE);
-				
+			} else {				
 				// se nao for owner, nao pode alterar nada. vamos querer adicionar mais condicoes eventualmente...
-				if ( !isOwner(data.email, owner_email) || !isActive(state)) {
+				if ( !DB_Event.isOwner(event, data.email) || !DB_Event.isActive(event)) {
 					txn.rollback();
 					LOG.warning("User " + data.email + " can not update profile of event " + data.event_id);
 					return Response.status(Status.FORBIDDEN).build();
@@ -261,22 +251,4 @@ public class UpdateEventResource {
 			}
 		}
 	}
-	
-	static boolean isOwner (String email, String owner_emai) {
-		return email.equals(owner_emai);
-	}
-	
-	static boolean isActive (String state) {
-		return state.equals(State.ENABLED.toString());
-	}
-	
-	static boolean isPublic (String profile) {
-		return profile.equals(Profile.PUBLIC.toString());
-	}
-	
-	static boolean isFull (long capacity, long num_participants) {
-		return num_participants <= capacity;
-	}
-	
-
 }

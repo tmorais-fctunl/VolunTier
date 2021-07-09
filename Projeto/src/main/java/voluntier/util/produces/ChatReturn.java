@@ -1,27 +1,23 @@
 package voluntier.util.produces;
 
-import java.util.LinkedList;
 import java.util.List;
 
-import com.google.cloud.datastore.Value;
+import com.google.datastore.v1.QueryResultBatch.MoreResultsType;
 
-import voluntier.util.JsonUtil;
-import voluntier.util.eventdata.CommentData;
+import voluntier.util.eventdata.MessageData;
 
 public class ChatReturn {
 	
-	public List<CommentData> comments;
+	public List<MessageData> comments;
+	public Integer cursor;
+	public String results;
 
 	public ChatReturn () {
 	}
 	
-	public ChatReturn (List<Value<?>> chat) {
-		comments = new LinkedList<CommentData>();
-		
-		chat.forEach(comment -> {
-			String comment_string = (String) comment.get();
-			comments.add(JsonUtil.json.fromJson(comment_string, CommentData.class));
-		});
-
+	public ChatReturn (List<MessageData> chat, Integer cursor, MoreResultsType more_results) {
+		comments = chat;
+		this.cursor = cursor;
+		this.results = more_results.toString();
 	}
 }
