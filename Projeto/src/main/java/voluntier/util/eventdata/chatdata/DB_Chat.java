@@ -267,7 +267,7 @@ public class DB_Chat {
 
 		List<MessageLog> logs = getMessageLogs(chat);
 
-		if (cursor > logs.size() || cursor < 0)
+		if (cursor >= logs.size() || cursor < 0)
 			throw new InvalidCursorException();
 
 		MessageLog log = logs.get(cursor);
