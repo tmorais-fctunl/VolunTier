@@ -20,7 +20,7 @@ public class CreateEventData extends RequestData {
 	public String end_date;
 	public String description;
 	public String category;
-	
+
 	public String contact;
 	public long capacity;
 
@@ -37,11 +37,11 @@ public class CreateEventData extends RequestData {
 		this.end_date = end_date;
 		this.description = description;
 		this.category = category;
-		
+
 		this.contact = "";
 		this.capacity = DB_Event.DEFAULT_CAPACITY;
 	}*/
-	
+
 	public CreateEventData (String user_email, String token, String event_name, double[] location, 
 			String start_date, String end_date, String description, String category, String contact, long capacity){
 		super(user_email, token);
@@ -51,34 +51,37 @@ public class CreateEventData extends RequestData {
 		this.end_date = end_date;
 		this.description = description;
 		this.category = category;
-		
+
 		this.contact = contact;
 		this.capacity = capacity;
 	}
-	
+
 	public boolean event_nameValid () {
 		return event_name != null && event_name != "";
 	}
-	
+
 	public boolean categoryValid () {
 		return EventData_Minimal.categoryValid(category);
 	}
-	
+
 	public boolean descriptionValid () {
 		return description != null && description != "" && description.length() <= DB_Event.DEFALUT_COMMENT_SIZE;
 	}
-	
+
 	public boolean locationValid () {
 		return location != null && location[0] != -1 && location[1] != -1;
 	}
-	
+
 	public boolean contactValid () {
 		if (contact == null) {
 			contact = "";
 			return true;
-		} else return EventData_Minimal.contactValid(contact);
+		} 
+		else if (contact.equals(""))
+			return true;
+		else return EventData_Minimal.contactValid(contact);
 	}
-	
+
 	public boolean capacityValid () {
 		if (capacity < 1) {
 			capacity = DB_Event.DEFAULT_CAPACITY;
@@ -97,7 +100,7 @@ public class CreateEventData extends RequestData {
 			return false;
 		}
 	}
-	
+
 	public boolean optionalsValid () {
 		return contactValid() && capacityValid();
 	}
