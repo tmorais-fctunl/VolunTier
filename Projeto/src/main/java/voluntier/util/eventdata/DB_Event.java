@@ -208,13 +208,13 @@ public class DB_Event {
 		return updateParticipants(eventKey, event, newParticipants.build(), true);
 	}
 	
-	public static Triplet<List<MessageData>, Integer, QueryResultBatch.MoreResultsType> getChat(Key eventKey, Entity event, Integer cursor) 
+	public static Triplet<List<MessageData>, Integer, QueryResultBatch.MoreResultsType> getChat(Key eventKey, Entity event, Integer cursor, boolean lastest_first) 
 			throws InexistentChatIdException, InvalidCursorException,
 				InexistentLogIdException{
 		
 		String chat_id = event.getString(CHAT_ID);
 		
-		return DB_Chat.getChat(chat_id, cursor == null ? 0 : cursor);
+		return DB_Chat.getChat(chat_id, cursor == null ? 0 : cursor, lastest_first);
 	}
 
 	public static Entity updateParticipants (Key eventKey, Entity event, ListValue newParticipants, boolean add) {

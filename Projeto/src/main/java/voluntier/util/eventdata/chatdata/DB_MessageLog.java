@@ -29,7 +29,7 @@ public class DB_MessageLog {
 	public static final String ID = "id";
 	public static final String START_INDEX = "start_index";
 
-	public static final int MAX_LOG_SIZE = 10000;
+	public static final int MAX_LOG_SIZE = 1000;
 
 	private static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	private static KeyFactory logFactory = datastore.newKeyFactory().setKind("MessageLog");
@@ -67,8 +67,10 @@ public class DB_MessageLog {
 
 		if (log == null)
 			throw new InexistentLogIdException();
+		
 
 		List<Value<?>> messages = log.getList(MESSAGES);
+
 		Iterator<Value<?>> it = messages.iterator();
 		MessageData out = null;
 		while (it.hasNext()) {
@@ -91,7 +93,7 @@ public class DB_MessageLog {
 		Pair<Entity, String> newLog = createNew(chat_id, start_index);
 		String message_log_id = newLog.getValue1();
 		Pair<Entity, Integer> updated_log;
-		
+
 		updated_log = addMessage(newLog.getValue0().getKey(), newLog.getValue0(), email, message);
 		Integer message_id = updated_log.getValue1();
 
@@ -214,7 +216,7 @@ public class DB_MessageLog {
 		return updateMessages(idKey, log, newList.build());
 	}
 
-	public static List<MessageData> getMessages(String log_id) throws InexistentLogIdException {
+	public static List<MessageData> getMessages(String log_id, boolean latest_first) throws InexistentLogIdException {
 		Key idKey = logFactory.newKey(log_id);
 		Entity log = datastore.get(idKey);
 
@@ -225,7 +227,10 @@ public class DB_MessageLog {
 		List<MessageData> out = new LinkedList<>();
 		messages.forEach(message -> {
 			MessageData message_data = JsonUtil.json.fromJson((String) message.get(), MessageData.class);
-			out.add(message_data);
+			if (latest_first)
+				out.add(0, message_data);
+			else
+				out.add(message_data);
 		});
 
 		return out;

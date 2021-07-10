@@ -130,7 +130,7 @@ public class DB_Chat {
 			else 
 				break;
 		}
-		
+			
 		return message_log;
 	}
 
@@ -172,10 +172,10 @@ public class DB_Chat {
 			message_id = message_log.getValue1();
 
 		} catch (MaximumSizeReachedException e) {
-			int last_start_index = last_log_data.start_index;
-			// need to create a new MessageLog and add it to current list with the message
-			// already added
-			int new_start_index = last_start_index + DB_MessageLog.getMessages(last_log_id).size();
+			// need to create a new MessageLog and add it to current list with the new message
+			//get the last index from the last log, +1 will be the starting index of the new log
+			List<MessageData> messages = DB_MessageLog.getMessages(last_log_id, false);
+			int new_start_index = messages.get(messages.size() - 1).comment_id + 1;
 
 			Triplet<Entity, String, Integer> new_message_log = DB_MessageLog.createLogAndAddMessage(chat_id,
 					new_start_index, email, message);
@@ -257,7 +257,7 @@ public class DB_Chat {
 	}
 
 	public static Triplet<List<MessageData>, Integer, QueryResultBatch.MoreResultsType> getChat(String chat_id,
-			int cursor) throws InexistentChatIdException, InvalidCursorException, InexistentLogIdException {
+			int cursor, boolean latest_first) throws InexistentChatIdException, InvalidCursorException, InexistentLogIdException {
 
 		Key idKey = chatFactory.newKey(chat_id);
 		Entity chat = datastore.get(idKey);
@@ -269,11 +269,23 @@ public class DB_Chat {
 
 		if (cursor >= logs.size() || cursor < 0)
 			throw new InvalidCursorException();
+		
+		int index = latest_first ? logs.size() - 1 - cursor : cursor;
 
-		MessageLog log = logs.get(cursor);
+		MessageLog log = logs.get(index);
 		boolean more_results = cursor < logs.size() - 1;
+		
+		List<MessageData> messages = DB_MessageLog.getMessages(log.id, latest_first);
+		
+		int new_cursor = cursor + 1;
+		
+		if(latest_first && cursor == 0 && logs.size() > 1) {
+			messages.addAll(DB_MessageLog.getMessages(logs.get(index - 1).id, latest_first));
+			more_results = cursor < logs.size() - 2;
+			new_cursor = cursor + 2;
+		}
 
-		return new Triplet<>(DB_MessageLog.getMessages(log.id), more_results ? cursor + 1 : null,
+		return new Triplet<>(messages, more_results ? new_cursor : null,
 				more_results ? MoreResultsType.MORE_RESULTS_AFTER_LIMIT : MoreResultsType.NO_MORE_RESULTS);
 	}
 

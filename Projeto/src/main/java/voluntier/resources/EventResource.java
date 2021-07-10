@@ -393,7 +393,7 @@ public class EventResource {
 
 			try {
 				Triplet<List<MessageData>, Integer, MoreResultsType> messages = DB_Event.getChat(eventKey, event,
-						data.cursor);
+						data.cursor, data.latest_first);
 				return Response
 						.ok(JsonUtil.json.toJson(
 								new ChatReturn(messages.getValue0(), messages.getValue1(), messages.getValue2())))
