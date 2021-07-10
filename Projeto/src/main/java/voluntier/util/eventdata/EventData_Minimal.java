@@ -41,7 +41,7 @@ public class EventData_Minimal {
 	
 	public EventData_Minimal (CreateEventData data) {
 		this.setState(State.ENABLED);
-		this.setProfile(Profile.PRIVATE);
+		//this.setProfile(Profile.PRIVATE);
 		
 		name = data.event_name;
 		id = data.event_id;
@@ -51,6 +51,7 @@ public class EventData_Minimal {
 		owner_email = data.email;
 		description = data.description;
 		category = data.category;
+		setProfile (Profile.valueOf(data.profile));
 		
 		contact = data.contact;
 		capacity = data.capacity;

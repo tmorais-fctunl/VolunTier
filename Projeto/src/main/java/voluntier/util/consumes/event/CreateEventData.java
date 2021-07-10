@@ -20,6 +20,7 @@ public class CreateEventData extends RequestData {
 	public String end_date;
 	public String description;
 	public String category;
+	public String profile;
 
 	public String contact;
 	public long capacity;
@@ -42,7 +43,7 @@ public class CreateEventData extends RequestData {
 		this.capacity = DB_Event.DEFAULT_CAPACITY;
 	}*/
 
-	public CreateEventData (String user_email, String token, String event_name, double[] location, 
+	public CreateEventData (String user_email, String token, String event_name, double[] location, String profile,
 			String start_date, String end_date, String description, String category, String contact, long capacity){
 		super(user_email, token);
 		this.event_name = event_name;
@@ -51,6 +52,7 @@ public class CreateEventData extends RequestData {
 		this.end_date = end_date;
 		this.description = description;
 		this.category = category;
+		this.profile = profile;
 
 		this.contact = contact;
 		this.capacity = capacity;
@@ -70,6 +72,10 @@ public class CreateEventData extends RequestData {
 
 	public boolean locationValid () {
 		return location != null && location[0] != -1 && location[1] != -1;
+	}
+	
+	public boolean profileValid () {
+		return EventData_Minimal.profileValid(profile);
 	}
 
 	public boolean contactValid () {
@@ -95,7 +101,7 @@ public class CreateEventData extends RequestData {
 			Timestamp.parseTimestamp(start_date);
 			Timestamp.parseTimestamp(end_date);
 			return super.isValid() && event_nameValid() && locationValid() && descriptionValid() 
-					&& categoryValid() && contactValid() && capacityValid();
+					&& categoryValid() && contactValid() && capacityValid() && profileValid();
 		} catch (DateTimeParseException e) {
 			return false;
 		}
