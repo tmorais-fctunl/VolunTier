@@ -24,20 +24,18 @@ import com.google.common.collect.ImmutableList;
 public class GoogleStorageUtil {
 	
 	
-/*	public static void configureBucketCors(String bucketName, String origin, String responseHeader,
+	/*public static void configureBucketCors(String bucketName, String responseHeader,
 			Integer maxAgeSeconds) {
 		//https://cloud.google.com/storage/docs/configuring-cors#storage_cors_configuration-java
 
 		Bucket bucket = storage.get(bucketName);
 		
-		Cors cors = Cors.newBuilder().setOrigins(ImmutableList.of(Cors.Origin.of(origin)))
+		Cors cors = Cors.newBuilder().setOrigins(ImmutableList.of(Cors.Origin.of("https://voluntier-317915.appspot.com"),Cors.Origin.of("https://voluntier-317915.ew.r.appspot.com")))
 				.setMethods(ImmutableList.of(HttpMethod.GET, HttpMethod.PUT)).setResponseHeaders(ImmutableList.of(responseHeader))
 				.setMaxAgeSeconds(maxAgeSeconds).build();
 
 		bucket.toBuilder().setCors(ImmutableList.of(cors)).build().update();
 
-		System.out.println("Bucket " + bucketName + " was updated with a CORS config to allow GET requests from "
-				+ origin + " sharing " + responseHeader + " responses across origins");
 	}*/
 		
 	
@@ -51,7 +49,7 @@ public class GoogleStorageUtil {
 		BlobId blobId = BlobId.of(bucketName, fileName);
 		BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType("text/plain").build();
 		
-		//configureBucketCors(bucketName, "https://voluntier-317915.appspot.com", "*", 15*60);
+		//configureBucketCors(bucketName, "*", 15*60);
 
 		//long maxContentLength = 1048576; // 1Mb
 		//Map<String, String> extHeaders = new HashMap<>();
