@@ -1,5 +1,6 @@
 package voluntier.util.eventdata;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import org.javatuples.Pair;
@@ -18,6 +19,7 @@ import voluntier.exceptions.ImpossibleActionException;
 import voluntier.exceptions.InexistentChatIdException;
 import voluntier.exceptions.InexistentLogIdException;
 import voluntier.exceptions.InexistentMessageIdException;
+import voluntier.exceptions.InexistentModeratorException;
 import voluntier.exceptions.InvalidCursorException;
 import voluntier.exceptions.SomethingWrongException;
 import voluntier.util.consumes.event.CreateEventData;
@@ -169,19 +171,28 @@ public class DB_Event {
 		
 		return entities;
 	}
+	
+	private static void checkIsParticipant(Key eventKey, Entity event, String req_email) throws ImpossibleActionException {
+		List<String> participants = getParticipants(eventKey, event);
+		if(!participants.contains(req_email))
+			throw new ImpossibleActionException("Non particpants cannot see chat moderators");
+	}
 
 	public static Pair<List<Entity>, Integer> postComment (Key eventKey, Entity event, String email, String comment)
 			throws InexistentChatIdException, InexistentLogIdException,
-				SomethingWrongException {
+				SomethingWrongException, ImpossibleActionException {
+
+		checkIsParticipant(eventKey, event, email);
 		
 		String chat_id = event.getString(CHAT_ID);
-		
 		return DB_Chat.postMessage(chat_id, email, comment);
 	}
 	
 	public static Entity deleteComment(Key eventKey, Entity event, int comment_id, String email)
 			throws InexistentMessageIdException, InexistentChatIdException,
 				InexistentLogIdException, ImpossibleActionException {
+
+		checkIsParticipant(eventKey, event, email);
 		
 		String chat_id = event.getString(CHAT_ID);
 		return DB_Chat.deleteMessage(chat_id, comment_id, email);
@@ -190,9 +201,59 @@ public class DB_Event {
 	public static Entity updateComment (Key eventKey, Entity event, int comment_id, String user_email, String comment_content) 
 			throws ImpossibleActionException, InexistentMessageIdException,
 				InexistentChatIdException, InexistentLogIdException {
+
+		checkIsParticipant(eventKey, event, user_email);
 		
 		String chat_id = event.getString(CHAT_ID);
 		return DB_Chat.editMessage(chat_id, comment_id, user_email, comment_content);
+	}
+	
+	public static Entity likeComment (Key eventKey, Entity event, int comment_id, String req_email)
+			throws InexistentChatIdException, InexistentLogIdException, 
+			InexistentMessageIdException, ImpossibleActionException {
+
+		checkIsParticipant(eventKey, event, req_email);
+		
+		String chat_id = event.getString(CHAT_ID);
+		return DB_Chat.likeMessage(chat_id, comment_id);
+	}
+	
+	public static Entity makeChatModerator (Key eventKey, Entity event, String req_email, String target_email) 
+			throws InexistentChatIdException, ImpossibleActionException {
+
+		checkIsParticipant(eventKey, event, req_email);
+		
+		String chat_id = event.getString(CHAT_ID);
+		return DB_Chat.makeModerator(chat_id, target_email, req_email);
+	}
+	
+	public static Entity removeChatModerator (Key eventKey, Entity event, String req_email, String target_email) 
+			throws InexistentChatIdException, ImpossibleActionException, InexistentModeratorException {
+
+		checkIsParticipant(eventKey, event, req_email);
+		
+		String chat_id = event.getString(CHAT_ID);
+		return DB_Chat.removeModerator(chat_id, target_email, req_email);
+	}
+	
+	public static List<String> getParticipants(Key eventKey, Entity event) {
+		List<String> participants = new LinkedList<>();
+		List<Value<?>> event_participants = event.getList(PARTICIPANTS);
+		event_participants.forEach(participant -> {
+			String participant_email = (String) participant.get();
+			participants.add(participant_email);
+		});
+		
+		return participants;
+	}
+	
+	public static List<String> getChatModerators(Key eventKey, Entity event, String req_email) 
+			throws InexistentChatIdException, ImpossibleActionException {
+		String chat_id = event.getString(CHAT_ID);
+		
+		checkIsParticipant(eventKey, event, req_email);
+		
+		return DB_Chat.getModerators(chat_id);
 	}
 
 	public static Entity addParticipant (Key eventKey, Entity event, String user_email) {
@@ -208,12 +269,14 @@ public class DB_Event {
 		return updateParticipants(eventKey, event, newParticipants.build(), true);
 	}
 	
-	public static Triplet<List<MessageData>, Integer, QueryResultBatch.MoreResultsType> getChat(Key eventKey, Entity event, Integer cursor, boolean lastest_first) 
+	public static Triplet<List<MessageData>, Integer, QueryResultBatch.MoreResultsType> getChat(Key eventKey, 
+			Entity event, Integer cursor, boolean lastest_first, String req_email) 
 			throws InexistentChatIdException, InvalidCursorException,
-				InexistentLogIdException{
+				InexistentLogIdException, ImpossibleActionException{
+
+		checkIsParticipant(eventKey, event, req_email);
 		
 		String chat_id = event.getString(CHAT_ID);
-		
 		return DB_Chat.getChat(chat_id, cursor == null ? 0 : cursor, lastest_first);
 	}
 
@@ -221,7 +284,7 @@ public class DB_Event {
 		Entity.Builder builder = Entity.newBuilder(eventKey);
 		long n_participants = event.getLong(N_PARTICIPANTS);
 		if (add)
-			builder.set(N_PARTICIPANTS, n_participants + 1) ;
+			builder.set(N_PARTICIPANTS, n_participants + 1);
 		else
 			builder.set(N_PARTICIPANTS, n_participants - 1);
 		return builder

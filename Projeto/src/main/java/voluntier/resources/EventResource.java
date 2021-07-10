@@ -28,10 +28,13 @@ import voluntier.exceptions.ImpossibleActionException;
 import voluntier.exceptions.InexistentChatIdException;
 import voluntier.exceptions.InexistentLogIdException;
 import voluntier.exceptions.InexistentMessageIdException;
+import voluntier.exceptions.InexistentModeratorException;
 import voluntier.exceptions.InvalidCursorException;
 import voluntier.util.JsonUtil;
 import voluntier.util.consumes.event.CreateEventData;
 import voluntier.util.consumes.event.EventData;
+import voluntier.util.consumes.event.LikeCommentData;
+import voluntier.util.consumes.event.ChatModeratorData;
 import voluntier.util.consumes.event.PostCommentData;
 import voluntier.util.consumes.event.UpdateCommentData;
 import voluntier.util.eventdata.DB_Event;
@@ -39,6 +42,7 @@ import voluntier.util.eventdata.MessageData;
 import voluntier.util.produces.ChatReturn;
 import voluntier.util.produces.CreateEventReturn;
 import voluntier.util.produces.EventDataReturn;
+import voluntier.util.produces.EventModeratorsReturn;
 import voluntier.util.produces.EventParticipantsReturn;
 import voluntier.util.produces.PostCommentReturn;
 import voluntier.util.userdata.*;
@@ -140,15 +144,6 @@ public class EventResource {
 				return Response.status(Status.FORBIDDEN).entity("Token expired or invalid: " + data.email).build();
 			}
 
-			Key userKey = usersFactory.newKey(data.email);
-			Entity user = txn.get(userKey);
-
-			if (user == null || ActionsResource.isRemovedOrBannedUser(user)) {
-				txn.rollback();
-				LOG.warning("Failed comment attempt by user: " + data.email);
-				return Response.status(Status.FORBIDDEN).entity("Session expired or invalid: " + data.email).build();
-			}
-
 			Key eventKey = eventFactory.newKey(data.event_id);
 			Entity event = txn.get(eventKey);
 
@@ -232,7 +227,7 @@ public class EventResource {
 				LOG.fine("Comment inserted correctly.");
 				return Response.ok(JsonUtil.json.toJson(new PostCommentReturn(recieved_data.getValue1()))).build();
 
-			} catch (InexistentChatIdException | InexistentLogIdException e) {
+			} catch (InexistentChatIdException | InexistentLogIdException | ImpossibleActionException e) {
 				txn.rollback();
 				return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
 			}
@@ -363,6 +358,63 @@ public class EventResource {
 			}
 		}
 	}
+	
+	@POST
+	@Path("/likeComment")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response likeComment(LikeCommentData data) {
+		LOG.fine("Trying to like a comment from event: " + data.event_id);
+
+		if (!data.isValid())
+			return Response.status(Status.BAD_REQUEST).build();
+
+		Transaction txn = datastore.newTransaction();
+
+		try {
+
+			Key tokenKey = sessionFactory.newKey(data.token);
+			Entity token = txn.get(tokenKey);
+
+			if (!TokensResource.isValidAccess(token, data.email)) {
+				txn.rollback();
+				LOG.warning("Failed like comment attempt by user: " + data.email);
+				return Response.status(Status.FORBIDDEN).entity("Token expired or invalid: " + data.email).build();
+			}
+
+			Key eventKey = eventFactory.newKey(data.event_id);
+			Entity event = txn.get(eventKey);
+
+			if (event == null) {
+				txn.rollback();
+				LOG.warning("There is no event with the name " + data.event_id);
+				return Response.status(Status.BAD_REQUEST).build();
+			}
+
+			try {
+				event = DB_Event.likeComment(eventKey, event, data.comment_id, data.email);
+			} catch (InexistentChatIdException | InexistentLogIdException | 
+					InexistentMessageIdException |ImpossibleActionException e) {
+				txn.rollback();
+				return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
+			}
+
+			txn.put(event);
+			txn.commit();
+
+			LOG.fine("Comment updated correctly.");
+			return Response.status(Status.NO_CONTENT).build();
+
+		} catch (Exception e) {
+			txn.rollback();
+			LOG.severe(e.getMessage());
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		} finally {
+			if (txn.isActive()) {
+				txn.rollback();
+				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+			}
+		}
+	}
 
 	@POST
 	@Path("/getEventChat")
@@ -393,12 +445,13 @@ public class EventResource {
 
 			try {
 				Triplet<List<MessageData>, Integer, MoreResultsType> messages = DB_Event.getChat(eventKey, event,
-						data.cursor, data.latest_first);
+						data.cursor, data.latest_first, data.email);
 				return Response
 						.ok(JsonUtil.json.toJson(
 								new ChatReturn(messages.getValue0(), messages.getValue1(), messages.getValue2())))
 						.build();
-			} catch (InexistentChatIdException | InvalidCursorException | InexistentLogIdException e) {
+			} catch (InexistentChatIdException | InvalidCursorException |
+					InexistentLogIdException | ImpossibleActionException e) {
 				return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
 			}
 
@@ -466,7 +519,163 @@ public class EventResource {
 				return Response.status(Status.BAD_REQUEST).build();
 			}
 
-			return Response.ok(JsonUtil.json.toJson(new EventParticipantsReturn(event))).build();
+			List<String> participants = DB_Event.getParticipants(eventKey, event);
+
+			return Response.ok(JsonUtil.json.toJson(new EventParticipantsReturn(participants))).build();
+		} catch (Exception e) {
+			LOG.severe(e.getMessage());
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
+	}
+
+	@POST
+	@Path("/moderator/add")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response makeChatModerator(ChatModeratorData data) {
+		LOG.fine("Trying to make chat moderator in event: " + data.event_id);
+
+		if (!data.isValid())
+			return Response.status(Status.BAD_REQUEST).build();
+
+		Transaction txn = datastore.newTransaction();
+
+		try {
+
+			Key tokenKey = sessionFactory.newKey(data.token);
+			Entity token = txn.get(tokenKey);
+
+			if (!TokensResource.isValidAccess(token, data.email)) {
+				txn.rollback();
+				LOG.warning("Failed update comment attempt by user: " + data.email);
+				return Response.status(Status.FORBIDDEN).entity("Token expired or invalid: " + data.email).build();
+			}
+
+			String req_email = token.getString(TokensResource.ACCESS_EMAIL);
+
+			Key eventKey = eventFactory.newKey(data.event_id);
+			Entity event = txn.get(eventKey);
+
+			if (event == null) {
+				txn.rollback();
+				LOG.warning("There is no event with the name " + data.event_id);
+				return Response.status(Status.BAD_REQUEST).build();
+			}
+
+			try {
+				event = DB_Event.makeChatModerator(eventKey, event, req_email, data.mod);
+			} catch (ImpossibleActionException | InexistentChatIdException e) {
+				txn.rollback();
+				return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
+			}
+
+			txn.put(event);
+			txn.commit();
+
+			LOG.fine("Added " + data.email + "to event chat : " + data.event_id);
+			return Response.status(Status.NO_CONTENT).build();
+
+		} catch (Exception e) {
+			txn.rollback();
+			LOG.severe(e.getMessage());
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		} finally {
+			if (txn.isActive()) {
+				txn.rollback();
+				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+			}
+		}
+	}
+
+	@POST
+	@Path("/moderator/remove")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response removeChatModerator(ChatModeratorData data) {
+		LOG.fine("Trying to make chat moderator in event: " + data.event_id);
+
+		if (!data.isValid())
+			return Response.status(Status.BAD_REQUEST).build();
+
+		Transaction txn = datastore.newTransaction();
+
+		try {
+
+			Key tokenKey = sessionFactory.newKey(data.token);
+			Entity token = txn.get(tokenKey);
+
+			if (!TokensResource.isValidAccess(token, data.email)) {
+				txn.rollback();
+				LOG.warning("Failed update comment attempt by user: " + data.email);
+				return Response.status(Status.FORBIDDEN).entity("Token expired or invalid: " + data.email).build();
+			}
+
+			String req_email = token.getString(TokensResource.ACCESS_EMAIL);
+
+			Key eventKey = eventFactory.newKey(data.event_id);
+			Entity event = txn.get(eventKey);
+
+			if (event == null) {
+				txn.rollback();
+				LOG.warning("There is no event with the name " + data.event_id);
+				return Response.status(Status.BAD_REQUEST).build();
+			}
+
+			try {
+				event = DB_Event.removeChatModerator(eventKey, event, req_email, data.mod);
+			} catch (InexistentChatIdException | ImpossibleActionException | InexistentModeratorException e) {
+				txn.rollback();
+				return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
+			}
+
+			txn.put(event);
+			txn.commit();
+
+			LOG.fine("Added " + data.email + "to event chat : " + data.event_id);
+			return Response.status(Status.NO_CONTENT).build();
+
+		} catch (Exception e) {
+			txn.rollback();
+			LOG.severe(e.getMessage());
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		} finally {
+			if (txn.isActive()) {
+				txn.rollback();
+				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+			}
+		}
+	}
+
+	@POST
+	@Path("/moderator/getall")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response getChatModerators(EventData data) {
+		LOG.fine("Trying to get event participants: " + data.event_id);
+
+		if (!data.isValid())
+			return Response.status(Status.BAD_REQUEST).build();
+
+		try {
+			if (!TokensResource.isValidAccess(data.token, data.email)) {
+				LOG.warning("Failed retrieve event participants attempt by user: " + data.email);
+				return Response.status(Status.FORBIDDEN).entity("Token expired or invalid: " + data.email).build();
+			}
+
+			Key eventKey = eventFactory.newKey(data.event_id);
+			Entity event = datastore.get(eventKey);
+
+			if (event == null) {
+				LOG.warning("There is no event with the name " + data.event_id);
+				return Response.status(Status.BAD_REQUEST).build();
+			}
+
+			try {
+				List<String> moderators = DB_Event.getChatModerators(eventKey, event, data.email);
+
+				return Response.ok(JsonUtil.json.toJson(new EventModeratorsReturn(moderators))).build();
+			} catch (InexistentChatIdException | ImpossibleActionException e) {
+				return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
+			}
+			
 		} catch (Exception e) {
 			LOG.severe(e.getMessage());
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();

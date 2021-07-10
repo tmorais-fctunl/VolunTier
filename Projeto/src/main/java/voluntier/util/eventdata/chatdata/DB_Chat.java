@@ -211,7 +211,7 @@ public class DB_Chat {
 		MessageData message = DB_MessageLog.getMessage(log_data.id, message_id);
 
 		List<String> mods = getModeratorList(chat);
-		if (!message.email.equals(email) && !mods.contains(email))
+		if (!message.email.equals(email) && !mods.contains(email) || email.equals(chat.getString(ADMIN)))
 			throw new ImpossibleActionException("no permission");
 
 		Entity newMessageLog = DB_MessageLog.deleteMessage(log_data.id, message_id);
@@ -229,18 +229,18 @@ public class DB_Chat {
 		if (chat == null)
 			throw new InexistentChatIdException();
 
-		MessageLog last_log_data = getMessageLogWithMessageId(chat, message_id);
+		MessageLog log_data = getMessageLogWithMessageId(chat, message_id);
 
-		MessageData message = DB_MessageLog.getMessage(last_log_data.id, message_id);
+		MessageData message = DB_MessageLog.getMessage(log_data.id, message_id);
 		if (!message.email.equals(email))
 			throw new ImpossibleActionException();
 
-		Entity newMessageLog = DB_MessageLog.editMessage(last_log_data.id, message_id, new_message);
+		Entity newMessageLog = DB_MessageLog.editMessage(log_data.id, message_id, new_message);
 
 		return newMessageLog;
 	}
 
-	public static Entity likeMessage(String chat_id, int message_id, String new_message)
+	public static Entity likeMessage(String chat_id, int message_id)
 			throws InexistentChatIdException, InexistentLogIdException, InexistentMessageIdException {
 
 		Key idKey = chatFactory.newKey(chat_id);
@@ -249,9 +249,9 @@ public class DB_Chat {
 		if (chat == null)
 			throw new InexistentChatIdException();
 
-		MessageLog last_log_data = getMessageLogWithMessageId(chat, message_id);
+		MessageLog log_data = getMessageLogWithMessageId(chat, message_id);
 
-		Entity newMessageLog = DB_MessageLog.editMessage(last_log_data.id, message_id, new_message);
+		Entity newMessageLog = DB_MessageLog.likeMessage(log_data.id, message_id);
 
 		return newMessageLog;
 	}
@@ -298,7 +298,8 @@ public class DB_Chat {
 		if (chat == null)
 			throw new InexistentChatIdException();
 
-		if (!req_email.equals(chat.getString(ADMIN)))
+		List<String> mods = getModerators(chat_id);
+		if (mods.contains(target_email) || !req_email.equals(chat.getString(ADMIN)))
 			throw new ImpossibleActionException();
 
 		return addModerator(idKey, chat, target_email);
@@ -319,4 +320,21 @@ public class DB_Chat {
 		return removeModerator(idKey, chat, target_email);
 	}
 
+	public static List<String> getModerators(String chat_id) throws InexistentChatIdException {
+		
+		Key idKey = chatFactory.newKey(chat_id);
+		Entity chat = datastore.get(idKey);
+
+		if (chat == null)
+			throw new InexistentChatIdException();
+
+		List<String> moderators = new LinkedList<>();
+		List<Value<?>> event_moderators = chat.getList(MODS);
+		event_moderators.forEach(moderator -> {
+			String moderator_email = (String) moderator.get();
+			moderators.add(moderator_email);
+		});
+		
+		return moderators;
+	}
 }

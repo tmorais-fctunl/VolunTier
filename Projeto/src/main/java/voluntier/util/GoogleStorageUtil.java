@@ -1,10 +1,6 @@
 package voluntier.util;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.javatuples.Pair;
@@ -16,9 +12,9 @@ import com.google.cloud.storage.HttpMethod;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
 
-import com.google.cloud.storage.Bucket;
-import com.google.cloud.storage.Cors;
-import com.google.common.collect.ImmutableList;
+//import com.google.cloud.storage.Bucket;
+//import com.google.cloud.storage.Cors;
+//import com.google.common.collect.ImmutableList;
 
 
 public class GoogleStorageUtil {
@@ -50,10 +46,6 @@ public class GoogleStorageUtil {
 		BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType("text/plain").build();
 		
 		//configureBucketCors(bucketName, "*", 15*60);
-
-		//long maxContentLength = 1048576; // 1Mb
-		//Map<String, String> extHeaders = new HashMap<>();
-		//extHeaders.put("Access-Control-Allow-Origin", "*");
 
 		URL signedURL = storage.signUrl(blobInfo, 15, TimeUnit.MINUTES,
 				Storage.SignUrlOption.httpMethod(method)/*, Storage.SignUrlOption.withExtHeaders(extHeaders)*/);
