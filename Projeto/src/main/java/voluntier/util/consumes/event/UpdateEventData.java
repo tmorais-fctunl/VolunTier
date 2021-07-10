@@ -9,15 +9,15 @@ public class UpdateEventData extends EventData {
 	public double[] location;
 	public String start_date;
 	public String end_date;
+	public String profile;
 	
-	public String owner_email;
 	public String contact;
 	
 	//chat and participants...
 	
 	public String description;
 	public String category;
-	public long capacity;
+	public Long capacity;
 	//public int number_participants;
 	//public String creation_date;
 	
@@ -31,12 +31,11 @@ public class UpdateEventData extends EventData {
 	
 	public UpdateEventData (String email, String token, String event_id, double[] location, String start_date, 
 			String end_date, String owner_email, String contact, String description, String category, 
-			long capacity, String website, String facebook, String instagram,String twitter) {
+			long capacity, String website, String facebook, String instagram,String twitter, String profile) {
 		super (email, token, event_id);
 		this.location = location;
 		this.start_date = start_date;
 		this.end_date = end_date;
-		this.owner_email = owner_email;
 		this.contact = contact;
 		this.description = description;
 		this.category = category;
@@ -46,6 +45,8 @@ public class UpdateEventData extends EventData {
 		this.facebook = facebook;
 		this.instagram = instagram;
 		this.twitter = twitter;
+		
+		this.profile = profile;
 	}
 	
 	public LatLng getLocation (LatLng a_default) {
@@ -59,11 +60,7 @@ public class UpdateEventData extends EventData {
 	public String getEndDate (String a_default) {
 		return end_date == null ? a_default : end_date;
 	}
-	
-	public String getOwnerEmail (String a_default) {
-		return owner_email == null ? a_default : owner_email;
-	}
-	
+		
 	public String getContact (String a_default) {
 		return contact == null ? a_default : contact;
 	}
@@ -77,7 +74,7 @@ public class UpdateEventData extends EventData {
 	}
 	
 	public long getCapacity (long a_default) {
-		return capacity == -1 ? a_default : capacity;
+		return capacity == null ? a_default : capacity;
 	}
 	
 	public String getWebsite(String a_default) {
@@ -96,16 +93,21 @@ public class UpdateEventData extends EventData {
 		return twitter == null ? a_default : twitter;
 	}
 	
+	public String getProfile(String a_default) {
+		return profile == null ? a_default : profile;
+	}
+	
 	public boolean isValid () {
 		return super.isValid()
 				//&& (name == null || EventData_Minimal.nameValid(name))
 				&& (location == null || EventData_Minimal.locationValid(location))
+				&& (profile == null || EventData_Minimal.profileValid(profile))
 				&& (start_date == null || EventData_Minimal.startDateValid(start_date))
 				&& (end_date == null || EventData_Minimal.endDateValid(end_date))
 				&& (contact == null || EventData_Minimal.contactValid(contact))
 				&& (description == null || EventData_Minimal.descriptionValid(description))
 				&& (category == null || EventData_Minimal.categoryValid(category))
-				&& (capacity == -1 || EventData_Minimal.capacityValid(capacity))
+				&& (capacity == null || EventData_Minimal.capacityValid(capacity))
 				&& (website == null || website.equals("") || EventData_Minimal.websiteValid(website))
 				&& (facebook == null || facebook.equals("") || EventData_Minimal.facebookValid(facebook))
 				&& (instagram == null || instagram.equals("") || EventData_Minimal.instagramValid(instagram))
