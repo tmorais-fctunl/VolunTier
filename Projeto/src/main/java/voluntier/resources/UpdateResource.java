@@ -28,6 +28,7 @@ import voluntier.util.consumes.UpdateStateData;
 import voluntier.util.consumes.UploadImageData;
 import voluntier.util.produces.UploadSignedURLReturn;
 import voluntier.util.userdata.DB_User;
+import voluntier.util.userdata.ProfilePicture;
 import voluntier.util.userdata.State;
 
 @Path("/update")
@@ -352,7 +353,8 @@ public class UpdateResource {
 			txn.put(user);
 			txn.commit();
 
-			URL signedURL = GoogleStorageUtil.signURLForUpload(DB_User.getProfilePictureFilename(username));
+			String ext = ProfilePicture.getImageType(data.data);
+			URL signedURL = GoogleStorageUtil.signURLForUpload(DB_User.getProfilePictureFilename(username, ext));
 
 			return Response.ok(JsonUtil.json.toJson(new UploadSignedURLReturn(signedURL))).build();
 

@@ -10,7 +10,7 @@ import javax.xml.bind.DatatypeConverter;
 
 public class ProfilePicture{
 
-	private static final String HEADER_REGEX = "data[:]image[/](png|jpg|jpeg)[;]base64";
+	private static final String HEADER_REGEX = "data[:]image[/](png|jpg|jpeg|PNG|JPG|JPEG)[;]base64";
 	public String data; // data should be something like 'data:image/png;base64,{base64encoding}'
 	private String base64encoding;
 	private String header;
@@ -57,11 +57,21 @@ public class ProfilePicture{
 		} catch (IOException e) {}
 		return base64encoding;
 	}
+	
+	private static String getImageTypeFromHeader(String h) {
+		return h.split("/")[1].split(";")[0];
+	}
+	
+	public static String getImageType(String data) {
+		String[] d = data.split(",");
+		String header = d[0];
+		return getImageTypeFromHeader(header);
+	}
 
 	public String getImageType() {
 		try {
 			if(header == null) processData();
 		} catch (IOException e) {}
-		return header;
+		return getImageTypeFromHeader(header);
 	}
 }

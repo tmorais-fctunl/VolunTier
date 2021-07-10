@@ -41,6 +41,7 @@ import voluntier.util.consumes.SearchUserData;
 import voluntier.util.produces.GetPictureReturn;
 import voluntier.util.produces.SearchData;
 import voluntier.util.userdata.DB_User;
+import voluntier.util.userdata.ProfilePicture;
 import voluntier.util.userdata.UserData_Minimal;
 
 @Path("/")
@@ -162,7 +163,13 @@ public class SearchResource {
 				Key emailKey = usersFactory.newKey(usernameEnt.getString(DB_User.EMAIL));
 				Entity emailEnt = datastore.get(emailKey);
 				String encodedMiniature = emailEnt.getString(DB_User.PROFILE_PICTURE_MINIATURE);
-				String GCS_filename = DB_User.getProfilePictureFilename(username);
+				
+				if(encodedMiniature.equals(""))
+					return Response.status(Status.NO_CONTENT).build();
+				
+				String ext = ProfilePicture.getImageType(encodedMiniature);
+				
+				String GCS_filename = DB_User.getProfilePictureFilename(username, ext);
 				Pair<URL, Long> downloadData = GoogleStorageUtil.signURLForDownload(GCS_filename);
 
 				return Response.ok(JsonUtil.json.toJson(new GetPictureReturn(downloadData.getValue0(), downloadData.getValue1(),

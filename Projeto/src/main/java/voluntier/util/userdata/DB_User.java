@@ -230,7 +230,7 @@ public class DB_User {
 				.build();
 	}
 	
-	public static String getProfilePictureFilename(String username) {
-		return username + "_profile_picture";
+	public static String getProfilePictureFilename(String username, String ext) {
+		return username + "_profile_picture." + ext;
 	}
 }
