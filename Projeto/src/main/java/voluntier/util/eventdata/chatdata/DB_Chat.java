@@ -211,7 +211,7 @@ public class DB_Chat {
 		MessageData message = DB_MessageLog.getMessage(log_data.id, message_id);
 
 		List<String> mods = getModeratorList(chat);
-		if (!message.email.equals(email) && !mods.contains(email) || email.equals(chat.getString(ADMIN)))
+		if (!message.email.equals(email) && !mods.contains(email) && !email.equals(chat.getString(ADMIN)))
 			throw new ImpossibleActionException("no permission");
 
 		Entity newMessageLog = DB_MessageLog.deleteMessage(log_data.id, message_id);
