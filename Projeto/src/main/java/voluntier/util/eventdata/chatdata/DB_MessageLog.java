@@ -74,7 +74,7 @@ public class DB_MessageLog {
 		while (it.hasNext()) {
 			Value<?> message = it.next();
 			MessageData message_data = JsonUtil.json.fromJson((String) message.get(), MessageData.class);
-			if (message_id == message_data.message_id) {
+			if (message_id == message_data.comment_id) {
 				out = message_data;
 				break;
 			}
@@ -140,7 +140,7 @@ public class DB_MessageLog {
 		while (it.hasNext()) {
 			Value<?> message = it.next();
 			MessageData message_data = JsonUtil.json.fromJson((String) message.get(), MessageData.class);
-			if (message_id != message_data.message_id) {
+			if (message_id != message_data.comment_id) {
 				newList.addValue(message);
 			} else
 				changed = true;
@@ -169,7 +169,7 @@ public class DB_MessageLog {
 			Value<?> comment = it.next();
 			MessageData comment_data = JsonUtil.json.fromJson((String) comment.get(), MessageData.class);
 
-			if (message_id != comment_data.message_id)
+			if (message_id != comment_data.comment_id)
 				newList.addValue(comment);
 			else {
 				comment_data.comment = new_message;
@@ -200,7 +200,7 @@ public class DB_MessageLog {
 			Value<?> comment = it.next();
 			MessageData comment_data = JsonUtil.json.fromJson((String) comment.get(), MessageData.class);
 
-			if (message_id != comment_data.message_id)
+			if (message_id != comment_data.comment_id)
 				newList.addValue(comment);
 			else {
 				comment_data.likes += 1;

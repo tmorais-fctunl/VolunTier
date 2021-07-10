@@ -5,7 +5,7 @@ public class MessageData {
 	public String email;
 	public String comment;
 	public String timestamp;
-	public int message_id;
+	public int comment_id;
 	public int likes;
 	
 	public MessageData() {
@@ -15,7 +15,7 @@ public class MessageData {
 		this.email = email;
 		this.comment = comment;
 		this.timestamp = timestamp;
-		this.message_id = comment_id;
+		this.comment_id = comment_id;
 		this.likes = likes;
 	}
 }
