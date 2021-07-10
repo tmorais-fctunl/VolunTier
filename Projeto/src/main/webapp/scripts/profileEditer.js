@@ -3,9 +3,123 @@ var profileVisibility = false;
 var infoElementsRef = document.getElementsByClassName("info");
 var infoElements = [];
 updateInfoElements();
+var imgfile, imgblob, imgext;
+var fileData;
+/*
+ * Fazer o seguinte:
+ * Carregamos info do user, se nao tiver img, imgsrc fica igual à default e carrega na página. 
+ * Caso haja, carregamos a img
+ * Para saber se a imagem foi mudada, ou temos um booleano, ou comparamos novo src com antigo (imgsrc)
+ */
+
+//Image upload scripts begining:
+//Script to redirect button click to file explorer input
+function uploadImg() {
+    $('#imgupload').trigger('click');
+}
+//Script to load the photo to the user image
+var loadFile = function (event) { 
+    var image = document.getElementById('userImg');
+    imgfile = event.target.files[0];
+    imgext = event.target.value.split('.')[1];
+    console.log(imgext);
+    imgblob = URL.createObjectURL(imgfile);
+    image.src = imgblob; 
+
+    fileData = new Blob([imgfile]);
+};
+//Script to put image into base64 format and call send to backend
+function saveImage() {
+
+   var blobToBase64 = function (blob, callback) {
+        var reader = new FileReader();
+        reader.onload = function () {
+            var dataUrl = reader.result;
+            var base64 = dataUrl.split(',')[1];
+            callback(base64);
+        };
+        reader.readAsDataURL(blob);
+    };
+
+    const img = new Image();
+    img.src = imgblob;
+    img.onload = function (ev) {
+
+        URL.revokeObjectURL(imgblob); //release memory
+        //Do whatever I need here:
+        const newWidth = 200, newHeight = 200;
+        const canvas = document.createElement('canvas');
+        canvas.width = newWidth;
+        canvas.height = newHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, newWidth, newHeight);
+
+        canvas.toBlob(function (blob) {
+            blobToBase64(blob, function (base64) {
+                //console.log(base64);
+                saveUserPhoto(base64);
+            });
+        }, 'image/'+imgext, 1);
+    }  
+}
+//Script to send to backend and call send to cloud storage
+function saveUserPhoto(base64) {
+    var urlvariable = "/rest/update/picture";
+    var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //LookUp REST URL
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.open("POST", URL, false);
+    xmlhttp.setRequestHeader("Content-Type", "application/json");
+    var userId = localStorage.getItem("email"), token = localStorage.getItem("jwt");
+    var ItemJSON = '{"email": "' + userId +
+        '", "token": "' + token +
+        '", "data": "' + 'data:image/'+imgext+';base64,' + base64 + '"}';
+    xmlhttp.send(ItemJSON);
+    if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+        const obj = JSON.parse(xmlhttp.responseText);
+        let cloudURL = obj.url;
+        sendFile(cloudURL, fileData);
+        return false;
+    }
+    console.log("update request: " + xmlhttp.status);
+}
+//Script to convert image to byte array, used to send to cloud storage
+function getBuffer(fileData) {
+    return function (resolve) {
+        var reader = new FileReader();
+        reader.readAsArrayBuffer(fileData);
+        reader.onload = function () {
+            var arrayBuffer = reader.result
+            var bytes = new Uint8Array(arrayBuffer);
+            resolve(bytes);
+        }
+    }
+}
+//send file now in byte array to cloud storage
+function sendFile(cloudURL, file) {
+    console.log("Trying to send file to " + cloudURL);
+    var promise = new Promise(getBuffer(file));
+    // Wait for promise to be resolved, or log error.
+    promise.then(function (data) {
+        // Here you can pass the bytes to another function.
+        console.log(data);
+
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.open("PUT", cloudURL, true);
+        xmlhttp.onload = function (oEvent) {
+            // Uploaded.
+            console.log("Request status: " + xmlhttp.status);
+        };
+        xmlhttp.send(data);
+
+
+    }).catch(function (err) {
+        console.log('Error: ', err);
+    });
+}
+//Image upload scripts end
 
 function updateInfoElements() {
-  console.log(infoElementsRef.length);
+  //console.log(infoElementsRef.length);
     for (i = 0; i < infoElementsRef.length; i++) {
         infoElements[i] = [];
         infoElements[i] = [infoElementsRef[i].getAttribute("id"), infoElementsRef[i].innerHTML];
@@ -25,6 +139,7 @@ function saveBtn() {
     //needs to turn the content editable off
     turnContent(false);
     saveInfo();
+    saveImage();
     profileBtnSwap();
 }
 
@@ -79,6 +194,9 @@ function turnContent(on) {
                 }
             });
         }
+        //Allow user to upload image
+        $("#userImg").toggleClass("imgUpload");
+        $("#OpenImgUpload").attr("style", "");
     }
     else {
 
@@ -103,12 +221,14 @@ function turnContent(on) {
         var data = '<p class="text-muted font-size-sm editable info" id="profile_region" name="region">' + prevRegion + '</p>';
         $('#profile_region_div').html(data);
 
+        //Unable user to upload image
+        $("#userImg").toggleClass("imgUpload");
+        $("#OpenImgUpload").attr("style", "display: none");
+        
+
     }
     return false;
 }
-
-
-
 
 function saveInfo() {
     var urlvariable = "/rest/update/profile";
@@ -161,3 +281,9 @@ function saveInfo() {
 
 
 }
+
+
+
+
+
+

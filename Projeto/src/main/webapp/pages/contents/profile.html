@@ -7,7 +7,11 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="d-flex flex-column align-items-center text-center">
-                            <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="Admin" class="rounded-circle" width="150">
+                            <img id="userImg" src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="Admin" class="rounded-circle userImg" width="150" height="150">
+                            <br />
+                            <input type="file" id="imgupload" style="display:none" accept="image/png, image/jpeg" onchange="loadFile(event)">
+                            <label for='imgupload'> <button onclick="return uploadImg()" class="btn btn-info" id="OpenImgUpload" style="display:none">Image Upload</button></label>
+
                             <div class="mt-3">
                                 <h4 id="profile_username">Username</h4>
 
@@ -17,7 +21,7 @@
                                     <p class="text-muted font-size-sm editable info" id="profile_region" name="region">Country</p>
                                 </div>
                                 <!-- <button class="btn btn-primary">Follow</button>
-    <button class="btn btn-outline-primary">Message</button> -->
+        <button class="btn btn-outline-primary">Message</button> -->
                             </div>
                         </div>
                     </div>

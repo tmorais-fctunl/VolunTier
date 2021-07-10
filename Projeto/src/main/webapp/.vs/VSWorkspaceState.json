@@ -1,9 +1,12 @@
 {
   "ExpandedNodes": [
+    "",
     "\\bootstrap",
     "\\css",
     "\\pages",
+    "\\pages\\contents",
     "\\scripts"
   ],
+  "SelectedNode": "\\scripts\\AppLoading.js",
   "PreviewInSolutionExplorer": false
 }

@@ -1,12 +1,5 @@
-window.onload = function () {
-    // For debugging purposes: loadContents();
-    if (!tryAuthentication()) {
-        loadContent("appTab", "../pages/contents/logoutTab.html");
-        return false;
-    }
-    loadContents();
-    loadContent("appTab", "../pages/contents/loggedTab.html");
-
+//Request user info
+function requestUserInfo() {
     var urlvariable = "/rest/user";
     var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //LookUp REST URL
     var xmlhttp = new XMLHttpRequest();
@@ -51,6 +44,75 @@ window.onload = function () {
 
 
 
+            //request picture
+            requestUserPicture(obj.username);
         }
     });
+}
+
+function requestUserPictureGCS(url) {
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.open("GET", url, true);
+    xmlhttp.responseType = "blob";
+    xmlhttp.onload = function (oEvent) {
+        if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200)) {
+            alert("Couldn't load user image from GCS, message: " + xmlhttp.status);
+            return false;
+        }
+       // var blob = new Blob([xmlhttp.response]);
+        var blob = xmlhttp.response;
+        var userpic = document.getElementById("userImg");
+        
+        userpic.src = URL.createObjectURL(blob);
+    };
+    xmlhttp.send();
+
+}
+
+function requestUserPicture(username) {
+    var urlvariable = "/rest/picture/"+username;
+    var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //LookUp REST URL
+    var xmlhttp = new XMLHttpRequest();
+    var userId = localStorage.getItem("email"), token = localStorage.getItem("jwt");
+    var ItemJSON = '{"email": "' + userId + '", "token": "' + token + '"}';
+    xmlhttp.open("POST", URL, true);
+    
+    xmlhttp.setRequestHeader("Content-Type", "application/json");
+
+    xmlhttp.onload = function (oEvent) {
+        if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200)) {
+            alert("Couldn't load user image, message: " + xmlhttp.status);
+            return false;
+        }
+        //Other wise...
+        const obj = JSON.parse(xmlhttp.responseText);
+        var cloudURL = obj.url;
+        var pic = obj.pic; 
+        var size = obj.size;
+        //Can't do nothing with pic right now
+
+        //TODO
+
+
+        console.log(cloudURL);
+        //trying to fetch GCS image
+        requestUserPictureGCS(cloudURL);
+        
+
+
+    }
+    xmlhttp.send(ItemJSON);
+}
+
+
+window.onload = function () {
+    // For debugging purposes: loadContents();
+    if (!tryAuthentication()) {
+        loadContent("appTab", "../pages/contents/logoutTab.html");
+        return false;
+    }
+    loadContents();
+    loadContent("appTab", "../pages/contents/loggedTab.html");
+
+    requestUserInfo();
 }

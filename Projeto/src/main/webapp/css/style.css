@@ -190,3 +190,15 @@ div.createEvent label {
 div.createEvent label:after {
     content: ":";
 }
+
+#userImg {
+    
+}
+.imgUpload {
+
+}
+.imgUpload:hover {
+    cursor: pointer;
+}
+
+}
