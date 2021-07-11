@@ -13,7 +13,6 @@ public class CreateEventData extends RequestData {
 	//private static final Logger LOG = Logger.getLogger(RegisterResource.class.getName());
 
 	public String event_name;
-	public String event_id;
 	public double[] location;
 	public String start_date;
 	public String end_date;

@@ -158,16 +158,14 @@ public class DB_Event {
 				.build();
 	}
 
-	public static List<Entity> createNew (CreateEventData event_data, String user_email) {
-		Pair<List<Entity>, String> chat = DB_Chat.createNew(user_email);
+	public static Pair<List<Entity>, String> createNew (CreateEventData event_data) {
+		Pair<List<Entity>, String> chat = DB_Chat.createNew(event_data.email);
 		ListValue.Builder participants = ListValue.newBuilder();
-		participants.addValue(user_email);
+		participants.addValue(event_data.email);
 		List<Entity> entities = chat.getValue0();
 
 		Key eventKey = generateEventID(event_data.event_name);
-		
-		event_data.event_id = eventKey.getName();
-		
+				
 		EventData_Minimal data = new EventData_Minimal(event_data);
 		LatLng event_location = LatLng.of(data.location[0], data.location[1]);
 
@@ -194,7 +192,7 @@ public class DB_Event {
 				.set(TWITTER, data.twitter)
 				.build());
 		
-		return entities;
+		return new Pair<>(entities, eventKey.getName());
 	}
 	
 	private static Key generateEventID(String event_name) {

@@ -41,6 +41,7 @@ import voluntier.util.consumes.event.LikeCommentData;
 import voluntier.util.consumes.event.ChatModeratorData;
 import voluntier.util.consumes.event.PostCommentData;
 import voluntier.util.consumes.event.UpdateCommentData;
+import voluntier.util.consumes.event.UserEventsData;
 import voluntier.util.eventdata.DB_Event;
 import voluntier.util.eventdata.EventParticipantData;
 import voluntier.util.eventdata.MessageData;
@@ -50,6 +51,7 @@ import voluntier.util.produces.EventDataReturn;
 import voluntier.util.produces.EventModeratorsReturn;
 import voluntier.util.produces.EventParticipantsReturn;
 import voluntier.util.produces.PostCommentReturn;
+import voluntier.util.produces.UserEventsReturn;
 import voluntier.util.userdata.*;
 
 @Path("/")
@@ -87,13 +89,16 @@ public class EventResource {
 				return Response.status(Status.FORBIDDEN).build();
 			}
 			
-			List<Entity> ents = DB_Event.createNew(data, data.email);
+			Pair<List<Entity>, String> ents = DB_Event.createNew(data);
+			String event_id = ents.getValue1();
+			Entity updated_user = DB_User.addEvent(userKey, user, event_id);
 
-			ents.forEach(ent -> txn.put(ent));
+			ents.getValue0().forEach(ent -> txn.put(ent));
+			txn.put(updated_user);
 			txn.commit();
 
 			LOG.fine("Event: " + data.event_name + " inserted correctly.");
-			return Response.ok(JsonUtil.json.toJson(new CreateEventReturn(data.event_id))).build();
+			return Response.ok(JsonUtil.json.toJson(new CreateEventReturn(event_id))).build();
 			
 		} catch (InvalidTokenException e) {
 			txn.rollback();
@@ -553,6 +558,33 @@ public class EventResource {
 				txn.rollback();
 				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 			}
+		}
+	}
+	
+	@POST
+	@Path("/user/events")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response getUserEvents(UserEventsData data) {
+		LOG.fine("Trying to get user events: " + data.target);
+
+		if (!data.isValid())
+			return Response.status(Status.BAD_REQUEST).build();
+
+		try {
+			TokensResource.checkIsValidAccess(data.token, data.email);
+			Key userKey = usersFactory.newKey(data.target);
+			Entity user = datastore.get(userKey);
+			
+			List<String> events = DB_User.getEvents(user);
+			return Response.ok(JsonUtil.json.toJson(new UserEventsReturn(events))).build();
+
+		} catch (InvalidTokenException  e) {
+			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
+
+		} catch (Exception e) {
+			LOG.severe(e.getMessage());
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 	}
 

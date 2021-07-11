@@ -16,7 +16,7 @@ public class ChatReturn {
 	}
 	
 	public ChatReturn (List<MessageData> chat, Integer cursor, MoreResultsType more_results) {
-		comments = chat;
+		this.comments = chat;
 		this.cursor = cursor;
 		this.results = more_results.toString();
 	}

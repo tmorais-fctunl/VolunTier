@@ -44,7 +44,6 @@ public class EventData_Minimal {
 		//this.setProfile(Profile.PRIVATE);
 		
 		name = data.event_name;
-		id = data.event_id;
 		location = data.location;
 		start_date = data.start_date;
 		end_date = data.end_date;

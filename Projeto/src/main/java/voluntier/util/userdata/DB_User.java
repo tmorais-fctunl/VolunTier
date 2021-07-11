@@ -1,10 +1,16 @@
 package voluntier.util.userdata;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import com.google.cloud.datastore.Entity;
 
 import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.ListValue;
 import com.google.cloud.datastore.StringValue;
+import com.google.cloud.datastore.Value;
 
+import voluntier.exceptions.InexistentEventException;
 import voluntier.util.consumes.RegisterData;
 import voluntier.util.consumes.UpdateProfileData;
 
@@ -32,8 +38,10 @@ public class DB_User {
 	public static final String FACEBOOK = "user_facebook";
 	public static final String INSTAGRAM = "user_instagram";
 	public static final String TWITTER = "user_twitter";
-	
+
 	public static final String PROFILE_PICTURE_MINIATURE = "profile_pic_200x200";
+	
+	public static final String EVENTS = "user_events";
 	
 	public static final String EMAIL_REGEX = ".+@.+[.].+";
 	public static final String POSTAL_CODE_REGEX = "[0-9]{4}-[0-9]{3}";
@@ -63,6 +71,7 @@ public class DB_User {
 				.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(user.getString(PROFILE_PICTURE_MINIATURE))
 						.setExcludeFromIndexes(true)
 						.build())
+				.set(EVENTS, user.getList(EVENTS))
 				.build();
 	}
 	
@@ -89,6 +98,7 @@ public class DB_User {
 				.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(user.getString(PROFILE_PICTURE_MINIATURE))
 						.setExcludeFromIndexes(true)
 						.build())
+				.set(EVENTS, user.getList(EVENTS))
 				.build();
 	}
 	
@@ -115,6 +125,7 @@ public class DB_User {
 				.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(user.getString(PROFILE_PICTURE_MINIATURE))
 						.setExcludeFromIndexes(true)
 						.build())
+				.set(EVENTS, user.getList(EVENTS))
 				.build();
 	}
 	
@@ -141,6 +152,7 @@ public class DB_User {
 				.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(user.getString(PROFILE_PICTURE_MINIATURE))
 						.setExcludeFromIndexes(true)
 						.build())
+				.set(EVENTS, user.getList(EVENTS))
 				.build();
 	}
 	
@@ -167,6 +179,7 @@ public class DB_User {
 				.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(user.getString(PROFILE_PICTURE_MINIATURE))
 						.setExcludeFromIndexes(true)
 						.build())
+				.set(EVENTS, user.getList(EVENTS))
 				.build();
 	}
 	
@@ -193,6 +206,7 @@ public class DB_User {
 				.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(data)
 						.setExcludeFromIndexes(true)
 						.build())
+				.set(EVENTS, user.getList(EVENTS))
 				.build();
 	}
 	
@@ -203,8 +217,92 @@ public class DB_User {
 				.build();
 	}
 	
+	public static List<String> getEvents(Entity user) {
+		List<String> events = new LinkedList<>();
+		List<Value<?>> event_list = user.getList(EVENTS);
+		event_list.forEach(event -> {
+			String event_id = (String) event.get();
+			events.add(event_id);
+		});
+		
+		return events;
+	}
+	
+	public static Entity addEvent(Key userKey, Entity user, String event_id) {
+		
+		List<String> events = getEvents(user);
+		if(events.contains(event_id))
+			return user;
+
+		ListValue.Builder events_list = ListValue.newBuilder().set(user.getList(EVENTS));
+		events_list.addValue(event_id);
+		
+		return Entity.newBuilder(userKey)
+				.set(USERNAME, user.getString(USERNAME))
+				.set(EMAIL, user.getString(EMAIL))
+				.set(PASSWORD, user.getString(PASSWORD))
+				.set(FULL_NAME, user.getString(FULL_NAME))
+				.set(LANDLINE, user.getString(LANDLINE))
+				.set(MOBILE, user.getString(MOBILE))
+				.set(ADDRESS, user.getString(ADDRESS))
+				.set(ADDRESS2, user.getString(ADDRESS2))
+				.set(REGION, user.getString(REGION))
+				.set(POSTAL_CODE, user.getString(POSTAL_CODE))
+				.set(ACCOUNT, user.getString(ACCOUNT))
+				.set(ROLE, user.getString(ROLE))
+				.set(STATE, user.getString(STATE))
+				.set(PROFILE, user.getString(PROFILE))
+				.set(WEBSITE, user.getString(WEBSITE))
+				.set(FACEBOOK, user.getString(FACEBOOK))
+				.set(INSTAGRAM, user.getString(INSTAGRAM))
+				.set(TWITTER, user.getString(TWITTER))
+				.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(user.getString(PROFILE_PICTURE_MINIATURE))
+						.setExcludeFromIndexes(true)
+						.build())
+				.set(EVENTS, events_list.build())
+				.build();
+	}
+	
+	public static Entity removeEvent(Key userKey, Entity user, String event_id) throws InexistentEventException {
+		List<String> events = getEvents(user);
+		if(!events.contains(event_id))
+			throw new InexistentEventException();
+		
+		ListValue.Builder events_list = ListValue.newBuilder();
+		
+		events.remove(event_id);
+		events.forEach(event -> events_list.addValue(event));
+		
+		return Entity.newBuilder(userKey)
+				.set(USERNAME, user.getString(USERNAME))
+				.set(EMAIL, user.getString(EMAIL))
+				.set(PASSWORD, user.getString(PASSWORD))
+				.set(FULL_NAME, user.getString(FULL_NAME))
+				.set(LANDLINE, user.getString(LANDLINE))
+				.set(MOBILE, user.getString(MOBILE))
+				.set(ADDRESS, user.getString(ADDRESS))
+				.set(ADDRESS2, user.getString(ADDRESS2))
+				.set(REGION, user.getString(REGION))
+				.set(POSTAL_CODE, user.getString(POSTAL_CODE))
+				.set(ACCOUNT, user.getString(ACCOUNT))
+				.set(ROLE, user.getString(ROLE))
+				.set(STATE, user.getString(STATE))
+				.set(PROFILE, user.getString(PROFILE))
+				.set(WEBSITE, user.getString(WEBSITE))
+				.set(FACEBOOK, user.getString(FACEBOOK))
+				.set(INSTAGRAM, user.getString(INSTAGRAM))
+				.set(TWITTER, user.getString(TWITTER))
+				.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(user.getString(PROFILE_PICTURE_MINIATURE))
+						.setExcludeFromIndexes(true)
+						.build())
+				.set(EVENTS, events_list.build())
+				.build();
+	}
+	
 	public static Entity createNew(String email, String username, String password, Key userKey) {
 		UserData_AllProperties data = new UserData_AllProperties(new RegisterData(email, username, password));
+		ListValue.Builder events_list = ListValue.newBuilder();
+		
 		return Entity.newBuilder(userKey)
 				.set(USERNAME, data.username)
 				.set(PASSWORD, data.password)
@@ -227,6 +325,7 @@ public class DB_User {
 				.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(data.profile_pic)
 						.setExcludeFromIndexes(true)
 						.build())
+				.set(EVENTS, events_list.build())
 				.build();
 	}
 	
