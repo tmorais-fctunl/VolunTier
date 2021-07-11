@@ -9,6 +9,7 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Transaction;
 
+import voluntier.exceptions.InvalidTokenException;
 import voluntier.util.AuthToken;
 
 public class TokensResource {
@@ -69,33 +70,40 @@ public class TokensResource {
 		return new Triplet<>(refresh, token, authToken);
 	}
 	
-	public static boolean isValidAccess(Entity token) {
-		return token != null && token.getLong(ACCESS_EXPIRATION) > System.currentTimeMillis();
+	public static Entity checkIsValidRefresh(Entity token, String email)  throws InvalidTokenException{
+		if(token != null && token.getLong(REFESH_EXPIRATION) > System.currentTimeMillis() 
+				&& token.getString(REFESH_EMAIL).equals(email))
+			return token;
+		
+		throw new InvalidTokenException("Refresh Token expired or invalid: " + email);
 	}
 	
-	public static boolean isValidAccess(Entity token, String email) {
-		return isValidAccess(token) && token.getString(ACCESS_EMAIL).equals(email);
-	}
-	
-	public static boolean isValidAccess(String tokenString, String email) {
+	public static Entity checkIsValidRefresh(String tokenString, String email) throws InvalidTokenException {
 		Key tokenKey = sessionFactory.newKey(tokenString);
 		Entity token = datastore.get(tokenKey);
 		
-		return isValidAccess(token, email);
+		return checkIsValidRefresh(token, email);
 	}
 	
-	public static boolean isValidAccess(Transaction txn, String tokenString, String email) {
+	public static Entity checkIsValidAccess(Entity token, String email)  throws InvalidTokenException{
+		if(token != null && token.getLong(ACCESS_EXPIRATION) > System.currentTimeMillis() 
+				&& token.getString(ACCESS_EMAIL).equals(email))
+			return token;
+		
+		throw new InvalidTokenException("Token expired or invalid: " + email);		
+	}
+	
+	public static Entity checkIsValidAccess(String tokenString, String email) throws InvalidTokenException {
+		Key tokenKey = sessionFactory.newKey(tokenString);
+		Entity token = datastore.get(tokenKey);
+		
+		return checkIsValidAccess(token, email);
+	}
+	
+	public static Entity checkIsValidAccess(Transaction txn, String tokenString, String email) throws InvalidTokenException {
 		Key tokenKey = sessionFactory.newKey(tokenString);
 		Entity token = txn.get(tokenKey);
-		
-		return isValidAccess(token, email);
-	}
-	
-	public static boolean isValidRefresh(Entity token) {
-		return token != null && token.getLong(REFESH_EXPIRATION) > System.currentTimeMillis();
-	}
-	
-	public static boolean isValidRefresh(Entity token, String email) {
-		return isValidRefresh(token) && token.getString(REFESH_EMAIL).equals(email);
+
+		return checkIsValidAccess(token, email);
 	}
 }

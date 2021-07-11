@@ -13,13 +13,9 @@ public class UpdateEventData extends EventData {
 	
 	public String contact;
 	
-	//chat and participants...
-	
 	public String description;
 	public String category;
 	public Long capacity;
-	//public int number_participants;
-	//public String creation_date;
 	
 	public String website;
 	public String facebook;
@@ -99,19 +95,18 @@ public class UpdateEventData extends EventData {
 	
 	public boolean isValid () {
 		return super.isValid()
-				//&& (name == null || EventData_Minimal.nameValid(name))
 				&& (location == null || EventData_Minimal.locationValid(location))
-				&& (profile == null || profile.equals("") || EventData_Minimal.profileValid(profile))
-				&& (start_date == null || start_date.equals("") || EventData_Minimal.startDateValid(start_date))
-				&& (end_date == null || end_date.equals("") || EventData_Minimal.endDateValid(end_date))
-				&& (contact == null || contact.equals("") || EventData_Minimal.contactValid(contact))
-				&& (description == null || description.equals("") || EventData_Minimal.descriptionValid(description))
-				&& (category == null || category.equals("") || EventData_Minimal.categoryValid(category))
+				&& (profile == null || EventData_Minimal.profileValid(profile))
+				&& (start_date == null || EventData_Minimal.startDateValid(start_date))
+				&& (end_date == null || EventData_Minimal.endDateValid(end_date))
+				&& (contact == null || EventData_Minimal.contactValid(contact))
+				&& (description == null || EventData_Minimal.descriptionValid(description))
+				&& (category == null || EventData_Minimal.categoryValid(category))
 				&& (capacity == null || EventData_Minimal.capacityValid(capacity))
-				&& (website == null || website.equals("") || EventData_Minimal.websiteValid(website))
-				&& (facebook == null || facebook.equals("") || EventData_Minimal.facebookValid(facebook))
-				&& (instagram == null || instagram.equals("") || EventData_Minimal.instagramValid(instagram))
-				&& (twitter == null || twitter.equals("") || EventData_Minimal.twitterValid(twitter));
+				&& (website == null || EventData_Minimal.websiteValid(website))
+				&& (facebook == null || EventData_Minimal.facebookValid(facebook))
+				&& (instagram == null || EventData_Minimal.instagramValid(instagram))
+				&& (twitter == null || EventData_Minimal.twitterValid(twitter));
 	}
 
 }

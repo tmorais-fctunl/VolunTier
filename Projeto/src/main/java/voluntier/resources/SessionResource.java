@@ -30,7 +30,6 @@ public class SessionResource {
 
 	private static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	private static KeyFactory usersFactory = datastore.newKeyFactory().setKind("User");
-	private static KeyFactory sessionFactory = datastore.newKeyFactory().setKind("Session");
 	private static KeyFactory refreshFactory = datastore.newKeyFactory().setKind("RefreshSession");
 
 	public SessionResource() {}
@@ -44,12 +43,7 @@ public class SessionResource {
 			return Response.status(Status.BAD_REQUEST).build();
 
 		try {
-			// check if the token corresponds to the user received and hasnt expired yet
-			if(!TokensResource.isValidAccess(data.token, data.email)) {
-				LOG.warning("Failed validate attempt by user: " + data.email);
-				return Response.status(Status.UNAUTHORIZED).build();
-			}
-			
+			TokensResource.checkIsValidAccess(data.token, data.email);
 			return Response.status(Status.NO_CONTENT).build();
 
 		} catch(Exception e) {
@@ -120,16 +114,7 @@ public class SessionResource {
 
 		Transaction txn = datastore.newTransaction();
 		try {
-
-			Key tokenKey = sessionFactory.newKey(data.token);
-			Entity token = txn.get(tokenKey);
-
-			// check if the token corresponds to the user received and hasnt expired yet
-			if(!TokensResource.isValidAccess(token, data.email)) {
-				txn.rollback();
-				LOG.warning("Failed logout attempt by user: " + data.email);
-				return Response.status(Status.FORBIDDEN).entity("Token expired or invalid: " + data.email).build();
-			}
+			Entity token = TokensResource.checkIsValidAccess(data.token, data.email);
 
 			invalidateSession(token, txn);
 			txn.commit();
@@ -160,21 +145,10 @@ public class SessionResource {
 
 		Transaction txn = datastore.newTransaction();
 		try {
-
-			// here the data.token is the refresh token
-			Key old_refreshKey = refreshFactory.newKey(data.token);
-			Entity old_refresh = txn.get(old_refreshKey);
-
-			// check if the token corresponds to the user received and hasnt expired yet
-			if(!TokensResource.isValidRefresh(old_refresh, data.email)) {
-				txn.rollback();
-				LOG.warning("Failed refreshing session for user: " + data.email);
-				return Response.status(Status.FORBIDDEN).entity("Token expired or invalid: " + data.email).build();
-			}
+			Entity old_refresh = TokensResource.checkIsValidRefresh(data.token, data.email);
 
 			// invalidate old refresh token
-			old_refresh = TokensResource.invalidateRefreshToken(old_refresh, old_refreshKey);
-			
+			old_refresh = TokensResource.invalidateRefreshToken(old_refresh, old_refresh.getKey());
 			
 			// create a new refresh and access token
 			Triplet<Entity, Entity, AuthToken> tokens = TokensResource.createNewAccessAndRefreshTokens(data.email);

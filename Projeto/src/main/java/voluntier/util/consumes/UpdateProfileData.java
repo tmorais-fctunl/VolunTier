@@ -19,6 +19,8 @@ public class UpdateProfileData extends RequestData {
 	public String facebook;
 	public String instagram;
 	public String twitter;
+	
+	public String target;
 
 	public UpdateProfileData() {
 	}
@@ -26,7 +28,7 @@ public class UpdateProfileData extends RequestData {
 	public UpdateProfileData(String token, String email, String password, String full_name,
 			String confirmation_password, String profile, String landline, String mobile, String address,
 			String address2, String region, String pc, String state, String website, String facebook, String instagram,
-			String twitter) {
+			String twitter, String target) {
 		super(email, token);
 		this.full_name = full_name;
 		this.password = password;
@@ -42,6 +44,8 @@ public class UpdateProfileData extends RequestData {
 		this.facebook = facebook;
 		this.instagram = instagram;
 		this.twitter = twitter;
+		
+		this.target = target;
 	}
 
 	public String getPassword(String a_default) {
@@ -101,7 +105,7 @@ public class UpdateProfileData extends RequestData {
 	}
 
 	public boolean isValid() {
-		return super.isValid()
+		return super.isValid() && target != null
 				&& (password == null || (UserData_Modifiable.passwordValid(password)
 						&& confirmation_password.equals(password) && old_password != null))
 				&& (full_name == null || UserData_Modifiable.fullNameValid(full_name))

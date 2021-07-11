@@ -45,7 +45,6 @@ public class DB_Chat {
 		do {
 			id = "Chat" + rand.nextInt();
 			idKey = chatFactory.newKey(id);
-			chatFactory.newKey(id);
 		} while (datastore.get(idKey) != null);
 
 		return idKey;
@@ -150,7 +149,7 @@ public class DB_Chat {
 		return mods;
 	}
 
-	public static Pair<List<Entity>, Integer> postMessage(String chat_id, String email, String message)
+	public static Pair<List<Entity>, Integer> postMessage(String chat_id, String email, String username, String message)
 			throws InexistentChatIdException, InexistentLogIdException, SomethingWrongException {
 		Key idKey = chatFactory.newKey(chat_id);
 		Entity chat = datastore.get(idKey);
@@ -167,7 +166,7 @@ public class DB_Chat {
 		int message_id = -1;
 
 		try {
-			Pair<Entity, Integer> message_log = DB_MessageLog.addMessage(last_log_id, email, message);
+			Pair<Entity, Integer> message_log = DB_MessageLog.addMessage(last_log_id, email, username, message);
 			ents.add(message_log.getValue0());
 			message_id = message_log.getValue1();
 
@@ -178,7 +177,7 @@ public class DB_Chat {
 			int new_start_index = messages.get(messages.size() - 1).comment_id + 1;
 
 			Triplet<Entity, String, Integer> new_message_log = DB_MessageLog.createLogAndAddMessage(chat_id,
-					new_start_index, email, message);
+					new_start_index, email, username, message);
 
 			String message_log_id = new_message_log.getValue1();
 			message_id = new_message_log.getValue2();

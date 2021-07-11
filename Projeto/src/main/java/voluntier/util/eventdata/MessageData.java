@@ -3,6 +3,7 @@ package voluntier.util.eventdata;
 public class MessageData {
 	
 	public String email;
+	public String username;
 	public String comment;
 	public String timestamp;
 	public int comment_id;
@@ -11,8 +12,9 @@ public class MessageData {
 	public MessageData() {
 	}
 	
-	public MessageData (String email, String comment, String timestamp, int comment_id, int likes) {
+	public MessageData (String email, String username, String comment, String timestamp, int comment_id, int likes) {
 		this.email = email;
+		this.username = username;
 		this.comment = comment;
 		this.timestamp = timestamp;
 		this.comment_id = comment_id;

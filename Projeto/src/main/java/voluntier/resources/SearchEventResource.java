@@ -18,6 +18,7 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Transaction;
 
+import voluntier.exceptions.InvalidTokenException;
 import voluntier.util.JsonUtil;
 import voluntier.util.consumes.event.SearchByRange;
 import voluntier.util.produces.CreateEventReturn;
@@ -30,7 +31,6 @@ public class SearchEventResource {
 
 	private static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	private static KeyFactory usersFactory = datastore.newKeyFactory().setKind("User");
-	private static KeyFactory sessionFactory = datastore.newKeyFactory().setKind("Session");
 	private static KeyFactory eventFactory = datastore.newKeyFactory().setKind("Event");
 
 	public SearchEventResource() {
@@ -49,15 +49,7 @@ public class SearchEventResource {
 		Transaction txn = datastore.newTransaction();
 
 		try {
-
-			Key tokenKey = sessionFactory.newKey(data.token);
-			Entity token = txn.get(tokenKey);
-
-			if (!TokensResource.isValidAccess(token, data.email)) {
-				txn.rollback();
-				LOG.warning("Failed event search attempt by user: " + data.email);
-				return Response.status(Status.FORBIDDEN).entity("Token expired or invalid: " + data.email).build();
-			}
+			TokensResource.checkIsValidAccess(data.token, data.email);
 
 			Key userKey = usersFactory.newKey(data.email);
 			Entity user = txn.get(userKey);
@@ -86,10 +78,16 @@ public class SearchEventResource {
 				return Response.ok(JsonUtil.json.toJson(new CreateEventReturn(data.event_id))).build();
 			}
 
+		} catch (InvalidTokenException e) {
+			txn.rollback();
+			LOG.severe(e.getMessage());
+			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
+			
 		} catch (Exception e) {
 			txn.rollback();
 			LOG.severe(e.getMessage());
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+			
 		} finally {
 			if (txn.isActive()) {
 				txn.rollback();

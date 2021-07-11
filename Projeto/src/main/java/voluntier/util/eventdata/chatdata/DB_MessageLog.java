@@ -88,31 +88,31 @@ public class DB_MessageLog {
 		return out;
 	}
 
-	public static Triplet<Entity, String, Integer> createLogAndAddMessage(String chat_id, int start_index, String email,
+	public static Triplet<Entity, String, Integer> createLogAndAddMessage(String chat_id, int start_index, String email, String username, 
 			String message) {
 		Pair<Entity, String> newLog = createNew(chat_id, start_index);
 		String message_log_id = newLog.getValue1();
 		Pair<Entity, Integer> updated_log;
 
-		updated_log = addMessage(newLog.getValue0().getKey(), newLog.getValue0(), email, message);
+		updated_log = addMessage(newLog.getValue0().getKey(), newLog.getValue0(), email, username, message);
 		Integer message_id = updated_log.getValue1();
 
 		return new Triplet<>(updated_log.getValue0(), message_log_id, message_id);
 	}
 
-	private static Pair<Entity, Integer> addMessage(Key key, Entity log, String email, String message) {
+	private static Pair<Entity, Integer> addMessage(Key key, Entity log, String email, String username, String message) {
 		List<Value<?>> messages = log.getList(MESSAGES);
 
 		ListValue.Builder newList = ListValue.newBuilder().set(messages);
 		int message_id = (int) (log.getLong(START_INDEX) + messages.size());
-		MessageData message_data = new MessageData(email, message, Timestamp.now().toString(), message_id, 0);
+		MessageData message_data = new MessageData(email, username, message, Timestamp.now().toString(), message_id, 0);
 
 		newList.addValue(JsonUtil.json.toJson(message_data));
 
 		return new Pair<Entity, Integer>(updateMessages(key, log, newList.build()), message_id);
 	}
 
-	public static Pair<Entity, Integer> addMessage(String log_id, String email, String message)
+	public static Pair<Entity, Integer> addMessage(String log_id, String email, String username, String message)
 			throws InexistentLogIdException, MaximumSizeReachedException {
 		Key idKey = logFactory.newKey(log_id);
 		Entity log = datastore.get(idKey);
@@ -122,7 +122,7 @@ public class DB_MessageLog {
 		if (Entity.calculateSerializedSize(log) + message.length() > MAX_LOG_SIZE)
 			throw new MaximumSizeReachedException();
 
-		return addMessage(idKey, log, email, message);
+		return addMessage(idKey, log, email, username, message);
 	}
 
 	public static Entity deleteMessage(String log_id, int message_id)

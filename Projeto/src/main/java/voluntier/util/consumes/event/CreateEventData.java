@@ -1,7 +1,6 @@
 package voluntier.util.consumes.event;
 
 import java.time.format.DateTimeParseException;
-import java.util.Random;
 
 import com.google.cloud.Timestamp;
 
@@ -23,7 +22,7 @@ public class CreateEventData extends RequestData {
 	public String profile;
 
 	public String contact;
-	public long capacity;
+	public Long capacity;
 
 
 	public CreateEventData() {
@@ -82,14 +81,13 @@ public class CreateEventData extends RequestData {
 		if (contact == null) {
 			contact = "";
 			return true;
-		} 
-		else if (contact.equals(""))
-			return true;
-		else return EventData_Minimal.contactValid(contact);
+		}
+		else
+			return EventData_Minimal.contactValid(contact);
 	}
 
 	public boolean capacityValid () {
-		if (capacity < 1) {
+		if (capacity == null) {
 			capacity = DB_Event.DEFAULT_CAPACITY;
 			return true;
 		}
@@ -110,14 +108,5 @@ public class CreateEventData extends RequestData {
 	public boolean optionalsValid () {
 		return contactValid() && capacityValid();
 	}
-
-	public void generateID () {
-		Random rand = new Random();
-		this.event_id = "Event" + event_name.toLowerCase().replace(" ",  "") + Math.abs(rand.nextInt());
-	}
-
-	/*public LatLng getLocatoinCoord () {
-		return LatLng.of(location[0], location[1]);
-	}*/
 
 }

@@ -15,6 +15,9 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Transaction;
 
+import voluntier.exceptions.InvalidTokenException;
+import voluntier.exceptions.InexistentEventException;
+import voluntier.exceptions.ImpossibleActionException;
 import voluntier.util.consumes.event.EventData;
 import voluntier.util.consumes.event.UpdateEventData;
 import voluntier.util.consumes.event.UpdateProfileData;
@@ -27,74 +30,52 @@ import javax.ws.rs.core.Response.Status;
 @Path("/updateEvent")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class UpdateEventResource {
-	
+
 	private static final Logger LOG = Logger.getLogger(UpdateResource.class.getName());
 
 	private static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	private static KeyFactory usersFactory = datastore.newKeyFactory().setKind("User");
-	private static KeyFactory sessionFactory = datastore.newKeyFactory().setKind("Session");
-	private static KeyFactory eventFactory = datastore.newKeyFactory().setKind("Event");
-	
+
 	public UpdateEventResource() {
 	}
-	
+
 	@POST
 	@Path("/attributes")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response updateAttributes (UpdateEventData data) {
+	public Response updateAttributes(UpdateEventData data) {
 		LOG.fine("Attempt to change event " + data.event_id + " attributes.");
-		
+
 		if (!data.isValid())
 			return Response.status(Status.BAD_REQUEST).build();
-		
+
 		Transaction txn = datastore.newTransaction();
-		
+
 		try {
+			TokensResource.checkIsValidAccess(data.token, data.email);
 
-			Key tokenKey = sessionFactory.newKey(data.token);
-			Entity token = txn.get(tokenKey);
-
-			//o token tem de pertencer a quem faz o request
-			if (!TokensResource.isValidAccess(token, data.email)) {
-				txn.rollback();
-				LOG.warning("Failed request to change attributes of event " + data.event_id + " by user " + data.email);
-				return Response.status(Status.FORBIDDEN).entity("Invalid token").build();
-			}
-			
 			Key userKey = usersFactory.newKey(data.email);
 			Entity user = txn.get(userKey);
-			
-			//o user tem de existir e estar em condicoes
+
+			// o user tem de existir e estar em condicoes
 			if (user == null || ActionsResource.isRemovedOrBannedUser(user)) {
 				txn.rollback();
 				LOG.warning("User can't request this opetation.");
 				return Response.status(Status.FORBIDDEN).entity("Invalid user").build();
 			}
-			
-			Key eventKey = eventFactory.newKey(data.event_id);
-			Entity event = txn.get(eventKey);
-			
-			if (event == null) {
-				txn.rollback();
-				LOG.warning("Event named " + data.event_id + " does not exist.");
-				return Response.status(Status.BAD_REQUEST).entity("Invalid event").build();
-			} else {
-				// se nao for owner, nao pode alterar nada. vamos querer adicionar mais condicoes eventualmente...
-				if ( !DB_Event.isOwner(event, data.email) || !DB_Event.isActive(event) ) {
-					txn.rollback();
-					LOG.warning("User " + data.email + " can not change properties of event " + data.event_id + " or event does not exist");
-					return Response.status(Status.FORBIDDEN).build();
-				}
-				
-				event = DB_Event.updateProperty(data, eventKey, event);
-				
-				txn.put(event);
-				txn.commit();
-				
-				LOG.fine("User " + data.email  + " updated the attributes of event " + data.event_id);
-				return Response.status(Status.NO_CONTENT).build();
-			}
-			
+
+			Entity event = DB_Event.updateProperty(data);
+
+			txn.put(event);
+			txn.commit();
+
+			LOG.fine("User " + data.email + " updated the attributes of event " + data.event_id);
+			return Response.status(Status.NO_CONTENT).build();
+
+		} catch (InvalidTokenException | InexistentEventException | ImpossibleActionException e) {
+			txn.rollback();
+			LOG.severe(e.getMessage());
+			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
+
 		} catch (Exception e) {
 			txn.rollback();
 			LOG.severe(e.getMessage());
@@ -106,67 +87,44 @@ public class UpdateEventResource {
 				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 			}
 		}
-		
 	}
-	
-	
+
 	@POST
 	@Path("/remove")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response removeEvent (EventData data) {
+	public Response removeEvent(EventData data) {
 		LOG.fine("Trying to delete event " + data.event_id);
-		
+
 		if (!data.isValid())
 			return Response.status(Status.BAD_REQUEST).build();
-		
+
 		Transaction txn = datastore.newTransaction();
-		
+
 		try {
+			TokensResource.checkIsValidAccess(data.token, data.email);
 
-			Key tokenKey = sessionFactory.newKey(data.token);
-			Entity token = txn.get(tokenKey);
-
-			//o token tem de pertencer a quem faz o request
-			if (!TokensResource.isValidAccess(token, data.email)) {
-				txn.rollback();
-				LOG.warning("Failed request to delete event " + data.event_id + " by user " + data.email);
-				return Response.status(Status.FORBIDDEN).entity("Invalid token").build();
-			}
-			
 			Key userKey = usersFactory.newKey(data.email);
 			Entity user = txn.get(userKey);
-			
-			//o user tem de existir e estar em condicoes
+
 			if (user == null || ActionsResource.isRemovedOrBannedUser(user)) {
 				txn.rollback();
 				LOG.warning("User can't request this opetation.");
 				return Response.status(Status.FORBIDDEN).entity("Invalid user").build();
 			}
-			
-			Key eventKey = eventFactory.newKey(data.event_id);
-			Entity event = txn.get(eventKey);
-			
-			if (event == null) {
-				txn.rollback();
-				LOG.warning("Event named " + data.event_id + " does not exist.");
-				return Response.status(Status.BAD_REQUEST).entity("Invalid event").build();
-			} else {				
-				// se nao for owner, nao pode alterar nada. vamos querer adicionar mais condicoes eventualmente...
-				if ( !DB_Event.isOwner(event, data.email) || !DB_Event.isActive(event)) {
-					txn.rollback();
-					LOG.warning("User " + data.email + " can not delete event " + data.event_id);
-					return Response.status(Status.FORBIDDEN).build();
-				}
-				
-				event = DB_Event.updateState(eventKey, event, State.BANNED.toString());
-				
-				txn.put(event);
-				txn.commit();
-				
-				LOG.fine("User " + data.email  + " deleted event " + data.event_id);
-				return Response.status(Status.NO_CONTENT).build();
-			}
-			
+
+			Entity event = DB_Event.updateState(data.event_id, data.email, State.BANNED.toString());
+
+			txn.put(event);
+			txn.commit();
+
+			LOG.fine("User " + data.email + " deleted event " + data.event_id);
+			return Response.status(Status.NO_CONTENT).build();
+
+		} catch (InvalidTokenException | ImpossibleActionException | InexistentEventException e) {
+			txn.rollback();
+			LOG.severe(e.getMessage());
+			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
+
 		} catch (Exception e) {
 			txn.rollback();
 			LOG.severe(e.getMessage());
@@ -179,66 +137,44 @@ public class UpdateEventResource {
 			}
 		}
 	}
-	
-	//um metodo so para mudar o owner?, tem de ser melhor verificado que os restantes atributos..?
-	
+
 	@POST
 	@Path("/profile")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response updateProfileEvent (UpdateProfileData data) {
+	public Response updateProfileEvent(UpdateProfileData data) {
 		LOG.fine("Trying to update state of event " + data.event_id);
-		
+
 		if (!data.isValid())
 			return Response.status(Status.BAD_REQUEST).build();
-		
+
 		Transaction txn = datastore.newTransaction();
-		
+
 		try {
+			TokensResource.checkIsValidAccess(data.token, data.email);
 
-			Key tokenKey = sessionFactory.newKey(data.token);
-			Entity token = txn.get(tokenKey);
-
-			//o token tem de pertencer a quem faz o request
-			if (!TokensResource.isValidAccess(token, data.email)) {
-				txn.rollback();
-				LOG.warning("Failed request to delete event " + data.event_id + " by user " + data.email);
-				return Response.status(Status.FORBIDDEN).entity("Invalid token").build();
-			}
-			
 			Key userKey = usersFactory.newKey(data.email);
 			Entity user = txn.get(userKey);
-			
-			//o user tem de existir e estar em condicoes
+
+			// o user tem de existir e estar em condicoes
 			if (user == null || ActionsResource.isRemovedOrBannedUser(user)) {
 				txn.rollback();
 				LOG.warning("User can't request this opetation.");
 				return Response.status(Status.FORBIDDEN).entity("Invalid user").build();
 			}
-			
-			Key eventKey = eventFactory.newKey(data.event_id);
-			Entity event = txn.get(eventKey);
-			
-			if (event == null) {
-				txn.rollback();
-				LOG.warning("Event named " + data.event_id + " does not exist.");
-				return Response.status(Status.BAD_REQUEST).entity("Invalid event").build();
-			} else {				
-				// se nao for owner, nao pode alterar nada. vamos querer adicionar mais condicoes eventualmente...
-				if ( !DB_Event.isOwner(event, data.email) || !DB_Event.isActive(event)) {
-					txn.rollback();
-					LOG.warning("User " + data.email + " can not update profile of event " + data.event_id);
-					return Response.status(Status.FORBIDDEN).build();
-				}
-				
-				event = DB_Event.updateProfile(eventKey, event, data.profile);
-				
-				txn.put(event);
-				txn.commit();
-				
-				LOG.fine("User " + data.email  + " deleted event " + data.event_id);
-				return Response.status(Status.NO_CONTENT).build();
-			}
-			
+
+			Entity event = DB_Event.updateProfile(data.event_id, data.email, data.profile);
+
+			txn.put(event);
+			txn.commit();
+
+			LOG.fine("User " + data.email + " deleted event " + data.event_id);
+			return Response.status(Status.NO_CONTENT).build();
+
+		} catch (InvalidTokenException | ImpossibleActionException | InexistentEventException e) {
+			txn.rollback();
+			LOG.severe(e.getMessage());
+			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
+
 		} catch (Exception e) {
 			txn.rollback();
 			LOG.severe(e.getMessage());

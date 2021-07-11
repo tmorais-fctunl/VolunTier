@@ -2,14 +2,16 @@ package voluntier.util.produces;
 
 import java.util.List;
 
+import voluntier.util.eventdata.EventParticipantData;
+
 public class EventParticipantsReturn {
 
-	public List<String> participants;
+	public List<EventParticipantData> participants;
 
 	public EventParticipantsReturn() {
 	}
 
-	public EventParticipantsReturn(List<String> participants) {
+	public EventParticipantsReturn(List<EventParticipantData> participants) {
 		this.participants = participants;
 	}
 }

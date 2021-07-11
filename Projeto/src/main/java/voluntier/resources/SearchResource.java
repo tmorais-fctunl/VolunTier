@@ -34,8 +34,10 @@ import com.google.datastore.v1.QueryResultBatch.MoreResultsType;
 import com.google.cloud.datastore.StructuredQuery.CompositeFilter;
 import com.google.cloud.datastore.StructuredQuery.Filter;
 
+import voluntier.exceptions.InvalidTokenException;
 import voluntier.util.GoogleStorageUtil;
 import voluntier.util.JsonUtil;
+import voluntier.util.consumes.LookUpData;
 import voluntier.util.consumes.RequestData;
 import voluntier.util.consumes.SearchUserData;
 import voluntier.util.produces.GetPictureReturn;
@@ -53,7 +55,6 @@ public class SearchResource {
 
 	private static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	private static KeyFactory usersFactory = datastore.newKeyFactory().setKind("User");
-	private static KeyFactory sessionFactory = datastore.newKeyFactory().setKind("Session");
 	private static KeyFactory usernamesFactory = datastore.newKeyFactory().setKind("ID");
 
 	public SearchResource() {
@@ -63,44 +64,42 @@ public class SearchResource {
 	@Path("/user")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response doLookUp(RequestData data) {
+	public Response doLookUp(LookUpData data) {
 
 		if (!data.isValid())
 			return Response.status(Status.BAD_REQUEST).entity("Invalid").build();
 
 		Transaction txn = datastore.newTransaction();
 		try {
-			Key tokenKey = sessionFactory.newKey(data.token);
-			Entity token = txn.get(tokenKey);
+			Entity token = TokensResource.checkIsValidAccess(data.token, data.email);
 
-			if (!TokensResource.isValidAccess(token)) {
+			Key tg_userKey = usersFactory.newKey(data.target);
+			Entity tg_user = txn.get(tg_userKey);
+
+			Key rq_userKey = usersFactory.newKey(token.getString(TokensResource.ACCESS_EMAIL));
+			Entity rq_user = txn.get(rq_userKey);
+
+			if (tg_user == null) {
 				txn.rollback();
-				LOG.warning("Invalid token");
 				return Response.status(Status.FORBIDDEN).build();
 			} else {
-				Key tg_userKey = usersFactory.newKey(data.email);
-				Entity tg_user = txn.get(tg_userKey);
-
-				Key rq_userKey = usersFactory.newKey(token.getString(TokensResource.ACCESS_EMAIL));
-				Entity rq_user = txn.get(rq_userKey);
-
-				if (tg_user == null) {
+				// check permissions
+				if (!ActionsResource.hasLookUpPermission(rq_user, tg_user, txn)) {
 					txn.rollback();
+					LOG.warning("User:" + rq_user.getString(DB_User.EMAIL)
+							+ " does not have enough permissions to look up: " + data.target);
 					return Response.status(Status.FORBIDDEN).build();
 				} else {
-					// check permissions
-					if (!ActionsResource.hasLookUpPermission(rq_user, tg_user, txn)) {
-						txn.rollback();
-						LOG.warning("User:" + rq_user.getString(DB_User.EMAIL)
-								+ " does not have enough permissions to look up: " + data.email);
-						return Response.status(Status.FORBIDDEN).build();
-					} else {
-						UserData_Minimal user_data = new UserData_Minimal(tg_user);
-						txn.rollback();
-						return Response.ok(JsonUtil.json.toJson(user_data)).build();
-					}
+					UserData_Minimal user_data = new UserData_Minimal(tg_user);
+					txn.rollback();
+					return Response.ok(JsonUtil.json.toJson(user_data)).build();
 				}
 			}
+
+		} catch (InvalidTokenException e) {
+			txn.rollback();
+			LOG.severe(e.getMessage());
+			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
 
 		} catch (Exception e) {
 			txn.rollback();
@@ -125,15 +124,15 @@ public class SearchResource {
 			return Response.status(Status.BAD_REQUEST).entity("Invalid").build();
 
 		try {
-			// check if the token corresponds to the user received and hasnt expired yet
-			if (!TokensResource.isValidAccess(data.token, data.email)) {
-				LOG.warning("Failed search attempt by user: " + data.email);
-				return Response.status(Status.FORBIDDEN).entity("Token expired or invalid: " + data.email).build();
-			}
+			TokensResource.checkIsValidAccess(data.token, data.email);
 
 			SearchData res = new SearchData(searchUser(query, data.cursor));
 
 			return Response.ok(JsonUtil.json.toJson(res)).build();
+
+		} catch (InvalidTokenException e) {
+			LOG.severe(e.getMessage());
+			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
 
 		} catch (Exception e) {
 			LOG.severe(e.getMessage());
@@ -151,10 +150,7 @@ public class SearchResource {
 			return Response.status(Status.BAD_REQUEST).entity("Invalid").build();
 
 		try {
-			if (!TokensResource.isValidAccess(data.token, data.email)) {
-				LOG.warning("Failed logout attempt by user: " + data.email);
-				return Response.status(Status.FORBIDDEN).entity("Token expired or invalid: " + data.email).build();
-			}
+			TokensResource.checkIsValidAccess(data.token, data.email);
 
 			Key usernameKey = usernamesFactory.newKey(username);
 			Entity usernameEnt = datastore.get(usernameKey);
@@ -163,20 +159,26 @@ public class SearchResource {
 				Key emailKey = usersFactory.newKey(usernameEnt.getString(DB_User.EMAIL));
 				Entity emailEnt = datastore.get(emailKey);
 				String encodedMiniature = emailEnt.getString(DB_User.PROFILE_PICTURE_MINIATURE);
-				
-				if(encodedMiniature.equals(""))
+
+				if (encodedMiniature.equals(""))
 					return Response.status(Status.NO_CONTENT).build();
-				
+
 				String ext = ProfilePicture.getImageType(encodedMiniature);
-				
+
 				String GCS_filename = DB_User.getProfilePictureFilename(username, ext);
 				Pair<URL, Long> downloadData = GoogleStorageUtil.signURLForDownload(GCS_filename);
 
-				return Response.ok(JsonUtil.json.toJson(new GetPictureReturn(downloadData.getValue0(), downloadData.getValue1(),
-						encodedMiniature.equals("") ? null : encodedMiniature))).build();
+				return Response
+						.ok(JsonUtil.json.toJson(new GetPictureReturn(downloadData.getValue0(),
+								downloadData.getValue1(), encodedMiniature.equals("") ? null : encodedMiniature)))
+						.build();
 			}
 
 			return Response.status(Status.NOT_FOUND).build();
+
+		} catch (InvalidTokenException e) {
+			LOG.severe(e.getMessage());
+			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
 
 		} catch (Exception e) {
 			LOG.severe(e.getMessage());
