@@ -36,7 +36,7 @@ import voluntier.exceptions.InvalidTokenException;
 import voluntier.util.JsonUtil;
 import voluntier.util.consumes.event.CreateEventData;
 import voluntier.util.consumes.event.EventData;
-import voluntier.util.consumes.event.KickParticipantData;
+import voluntier.util.consumes.event.RemoveParticipantData;
 import voluntier.util.consumes.event.LikeCommentData;
 import voluntier.util.consumes.event.ChatModeratorData;
 import voluntier.util.consumes.event.PostCommentData;
@@ -64,7 +64,7 @@ public class EventResource {
 
 	public EventResource() {
 	}
-
+	
 	@POST
 	@Path("/addEvent")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -132,14 +132,18 @@ public class EventResource {
 			TokensResource.checkIsValidAccess(data.token, data.email);
 
 			Entity event = DB_Event.participateInEvent(data.event_id, data.email);
+			Key userKey = usersFactory.newKey(data.email);
+			Entity user = datastore.get(userKey);
+			Entity updated_user = DB_User.participateEvent(userKey, user, data.event_id);
 
-			txn.put(event);
+			txn.put(event, updated_user);
 			txn.commit();
 
 			LOG.fine("Participant inserted correctly.");
 			return Response.status(Status.NO_CONTENT).build();
 
 		} catch (InvalidTokenException | ImpossibleActionException | InexistentEventException e) {
+			txn.rollback();
 			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
 
 		} catch (Exception e) {
@@ -153,7 +157,54 @@ public class EventResource {
 				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 			}
 		}
+	}
+	
+	@POST
+	@Path("/removeParticipant")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response removeParticipant(RemoveParticipantData data) {
+		LOG.fine("Trying to make chat moderator in event: " + data.event_id);
 
+		if (!data.isValid())
+			return Response.status(Status.BAD_REQUEST).build();
+
+		Transaction txn = datastore.newTransaction();
+
+		try {
+			TokensResource.checkIsValidAccess(data.token, data.email);
+
+			String req_email = data.email;
+
+			List<Entity> ents = DB_Event.removeParticipant(data.event_id, data.participant, req_email);
+			
+			Key userKey = usersFactory.newKey(data.participant);
+			Entity user = txn.get(userKey);
+			Entity updated_user = DB_User.leaveEvent(userKey, user, data.event_id);
+			if(data.email.equals(data.participant))
+				txn.put(updated_user);
+			
+			ents.forEach(ent -> txn.put(ent));
+			txn.commit();
+
+			LOG.fine("Removed " + data.participant + "from event: " + data.event_id);
+			return Response.status(Status.NO_CONTENT).build();
+
+		} catch (InvalidTokenException | InexistentChatIdException | ImpossibleActionException
+				| InexistentModeratorException | InexistentEventException e) {
+			txn.rollback();
+			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
+
+		} catch (Exception e) {
+			txn.rollback();
+			LOG.severe(e.getMessage());
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+
+		} finally {
+			if (txn.isActive()) {
+				txn.rollback();
+				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+			}
+		}
 	}
 
 	@POST
@@ -519,47 +570,6 @@ public class EventResource {
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 	}
-
-	@POST
-	@Path("/kick")
-	@Consumes(MediaType.APPLICATION_JSON)
-	public Response kickParticipant(KickParticipantData data) {
-		LOG.fine("Trying to make chat moderator in event: " + data.event_id);
-
-		if (!data.isValid())
-			return Response.status(Status.BAD_REQUEST).build();
-
-		Transaction txn = datastore.newTransaction();
-
-		try {
-			TokensResource.checkIsValidAccess(data.token, data.email);
-
-			String req_email = data.email;
-
-			List<Entity> ents = DB_Event.removeParticipant(data.event_id, data.participant, req_email);
-			ents.forEach(ent -> txn.put(ent));
-			txn.commit();
-
-			LOG.fine("Removed " + data.participant + "from event: " + data.event_id);
-			return Response.status(Status.NO_CONTENT).build();
-
-		} catch (InvalidTokenException | InexistentChatIdException | ImpossibleActionException
-				| InexistentModeratorException | InexistentEventException e) {
-			txn.rollback();
-			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
-
-		} catch (Exception e) {
-			txn.rollback();
-			LOG.severe(e.getMessage());
-			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-
-		} finally {
-			if (txn.isActive()) {
-				txn.rollback();
-				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-			}
-		}
-	}
 	
 	@POST
 	@Path("/user/events")
@@ -577,6 +587,33 @@ public class EventResource {
 			Entity user = datastore.get(userKey);
 			
 			List<String> events = DB_User.getEvents(user);
+			return Response.ok(JsonUtil.json.toJson(new UserEventsReturn(events))).build();
+
+		} catch (InvalidTokenException  e) {
+			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
+
+		} catch (Exception e) {
+			LOG.severe(e.getMessage());
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
+	}
+	
+	@POST
+	@Path("/user/participatingEvents")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response getUserParticipatingEvents(UserEventsData data) {
+		LOG.fine("Trying to get user participating events: " + data.target);
+
+		if (!data.isValid())
+			return Response.status(Status.BAD_REQUEST).build();
+
+		try {
+			TokensResource.checkIsValidAccess(data.token, data.email);
+			Key userKey = usersFactory.newKey(data.target);
+			Entity user = datastore.get(userKey);
+			
+			List<String> events = DB_User.getParticipatingEvents(user);
 			return Response.ok(JsonUtil.json.toJson(new UserEventsReturn(events))).build();
 
 		} catch (InvalidTokenException  e) {

@@ -11,6 +11,8 @@ public class UpdateEventData extends EventData {
 	public String end_date;
 	public String profile;
 	
+	public String event_name;
+	
 	public String contact;
 	
 	public String description;
@@ -27,8 +29,10 @@ public class UpdateEventData extends EventData {
 	
 	public UpdateEventData (String email, String token, String event_id, double[] location, String start_date, 
 			String end_date, String owner_email, String contact, String description, String category, 
-			long capacity, String website, String facebook, String instagram,String twitter, String profile) {
+			long capacity, String website, String facebook, String instagram,String twitter, String profile,
+			String event_name) {
 		super (email, token, event_id);
+		this.event_name = event_name;
 		this.location = location;
 		this.start_date = start_date;
 		this.end_date = end_date;
@@ -95,6 +99,7 @@ public class UpdateEventData extends EventData {
 	
 	public boolean isValid () {
 		return super.isValid()
+				&& (event_name == null || EventData_Minimal.nameValid(event_name))
 				&& (location == null || EventData_Minimal.locationValid(location))
 				&& (profile == null || EventData_Minimal.profileValid(profile))
 				&& (start_date == null || EventData_Minimal.startDateValid(start_date))

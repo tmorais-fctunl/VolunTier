@@ -27,20 +27,6 @@ public class CreateEventData extends RequestData {
 	public CreateEventData() {
 	}
 
-	/*public CreateEventData (String user_email, String token, String event_name, double[] location, 
-			String start_date, String end_date, String description, String category) {
-		super(user_email, token);
-		this.event_name = event_name;
-		this.location = location;
-		this.start_date = start_date;
-		this.end_date = end_date;
-		this.description = description;
-		this.category = category;
-
-		this.contact = "";
-		this.capacity = DB_Event.DEFAULT_CAPACITY;
-	}*/
-
 	public CreateEventData (String user_email, String token, String event_name, double[] location, String profile,
 			String start_date, String end_date, String description, String category, String contact, long capacity){
 		super(user_email, token);
@@ -57,7 +43,7 @@ public class CreateEventData extends RequestData {
 	}
 
 	public boolean event_nameValid () {
-		return event_name != null && event_name != "";
+		return event_name != null && event_name != "" && event_name.length() < 100;
 	}
 
 	public boolean categoryValid () {

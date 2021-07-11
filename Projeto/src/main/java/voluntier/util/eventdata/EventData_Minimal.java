@@ -80,7 +80,7 @@ public class EventData_Minimal {
 	}
 	
 	public static boolean nameValid (String name) {
-		return name != null && name.length() < 100;
+		return name != null && name.length() < 100 && !name.equals("");
 	}
 	
 	public static boolean locationValid (double[] location) {

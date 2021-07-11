@@ -1,13 +1,13 @@
 package voluntier.util.consumes.event;
 
-public class KickParticipantData extends EventData {
+public class RemoveParticipantData extends EventData {
 
 	public String participant;
 
-	public KickParticipantData() {
+	public RemoveParticipantData() {
 	}
 
-	public KickParticipantData (String participant){
+	public RemoveParticipantData (String participant){
 		this.participant = participant;
 	}
 
