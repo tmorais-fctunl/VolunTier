@@ -5,12 +5,57 @@ var infoElements = [];
 updateInfoElements();
 var imgfile, imgblob, imgext, imgSrcPrev;
 var fileData;
-/*
- * Fazer o seguinte:
- * Carregamos info do user, se nao tiver img, imgsrc fica igual à default e carrega na página. 
- * Caso haja, carregamos a img
- * Para saber se a imagem foi mudada, ou temos um booleano, ou comparamos novo src com antigo (imgsrc)
- */
+
+//Regex for inputs:
+var phonesRegex = new RegExp("([+][0-9]{2,3}\s)?[2789][0-9]{8}");
+console.log(phonesRegex.test("965821895"));
+console.log(phonesRegex.test(""));
+console.log(phonesRegex.test("96582189"));
+console.log(phonesRegex.test("+351 965821895"));
+console.log(phonesRegex.test("211814686"));
+console.log(phonesRegex.test("+351 211814686"));
+
+//Check validity of the attributes:
+function updateEditInputs() {
+    $(document).ready(function () {
+        $('body').on("keyup", '.info', function () {
+            console.log("I hit it");
+            if (allInputsValid()) $('#saveBtn').removeAttr('disabled');
+            else $('#saveBtn').prop("disabled", true);
+        });
+    });
+}
+
+function allInputsValid() {
+    var errormsg = document.getElementById("profileEditMsg");
+    errormsg.style.display = "block";
+
+
+    if ($("#profile_fullname").html().length > 120) {
+        errormsg.innerHTML = "Full name must not excede 120 characters";
+        return false;
+    }
+    let phonenumber = $("#profile_mobile").html();
+    if (phonenumber != "" && !phonesRegex.test(phonenumber)) {
+        errormsg.innerHTML = "Mobile number format error: +XXX(optional) YYYYYYYYY";
+        return false;
+    }
+    let landlinenumber = $("#profile_landline").html();
+    if (landlinenumber != "" && !phonesRegex.test(landlinenumber)) {
+        errormsg.innerHTML = "Landline number format error: +XXX(optional) YYYYYYYYY";
+        return false;
+    }
+    let addresslength = $("#profile_address").html().length;
+    if (addresslength != 0 && addresslength <= 5) {
+        errormsg.innerHTML = "Adress must be over 5 characters or none at all";
+        return false;
+    }
+
+    //Everything ok
+    errormsg.style.display = "none";
+    return true;
+}
+
 
 //Image upload scripts begining:
 //Script to redirect button click to file explorer input
@@ -208,6 +253,12 @@ function turnContent(on) {
         //Disable editing
         $('#profileContainer .editable').each(function () {
             $(this).attr("contenteditable", "false");
+            if ($(this).hasClass("url")) {
+                let url = $(this).html();
+                if (url.substring(0, 7) !== 'http://' || url.substring(0, 8) !== 'https://' )
+                    url = 'http://' + url;
+                $(this).attr("href", url);
+            }
         });
 
         //Disable editing for the profile and display without icon

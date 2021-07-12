@@ -136,6 +136,60 @@ function createEventInMap(attributes) {
     }
 }*/
 
+//Funcao para testes do Franca
+function loadEventWithID() {
+   /* let id = $("#loadEventID").val();
+    if (!id) {
+        alert("Mete um id");
+    }
+    loadEvent(id, true);*/
+    /*navigator.geolocation.getCurrentPosition(
+        (position) => {
+            const pos = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude,
+            };*/
+
+
+    let pos = map.getCenter();
+    let bounds = map.getBounds();
+    let ne = bounds.getNorthEast().lat();
+
+    let dif = Math.abs(ne - pos.lat());
+        
+            var urlvariable = "/rest/searchEventsByRange";
+            var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //GET EVENTS
+            var xmlhttp = new XMLHttpRequest();
+            var userId = localStorage.getItem("email"), token = localStorage.getItem("jwt");
+            var ItemJSON = '{"email": "' + userId +
+                '", "token": "' + token +
+                '", "location": ["' + pos.lat() + '","' + pos.lng() + '"]' +
+                ', "radius": "' + dif +
+                '"}';
+            xmlhttp.open("POST", URL, true);
+            xmlhttp.setRequestHeader("Content-Type", "application/json");
+            xmlhttp.onload = function (oEvent) {
+                if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200)) {
+                    alert("Couldn't load events, message: " + xmlhttp.status);
+                    return false;
+                }
+                const attributes = JSON.parse(xmlhttp.responseText);
+                for (var i = 0; i < attributes.length; i++) {
+                    var obj = attributes[i];
+
+                    console.log(obj.event_id);
+
+                    loadEvent(obj.event_id, true);
+                }
+            };
+            xmlhttp.send(ItemJSON);
+
+       /* },
+        () => {
+            handleLocationError(true);
+        }
+    );*/
+}
 
 //Requires callback function
 function getReverseGeocodingData(lat, lng, callback) {
@@ -159,6 +213,7 @@ function getReverseGeocodingData(lat, lng, callback) {
 }
 
 
+let searchMarkers = [];
 function searchBar() {
   // Create the search box and link it to the UI element.
   const input = document.createElement("input");
@@ -174,7 +229,6 @@ function searchBar() {
   map.addListener("bounds_changed", () => {
     searchBox.setBounds(map.getBounds());
   });
-  let markers = [];
   // Listen for the event fired when the user selects a prediction and retrieve
   // more details for that place.
   searchBox.addListener("places_changed", () => {
@@ -184,10 +238,10 @@ function searchBar() {
       return;
     }
     // Clear out the old markers.
-    markers.forEach((marker) => {
+    searchMarkers.forEach((marker) => {
       marker.setMap(null);
     });
-    markers = [];
+    searchMarkers = [];
     // For each place, get the icon, name and location.
     const bounds = new google.maps.LatLngBounds();
     places.forEach((place) => {
@@ -203,7 +257,7 @@ function searchBar() {
         scaledSize: new google.maps.Size(25, 25),
       };
       // Create a marker for each place.
-      markers.push(
+      searchMarkers.push(
         new google.maps.Marker({
           map,
           icon,

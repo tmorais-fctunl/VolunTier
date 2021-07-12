@@ -35,22 +35,47 @@ function requestUserInfo() {
                 document.getElementById("profile_address").innerHTML = obj.address;
             if (obj.mobile)
                 document.getElementById("profile_mobile").innerHTML = obj.mobile;
-            if (obj.website)
-                document.getElementById("profile_website").innerHTML = obj.website;
-            if (obj.facebook)
-                document.getElementById("profile_facebook").innerHTML = obj.facebook;
-            if (obj.instagram)
-                document.getElementById("profile_instagram").innerHTML = obj.instagram;
-            if (obj.twitter)
-                document.getElementById("profile_twitter").innerHTML = obj.twitter;
+            if (obj.website) {
+                fillRefs("profile_website", obj.website);
+            }
+            if (obj.facebook) {
+                fillRefs("profile_facebook", obj.facebook);
+            }
+            if (obj.instagram) {
+                fillRefs("profile_instagram", obj.instagram);
+            }
+            if (obj.twitter) {
+                fillRefs("profile_twitter", obj.twitter);
+            }
             //The rest fields
+
+            $('#profileContainer .editable').each(function () {
+                $(this).attr("contenteditable", "false");
+                if ($(this).hasClass("url")) {
+                    let url = $(this).html();
+                    if (url.substring(0, 7) !== 'http://' || url.substring(0, 8) !== 'https://')
+                        url = 'http://' + url;
+                    $(this).attr("href", url);
+                }
+            });
 
 
 
             //request picture
             requestUserPicture(obj.username);
+
+            updateEditInputs();
         }
     });
+}
+
+function fillRefs(element_id, link) {
+    let website = document.getElementById(element_id);
+    let url = link;
+    website.innerHTML = url;
+    if (url.substring(0, 7) !== 'http://' || url.substring(0, 8) !== 'https://')
+        url = 'http://' + url;
+    website.href = url;
 }
 
 function requestUserPictureGCS(url) {

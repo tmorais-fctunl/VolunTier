@@ -7,6 +7,10 @@
             clickmarker.setMap(null);
             clickmarker = null;
         }
+        // Clear out the old searchbar markers.
+        searchMarkers.forEach((marker) => {
+            marker.setMap(null);
+        });
     }
 
     window.onload = removeMarkerListeners();

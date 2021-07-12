@@ -9,15 +9,17 @@ function tryAuthentication() {
     }
     console.log("User in storage");
     //Authenticate user
-    var authenticated = authenticate(localStorage.getItem("email"), localStorage.getItem("jwt"));
+   var authenticated = authenticate(localStorage.getItem("email"), localStorage.getItem("jwt"));
 
     if (authenticated) {
         console.log("validated user");
         return true;
     }
     console.log("User not validated");
-    var expDate = new Date(localStorage.getItem("jwt_expiration_date"));
+    var expDate = new Date(parseInt(localStorage.getItem("jwt_expiration_date")));
     var currDate = new Date();
+    console.log("Exp: " + expDate);
+    console.log("Curr: " + currDate);
     var expired = expDate < currDate;
     if (!expired) {
         console.log("jwt not expired, incorrect token");
@@ -25,7 +27,7 @@ function tryAuthentication() {
         return false;
     }
     console.log("jwt expired");
-    var expRefDate = new Date(localStorage.getItem("jwrt_expiration_date"));
+    var expRefDate = new Date(parseInt(localStorage.getItem("jwrt_expiration_date")));
     expired = expRefDate < currDate;
     if (expired) {
         console.log("jwrt expired");
