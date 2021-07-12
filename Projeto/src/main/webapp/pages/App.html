@@ -44,15 +44,22 @@
             <!--  <span onclick="this.parentElement.style.display='none'" class="topright">&times</span>-->
             <main class="app">
                 <aside class="sidebar" style="background-color:white;">
+
+                    <div id="sidebar_content_event_list">
+                        <h3 style="text-align:center">Events</h3>
+                    </div>
+
                     <div id="sidebar_content">
-                            <h3>This right here is your panel.</h1>
-                            <br>
-                            <p> Your panel will display event details, event creation form and other tools that are in development</p>
-                            <br>
-                            <p style="display: inline"> Right now, you can click the "Create Event" button in the bottom right to open up the Create Event Form.
-                              In the future, we want to allow you to click events already marked on your map and display their information here.
-                              We also want to have a feed of events, which can make it easier for you to check them out without needlessly clicking through all of them.
-                              More tools may be developed as our project and ideas grow. </p>
+                        <h3>This right here is your panel.</h3>
+                        <br>
+                        <p> Your panel will display event details, event creation form and other tools that are in development</p>
+                        <br>
+                        <p style="display: inline">
+                            Right now, you can click the "Create Event" button in the bottom right to open up the Create Event Form.
+                            In the future, we want to allow you to click events already marked on your map and display their information here.
+                            We also want to have a feed of events, which can make it easier for you to check them out without needlessly clicking through all of them.
+                            More tools may be developed as our project and ideas grow.
+                        </p>
 
                     </div>
                 </aside>
@@ -66,7 +73,9 @@
         </div>
         <div id="Profile" class="tabcontent">
             <!--  <span onclick="this.parentElement.style.display='none'" class="topright">&times</span>-->
+
             <div data-include="./contents/profile.html"></div>
+
         </div>
         <div id="Leaderboard" class="tabcontent">
             <!--  <span onclick="this.parentElement.style.display='none'" class="topright">&times</span>-->
@@ -78,10 +87,14 @@
             <h3>Store</h3>
             <p>There's nothing here to buy, because of, yet again, our developer. (Our higher-ups are really pissed about all the missed profit)</p>
         </div>
-        <footer class="bg-dark pt-5 text-white-50">
+        <div id="Event" class="tabcontent">
+            <span onclick="closeEventTab()" class="topright">&times</span>
+            <h3>Event</h3>
+            <p>There's nothing here, because of, yet again, our developer. (Our higher-ups are really pissed about all the missed profit)</p>
+        </div>
+        <footer class="bg-dark pt-5 text-white-50" style="display: inline-block; width: 100%">
             <div class="container">
-                <div class="row">
-</div>
+                <div class="row"></div>
             </div>
         </footer>
         <script src="../assets/js/jquery.min.js"></script>
@@ -90,9 +103,9 @@
         <script src="../scripts/formLoader.js"></script>
         <!-- Hash function -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha512/0.8.0/sha512.min.js"></script>
-      <!--  <script src="../scripts/login.js"></script>-->
-      <!--  <script src="../scripts/register.js"></script>-->
-      <!--  <script src="../scripts/login_ok_fields.js"></script>-->
+        <!--  <script src="../scripts/login.js"></script>-->
+        <!--  <script src="../scripts/register.js"></script>-->
+        <!--  <script src="../scripts/login_ok_fields.js"></script>-->
         <!--  <script src="../scripts/register_ok_fields.js"></script>-->
         <script src="../scripts/authenticate.js"></script>
 

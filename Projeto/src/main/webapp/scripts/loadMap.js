@@ -46,6 +46,7 @@ function initMap() {
     styles:myStyles,
     gestureHandling: "greedy"
   });
+  
   createEventButton();
   locationButton();
   searchBar();
@@ -59,7 +60,8 @@ function createEventButton() {
   map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(createEventButton);
   createEventButton.addEventListener("click", () => {
     //Allow user to create a new event in the side bar
-    let sidebar = document.getElementById("sidebar_content");
+      let sidebar = document.getElementById("sidebar_content");
+      document.getElementById("sidebar_content_event_list").style.display = 'none';
 
     $.get("contents/createEventForm.html", function (data) {
         $('#sidebar_content').html(data);
@@ -82,6 +84,44 @@ function createEventButton() {
 
 
   });
+}
+
+function displayEventSideBar(event_id) {
+    document.getElementById("sidebar_content_event_list").style.display = 'none';
+    loadEvent(event_id, false);
+}
+
+function createEventInMap(attributes) {
+    
+    //props for the event marker
+    
+    const pos = {
+        lat: attributes.location[0],
+        lng: attributes.location[1]
+    };
+
+    var contentString = "<p style='text-align: center; font-size: 140%'>" + attributes.name + "</p>" +
+        "<label style=\"font-size: 110%; text-align: center \">Event Description:</label>" +
+        "<p style=\"display: inline-block; text-align: center\">"+attributes.description+"</p>" +
+        "<br>" +
+        "<label style=\"font-size: 110%; text-align: center\">Category:</label>" +
+        "<p style=\"display:inline-block; text-align: center\">" + attributes.category + "</p>" +
+        "<br>" +
+        "<button style='margin: auto' type = \"button\" onclick = \"displayEventSideBar(\'" + attributes.event_id + "\')\">View more details</button>";
+
+
+    $("#sidebar_content_event_list").append($("<div style='text-align: center; border-style: solid; border-color: lightgray; border-width: 1px'>" + contentString + "</div><br>"));
+
+    contentString = "<div style='text-align: center'>" + contentString + "</div>";
+
+    var props = {
+        coords: pos,
+        content: contentString,
+        title: attributes.event_id
+    }
+    //add user location marker
+    addMarker(props);
+
 }
 
 /*function requestGeoCode(latLng){
@@ -262,7 +302,18 @@ function addMarker(props){
     var infoWindow = new google.maps.InfoWindow({
       content:props.content
     });
+      marker.addListener("click", () => {
+          infoWindow.open({
+              anchor: marker,
+              map,
+              shouldFocus: false
+          });
+      });
   }
+  if (props.title) {
+      marker.setTitle(props.title);
+  }
+  return marker;
 }
 
 function clickMarker(location) {

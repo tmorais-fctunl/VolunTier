@@ -13,126 +13,150 @@
       google.maps.event.removeListener(clickListener);
       map.setOptions({ draggableCursor:''});
       if (clickmarker)
-        clickmarker.setMap(null);
+          clickmarker.setMap(null);
+        document.getElementById("sidebar_content_event_list").style.display = '';
     });
   });
 </script>
 
 <script>
+   
+    var canSubmit = false;
+    //True is for public, false for private (I know seems kinda counter-intuitive given the name)
+    var eventPrivacy = true;
 
-  var canSubmit = false;
-  window.onload = eventLoadFunction();
+    $("#eventPrivacyLock").toggleClass('unlocked');
+    $("#eventPrivacyLock").val("PUBLIC");
+    window.onload = eventLoadFunction();
 
-  function DateTimeListenerFunction() {
-    //inputTime = this.value;
+    function DateTimeListenerFunction() {
+        //inputTime = this.value;
 
-    //start date
-    minTimeCondition = $("#evTime").attr("min");
-    minDateCondition = $("#evDate").attr("min");
-    currTime = $("#evTime").val();
-    currDate = $("#evDate").val();
+        //start date
+        minTimeCondition = $("#evTime").attr("min");
+        minDateCondition = $("#evDate").attr("min");
+        currTime = $("#evTime").val();
+        currDate = $("#evDate").val();
 
-    console.log("Start Date:");
-    console.log("Inputs date: "+currDate+", time:"+currTime+".\nMins date: "+minDateCondition+", time: "+minTimeCondition+"?");
-
-
-
-    //end date
-    endMinTimeCondition = currTime;
-    endMinDateCondition = currDate;
-    endCurrTime = $("#evTimeEnd").val();
-    endCurrDate = $("#evDateEnd").val();
-
-    console.log("End Date:");
-    console.log("Inputs date: "+endCurrDate+", time:"+endCurrTime+".\nMins date: "+endMinDateCondition+", time: "+endMinTimeCondition+"?");
-
-    //update end-date if the start-date interferes
-    $('#evDateEnd').prop('min', endMinDateCondition);
-    $('#evTimeEnd').prop('min', endMinTimeCondition);
-
-    if (endCurrDate<endMinDateCondition || (endMinDateCondition == endCurrDate && endCurrTime<endMinTimeCondition)) {
-      console.log("Updated the end-date because the start-date surpassed it");
-
-      $('#evDateEnd').prop('value', currDate);
-
-      $('#evTimeEnd').prop('value', currTime);
-  }
+        console.log("Start Date:");
+        console.log("Inputs date: " + currDate + ", time:" + currTime + ".\nMins date: " + minDateCondition + ", time: " + minTimeCondition + "?");
 
 
 
+        //end date
+        endMinTimeCondition = currTime;
+        endMinDateCondition = currDate;
+        endCurrTime = $("#evTimeEnd").val();
+        endCurrDate = $("#evDateEnd").val();
 
-    //start conditions
-    if (currTime < minTimeCondition && currDate == minDateCondition) {
-      console.log("Time and date violating the rules!")
-      document.getElementById("dateMsg").innerHTML = "Choose a starting date which takes place in the future";
-      canSubmit = false;
-      return;
+        console.log("End Date:");
+        console.log("Inputs date: " + endCurrDate + ", time:" + endCurrTime + ".\nMins date: " + endMinDateCondition + ", time: " + endMinTimeCondition + "?");
+
+        //update end-date if the start-date interferes
+        $('#evDateEnd').prop('min', endMinDateCondition);
+        $('#evTimeEnd').prop('min', endMinTimeCondition);
+
+        if (endCurrDate < endMinDateCondition || (endMinDateCondition == endCurrDate && endCurrTime < endMinTimeCondition)) {
+            console.log("Updated the end-date because the start-date surpassed it");
+
+            $('#evDateEnd').prop('value', currDate);
+
+            $('#evTimeEnd').prop('value', currTime);
+        }
+
+
+
+
+        //start conditions
+        if (currTime < minTimeCondition && currDate == minDateCondition) {
+            console.log("Time and date violating the rules!")
+            document.getElementById("dateMsg").innerHTML = "Choose a starting date which takes place in the future";
+            canSubmit = false;
+            return;
+        }
+        else {
+            document.getElementById("dateMsg").innerHTML = "The starting date is valid";
+            canSubmit = true;
+        }
+
+        //end conditions
+        if (endCurrTime < endMinTimeCondition && endCurrDate == endMinDateCondition) {
+            console.log("Time and date violating the rules!")
+            document.getElementById("dateMsg").innerHTML = "Choose a end date which takes place after your start date";
+            canSubmit = false;
+            return;
+        }
+        else {
+            document.getElementById("dateMsg").innerHTML = "The event schedule is valid";
+            canSubmit = true;
+        }
     }
-    else {
-      document.getElementById("dateMsg").innerHTML = "The starting date is valid";
-      canSubmit = true;
+
+    function eventLoadFunction() {
+        var now = new Date();
+        now.setTime(now.getTime() - now.getTimezoneOffset() * 60 * 1000);
+        // minimum date the user can choose, in this case now and in the future
+        minDate = now.toISOString().substring(0, 10);
+        //  console.log(minDate);
+        //start
+        $('#evDate').prop('min', minDate);
+        $('#evDate').prop('value', minDate);
+        minTime = now.toISOString().substring(11, 16);
+        //  console.log(minTime);
+        $('#evTime').prop('min', minTime);
+        $('#evTime').prop('value', minTime);
+        //end
+        //add 15 minutes to the end date as a default
+        now.setTime(now.getTime() + 15 * 60000);
+        minTime = now.toISOString().substring(11, 16);
+
+        //console.log(minTime);
+
+        $('#evDateEnd').prop('min', minDate);
+        $('#evDateEnd').prop('value', minDate);
+        $('#evTimeEnd').prop('min', minTime);
+        $('#evTimeEnd').prop('value', minTime);
+
+        document.getElementById("evTime").addEventListener('input', function (evt) {
+            DateTimeListenerFunction()
+        });
+        document.getElementById("evDate").addEventListener('input', function (evt) {
+            DateTimeListenerFunction()
+        });
+        document.getElementById("evTimeEnd").addEventListener('input', function (evt) {
+            DateTimeListenerFunction()
+        });
+        document.getElementById("evDateEnd").addEventListener('input', function (evt) {
+            DateTimeListenerFunction()
+        });
+
+
     }
 
-    //end conditions
-    if (endCurrTime < endMinTimeCondition && endCurrDate == endMinDateCondition){
-      console.log("Time and date violating the rules!")
-      document.getElementById("dateMsg").innerHTML = "Choose a end date which takes place after your start date";
-      canSubmit = false;
-      return;
-    }
-    else {
-      document.getElementById("dateMsg").innerHTML = "The event schedule is valid";
-      canSubmit = true;
-    }
-  }
-
-  function eventLoadFunction() {
-    var now = new Date();
-    now.setTime(now.getTime()-now.getTimezoneOffset()*60*1000);
-    // minimum date the user can choose, in this case now and in the future
-    minDate = now.toISOString().substring(0,10);
-  //  console.log(minDate);
-    //start
-    $('#evDate').prop('min', minDate);
-    $('#evDate').prop('value', minDate);
-    minTime = now.toISOString().substring(11,16);
-  //  console.log(minTime);
-    $('#evTime').prop('min', minTime);
-    $('#evTime').prop('value', minTime);
-    //end
-    //add 15 minutes to the end date as a default
-    now.setTime(now.getTime()+15*60000);
-    minTime = now.toISOString().substring(11,16);
-
-    //console.log(minTime);
-
-    $('#evDateEnd').prop('min', minDate);
-    $('#evDateEnd').prop('value', minDate);
-    $('#evTimeEnd').prop('min', minTime);
-    $('#evTimeEnd').prop('value', minTime);
-
-    document.getElementById("evTime").addEventListener('input', function(evt){
-      DateTimeListenerFunction()
+    $("#eventPrivacyLock").click(function () {
+        console.log("Previous: "+$(this).val());
+        $(this).toggleClass('unlocked');
+        if (eventPrivacy) {
+            $(this).val("PRIVATE");
+            eventPrivacy = false;
+        }
+        else {
+            $(this).val("PUBLIC");
+            eventPrivacy = true;
+        }
+        $("#EventPrivacy").html($(this).val());
+        console.log("After: "+$(this).val());
     });
-    document.getElementById("evDate").addEventListener('input', function(evt){
-      DateTimeListenerFunction()
-    });
-    document.getElementById("evTimeEnd").addEventListener('input', function(evt){
-      DateTimeListenerFunction()
-    });
-    document.getElementById("evDateEnd").addEventListener('input', function(evt){
-      DateTimeListenerFunction()
-    });
+    
 
-
-  }
 
 
 
 </script>
 
+
 <div>
-    <span  id="disableCreate" class="topright">&times</span>
+    <span id="disableCreate" class="topright">&times</span>
     <label style="font-size: 110%">Event name</label>
     <br>
     <input type="text" style="max-width:99%; min-width:94%" id="evName" name="Event Name" placeholder="Something neat">
@@ -143,12 +167,39 @@
     <textarea style="vertical-align: top; max-width:99%" id="evDesc" name="Event Description" placeholder="Tell us all about it" rows="4" cols="50"></textarea>
     <br>
     <br>
+    <!--Choosing the category-->
+    <!-- Talvez faca sentido termos guardado em base de dados e carregarmos as opcoes dinamicamente de forma a ser future proof e nao necessitar de deploys -->
+    <label style="font-size: 110%">Event Category</label>
+    <br>
+    <select id="eventCategory" style="color: dimgray; text-align:center; border-style:ridge; border-radius:5px; border-color:lightgray; max-width:99%; min-width:94%" placeholder="Category" value="">
+        <option value="CUIDAR_DE_ANIMAIS" selected="selected">Animal Caring</option>
+        <option value="ENSINAR_IDIOMAS">Language Teaching</option>
+        <option value="ENSINAR_MUSICA">Music Teaching</option>
+        <option value="INICIATIVAS_AMBIENTAIS">Environmental Initiatives</option>
+        <option value="DESASTRES_AMBIENTAIS">Environmental Disasters</option>
+        <option value="COMUNICACAO_DIGITAL">Digital Comunication</option>
+        <option value="AUXILIO_DE_DOENTES">Aiding The Sick</option>
+        <option value="AJUDAR_PORTADORES_DE_DEFICIENCIA">Aiding the Disabled</option>
+        <option value="AJUDA_DESPORTIVA">Sports Aid</option>
+        <option value="AJUDA_EMPRESARIAL">Business Aid</option>
+        <option value="AJUDA_A_CRIANCAS">Aiding Children</option>
+        <option value="AJUDA_A_IDOSOS">Aiding the Elderly</option>
+        <option value="AJUDA_A_SEM_ABRIGO">Aiding the Homeless</option>
+        <!--<option value="PROMOCAO">Promotional</option>-->
+        <option value="INTERNACIONAL">Aiding the Foreign</option>
+        <option value="PROTECAO_CIVIL">Civil Protection</option>
+        <option value="SOCIAL">Social</option>
+        <option value="RECICLAGEM">Recyling</option>
+        <option value="CONSTRUCAO">Construction</option>
+        <!--Can add more in the future-->
+    </select>
+    <br>
+    <br>
     <label style="font-size: 110%">Location</label>
     <br>
     <input type="text" style="max-width:99%; min-width:94%" id="evLoc" name="Event Location" placeholder="Click the map or search for a location using the search bar above it">
     <small style="display: block; margin-top: 5px; margin-bottom: 10px;" id="evLocName" name="Event Location Name">The Adress name will display here</small>
 
-    <!-- Por restricoes quanto ao tempo e data permitidos (>Data atual)-->
     <label style="font-size: 110%">Start Date and time</label>
     <br>
     <input type="date" style="max-width:99%" id="evDate" name="Event Date" placeholder="When will it happen">
@@ -159,6 +210,7 @@
     <input type="date" style="max-width:99%" id="evDateEnd" name="Event Date" placeholder="When will it happen">
     <input type="time" style="max-width:99%" id="evTimeEnd" name="Event Time" placeholder="At what time">
     <small style="display: block; margin-top: 5px; margin-bottom: 10px;" id="dateMsg" name="Datemsg">Put your time correctly, no going back in time allowed here!</small>
-
+    <label style="font-size: 110%">Privacy: </label><span class="container_lock lock" id="eventPrivacyLock" style="margin-left:10px; display: inline-block" value=""></span><p style="display: inline-block; margin-left:10px;" id="EventPrivacy">PUBLIC</p>
+    <br>
     <button type="button" onclick="return createEventRequest()">Submit</button>
 </div>

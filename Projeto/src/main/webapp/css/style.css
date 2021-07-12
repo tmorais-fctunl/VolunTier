@@ -49,6 +49,7 @@ header {
 .sidebar {
     flex-basis: 25%;
     flex-shrink: 0;
+    min-width:200px;
 
     /* just one way to do it */
     height: 100%;
@@ -192,7 +193,7 @@ div.createEvent label:after {
 }
 
 #userImg {
-    
+
 }
 .imgUpload {
 

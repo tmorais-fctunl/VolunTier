@@ -1,0 +1,63 @@
+<script>
+
+    function removeMarkerListeners() {
+        google.maps.event.removeListener(clickListener);
+        map.setOptions({ draggableCursor: '' });
+        if (clickmarker) {
+            clickmarker.setMap(null);
+            clickmarker = null;
+        }
+    }
+
+    window.onload = removeMarkerListeners();
+
+  
+
+  $(function () {
+    $('span#disableSuccessMsg').bind('click', function (e) {
+      // "this" points to the <span> element
+      // "e" points to the event object
+        this.parentElement.style.display = 'none';
+        document.getElementById("sidebar_content_event_list").style.display = '';
+
+    });
+  });
+</script>
+
+<div style="padding: 2px, text-">
+
+    <span id="disableSuccessMsg" class="topright">&times</span>
+    <p style='text-align: center; font-size: 140%'>Event Page</p>
+
+        
+
+    <!--<label style="font-size: 110%">Event Name:</label>
+    <p style="display:inline-block" id="evNameSidePage">Aloha</p>-->
+    
+    
+    <label style="font-size: 110%; max-width: 99%">Event Description:</label>
+    <p style="display:inline-block; text-align: center" id="evDescSidePage"></p>
+    
+    <br>
+    <label style="font-size: 110%">Category:</label>
+    <p style="display:inline-block" id="evCatgSidePage"></p>
+    
+    <br>
+    <label style="font-size: 110%">Location:</label>
+    <p style="display:inline-block" id="evLocSidePage"></p>
+   
+    <br>
+    <label style="font-size: 110%">Start:</label>
+    <p style="display:inline-block" id="evStartSidePage"></p>
+    
+    <br>
+    <label style="font-size: 110%">End:</label>
+    <p style="display:inline-block" id="evEndSidePage"></p>
+    
+    <br>
+    <label style="font-size: 110%">Privacy:</label>
+    <p style="display:inline-block" id="evPrivSidePage"></p>
+    
+    <br>
+    <button type="button" onclick="loadEventTab()">View Full Event Page</button>
+</div>

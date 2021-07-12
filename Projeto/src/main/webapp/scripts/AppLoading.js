@@ -6,7 +6,10 @@ function requestUserInfo() {
     xmlhttp.open("POST", URL, false);
     xmlhttp.setRequestHeader("Content-Type", "application/json");
     var userId = localStorage.getItem("email"), token = localStorage.getItem("jwt");
-    var ItemJSON = '{"email": "' + userId + '", "token": "' + token + '"}';
+    var ItemJSON = '{"email": "' + userId +
+        '", "token": "' + token +
+        '", "target": "' + userId +
+        '"}';
     xmlhttp.send(ItemJSON);
 
     if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200))

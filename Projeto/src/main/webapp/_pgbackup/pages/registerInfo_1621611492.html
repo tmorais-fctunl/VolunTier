@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="description" content="">
+        <meta name="author" content="">
+        <title>Pinegrow | Bootstrap Blocks Template</title>
+        <!-- Bootstrap core CSS -->
+        <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="../css/blocks.css">
+        <!-- Custom styles for this template -->
+        <link href="../css/style.css" rel="stylesheet">
+        <link rel="stylesheet" href="../css/blocks.css">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Alfa+Slab+One&display=swap">
+    </head>
+    <header>
+</header>
+    <body class="text-secondary">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="#" style="font-family: 'Alfa Slab One', cursive; font-size: 26px; color: #e7822c; letter-spacing: 1px;">VolunTier</a>
+        </nav>
+        <section class="background-cover bg-dark  pb-5 position-relative pt-5 text-white" style="background-image: url('https://wallpaperaccess.com/full/2580733.jpg'); height: 80vh;">
+            <div class="container loginbox">
+                <div class="col-md-9 col-xl-8 ml-auto mr-auto" id="login-register-box">
+                    <form>
+                        <div class="form-group">
+                            <div class="flex-nowrap input-group">
+                                <div class="input-group-prepend">
+                                    <span class="bg-light input-group-text" id="addon-wrapping"> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="1em" height="1em">
+</svg> </span>
+                                </div>
+                                <input type="text" class="form-control" placeholder="username" aria-label="User Email" aria-describedby="addon-wrapping" id="username" required=""/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="flex-nowrap input-group">
+                                <div class="input-group-prepend">
+                                    <span class="bg-light input-group-text" id="addon-wrapping2"> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="1em" height="1em">
+                                            <g>
+                                                <path fill="none" d="M0 0h24v24H0z"></path>
+                                                <path d="M10.758 11.828l7.849-7.849 1.414 1.414-1.414 1.415 2.474 2.474-1.414 1.415-2.475-2.475-1.414 1.414 2.121 2.121-1.414 1.415-2.121-2.122-2.192 2.192a5.002 5.002 0 0 1-7.708 6.294 5 5 0 0 1 6.294-7.708zm-.637 6.293A3 3 0 1 0 5.88 13.88a3 3 0 0 0 4.242 4.242z"></path>
+                                            </g>
+                                        </svg> </span>
+                                </div>
+                                <input type="password" class="form-control" placeholder="Password" aria-label="Password" aria-describedby="addon-wrapping" id="password" required=""/>
+                            </div>
+                        </div>
+                        <div class="form-group form-check">
+                            <!--How to do this? Remember to search-->
+                            <input type="checkbox" class="form-check-input" id="exampleCheck1"/>
+                            <label class="form-check-label" for="exampleCheck1">Remember me</label>
+                            <p> <!--Make sure the check mark makes the password visible--> <input type="checkbox" class="form-check-input" id="exampleCheck1" onclick="showPassword()"/> <label class="form-check-label" for="exampleCheck1">Show Password</label> </p>
+                        </div>
+                        <button type="submit" id="loginButton" class="btn btn-block btn-primary font-weight-bold pb-2 pl-3 pr-3 pt-2" onclick="return login()" disabled="disabled">Sign In</button>
+                        <!--Remember to do the forgot password form and password change page for the server to send-->
+                        <p style="text-align: center; margin-top: 10px;"><a href="#" id="forgotpwLink" data-target="forgotpw-box">Forgot password?</a></p>
+                    </form>
+                </div>
+                <p style="text-align: center; margin-top: 10px;"><a href="#" id="login-registerLink" data-target="register-box">Don't have an account? Register</a></p>
+            </div>
+        </section>
+        <footer class="bg-dark pt-5 text-white-50">
+            <div class="container">
+                <div class="row">
+</div>
+            </div>
+        </footer>
+        <script src="../assets/js/jquery.min.js"></script>
+        <script src="../assets/js/popper.js"></script>
+        <script src="../bootstrap/js/bootstrap.min.js"></script>
+        <script src="../scripts/formLoader.js"></script>
+        <!-- Hash function -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
+        <script src="../scripts/login.js"></script>
+        <script src="../scripts/register.js"></script>
+        <script src="../scripts/login_ok_fields.js"></script>
+        <script src="../scripts/register_ok_fields.js"></script>
+    </body>
+</html>

@@ -3,7 +3,7 @@ var profileVisibility = false;
 var infoElementsRef = document.getElementsByClassName("info");
 var infoElements = [];
 updateInfoElements();
-var imgfile, imgblob, imgext;
+var imgfile, imgblob, imgext, imgSrcPrev;
 var fileData;
 /*
  * Fazer o seguinte:
@@ -124,6 +124,7 @@ function updateInfoElements() {
         infoElements[i] = [];
         infoElements[i] = [infoElementsRef[i].getAttribute("id"), infoElementsRef[i].innerHTML];
     }
+    imgSrcPrev = $("#userImg").attr("src");
 }
 
 function editBtn() {
@@ -139,7 +140,10 @@ function saveBtn() {
     //needs to turn the content editable off
     turnContent(false);
     saveInfo();
-    saveImage();
+    if (imgSrcPrev != $("#userImg").attr("src")) {
+        saveImage();
+    }
+    else console.log("User Image not changed.")
     profileBtnSwap();
 }
 
@@ -169,15 +173,16 @@ function turnContent(on) {
 
         //Change profile icon
         var profile = document.getElementById("profile_visibility").innerHTML;
-        var profile_html = 'Profile visibility: <pan class="lock" style = "margin-left:10px" ></span>'
+        var profile_html = 'Profile visibility: <span class="lock" id="profilePrivacyLock" style = "margin-left:10px" ></span>'
         $('#profile_visibility').html(profile_html);
         if (profile == "PUBLIC") {
             $(".lock").toggleClass('unlocked');
             profileVisibility = true;
         }
-        $(".lock").click(function () {
+        $("#profilePrivacyLock").click(function () {
             $(this).toggleClass('unlocked');
             profileVisibility = !profileVisibility;
+            
         });
 
         //Change region to list
@@ -238,7 +243,8 @@ function saveInfo() {
     xmlhttp.setRequestHeader("Content-Type", "application/json");
     var userId = localStorage.getItem("email"), token = localStorage.getItem("jwt");
     var ItemJSONBeginning = '{"email": "' + userId +
-        '", "token": "' + token;
+        '", "token": "' + token +
+        '", "target": "' + userId;
     var ItemJSONEnd = '"}';
     var ItemJSONInfo = "", infoName, infoPrev, infoNow, infoId, newInfo;
 

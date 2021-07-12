@@ -14,3 +14,22 @@ function openTab(evt, tab) {
 
 // Get the element with id="defaultOpen" and click on it
 document.getElementById("defaultOpen").click();
+
+var openedTab;
+function loadEventTab() {
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+        if (tabcontent[i].style.display == "block") {
+            console.log(tabcontent[i].id);
+            openedTab = tabcontent[i];
+        }
+    }
+    openedTab.style.display = "none";
+    document.getElementById("Event").style.display = "block";
+
+}
+
+function closeEventTab() {
+    document.getElementById("Event").style.display = "none";
+    openedTab.style.display = "block";
+}
