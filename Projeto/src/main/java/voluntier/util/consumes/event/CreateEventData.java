@@ -55,7 +55,7 @@ public class CreateEventData extends RequestData {
 	}
 
 	public boolean locationValid () {
-		return location != null && location[0] != -1 && location[1] != -1;
+		return location != null && location.length == 2;
 	}
 	
 	public boolean profileValid () {

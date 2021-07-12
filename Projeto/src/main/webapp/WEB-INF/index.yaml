@@ -1,0 +1,5 @@
+- kind: Event
+  properties:
+  - name: event_profile
+  - name: event_state 
+  - name: location

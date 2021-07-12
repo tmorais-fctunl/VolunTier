@@ -84,7 +84,7 @@ public class EventData_Minimal {
 	}
 	
 	public static boolean locationValid (double[] location) {
-		return location != null;
+		return location != null && location.length == 2;
 	}
 	
 	public static boolean startDateValid (String start_date) {
