@@ -1,11 +1,12 @@
 {
   "ExpandedNodes": [
     "",
-    "\\bootstrap\\css",
+    "\\css",
+    "\\latlon-geohash-master",
     "\\pages",
     "\\pages\\contents",
     "\\scripts"
   ],
-  "SelectedNode": "\\scripts\\loadMap.js",
+  "SelectedNode": "\\scripts\\tabLoader.js",
   "PreviewInSolutionExplorer": false
 }

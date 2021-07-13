@@ -3,7 +3,13 @@
 // failed.", it means you probably did not give permission for the browser to
 // locate you.
 let map, infoWindow;
+let mapPreview;
+var previewMarker;
 var clickListener, clickmarker;
+var geoHashArray = [];
+var geoHash;
+var dragListener;
+var markers = [];
 
 //First style is no POI style, then enable public parks, medical and government places
 var myStyles =[
@@ -41,15 +47,62 @@ function initMap() {
   map = new google.maps.Map(document.getElementById("map"), {
     //center at FCT NOVA
     center: { lat: 38.66128, lng: - 9.20343 },
+    zoom: 12,
+    //disableDefaultUI: true,
+    
+          zoomControl: false,
+          mapTypeControl: true,
+          scaleControl: false,
+          streetViewControl: false,
+          rotateControl: false,
+          fullscreenControl: false,
+      
+
+    styles:myStyles,
+    gestureHandling: "greedy"
+  });
+
+  createEventButton();
+  locationButton();
+  searchBar();
+
+  initMapPreview();
+
+  let tileListener = google.maps.event.addListenerOnce(map,'tilesloaded', function(){
+    loadEventWithID();
+    dragListener = google.maps.event.addListener(map, 'dragend', function(event) {
+      loadEventWithID();
+    });
+    dragListener = google.maps.event.addListener(map, 'zoom_changed', function(event) {
+        loadEventWithID();
+        var zoom = map.getZoom();
+        // iterate over markers and call setVisible
+
+        for (i = 0; i < markers.length; i++) {
+            console.log("Hello?");
+            markers[i].setVisible(zoom >= 9);
+        }
+
+    });
+  });
+
+
+
+}
+
+function initMapPreview() {
+  mapPreview = new google.maps.Map(document.getElementById("mapPreview"), {
+    //center at FCT NOVA
+    center: { lat: 38.66128, lng: - 9.20343 },
     zoom: 6,
     disableDefaultUI: true,
     styles:myStyles,
     gestureHandling: "greedy"
   });
-  
-  createEventButton();
-  locationButton();
-  searchBar();
+
+
+
+//You have to make some functions to center the map on the location of the event
 
 }
 
@@ -92,9 +145,8 @@ function displayEventSideBar(event_id) {
 }
 
 function createEventInMap(attributes) {
-    
+
     //props for the event marker
-    
     const pos = {
         lat: attributes.location[0],
         lng: attributes.location[1]
@@ -150,15 +202,31 @@ function loadEventWithID() {
                 lng: position.coords.longitude,
             };*/
 
-    		let pos = map.getCenter();
-    		
+
+    let pos = map.getCenter();
+    let bounds = map.getBounds();
+    let ne = bounds.getNorthEast().lat();
+    geohash = Geohash.encode(pos.lat(), pos.lng(), 3);
+    console.log("Zoom level: " + map.getZoom());
+    if (map.getZoom() < 8) {
+
+        console.log("Zoom is way out to load events. Zoom in a little to avoid loading all the events of the world resulting in the biggest lag since the ZON company arrived.");
+        return false;
+    }
+    if (geoHashArray.includes(geohash)) {
+        console.log("Already loaded events for this geohash. Exiting...");
+        return false;
+    }
+    let dif = Math.abs(ne - pos.lat());
+
             var urlvariable = "/rest/searchEventsByRange";
             var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //GET EVENTS
             var xmlhttp = new XMLHttpRequest();
             var userId = localStorage.getItem("email"), token = localStorage.getItem("jwt");
             var ItemJSON = '{"email": "' + userId +
                 '", "token": "' + token +
-                '", "location": ["' + pos.lat() + '","' + pos.lng() + '"]' + 
+                '", "location": ["' + pos.lat() + '","' + pos.lng() + '"]' +
+               // ', "radius": "' + dif +
                 '}';
             xmlhttp.open("POST", URL, true);
             xmlhttp.setRequestHeader("Content-Type", "application/json");
@@ -168,13 +236,16 @@ function loadEventWithID() {
                     return false;
                 }
                 const attributes = JSON.parse(xmlhttp.responseText);
-                for (var i = 0; i < attributes.length; i++) {
-                    var obj = attributes[i];
-
-                    console.log(obj.event_id);
-
-                    loadEvent(obj.event_id, true);
+                const events = attributes.events;
+                console.log("Loading "+events.length+" events.");
+                var obj;
+                for (var i = 0; i < events.length; i++) {
+                    obj = events[i];
+                    timeOutAddition(obj, i);
+                    //loadEventMiniature(obj);
+                    //loadEvent(obj.event_id, true);
                 }
+                geoHashArray.push(attributes.region_hash);
             };
             xmlhttp.send(ItemJSON);
 
@@ -183,6 +254,46 @@ function loadEventWithID() {
             handleLocationError(true);
         }
     );*/
+}
+
+function timeOutAddition(obj, i) {
+    setTimeout((function () {
+        loadEventMiniature(obj);
+    }), i * 20);
+}
+
+function loadEventMiniature(attributes) {
+    //props for the event marker
+    const pos = {
+        lat: attributes.location[0],
+        lng: attributes.location[1]
+    };
+
+    var contentString = 
+        "<p style='text-align: center; font-size: 140%'>" + attributes.name + "</p>" +
+        "<label style=\"font-size: 110%; text-align: center\">Category:</label>" +
+        "<p style=\"display:inline-block; text-align: center\">" + attributes.category + "</p>" +
+        "<br>" +
+        "<label style=\"font-size: 110%; text-align: center \">Event Schedule:</label>" +
+        "<p style=\"display: inline-block; text-align: center\">" + attributes.start_date + " - "+attributes.end_date+"</p>" +
+        "<br>" +
+        "<i style=\"margin-top:10px\" class=\"fa fa-user-o\" style=\"\"></i><p style=\"display:inline-block; margin-left: 10px\">"+attributes.num_participants+"</p>" +
+        "<br>" +
+        "<button class=\"btn btn-primary\" style='margin: auto' type = \"button\" onclick = \"displayEventSideBar(\'" + attributes.event_id + "\')\">View more details</button>";
+
+
+    $("#sidebar_content_event_list").append($("<div style='text-align: center; border-style: solid; border-color: lightgray; border-width: 1px'>" + contentString + "</div><br>"));
+
+    contentString = "<div style='text-align: center'>" + contentString + "</div>";
+
+    var props = {
+        coords: pos,
+        content: contentString,
+        title: attributes.event_id
+    }
+    //add user location marker
+    addMarker(props);
+
 }
 
 //Requires callback function
@@ -341,7 +452,8 @@ function handleLocationError(browserHasGeolocation) {
 function addMarker(props){
   var marker = new google.maps.Marker({
     position:props.coords,
-    map:map
+      map: map,
+     animation: google.maps.Animation.DROP
   });
   if(props.iconImage){
     marker.setIcon(props.iconImage);
@@ -360,7 +472,8 @@ function addMarker(props){
   }
   if (props.title) {
       marker.setTitle(props.title);
-  }
+    }
+    markers.push(marker);
   return marker;
 }
 

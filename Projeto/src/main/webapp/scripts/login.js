@@ -2,7 +2,7 @@ function login() {
     $('body').addClass('waiting');
     var urlvariable = "/rest/login";
     var encryptedP = sha512(document.getElementById("password").value);
-    var ItemJSON = '{"email": "' + document.getElementById("email").value + '", "password": "' + encryptedP + '"}';
+    var ItemJSON = '{"user": "' + document.getElementById("email").value + '", "password": "' + encryptedP + '"}';
     var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //LOGIN REST URL
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.open("POST", URL, false);
