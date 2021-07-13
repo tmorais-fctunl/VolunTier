@@ -12,6 +12,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.javatuples.Triplet;
 
+import voluntier.exceptions.InvalidTokenException;
 import voluntier.util.Argon2Util;
 import voluntier.util.AuthToken;
 import voluntier.util.JsonUtil;
@@ -46,6 +47,10 @@ public class SessionResource {
 			TokensResource.checkIsValidAccess(data.token, data.email);
 			return Response.status(Status.NO_CONTENT).build();
 
+		} catch (InvalidTokenException e) {
+			LOG.severe(e.getMessage());
+			return Response.status(Status.UNAUTHORIZED).build();
+			
 		} catch(Exception e) {
 			LOG.severe(e.getMessage());
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
@@ -122,6 +127,11 @@ public class SessionResource {
 			LOG.fine("Logout by user: " + data.email);
 			return Response.status(Status.NO_CONTENT).build();
 
+		} catch (InvalidTokenException e) {
+			txn.rollback();
+			LOG.severe(e.getMessage());
+			return Response.status(Status.FORBIDDEN).build();
+			
 		} catch(Exception e) {
 			txn.rollback();
 			LOG.severe(e.getMessage());
@@ -158,6 +168,11 @@ public class SessionResource {
 
 			LOG.fine("Refreshed session by user: " + data.email);
 			return Response.ok(JsonUtil.json.toJson(tokens.getValue2())).build();
+		} catch (InvalidTokenException e) {
+			txn.rollback();
+			LOG.severe(e.getMessage());
+			return Response.status(Status.FORBIDDEN).build();
+			
 		} catch(Exception e) {
 			txn.rollback();
 			LOG.severe(e.getMessage());

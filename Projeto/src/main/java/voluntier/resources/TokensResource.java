@@ -79,7 +79,7 @@ public class TokensResource {
 	}
 	
 	public static Entity checkIsValidRefresh(String tokenString, String email) throws InvalidTokenException {
-		Key tokenKey = sessionFactory.newKey(tokenString);
+		Key tokenKey = refreshFactory.newKey(tokenString);
 		Entity token = datastore.get(tokenKey);
 		
 		return checkIsValidRefresh(token, email);

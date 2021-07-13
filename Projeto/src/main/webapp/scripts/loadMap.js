@@ -150,22 +150,16 @@ function loadEventWithID() {
                 lng: position.coords.longitude,
             };*/
 
-
-    let pos = map.getCenter();
-    let bounds = map.getBounds();
-    let ne = bounds.getNorthEast().lat();
-
-    let dif = Math.abs(ne - pos.lat());
-        
+    		let pos = map.getCenter();
+    		
             var urlvariable = "/rest/searchEventsByRange";
             var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //GET EVENTS
             var xmlhttp = new XMLHttpRequest();
             var userId = localStorage.getItem("email"), token = localStorage.getItem("jwt");
             var ItemJSON = '{"email": "' + userId +
                 '", "token": "' + token +
-                '", "location": ["' + pos.lat() + '","' + pos.lng() + '"]' +
-                ', "radius": "' + dif +
-                '"}';
+                '", "location": ["' + pos.lat() + '","' + pos.lng() + '"]' + 
+                '}';
             xmlhttp.open("POST", URL, true);
             xmlhttp.setRequestHeader("Content-Type", "application/json");
             xmlhttp.onload = function (oEvent) {

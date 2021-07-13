@@ -28,6 +28,7 @@ import voluntier.exceptions.InexistentModeratorException;
 import voluntier.exceptions.InexistentParticipantException;
 import voluntier.exceptions.InvalidCursorException;
 import voluntier.exceptions.SomethingWrongException;
+import voluntier.util.GeoHashUtil;
 import voluntier.util.consumes.event.CreateEventData;
 import voluntier.util.consumes.event.UpdateEventData;
 import voluntier.util.eventdata.chatdata.DB_Chat;
@@ -59,6 +60,10 @@ public class DB_Event {
 	public static final String INSTAGRAM = "event_instagram";
 	public static final String TWITTER = "event_twitter";
 
+	public static final String GEOHASH = "event_geohash";
+
+	public static final String PICTURES = "event_pics_id";
+
 	public static final String STATE = "event_state";
 	public static final String PROFILE = "event_profile";
 
@@ -78,6 +83,8 @@ public class DB_Event {
 		checkIsOwner(event, data.email);
 		checkIsActive(event);
 
+		ListValue pictures = getPictures(event);
+
 		return Entity.newBuilder(event.getKey()).set(NAME, event.getString(NAME)).set(ID, event.getString(ID))
 				.set(LOCATION, data.getLocation(event.getLatLng(LOCATION)))
 				.set(START_DATE, data.getStartDate(event.getString(START_DATE)))
@@ -92,7 +99,9 @@ public class DB_Event {
 				.set(WEBSITE, data.getWebsite(event.getString(WEBSITE)))
 				.set(FACEBOOK, data.getFacebook(event.getString(FACEBOOK)))
 				.set(INSTAGRAM, data.getInstagram(event.getString(INSTAGRAM)))
-				.set(TWITTER, data.getTwitter(event.getString(TWITTER))).build();
+				.set(TWITTER, data.getTwitter(event.getString(TWITTER)))
+				.set(GEOHASH, data.getGeohash(event.getString(GEOHASH)))
+				.set(PICTURES, pictures).build();
 	}
 
 	public static Entity updateState(String event_id, String email, String state)
@@ -101,6 +110,8 @@ public class DB_Event {
 		checkIsOwner(event, email);
 		checkIsActive(event);
 
+		ListValue pictures = getPictures(event);
+		
 		return Entity.newBuilder(event.getKey()).set(NAME, event.getString(NAME)).set(ID, event.getString(ID))
 				.set(LOCATION, event.getLatLng(LOCATION)).set(START_DATE, event.getString(START_DATE))
 				.set(END_DATE, event.getString(END_DATE)).set(CREATION_DATE, event.getString(CREATION_DATE))
@@ -110,7 +121,17 @@ public class DB_Event {
 				.set(CATEGORY, event.getString(CATEGORY)).set(CAPACITY, event.getLong(CAPACITY)).set(STATE, state)
 				.set(PROFILE, event.getString(PROFILE)).set(WEBSITE, event.getString(WEBSITE))
 				.set(FACEBOOK, event.getString(FACEBOOK)).set(INSTAGRAM, event.getString(INSTAGRAM))
-				.set(TWITTER, event.getString(TWITTER)).build();
+				.set(TWITTER, event.getString(TWITTER))
+				.set(GEOHASH, event.getString(GEOHASH))
+				.set(PICTURES, pictures).build();
+	}
+	
+	private static ListValue getPictures(Entity event) {
+		ListValue.Builder pictures = ListValue.newBuilder();
+		if(event.getProperties().containsKey(PICTURES))
+			pictures = pictures.set(event.getList(PICTURES));
+		
+		return pictures.build();
 	}
 
 	public static Entity updateProfile(String event_id, String email, String profile)
@@ -118,7 +139,9 @@ public class DB_Event {
 		Entity event = getEvent(event_id);
 		checkIsOwner(event, email);
 		checkIsActive(event);
-
+		
+		ListValue pictures = getPictures(event);
+		
 		return Entity.newBuilder(event.getKey()).set(NAME, event.getString(NAME)).set(ID, event.getString(ID))
 				.set(LOCATION, event.getLatLng(LOCATION)).set(START_DATE, event.getString(START_DATE))
 				.set(END_DATE, event.getString(END_DATE)).set(CREATION_DATE, event.getString(CREATION_DATE))
@@ -128,19 +151,24 @@ public class DB_Event {
 				.set(CATEGORY, event.getString(CATEGORY)).set(CAPACITY, event.getLong(CAPACITY))
 				.set(STATE, event.getString(STATE)).set(PROFILE, profile).set(WEBSITE, event.getString(WEBSITE))
 				.set(FACEBOOK, event.getString(FACEBOOK)).set(INSTAGRAM, event.getString(INSTAGRAM))
-				.set(TWITTER, event.getString(TWITTER)).build();
+				.set(TWITTER, event.getString(TWITTER))
+				.set(GEOHASH, event.getString(GEOHASH))
+				.set(PICTURES, pictures).build();
 	}
 
-	public static Pair<List<Entity>, String> createNew(CreateEventData event_data) {
-		Pair<List<Entity>, String> chat = DB_Chat.createNew(event_data.email);
+	public static Pair<List<Entity>, String> createNew(CreateEventData create_event_data) {
+		Pair<List<Entity>, String> chat = DB_Chat.createNew(create_event_data.email);
 		ListValue.Builder participants = ListValue.newBuilder();
-		participants.addValue(event_data.email);
+		ListValue.Builder pictures = ListValue.newBuilder();
+		participants.addValue(create_event_data.email);
 		List<Entity> entities = chat.getValue0();
 
-		Key eventKey = generateEventID(event_data.event_name);
+		Key eventKey = generateEventID(create_event_data.event_name);
 
-		EventData_Minimal data = new EventData_Minimal(event_data);
+		EventData_Minimal data = new EventData_Minimal(create_event_data);
 		LatLng event_location = LatLng.of(data.location[0], data.location[1]);
+		
+		String geohash = GeoHashUtil.convertCoordsToGeoHashHighPrecision(data.location[0], data.location[1]);
 
 		entities.add(Entity.newBuilder(eventKey).set(NAME, data.name).set(ID, eventKey.getName())
 				.set(LOCATION, event_location).set(START_DATE, data.start_date).set(END_DATE, data.end_date)
@@ -149,7 +177,9 @@ public class DB_Event {
 				.set(CONTACT, data.contact).set(DESCRIPTION, data.description).set(CATEGORY, data.category)
 				.set(CAPACITY, data.capacity).set(STATE, data.getState().toString())
 				.set(PROFILE, data.getProfile().toString()).set(WEBSITE, data.website).set(FACEBOOK, data.facebook)
-				.set(INSTAGRAM, data.instagram).set(TWITTER, data.twitter).build());
+				.set(INSTAGRAM, data.instagram).set(TWITTER, data.twitter)
+				.set(GEOHASH, geohash)
+				.set(PICTURES, pictures.build()).build());
 
 		return new Pair<>(entities, eventKey.getName());
 	}
@@ -388,6 +418,9 @@ public class DB_Event {
 			builder.set(N_PARTICIPANTS, n_participants + 1);
 		else
 			builder.set(N_PARTICIPANTS, n_participants - 1);
+		
+		ListValue pictures = getPictures(event);
+		
 		return builder.set(NAME, event.getString(NAME)).set(ID, event.getString(ID))
 				.set(LOCATION, event.getLatLng(LOCATION)).set(START_DATE, event.getString(START_DATE))
 				.set(END_DATE, event.getString(END_DATE)).set(CREATION_DATE, event.getString(CREATION_DATE))
@@ -397,7 +430,9 @@ public class DB_Event {
 				.set(CAPACITY, event.getLong(CAPACITY)).set(STATE, event.getString(STATE))
 				.set(PROFILE, event.getString(PROFILE)).set(WEBSITE, event.getString(WEBSITE))
 				.set(FACEBOOK, event.getString(FACEBOOK)).set(INSTAGRAM, event.getString(INSTAGRAM))
-				.set(TWITTER, event.getString(TWITTER)).build();
+				.set(TWITTER, event.getString(TWITTER))
+				.set(GEOHASH, event.getString(GEOHASH))
+				.set(PICTURES, pictures).build();
 	}
 
 	public static boolean isOwner(Entity event, String owner_email) {

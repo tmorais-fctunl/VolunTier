@@ -2,6 +2,7 @@ package voluntier.util.consumes.event;
 
 import com.google.cloud.datastore.LatLng;
 
+import voluntier.util.GeoHashUtil;
 import voluntier.util.eventdata.EventData_Minimal;
 
 public class UpdateEventData extends EventData {
@@ -95,6 +96,10 @@ public class UpdateEventData extends EventData {
 	
 	public String getProfile(String a_default) {
 		return profile == null ? a_default : profile;
+	}
+	
+	public String getGeohash(String a_default) {
+		return location == null ? a_default : GeoHashUtil.convertCoordsToGeoHashHighPrecision(location[0], location[1]);
 	}
 	
 	public boolean isValid () {
