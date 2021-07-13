@@ -17,7 +17,7 @@ public class UpdateCommentData extends EventData {
 	}
 	
 	public boolean isValid () {
-		return super.isValid() && comment != null && comment.length() < DB_Event.DEFALUT_COMMENT_SIZE && comment_id != null;
+		return super.isValid() && comment != null && comment.length() < DB_Event.MAX_COMMENT_SIZE && comment_id != null;
 	}
 
 }

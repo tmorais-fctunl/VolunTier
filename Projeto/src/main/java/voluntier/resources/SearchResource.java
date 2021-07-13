@@ -24,8 +24,6 @@ import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
-import com.google.cloud.datastore.LatLng;
-import com.google.cloud.datastore.LatLngValue;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery.Builder;
 import com.google.cloud.datastore.QueryResults;

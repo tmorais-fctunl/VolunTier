@@ -2,16 +2,16 @@ package voluntier.util.consumes;
 
 public class LoginData {
 	
-	public String email;
+	public String user;
 	public String password;
 	
 	public LoginData() {}
-	public LoginData(String email, String password) {
-		this.email = email;
+	public LoginData(String user, String password) {
+		this.user = user;
 		this.password = password;
 	}
 	
 	public boolean isValid() {
-		return email != null && password != null;
+		return user != null && password != null;
 	}
 }

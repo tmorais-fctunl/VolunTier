@@ -51,7 +51,7 @@ public class CreateEventData extends RequestData {
 	}
 
 	public boolean descriptionValid () {
-		return description != null && description != "" && description.length() <= DB_Event.DEFALUT_COMMENT_SIZE;
+		return description != null && description != "" && description.length() <= DB_Event.MAX_COMMENT_SIZE;
 	}
 
 	public boolean locationValid () {

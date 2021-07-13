@@ -31,16 +31,18 @@ public class SessionResource {
 
 	private static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	private static KeyFactory usersFactory = datastore.newKeyFactory().setKind("User");
+	private static KeyFactory usernamesFactory = datastore.newKeyFactory().setKind("ID");
 	private static KeyFactory refreshFactory = datastore.newKeyFactory().setKind("RefreshSession");
 
-	public SessionResource() {}
-	
+	public SessionResource() {
+	}
+
 	@POST
 	@Path("/validate")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response doValidation(RequestData data) {
 
-		if(!data.isValid())
+		if (!data.isValid())
 			return Response.status(Status.BAD_REQUEST).build();
 
 		try {
@@ -50,8 +52,8 @@ public class SessionResource {
 		} catch (InvalidTokenException e) {
 			LOG.severe(e.getMessage());
 			return Response.status(Status.UNAUTHORIZED).build();
-			
-		} catch(Exception e) {
+
+		} catch (Exception e) {
 			LOG.severe(e.getMessage());
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 
@@ -64,45 +66,60 @@ public class SessionResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response doLogin(LoginData data) {
 
-		if(!data.isValid())
+		if (!data.isValid())
 			return Response.status(Status.BAD_REQUEST).build();
 
 		Transaction txn = datastore.newTransaction();
 		try {
-			Key userKey = usersFactory.newKey(data.email);
+			Key userKey = usersFactory.newKey(data.user);
 			Entity user = txn.get(userKey);
+			
+			String email = null;
 
 			// check if user exists
-			if(user == null || ActionsResource.isRemovedOrBannedUser(user)) {
+			if (user == null) {
+				Key usernameKey = usernamesFactory.newKey(data.user);
+				Entity username = txn.get(usernameKey);
+				if(username != null) {
+					email = username.getString(DB_User.EMAIL);
+					userKey = usersFactory.newKey(email);
+					user = txn.get(userKey);
+				}
+			} else 
+				email = data.user;
+			
+			if (user == null || ActionsResource.isRemovedOrBannedUser(user)) {
 				txn.rollback();
 				return Response.status(Status.FORBIDDEN).build();
+			}
+			
+			String hsh_pwd = user.getString(DB_User.PASSWORD);
+
+			// check for correct password
+			if (!Argon2Util.verify(hsh_pwd, data.password)) {
+				txn.rollback();
+				LOG.warning("Failed login attempt by user: " + data.user);
+				return Response.status(Status.FORBIDDEN).build();
 			} else {
-				String hsh_pwd = user.getString(DB_User.PASSWORD);
+				// create a new refresh and access token
+				Triplet<Entity, Entity, AuthToken> tokens = TokensResource.createNewAccessAndRefreshTokens(email);
 
-				// check for correct password
-				if(!Argon2Util.verify(hsh_pwd, data.password)) {
-					txn.rollback();
-					LOG.warning("Failed login attempt by user: " + data.email);
-					return Response.status(Status.FORBIDDEN).build();
-				} else {
-					// create a new refresh and access token
-					Triplet<Entity, Entity, AuthToken> tokens = TokensResource.createNewAccessAndRefreshTokens(data.email);
+				txn.put(tokens.getValue0(), tokens.getValue1());
+				txn.commit();
 
-					txn.put(tokens.getValue0(), tokens.getValue1());
-					txn.commit();
-
-					LOG.fine("Login by user: " + data.email);
-					return Response.ok(JsonUtil.json.toJson(new LoginReturn(tokens.getValue2(), user.getString(DB_User.USERNAME)))).build();
-				}
+				LOG.fine("Login by user: " + data.user);
+				return Response
+						.ok(JsonUtil.json.toJson(new LoginReturn(tokens.getValue2(), user.getString(DB_User.USERNAME))))
+						.build();
 			}
 
-		} catch(Exception e) {
+		} catch (Exception e) {
 			txn.rollback();
 			LOG.severe(e.getMessage());
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 
 		} finally {
-			if(txn.isActive()) {
+			if (txn.isActive()) {
 				txn.rollback();
 				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 			}
@@ -114,7 +131,7 @@ public class SessionResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response doLogout(RequestData data) {
 
-		if(!data.isValid())
+		if (!data.isValid())
 			return Response.status(Status.BAD_REQUEST).build();
 
 		Transaction txn = datastore.newTransaction();
@@ -123,7 +140,7 @@ public class SessionResource {
 
 			invalidateSession(token, txn);
 			txn.commit();
-			
+
 			LOG.fine("Logout by user: " + data.email);
 			return Response.status(Status.NO_CONTENT).build();
 
@@ -131,14 +148,14 @@ public class SessionResource {
 			txn.rollback();
 			LOG.severe(e.getMessage());
 			return Response.status(Status.FORBIDDEN).build();
-			
-		} catch(Exception e) {
+
+		} catch (Exception e) {
 			txn.rollback();
 			LOG.severe(e.getMessage());
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 
 		} finally {
-			if(txn.isActive()) {
+			if (txn.isActive()) {
 				txn.rollback();
 				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 			}
@@ -150,7 +167,7 @@ public class SessionResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response doRefresh(RequestData data) {
-		if(!data.isValid())
+		if (!data.isValid())
 			return Response.status(Status.BAD_REQUEST).build();
 
 		Transaction txn = datastore.newTransaction();
@@ -159,7 +176,7 @@ public class SessionResource {
 
 			// invalidate old refresh token
 			old_refresh = TokensResource.invalidateRefreshToken(old_refresh, old_refresh.getKey());
-			
+
 			// create a new refresh and access token
 			Triplet<Entity, Entity, AuthToken> tokens = TokensResource.createNewAccessAndRefreshTokens(data.email);
 
@@ -172,14 +189,14 @@ public class SessionResource {
 			txn.rollback();
 			LOG.severe(e.getMessage());
 			return Response.status(Status.FORBIDDEN).build();
-			
-		} catch(Exception e) {
+
+		} catch (Exception e) {
 			txn.rollback();
 			LOG.severe(e.getMessage());
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 
 		} finally {
-			if(txn.isActive()) {
+			if (txn.isActive()) {
 				txn.rollback();
 				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 			}
@@ -187,10 +204,8 @@ public class SessionResource {
 	}
 
 	public static void invalidateAllSessionsOfUser(String user_email, Transaction txn) {
-		Query<Entity> query = Query.newEntityQueryBuilder()
-				.setKind("Session")
-				.setFilter(PropertyFilter.eq(TokensResource.ACCESS_EMAIL, user_email))
-				.build();
+		Query<Entity> query = Query.newEntityQueryBuilder().setKind("Session")
+				.setFilter(PropertyFilter.eq(TokensResource.ACCESS_EMAIL, user_email)).build();
 
 		QueryResults<Entity> res = datastore.run(query);
 
@@ -198,12 +213,10 @@ public class SessionResource {
 			invalidateSession(accessToken, txn);
 		});
 	}
-	
+
 	public static void invalidateAllSessionsOfUser(String user_email, Transaction txn, String except) {
-		Query<Entity> query = Query.newEntityQueryBuilder()
-				.setKind("Session")
-				.setFilter(PropertyFilter.eq(TokensResource.ACCESS_EMAIL, user_email))
-				.build();
+		Query<Entity> query = Query.newEntityQueryBuilder().setKind("Session")
+				.setFilter(PropertyFilter.eq(TokensResource.ACCESS_EMAIL, user_email)).build();
 
 		QueryResults<Entity> res = datastore.run(query);
 

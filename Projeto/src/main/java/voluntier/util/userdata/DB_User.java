@@ -3,15 +3,19 @@ package voluntier.util.userdata;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.google.cloud.datastore.Datastore;
+import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Entity;
 
 import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.ListValue;
 import com.google.cloud.datastore.StringValue;
 import com.google.cloud.datastore.Value;
 
 import voluntier.exceptions.ImpossibleActionException;
 import voluntier.exceptions.InexistentEventException;
+import voluntier.exceptions.InexistentUserException;
 import voluntier.util.consumes.RegisterData;
 import voluntier.util.consumes.UpdateProfileData;
 
@@ -49,6 +53,9 @@ public class DB_User {
 	public static final String POSTAL_CODE_REGEX = "[0-9]{4}-[0-9]{3}";
 	public static final String MOBILE_REGEX = "([+][0-9]{2,3}\\s)?[2789][0-9]{8}";
 	public static final String USERNAME_REGEX = "[a-zA-Z][a-zA-Z0-9]*([.][a-zA-Z0-9]+|[a-zA-Z0-9]*)";
+	
+	private static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
+	private static KeyFactory usersFactory = datastore.newKeyFactory().setKind("User");
 		
 	public static Entity changePassword(String new_password, Key userKey, Entity user) {
 		return Entity.newBuilder(userKey)
@@ -383,6 +390,17 @@ public class DB_User {
 				.set(EVENTS, events_list.build())
 				.set(EVENTS_PARTICIPATING, participating_events_list.build())
 				.build();
+	}
+		
+	public static Entity getUser(String user_email) 
+	throws InexistentUserException {
+		Key userKey = usersFactory.newKey(user_email);
+		Entity user = datastore.get(userKey);
+		
+		if(user == null)
+			throw new InexistentUserException("Inexistent user: " + user_email);
+		
+		return user;
 	}
 	
 	public static String getProfilePictureFilename(String username, String ext) {

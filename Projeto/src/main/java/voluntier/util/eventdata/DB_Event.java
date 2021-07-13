@@ -17,7 +17,7 @@ import com.google.cloud.datastore.LatLng;
 import com.google.cloud.datastore.ListValue;
 import com.google.cloud.datastore.StringValue;
 import com.google.cloud.datastore.Value;
-import com.google.datastore.v1.QueryResultBatch;
+import com.google.datastore.v1.QueryResultBatch.MoreResultsType;
 
 import voluntier.exceptions.ImpossibleActionException;
 import voluntier.exceptions.InexistentChatIdException;
@@ -26,12 +26,15 @@ import voluntier.exceptions.InexistentLogIdException;
 import voluntier.exceptions.InexistentMessageIdException;
 import voluntier.exceptions.InexistentModeratorException;
 import voluntier.exceptions.InexistentParticipantException;
+import voluntier.exceptions.InexistentPictureException;
+import voluntier.exceptions.InexistentUserException;
 import voluntier.exceptions.InvalidCursorException;
 import voluntier.exceptions.SomethingWrongException;
 import voluntier.util.GeoHashUtil;
 import voluntier.util.consumes.event.CreateEventData;
 import voluntier.util.consumes.event.UpdateEventData;
 import voluntier.util.eventdata.chatdata.DB_Chat;
+import voluntier.util.userdata.DB_User;
 import voluntier.util.userdata.Profile;
 import voluntier.util.userdata.State;
 
@@ -69,8 +72,10 @@ public class DB_Event {
 
 	public static final String MOBILE_REGEX = "([+][0-9]{2,3}\\s)?[2789][0-9]{8}";
 
-	public static final int DEFALUT_COMMENT_SIZE = 500;
+	public static final int MAX_COMMENT_SIZE = 500;
 	public static final long DEFAULT_CAPACITY = 100;
+
+	public static final long MAX_PARTICIPANTS_RETURN = 5;
 
 	private static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	private static KeyFactory eventFactory = datastore.newKeyFactory().setKind("Event");
@@ -100,8 +105,7 @@ public class DB_Event {
 				.set(FACEBOOK, data.getFacebook(event.getString(FACEBOOK)))
 				.set(INSTAGRAM, data.getInstagram(event.getString(INSTAGRAM)))
 				.set(TWITTER, data.getTwitter(event.getString(TWITTER)))
-				.set(GEOHASH, data.getGeohash(event.getString(GEOHASH)))
-				.set(PICTURES, pictures).build();
+				.set(GEOHASH, data.getGeohash(event.getString(GEOHASH))).set(PICTURES, pictures).build();
 	}
 
 	public static Entity updateState(String event_id, String email, String state)
@@ -111,7 +115,7 @@ public class DB_Event {
 		checkIsActive(event);
 
 		ListValue pictures = getPictures(event);
-		
+
 		return Entity.newBuilder(event.getKey()).set(NAME, event.getString(NAME)).set(ID, event.getString(ID))
 				.set(LOCATION, event.getLatLng(LOCATION)).set(START_DATE, event.getString(START_DATE))
 				.set(END_DATE, event.getString(END_DATE)).set(CREATION_DATE, event.getString(CREATION_DATE))
@@ -121,17 +125,8 @@ public class DB_Event {
 				.set(CATEGORY, event.getString(CATEGORY)).set(CAPACITY, event.getLong(CAPACITY)).set(STATE, state)
 				.set(PROFILE, event.getString(PROFILE)).set(WEBSITE, event.getString(WEBSITE))
 				.set(FACEBOOK, event.getString(FACEBOOK)).set(INSTAGRAM, event.getString(INSTAGRAM))
-				.set(TWITTER, event.getString(TWITTER))
-				.set(GEOHASH, event.getString(GEOHASH))
-				.set(PICTURES, pictures).build();
-	}
-	
-	private static ListValue getPictures(Entity event) {
-		ListValue.Builder pictures = ListValue.newBuilder();
-		if(event.getProperties().containsKey(PICTURES))
-			pictures = pictures.set(event.getList(PICTURES));
-		
-		return pictures.build();
+				.set(TWITTER, event.getString(TWITTER)).set(GEOHASH, event.getString(GEOHASH)).set(PICTURES, pictures)
+				.build();
 	}
 
 	public static Entity updateProfile(String event_id, String email, String profile)
@@ -139,9 +134,9 @@ public class DB_Event {
 		Entity event = getEvent(event_id);
 		checkIsOwner(event, email);
 		checkIsActive(event);
-		
+
 		ListValue pictures = getPictures(event);
-		
+
 		return Entity.newBuilder(event.getKey()).set(NAME, event.getString(NAME)).set(ID, event.getString(ID))
 				.set(LOCATION, event.getLatLng(LOCATION)).set(START_DATE, event.getString(START_DATE))
 				.set(END_DATE, event.getString(END_DATE)).set(CREATION_DATE, event.getString(CREATION_DATE))
@@ -151,40 +146,112 @@ public class DB_Event {
 				.set(CATEGORY, event.getString(CATEGORY)).set(CAPACITY, event.getLong(CAPACITY))
 				.set(STATE, event.getString(STATE)).set(PROFILE, profile).set(WEBSITE, event.getString(WEBSITE))
 				.set(FACEBOOK, event.getString(FACEBOOK)).set(INSTAGRAM, event.getString(INSTAGRAM))
-				.set(TWITTER, event.getString(TWITTER))
-				.set(GEOHASH, event.getString(GEOHASH))
-				.set(PICTURES, pictures).build();
+				.set(TWITTER, event.getString(TWITTER)).set(GEOHASH, event.getString(GEOHASH)).set(PICTURES, pictures)
+				.build();
 	}
 
-	public static Pair<List<Entity>, String> createNew(CreateEventData create_event_data) {
-		Pair<List<Entity>, String> chat = DB_Chat.createNew(create_event_data.email);
+	public static Triplet<List<Entity>, String, String> createNew(CreateEventData create_event_data) {
 		ListValue.Builder participants = ListValue.newBuilder();
-		ListValue.Builder pictures = ListValue.newBuilder();
 		participants.addValue(create_event_data.email);
+
+		Pair<List<Entity>, String> chat = DB_Chat.createNew(create_event_data.email);
 		List<Entity> entities = chat.getValue0();
 
-		Key eventKey = generateEventID(create_event_data.event_name);
+		Key eventKey = generateEventKey(create_event_data.event_name);
+		String event_id = eventKey.getName();
+
+		ListValue.Builder pictures = ListValue.newBuilder();
+		String picture_id = generateNewPictureID(null, event_id);
+		pictures.addValue(picture_id);
 
 		EventData_Minimal data = new EventData_Minimal(create_event_data);
 		LatLng event_location = LatLng.of(data.location[0], data.location[1]);
-		
+
 		String geohash = GeoHashUtil.convertCoordsToGeoHashHighPrecision(data.location[0], data.location[1]);
 
-		entities.add(Entity.newBuilder(eventKey).set(NAME, data.name).set(ID, eventKey.getName())
-				.set(LOCATION, event_location).set(START_DATE, data.start_date).set(END_DATE, data.end_date)
+		entities.add(Entity.newBuilder(eventKey).set(NAME, data.name).set(ID, event_id).set(LOCATION, event_location)
+				.set(START_DATE, data.start_date).set(END_DATE, data.end_date)
 				.set(CREATION_DATE, Timestamp.now().toString()).set(CHAT_ID, chat.getValue1())
 				.set(PARTICIPANTS, participants.build()).set(N_PARTICIPANTS, 1).set(OWNER_EMAIL, data.owner_email)
 				.set(CONTACT, data.contact).set(DESCRIPTION, data.description).set(CATEGORY, data.category)
 				.set(CAPACITY, data.capacity).set(STATE, data.getState().toString())
 				.set(PROFILE, data.getProfile().toString()).set(WEBSITE, data.website).set(FACEBOOK, data.facebook)
-				.set(INSTAGRAM, data.instagram).set(TWITTER, data.twitter)
-				.set(GEOHASH, geohash)
+				.set(INSTAGRAM, data.instagram).set(TWITTER, data.twitter).set(GEOHASH, geohash)
 				.set(PICTURES, pictures.build()).build());
 
-		return new Pair<>(entities, eventKey.getName());
+		return new Triplet<>(entities, event_id, picture_id);
 	}
 
-	private static Key generateEventID(String event_name) {
+	public static Pair<Entity, String> addPicture(String event_id, String req_email)
+			throws InexistentEventException, ImpossibleActionException {
+		Entity event = getEvent(event_id);
+		checkIsOwner(event, req_email);
+		checkIsActive(event);
+
+		String new_pic_id = generateNewPictureID(event, null);
+
+		ListValue.Builder newList = ListValue.newBuilder().set(event.getList(PICTURES));
+		newList.addValue(new_pic_id);
+
+		return new Pair<>(updatePictures(event, newList.build()), new_pic_id);
+	}
+
+	public static Entity deletePicture(String event_id, String pic_id, String req_email)
+			throws ImpossibleActionException, InexistentEventException, InexistentPictureException {
+		Entity event = getEvent(event_id);
+		checkIsOwner(event, req_email);
+		checkIsActive(event);
+
+		List<String> pictures = getPicturesList(event);
+		if (!pictures.contains(pic_id))
+			throw new InexistentPictureException("there is no picture with id:" + pic_id + " for this event");
+
+		pictures.remove(pic_id);
+
+		ListValue.Builder newList = ListValue.newBuilder();
+		pictures.forEach(pic -> newList.addValue(pic));
+
+		return updatePictures(event, newList.build());
+	}
+
+	private static ListValue getPictures(Entity event) {
+		ListValue.Builder pictures = ListValue.newBuilder();
+		if (event.getProperties().containsKey(PICTURES))
+			pictures = pictures.set(event.getList(PICTURES));
+
+		return pictures.build();
+	}
+
+	private static List<String> getPicturesList(Entity event) {
+		List<Value<?>> pictures = event.getList(PICTURES);
+		List<String> picture_ids = new LinkedList<>();
+
+		pictures.forEach(pic -> picture_ids.add((String) pic.get()));
+
+		return picture_ids;
+	}
+	
+	public static List<String> getPicturesList(String event_id) throws InexistentEventException {
+		Entity event = getEvent(event_id);
+		return getPicturesList(event);
+	}
+
+	private static Entity updatePictures(Entity event, ListValue newPictures) {
+
+		return Entity.newBuilder(event.getKey()).set(NAME, event.getString(NAME)).set(ID, event.getString(ID))
+				.set(LOCATION, event.getLatLng(LOCATION)).set(START_DATE, event.getString(START_DATE))
+				.set(END_DATE, event.getString(END_DATE)).set(CREATION_DATE, event.getString(CREATION_DATE))
+				.set(CHAT_ID, event.getString(CHAT_ID)).set(PARTICIPANTS, event.getList(PARTICIPANTS))
+				.set(OWNER_EMAIL, event.getString(OWNER_EMAIL)).set(CONTACT, event.getString(CONTACT))
+				.set(DESCRIPTION, event.getString(DESCRIPTION)).set(CATEGORY, event.getString(CATEGORY))
+				.set(CAPACITY, event.getLong(CAPACITY)).set(STATE, event.getString(STATE))
+				.set(PROFILE, event.getString(PROFILE)).set(WEBSITE, event.getString(WEBSITE))
+				.set(FACEBOOK, event.getString(FACEBOOK)).set(INSTAGRAM, event.getString(INSTAGRAM))
+				.set(TWITTER, event.getString(TWITTER)).set(GEOHASH, event.getString(GEOHASH))
+				.set(PICTURES, newPictures).build();
+	}
+
+	private static Key generateEventKey(String event_name) {
 		Random rand = new Random();
 		String id = null;
 		Key idKey = null;
@@ -194,6 +261,50 @@ public class DB_Event {
 		} while (datastore.get(idKey) != null);
 
 		return idKey;
+	}
+
+	private static String generateNewPictureID(Entity event, String event_id) {
+		String id;
+		String number;
+
+		if (event != null) {
+			id = event.getString(ID);
+			List<Value<?>> pictures = event.getList(PICTURES);
+			if (pictures.size() > 0)
+				number = ""
+						+ (Integer.parseInt(((String) pictures.get(pictures.size() - 1).get()).split(id + "-")[1])
+						+ 1);
+			else
+				number = "" + 1;
+		} else {
+			id = event_id;
+			number = "" + 1;
+		}
+
+		return id + "-" + number;
+	}
+
+	private static Entity updateParticipants(Key eventKey, Entity event, ListValue newParticipants, boolean add) {
+		Entity.Builder builder = Entity.newBuilder(eventKey);
+		long n_participants = event.getLong(N_PARTICIPANTS);
+		if (add)
+			builder.set(N_PARTICIPANTS, n_participants + 1);
+		else
+			builder.set(N_PARTICIPANTS, n_participants - 1);
+
+		ListValue pictures = getPictures(event);
+
+		return builder.set(NAME, event.getString(NAME)).set(ID, event.getString(ID))
+				.set(LOCATION, event.getLatLng(LOCATION)).set(START_DATE, event.getString(START_DATE))
+				.set(END_DATE, event.getString(END_DATE)).set(CREATION_DATE, event.getString(CREATION_DATE))
+				.set(CHAT_ID, event.getString(CHAT_ID)).set(PARTICIPANTS, newParticipants)
+				.set(OWNER_EMAIL, event.getString(OWNER_EMAIL)).set(CONTACT, event.getString(CONTACT))
+				.set(DESCRIPTION, event.getString(DESCRIPTION)).set(CATEGORY, event.getString(CATEGORY))
+				.set(CAPACITY, event.getLong(CAPACITY)).set(STATE, event.getString(STATE))
+				.set(PROFILE, event.getString(PROFILE)).set(WEBSITE, event.getString(WEBSITE))
+				.set(FACEBOOK, event.getString(FACEBOOK)).set(INSTAGRAM, event.getString(INSTAGRAM))
+				.set(TWITTER, event.getString(TWITTER)).set(GEOHASH, event.getString(GEOHASH)).set(PICTURES, pictures)
+				.build();
 	}
 
 	private static void checkIsParticipant(Entity event, String email) throws InexistentParticipantException {
@@ -314,29 +425,45 @@ public class DB_Event {
 		return participants;
 	}
 
-	public static List<EventParticipantData> getParticipantRoles(String event_id)
-			throws InexistentChatIdException, InexistentEventException {
+	public static Triplet<List<EventParticipantData>, Integer, MoreResultsType> getParticipantRoles(String event_id,
+			int cursor) throws InexistentChatIdException, InexistentEventException, InexistentUserException {
 
 		Entity event = getEvent(event_id);
 		List<String> participant_emails = getParticipantEmails(event);
 		List<String> mods = DB_Chat.getModerators(event.getString(CHAT_ID));
 		List<EventParticipantData> participant_roles = new LinkedList<>();
 
-		participant_emails.forEach(participant_email -> {
+		int i = 0;
+		int counter = 0;
+		for (String participant_email : participant_emails) {
+			if (counter + 1 > MAX_PARTICIPANTS_RETURN)
+				break;
+			if (++i <= cursor)
+				continue;
+
+			++counter;
+
+			Entity user = DB_User.getUser(participant_email);
+			String encodedPicture = user.getString(DB_User.PROFILE_PICTURE_MINIATURE);
+			String username = user.getString(DB_User.USERNAME);
+
 			if (event.getString(OWNER_EMAIL).equals(participant_email)) {
-				participant_roles.add(new EventParticipantData(participant_email, "ADMIN"));
-				return;
+				participant_roles.add(new EventParticipantData(participant_email, username, encodedPicture, "ADMIN"));
+				continue;
 			}
 
 			if (mods.contains(participant_email)) {
-				participant_roles.add(new EventParticipantData(participant_email, "MOD"));
-				return;
+				participant_roles.add(new EventParticipantData(participant_email, username, encodedPicture, "MOD"));
+				continue;
 			}
 
-			participant_roles.add(new EventParticipantData(participant_email, "PARTICIPANT"));
-		});
+			participant_roles.add(new EventParticipantData(participant_email, username, encodedPicture, "PARTICIPANT"));
+		}
 
-		return participant_roles;
+		int new_cursor = i;
+		boolean more_results = new_cursor < participant_emails.size();
+		return new Triplet<>(participant_roles, more_results ? new_cursor : null,
+				more_results ? MoreResultsType.MORE_RESULTS_AFTER_LIMIT : MoreResultsType.NO_MORE_RESULTS);
 	}
 
 	public static List<String> getChatModerators(String event_id, String req_email)
@@ -383,8 +510,9 @@ public class DB_Event {
 
 		String owner = event.getString(OWNER_EMAIL);
 
-		if (participants.contains(target_email) && !target_email.equals(owner) && (owner.equals(req_email)
-				|| (moderators.contains(req_email) && !moderators.contains(target_email)) || target_email.equals(req_email))) {
+		if (participants.contains(target_email) && !target_email.equals(owner)
+				&& (owner.equals(req_email) || (moderators.contains(req_email) && !moderators.contains(target_email))
+						|| target_email.equals(req_email))) {
 
 			participants.remove(target_email);
 
@@ -400,39 +528,15 @@ public class DB_Event {
 		throw new ImpossibleActionException();
 	}
 
-	public static Triplet<List<MessageData>, Integer, QueryResultBatch.MoreResultsType> getChat(String event_id,
-			Integer cursor, boolean lastest_first, String req_email) throws InexistentChatIdException,
-			InvalidCursorException, InexistentLogIdException, InexistentParticipantException, InexistentEventException {
+	public static Triplet<List<MessageData>, Integer, MoreResultsType> getChat(String event_id, Integer cursor,
+			boolean lastest_first, String req_email) throws InexistentChatIdException, InvalidCursorException,
+			InexistentLogIdException, InexistentParticipantException, InexistentEventException {
 
 		Entity event = getEvent(event_id);
 		checkIsParticipant(event, req_email);
 
 		String chat_id = event.getString(CHAT_ID);
 		return DB_Chat.getChat(chat_id, cursor == null ? 0 : cursor, lastest_first);
-	}
-
-	private static Entity updateParticipants(Key eventKey, Entity event, ListValue newParticipants, boolean add) {
-		Entity.Builder builder = Entity.newBuilder(eventKey);
-		long n_participants = event.getLong(N_PARTICIPANTS);
-		if (add)
-			builder.set(N_PARTICIPANTS, n_participants + 1);
-		else
-			builder.set(N_PARTICIPANTS, n_participants - 1);
-		
-		ListValue pictures = getPictures(event);
-		
-		return builder.set(NAME, event.getString(NAME)).set(ID, event.getString(ID))
-				.set(LOCATION, event.getLatLng(LOCATION)).set(START_DATE, event.getString(START_DATE))
-				.set(END_DATE, event.getString(END_DATE)).set(CREATION_DATE, event.getString(CREATION_DATE))
-				.set(CHAT_ID, event.getString(CHAT_ID)).set(PARTICIPANTS, newParticipants)
-				.set(OWNER_EMAIL, event.getString(OWNER_EMAIL)).set(CONTACT, event.getString(CONTACT))
-				.set(DESCRIPTION, event.getString(DESCRIPTION)).set(CATEGORY, event.getString(CATEGORY))
-				.set(CAPACITY, event.getLong(CAPACITY)).set(STATE, event.getString(STATE))
-				.set(PROFILE, event.getString(PROFILE)).set(WEBSITE, event.getString(WEBSITE))
-				.set(FACEBOOK, event.getString(FACEBOOK)).set(INSTAGRAM, event.getString(INSTAGRAM))
-				.set(TWITTER, event.getString(TWITTER))
-				.set(GEOHASH, event.getString(GEOHASH))
-				.set(PICTURES, pictures).build();
 	}
 
 	public static boolean isOwner(Entity event, String owner_email) {

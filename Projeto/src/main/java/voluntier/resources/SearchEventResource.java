@@ -26,10 +26,8 @@ import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import voluntier.exceptions.InvalidTokenException;
 import voluntier.util.GeoHashUtil;
 import voluntier.util.JsonUtil;
-//import voluntier.util.consumes.RequestData;
 import voluntier.util.consumes.event.SearchByRange;
 import voluntier.util.eventdata.DB_Event;
-//import voluntier.util.produces.SearchEventReturn;
 import voluntier.util.produces.SearchEventsReturn;
 import voluntier.util.userdata.Profile;
 import voluntier.util.userdata.State;
@@ -44,7 +42,54 @@ public class SearchEventResource {
 
 	public SearchEventResource() {
 	}
+	
+	@POST
+	@Path("/searchEventsByRange")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getEventsInSameRegion(SearchByRange data) {
+		if (!data.isValid())
+			return Response.status(Status.BAD_REQUEST).build();
 
+		try {
+			TokensResource.checkIsValidAccess(data.token, data.email);
+
+			Pair<List<Entity>, String> events = queryEventsByArea(data.location);
+			
+			return Response.ok(JsonUtil.json.toJson(new SearchEventsReturn(events.getValue0(), events.getValue1()))).build();
+			
+		} catch (InvalidTokenException e) {
+			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
+
+		} catch (Exception e) {
+			LOG.severe(e.getMessage());
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+
+		}
+	}
+	
+	private Pair<List<Entity>, String> queryEventsByArea (double[] location) {
+		String geohash = GeoHashUtil.convertCoordsToGeoHashLowPrecision(location[0], location[1]);
+		
+		Builder<Entity> b = Query.newEntityQueryBuilder().setKind("Event").
+				setFilter(CompositeFilter.and(PropertyFilter.ge(DB_Event.GEOHASH, geohash),
+						PropertyFilter.lt(DB_Event.GEOHASH, geohash + "z"),
+						PropertyFilter.eq(DB_Event.PROFILE, Profile.PUBLIC.toString()),
+						PropertyFilter.eq(DB_Event.STATE, State.ENABLED.toString()))
+						);
+
+		Query<Entity> query = b.build();
+
+		QueryResults<Entity> res = datastore.run(query);
+
+		List<Entity> events = new LinkedList<>();
+		res.forEachRemaining(event -> {
+			events.add(event);
+		});
+
+		return new Pair<>(events, geohash);
+	}
+	
 	/*@POST
 	@Path("/searchAllEvents")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -86,48 +131,4 @@ public class SearchEventResource {
 
 		return events;
 	}*/
-	
-	@POST
-	@Path("/searchEventsByRange")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response getEventsAroundLocation(SearchByRange data) {
-		LOG.fine("Trying to find events near some location");
-
-		if (!data.isValid())
-			return Response.status(Status.BAD_REQUEST).build();
-
-		try {
-			TokensResource.checkIsValidAccess(data.token, data.email);
-		} catch (InvalidTokenException e) {
-			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
-		}
-
-		Pair<List<Entity>, String> events = getEventsByArea(data.location);
-		
-		LOG.fine("All events were searched and returned.");
-		return Response.ok(JsonUtil.json.toJson(new SearchEventsReturn(events.getValue0(), events.getValue1()))).build();
-	}
-	
-	private Pair<List<Entity>, String> getEventsByArea (double[] location) {
-		String geohash = GeoHashUtil.convertCoordsToGeoHashLowPrecision(location[0], location[1]);
-		
-		Builder<Entity> b = Query.newEntityQueryBuilder().setKind("Event").
-				setFilter(CompositeFilter.and(PropertyFilter.ge(DB_Event.GEOHASH, geohash),
-						PropertyFilter.lt(DB_Event.GEOHASH, geohash + "z"),
-						PropertyFilter.eq(DB_Event.PROFILE, Profile.PUBLIC.toString()),
-						PropertyFilter.eq(DB_Event.STATE, State.ENABLED.toString()))
-						);
-
-		Query<Entity> query = b.build();
-
-		QueryResults<Entity> res = datastore.run(query);
-
-		List<Entity> events = new LinkedList<>();
-		res.forEachRemaining(event -> {
-			events.add(event);
-		});
-
-		return new Pair<>(events, geohash);
-	}
 }
