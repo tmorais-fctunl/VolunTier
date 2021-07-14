@@ -57,7 +57,7 @@ function initMap() {
           rotateControl: false,
           fullscreenControl: false,
       
-
+      minZoom: 7,
     styles:myStyles,
     gestureHandling: "greedy"
   });
@@ -73,15 +73,33 @@ function initMap() {
     dragListener = google.maps.event.addListener(map, 'dragend', function(event) {
       loadEventWithID();
     });
+      var visible = true;
     dragListener = google.maps.event.addListener(map, 'zoom_changed', function(event) {
         loadEventWithID();
         var zoom = map.getZoom();
-        // iterate over markers and call setVisible
-
-        for (i = 0; i < markers.length; i++) {
-            console.log("Hello?");
-            markers[i].setVisible(zoom >= 9);
+      
+        if (!visible && zoom >= 9) {
+            visible = !visible;
+            for (i = 0; i < markers.length; i++) {
+             
+                markers[i].setMap(map);
+                markers[i].setOptions({ 'opacity': 1.0 })
+                markers[i].setAnimation(google.maps.Animation.DROP);
+            }
         }
+        else if (visible && zoom < 9) {
+            visible = !visible;
+            for (i = 0; i < markers.length; i++) {
+                markers[i].setAnimation(google.maps.Animation.BOUNCE);
+                timeOutHideAnimation(i);
+               // markers[i].setMap(null);
+            }
+        }
+
+      /*  for (i = 0; i < markers.length; i++) {
+           // console.log("Hello?");
+            markers[i].setVisible(zoom >= 9);
+        }*/
 
     });
   });
@@ -90,6 +108,22 @@ function initMap() {
 
 }
 
+function timeOutHideAnimation(i) {
+    setTimeout((function () {
+        markers[i].setOptions({ 'opacity': 0.750 })
+        setTimeout((function () {
+            markers[i].setOptions({ 'opacity': 0.5 })
+            setTimeout((function () {
+                markers[i].setOptions({ 'opacity': 0.250 })
+                setTimeout((function () {
+                    markers[i].setMap(null);
+                }), 100);
+            }), 100);
+        }), 100);
+    }), 100);
+}
+
+
 function initMapPreview() {
   mapPreview = new google.maps.Map(document.getElementById("mapPreview"), {
     //center at FCT NOVA
@@ -97,7 +131,8 @@ function initMapPreview() {
     zoom: 6,
     disableDefaultUI: true,
     styles:myStyles,
-    gestureHandling: "greedy"
+      gestureHandling: "greedy",
+    minZoom: 12
   });
 
 
@@ -137,11 +172,6 @@ function createEventButton() {
 
 
   });
-}
-
-function displayEventSideBar(event_id) {
-    document.getElementById("sidebar_content_event_list").style.display = 'none';
-    loadEvent(event_id, false);
 }
 
 function createEventInMap(attributes) {
@@ -268,22 +298,29 @@ function loadEventMiniature(attributes) {
         lat: attributes.location[0],
         lng: attributes.location[1]
     };
-
+    //infowindow content
+    var category = getCategory(attributes.category);
+    var start = new Date(attributes.start_date);
+    var end = new Date(attributes.end_date);
+    start = "Start: " + start.getDate() + "/" + start.getMonth() + "/" + start.getFullYear() + " " + start.getHours() + ":" + start.getMinutes();
+    end = "End: " + end.getDate() + "/" + end.getMonth() + "/" + end.getFullYear() + " " + end.getHours() + ":" + end.getMinutes();
     var contentString = 
-        "<p style='text-align: center; font-size: 140%'>" + attributes.name + "</p>" +
-        "<label style=\"font-size: 110%; text-align: center\">Category:</label>" +
-        "<p style=\"display:inline-block; text-align: center\">" + attributes.category + "</p>" +
+        "<p style='text-align: center; font-size: 150%; color: #009999'>" + attributes.name + "</p>" +
+        
+        "<p style=\"display:inline-block; text-align: center; margin-left: 4px; font-size:140%\">" + category + "</p>" +
         "<br>" +
         "<label style=\"font-size: 110%; text-align: center \">Event Schedule:</label>" +
-        "<p style=\"display: inline-block; text-align: center\">" + attributes.start_date + " - "+attributes.end_date+"</p>" +
+        "<p style=\"text-align: center\">" + start + "</p>" +
+        "<p style=\"text-align: center\">" + end + "</p>" +
+        "<i style=\"\" class=\"fa fa-user-o\" style=\"\"></i><p style=\"display:inline-block; margin-left: 10px\">"+attributes.num_participants+"</p>" +
         "<br>" +
-        "<i style=\"margin-top:10px\" class=\"fa fa-user-o\" style=\"\"></i><p style=\"display:inline-block; margin-left: 10px\">"+attributes.num_participants+"</p>" +
-        "<br>" +
-        "<button class=\"btn btn-primary\" style='margin: auto' type = \"button\" onclick = \"displayEventSideBar(\'" + attributes.event_id + "\')\">View more details</button>";
+        "<button class=\"btn btn-primary\" style='margin-bottom: 10px' type = \"button\" onclick = \"loadEvent(\'" + attributes.event_id + "\', false"+")\">View more details</button>";
 
-
-    $("#sidebar_content_event_list").append($("<div style='text-align: center; border-style: solid; border-color: lightgray; border-width: 1px'>" + contentString + "</div><br>"));
-
+   
+    //side panel content
+    var sideContentString = "<div style='text-align: center; border-style: solid; border-color: lightgray; border-width: 1px'>" + contentString;
+    
+    //last touches to info window's content
     contentString = "<div style='text-align: center'>" + contentString + "</div>";
 
     var props = {
@@ -293,7 +330,19 @@ function loadEventMiniature(attributes) {
     }
     //add user location marker
     addMarker(props);
+    let i = markers.length;
 
+    //add the content to the side panel with additional touches
+    var goToButton = "<button class=\"btn btn-secondary\" style='margin-left:10px; margin-bottom: 10px' type = \"button\" onclick = \"goToEvent(\'" + i + "\')\">Go to</button>";
+    sideContentString = sideContentString + goToButton + "</div><br>";
+    $("#sidebar_content_event_list").append($(sideContentString));
+
+}
+
+function goToEvent(i) {
+    let marker = markers[i - 1];
+    map.panTo(marker.getPosition());
+    new google.maps.event.trigger(marker, 'click');
 }
 
 //Requires callback function
@@ -468,6 +517,10 @@ function addMarker(props){
               map,
               shouldFocus: false
           });
+          let zoom = map.getZoom();
+          if (zoom<14)
+            map.setZoom(14);
+          map.setCenter(marker.getPosition());
       });
   }
   if (props.title) {

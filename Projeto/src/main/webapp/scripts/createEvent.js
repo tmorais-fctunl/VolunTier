@@ -38,31 +38,48 @@ function createEventRequest() {
   var xmlhttp = new XMLHttpRequest();
   xmlhttp.open("POST", URL, false);
   xmlhttp.setRequestHeader("Content-Type", "application/json");
-  xmlhttp.send(ItemJSON);
-  if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-    const obj = JSON.parse(xmlhttp.responseText);
-      alert("Create event: SUCCESS. Id: " + obj.event_id);
-     // localStorage.setItem(obj.event_id, ItemJSON);
-      loadEvent(obj.event_id, true);
-      return false;
+    xmlhttp.onload = function (oEvent) {
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+            const obj = JSON.parse(xmlhttp.responseText);
+            alert("Create event: SUCCESS. Id: " + obj.event_id);
+            // localStorage.setItem(obj.event_id, ItemJSON);
+            loadEvent(obj.event_id, true);
+            return false;
 
-  }
-  else {
-    alert("Create event: UNSUCCESS");
-    return false;
-  }
+        }
+        else {
+            alert("Create event: UNSUCCESS");
+            return false;
+        }
+    }
+    xmlhttp.send(ItemJSON);
 }
 
 function fillEventAttributes(attributes) {
 
+    
+    document.getElementById("event_name").innerHTML = attributes.name;
+    document.getElementById("event_profile").innerHTML = attributes.profile;
+    document.getElementById("event_joined_capacity").innerHTML = attributes.num_participants +"/"+attributes.capacity;
+    document.getElementById("event_creator").innerHTML = attributes.owner_email;
+    //Remove previous markers and add marker on preview of event
 
-    $("#evNameSidePage").html(attributes.name);
-    $("#evDescSidePage").html(attributes.description);
-    $("#evCatgSidePage").html(attributes.category);
-    $("#evLocSidePage").html(attributes.location);
-    $("#evStartSidePage").html(attributes.start_date);
-    $("#evEndSidePage").html(attributes.end_date);
-    $("#evPrivSidePage").html(attributes.profile);
+
+    //Address
+
+
+    //date:
+    var start = new Date(attributes.start_date);
+    var end = new Date(attributes.end_date);
+    var createdOn = new Date(attributes.creation_date);
+    start = start.getDate() + "/" + start.getMonth() + "/" + start.getFullYear() + " " + start.getHours() + ":" + start.getMinutes();
+    end = end.getDate() + "/" + end.getMonth() + "/" + end.getFullYear() + " " + end.getHours() + ":" + end.getMinutes();
+    createdOn = createdOn.getDate() + "/" + createdOn.getMonth() + "/" + createdOn.getFullYear() + " " + createdOn.getHours() + ":" + createdOn.getMinutes();
+    document.getElementById("event_start_end").innerHTML = "Created on: "+createdOn+" Starts on: "+start+" Ends on: "+end;
+    document.getElementById("event_description").innerHTML = attributes.description;
+    //Participants:
+    //Comments:
+    //Photos:
     
     //The rest
  
@@ -100,17 +117,9 @@ function loadEvent(eventID, createInMap) {
         if (!data) {
             alert("Could not load event");
         }
-        jQuery.ajax({
-            url: "../pages/contents/eventSidePage.html",
-            success: function (data) {
-                $('#sidebar_content').html(data);
-            },
-            async: true,
-            complete: function () {
-                fillEventAttributes(data);
-                if (createInMap)
-                    createEventInMap(data);
-            }
-        });
-    }); 
+        loadEventTab();
+        fillEventAttributes(data);
+        if (createInMap)
+            loadEventMiniature(data);
+    });
 }
