@@ -1,5 +1,6 @@
 package voluntier.util.userdata;
 
+import java.util.List;
 import java.util.Random;
 
 import com.google.cloud.datastore.Entity;
@@ -25,6 +26,9 @@ public class UserData_Minimal {
 	public String facebook;
 	public String instagram;
 	public String twitter;
+	
+	List<String> events_participating;
+	List<String> events_created;
 
 	public UserData_Minimal() {
 	}
@@ -63,6 +67,9 @@ public class UserData_Minimal {
 		this.facebook = user.getString(DB_User.FACEBOOK);
 		this.instagram = user.getString(DB_User.INSTAGRAM);
 		this.twitter = user.getString(DB_User.TWITTER);
+
+		events_participating = DB_User.getParticipatingEvents(user);
+		events_created = DB_User.getEvents(user);
 	}
 
 	public static boolean emailValid(String email) {

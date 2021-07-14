@@ -1,5 +1,6 @@
 package voluntier.util.eventdata;
 
+import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -29,11 +30,15 @@ import voluntier.exceptions.InexistentParticipantException;
 import voluntier.exceptions.InexistentPictureException;
 import voluntier.exceptions.InexistentUserException;
 import voluntier.exceptions.InvalidCursorException;
+import voluntier.exceptions.MaximumSizeReachedException;
 import voluntier.exceptions.SomethingWrongException;
 import voluntier.util.GeoHashUtil;
+import voluntier.util.GoogleStorageUtil;
 import voluntier.util.consumes.event.CreateEventData;
 import voluntier.util.consumes.event.UpdateEventData;
 import voluntier.util.eventdata.chatdata.DB_Chat;
+import voluntier.util.produces.DownloadEventPictureReturn;
+import voluntier.util.produces.DownloadSignedURLReturn;
 import voluntier.util.userdata.DB_User;
 import voluntier.util.userdata.Profile;
 import voluntier.util.userdata.State;
@@ -76,6 +81,7 @@ public class DB_Event {
 	public static final long DEFAULT_CAPACITY = 100;
 
 	public static final long MAX_PARTICIPANTS_RETURN = 5;
+	public static final long MAX_NUM_PICTURES = 10;
 
 	private static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	private static KeyFactory eventFactory = datastore.newKeyFactory().setKind("Event");
@@ -107,7 +113,7 @@ public class DB_Event {
 				.set(TWITTER, data.getTwitter(event.getString(TWITTER)))
 				.set(GEOHASH, data.getGeohash(event.getString(GEOHASH))).set(PICTURES, pictures).build();
 	}
-
+	
 	public static Entity updateState(String event_id, String email, String state)
 			throws ImpossibleActionException, InexistentEventException {
 		Entity event = getEvent(event_id);
@@ -183,14 +189,18 @@ public class DB_Event {
 	}
 
 	public static Pair<Entity, String> addPicture(String event_id, String req_email)
-			throws InexistentEventException, ImpossibleActionException {
+			throws InexistentEventException, ImpossibleActionException, MaximumSizeReachedException {
 		Entity event = getEvent(event_id);
 		checkIsOwner(event, req_email);
 		checkIsActive(event);
 
 		String new_pic_id = generateNewPictureID(event, null);
+		
+		List<Value<?>> pics = event.getList(PICTURES);
+		if(pics.size() >= MAX_NUM_PICTURES)
+			throw new MaximumSizeReachedException("This event cannot have anymore pictures " + event_id);
 
-		ListValue.Builder newList = ListValue.newBuilder().set(event.getList(PICTURES));
+		ListValue.Builder newList = ListValue.newBuilder().set(pics);
 		newList.addValue(new_pic_id);
 
 		return new Pair<>(updatePictures(event, newList.build()), new_pic_id);
@@ -230,10 +240,23 @@ public class DB_Event {
 
 		return picture_ids;
 	}
-	
-	public static List<String> getPicturesList(String event_id) throws InexistentEventException {
+
+	public static List<DownloadEventPictureReturn> getPicturesURLs(String event_id) throws InexistentEventException {
 		Entity event = getEvent(event_id);
-		return getPicturesList(event);
+		return getPicturesURLs(event);
+	}
+
+	public static List<DownloadEventPictureReturn> getPicturesURLs(Entity event) throws InexistentEventException {
+		List<String> filenames = getPicturesList(event);
+		List<DownloadEventPictureReturn> download_urls = new LinkedList<>();
+
+		filenames.forEach(file -> {
+			Pair<URL, Long> url = GoogleStorageUtil.signURLForDownload(file);
+			DownloadSignedURLReturn dwld_url = new DownloadSignedURLReturn(url.getValue0(), url.getValue1());
+			download_urls.add(new DownloadEventPictureReturn(dwld_url, file));
+		});
+
+		return download_urls;
 	}
 
 	private static Entity updatePictures(Entity event, ListValue newPictures) {
@@ -242,13 +265,13 @@ public class DB_Event {
 				.set(LOCATION, event.getLatLng(LOCATION)).set(START_DATE, event.getString(START_DATE))
 				.set(END_DATE, event.getString(END_DATE)).set(CREATION_DATE, event.getString(CREATION_DATE))
 				.set(CHAT_ID, event.getString(CHAT_ID)).set(PARTICIPANTS, event.getList(PARTICIPANTS))
-				.set(OWNER_EMAIL, event.getString(OWNER_EMAIL)).set(CONTACT, event.getString(CONTACT))
-				.set(DESCRIPTION, event.getString(DESCRIPTION)).set(CATEGORY, event.getString(CATEGORY))
-				.set(CAPACITY, event.getLong(CAPACITY)).set(STATE, event.getString(STATE))
-				.set(PROFILE, event.getString(PROFILE)).set(WEBSITE, event.getString(WEBSITE))
-				.set(FACEBOOK, event.getString(FACEBOOK)).set(INSTAGRAM, event.getString(INSTAGRAM))
-				.set(TWITTER, event.getString(TWITTER)).set(GEOHASH, event.getString(GEOHASH))
-				.set(PICTURES, newPictures).build();
+				.set(N_PARTICIPANTS, event.getLong(N_PARTICIPANTS)).set(OWNER_EMAIL, event.getString(OWNER_EMAIL))
+				.set(CONTACT, event.getString(CONTACT)).set(DESCRIPTION, event.getString(DESCRIPTION))
+				.set(CATEGORY, event.getString(CATEGORY)).set(CAPACITY, event.getLong(CAPACITY))
+				.set(STATE, event.getString(STATE)).set(PROFILE, event.getString(PROFILE))
+				.set(WEBSITE, event.getString(WEBSITE)).set(FACEBOOK, event.getString(FACEBOOK))
+				.set(INSTAGRAM, event.getString(INSTAGRAM)).set(TWITTER, event.getString(TWITTER))
+				.set(GEOHASH, event.getString(GEOHASH)).set(PICTURES, newPictures).build();
 	}
 
 	private static Key generateEventKey(String event_name) {
@@ -272,8 +295,7 @@ public class DB_Event {
 			List<Value<?>> pictures = event.getList(PICTURES);
 			if (pictures.size() > 0)
 				number = ""
-						+ (Integer.parseInt(((String) pictures.get(pictures.size() - 1).get()).split(id + "-")[1])
-						+ 1);
+						+ (Integer.parseInt(((String) pictures.get(pictures.size() - 1).get()).split(id + "-")[1]) + 1);
 			else
 				number = "" + 1;
 		} else {

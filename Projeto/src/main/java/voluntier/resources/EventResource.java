@@ -1,7 +1,6 @@
 package voluntier.resources;
 
 import java.net.URL;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -30,6 +29,7 @@ import voluntier.exceptions.InexistentModeratorException;
 import voluntier.exceptions.InexistentPictureException;
 import voluntier.exceptions.InexistentEventException;
 import voluntier.exceptions.InvalidTokenException;
+import voluntier.exceptions.MaximumSizeReachedException;
 import voluntier.util.GoogleStorageUtil;
 import voluntier.util.JsonUtil;
 import voluntier.util.consumes.event.CreateEventData;
@@ -42,7 +42,6 @@ import voluntier.util.eventdata.DB_Event;
 import voluntier.util.eventdata.EventParticipantData;
 import voluntier.util.produces.CreateEventReturn;
 import voluntier.util.produces.DownloadEventPictureReturn;
-import voluntier.util.produces.DownloadSignedURLReturn;
 import voluntier.util.produces.EventDataReturn;
 import voluntier.util.produces.EventParticipantsReturn;
 import voluntier.util.produces.EventPicturesReturn;
@@ -219,7 +218,9 @@ public class EventResource {
 			TokensResource.checkIsValidAccess(data.token, data.email);
 
 			Entity event = DB_Event.getEvent(data.event_id);
-			return Response.ok(JsonUtil.json.toJson(new EventDataReturn(event))).build();
+			List<DownloadEventPictureReturn> download_urls = DB_Event.getPicturesURLs(event);
+			
+			return Response.ok(JsonUtil.json.toJson(new EventDataReturn(event, download_urls))).build();
 
 		} catch (InvalidTokenException | InexistentEventException e) {
 			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
@@ -339,7 +340,8 @@ public class EventResource {
 			
 			return Response.ok(JsonUtil.json.toJson(new UploadEventPictureReturn(upload_url, filename))).build();
 
-		} catch (InvalidTokenException | InexistentEventException | ImpossibleActionException e) {
+		} catch (InvalidTokenException | InexistentEventException | 
+				ImpossibleActionException | MaximumSizeReachedException e) {
 			txn.rollback();
 			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
 
@@ -405,16 +407,9 @@ public class EventResource {
 		try {
 			TokensResource.checkIsValidAccess(data.token, data.email);
 			
-			List<String> filenames = DB_Event.getPicturesList(data.event_id);
-			List<DownloadEventPictureReturn> upload_urls = new LinkedList<>();
-			
-			filenames.forEach(file -> {
-				Pair<URL, Long> url = GoogleStorageUtil.signURLForDownload(file);
-				DownloadSignedURLReturn dwld_url = new DownloadSignedURLReturn(url.getValue0(), url.getValue1());
-				upload_urls.add(new DownloadEventPictureReturn(dwld_url, file));
-			});
-	
-			return Response.ok(JsonUtil.json.toJson(new EventPicturesReturn(upload_urls))).build();
+			List<DownloadEventPictureReturn> download_urls = DB_Event.getPicturesURLs(data.event_id);
+				
+			return Response.ok(JsonUtil.json.toJson(new EventPicturesReturn(download_urls))).build();
 
 		} catch (InvalidTokenException | InexistentEventException e) {
 			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();

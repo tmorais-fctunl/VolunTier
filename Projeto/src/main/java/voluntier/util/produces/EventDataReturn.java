@@ -1,11 +1,13 @@
 package voluntier.util.produces;
 
+import java.util.List;
+
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.LatLng;
 
 import voluntier.util.eventdata.DB_Event;
 
-public class EventDataReturn {
+public class EventDataReturn extends EventPicturesReturn {
 	public String profile;
 	
 	public String name;
@@ -28,11 +30,12 @@ public class EventDataReturn {
 	public String facebook;
 	public String instagram;
 	public String twitter;
-	
+		
 	public EventDataReturn() {
 	}
 	
-	public EventDataReturn (Entity event) {
+	public EventDataReturn (Entity event, List<DownloadEventPictureReturn> download_urls) {
+		super(download_urls);
 		
 		this.profile = event.getString(DB_Event.PROFILE);
 		this.name = event.getString(DB_Event.NAME);
