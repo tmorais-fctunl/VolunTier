@@ -49,27 +49,15 @@
         <div id="Map" class="tabcontent">
             <!--  <span onclick="this.parentElement.style.display='none'" class="topright">&times</span>-->
             <main class="app">
-                <aside class="sidebar" style="background-color:white;">
+                <aside class="sidebar" style="background-color: white;">
 
                     <div id="sidebar_content_event_list">
                         <h3 style="text-align:center">Events</h3>
-                        <br>
-                        <br>
                         <!--<button class="btn btn-info" style="margin: auto; width:100%" id="loadEventWithIDBtn" onclick="return loadEventWithID()">Load Event</button>-->
                     </div>
 
-                    <div id="sidebar_content">
-                        <h3>This right here is your panel.</h3>
-                        <br>
-                        <p> Your panel will display event details, event creation form and other tools that are in development</p>
-                        <br>
-                        <p style="display: inline">
-                            Right now, you can click the "Create Event" button in the bottom right to open up the Create Event Form.
-                            In the future, we want to allow you to click events already marked on your map and display their information here.
-                            We also want to have a feed of events, which can make it easier for you to check them out without needlessly clicking through all of them.
-                            More tools may be developed as our project and ideas grow.
-                        </p>
-
+                   <div id="sidebar_content">
+                       <!--For event form display-->
                     </div>
                 </aside>
                 <section class="map-area " id="map">
@@ -96,101 +84,101 @@
             <h3>Store</h3>
             <p>There's nothing here to buy, because of, yet again, our developer. (Our higher-ups are really pissed about all the missed profit)</p>
         </div>
-        <div id="Event" class="">
-            <span onclick="closeEventTab()" class="topright">&times</span>
-            <h3>Event</h3>
-            <p>There's nothing here, because of, yet again, our developer. (Our higher-ups are really pissed about all the missed profit)</p>
+        <div id="Event" class="tabcontent">
+            <div>
+                <span onclick="closeEventTab()" class="topright">&times</span>
+                <div id="eventContainer" class="container">
+                    <div class="main-body">
+                        <div class="row gutters-sm">
+                            <div class="col-md-4 mb-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="d-flex flex-column align-items-center text-center">
+                                            <img id="EventImage" src="https://bootdey.com/img/Content/avatar/avatar7.png" width="200" height="200">
+                                            <div class="mt-3">
 
-            <div id="eventContainer" class="container">
-                <div class="main-body">
-                    <div class="row gutters-sm">
-                        <div class="col-md-4 mb-3">
-                            <div class="card">
-                                <div class="card-body">
-                                    <div class="d-flex flex-column align-items-center text-center">
-                                        <img id="EventImage" src="https://bootdey.com/img/Content/avatar/avatar7.png" width="200" height="200">
-                                        <div class="mt-3">
+                                                <h4 id="event_name">Event Name</h4>
 
-                                            <h4 id="event_name">Event Name</h4>
+                                                <p class="text-secondary mb-1 container_lock info" id="event_profile" name="profile">Public</p>
+                                                <!--Should be Join when its public, and ask to join when its private-->
+                                                <button style="margin:auto;position:" id="joinBtn" class="btn btn-primary">Join/Ask to join</button>
+                                                <br>
+                                                <i style="margin-top:10px" class="fa fa-user-o" style=""></i><p id="event_joined_capacity" style="display:inline-block; margin-left: 10px">0/10</p>
 
-                                            <p class="text-secondary mb-1 container_lock info" id="event_profile" name="profile">Public</p>
-                                            <!--Should be Join when its public, and ask to join when its private-->
-                                            <button style="margin:auto;position:" id="joinBtn" class="btn btn-primary">Join/Ask to join</button>
-                                            <br>
-                                            <i style="margin-top:10px" class="fa fa-user-o" style=""></i><p id="event_joined_capacity"style="display:inline-block; margin-left: 10px">0/10</p>
-
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
+                                <div class="card mt-3">
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap" style="text-align:center">
+                                            <b style="width:100%"><h6 class="mb-0" style="width:100%; font-size:110%">Creator: </h6><a id="event_creator" href=""></a></b>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap" style="text-align:center">
+                                            <!--Map Preview Zone-->
+                                            <h6 id="event_address" style="width:100%" class="mb-0">Address</h6>
+                                            <section class="map-area " id="mapPreview" style="margin-top:10px"></section>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap" style="text-align:center">
+                                            <h6 id="event_start_end" style="width:100%" class="mb-0">Start-Time - End-Time</h6>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap">
+                                            <h6 class="mb-0">
+                                            </h6>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap">
+                                            <h6 class="mb-0">
+                                            </h6>
+                                        </li>
+                                    </ul>
+                                </div>
                             </div>
-                            <div class="card mt-3">
-                                <ul class="list-group list-group-flush">
-                                    <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap" style="text-align:center">
-                                      <b style="width:100%"><h6 class="mb-0" style="width:100%; font-size:110%">Creator: </h6><a id="event_creator" href=""></a></b>
-                                  </li>
-                                    <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap" style="text-align:center">
-                                        <!--Map Preview Zone-->
-                                        <h6 style="width:100%" class="mb-0">Address</h6>
-                                        <section class="map-area " id="mapPreview" style="margin-top:10px"></section>
-                                    </li>
-                                    <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap" style="text-align:center">
-                                        <h6 id="event_start_end" style="width:100%" class="mb-0">Start-Time - End-Time</h6>
-                                    </li>
-                                    <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap">
-                                        <h6 class="mb-0">
-                                        </h6>
-                                    </li>
-                                    <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap">
-                                        <h6 class="mb-0">
-                                        </h6>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="col-md-8">
-                            <div class="card mb-3">
-                                <div class="card-body">
-                                    <div class="row" style="text-align:center">
+                            <div class="col-md-8">
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <div class="row" style="text-align:center">
                                             <!-- Maybe the "Event Description" header should be centered-->
-                                            <h6 class="mb-0" style="width:100%">Event Description</h6>
+                                            <h6 class="mb-0" style="width:100%; font-size: 120%">Event Description</h6>
+                                            <br />
                                             <!--Description goes here-->
-                                            <p id="event_description"></p>
-                                    </div>
-                                    <hr>
-                                    <div class="row" style="text-align:center">
-                                        <!--What would we have here?-->
-                                    </div>
-                                    <hr>
-                                    <div class="row" style="text-align:center">
-                                        <!--What would we have here?-->
-                                    </div>
-                                    <hr>
-                                    <div class="row" style="text-align:center">
-                                        <!--Having the number of participants is cool along with the users-->
-                                        <h6 class="mb-0" style="width:100%">Participants</h6>
-                                    </div>
-                                    <hr>
-                                    <div class="row" style="text-align:center">
-                                        <!--What would we have here?-->
-                                    </div>
-                                    <hr>
-                                    <div class="row" style="text-align:center">
-                                        <div class="col-sm-12">
-                                            <h6 class="mb-0">Comments</h6>
-                                            <br>
-                                            <!--Lets have this row for comments or something. Maybe later add another row for photos idk-->
-                                            <ul>
-                                              <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap" style="text-align:center">
-                                                <p style="width:100%; font-size:90%; color: darkgray">Wow really cool stuff mate</p>
-                                              </li>
-                                              <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap" style="text-align:center">
-                                                <p style="width:100%; font-size:90%; color: darkgray">This will be all over the news!</p>
-                                              </li>
-                                              <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap" style="text-align:center">
-                                                <p style="width:100%; font-size:90%; color: darkgray">Really like the idea!</p>
-                                              </li>
-                                            </ul>
+                                            <p style="margin-top: 10px; width: 100%" id="event_description"></p>
+                                        </div>
+                                        <hr>
+                                        <div class="row" style="text-align:center">
+                                            <!--What would we have here?-->
+                                        </div>
+                                        <hr>
+                                        <div class="row" style="text-align:center">
+                                            <!--What would we have here?-->
+                                        </div>
+                                        <hr>
+                                        <div class="row" style="text-align:center">
+                                            <!--Having the number of participants is cool along with the users-->
+                                            <h6 class="mb-0" style="width:100%">Participants</h6>
+                                        </div>
+                                        <hr>
+                                        <div class="row" style="text-align:center">
+                                            <!--What would we have here?-->
+                                        </div>
+                                        <hr>
+                                        <div class="row" style="text-align:center">
+                                            <div class="col-sm-12">
+                                                <h6 class="mb-0">Comments</h6>
+                                                <br>
+                                                <!--Lets have this row for comments or something. Maybe later add another row for photos idk-->
+                                                <ul>
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap" style="text-align:center">
+                                                        <p style="width:100%; font-size:90%; color: darkgray">Wow really cool stuff mate</p>
+                                                    </li>
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap" style="text-align:center">
+                                                        <p style="width:100%; font-size:90%; color: darkgray">This will be all over the news!</p>
+                                                    </li>
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap" style="text-align:center">
+                                                        <p style="width:100%; font-size:90%; color: darkgray">Really like the idea!</p>
+                                                    </li>
+                                                </ul>
 
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

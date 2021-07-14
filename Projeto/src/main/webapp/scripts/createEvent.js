@@ -63,9 +63,19 @@ function fillEventAttributes(attributes) {
     document.getElementById("event_joined_capacity").innerHTML = attributes.num_participants +"/"+attributes.capacity;
     document.getElementById("event_creator").innerHTML = attributes.owner_email;
     //Remove previous markers and add marker on preview of event
+    let location = {
+        lat: attributes.location[0],
+        lng: attributes.location[1]
+    }
+    previewMarker(location.lat, location.lng);
 
 
     //Address
+    getReverseGeocodingData(location.lat, location.lng, function (address) {
+        document.getElementById("event_address").innerHTML = address;
+    });
+    
+    
 
 
     //date:

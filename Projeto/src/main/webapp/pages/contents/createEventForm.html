@@ -155,23 +155,27 @@
 </script>
 
 
-<div>
+<div sstyle="background-color: #FDFDFD">
     <span id="disableCreate" class="topright">&times</span>
-    <label style="font-size: 110%">Event name</label>
+    <label style="width: 100%; font-size: 110%; text-align: center">Event name</label>
     <br>
-    <input type="text" style="max-width:99%; min-width:94%" id="evName" name="Event Name" placeholder="Something neat">
+    <input type="text" style="max-width:100%; min-width:100%" id="evName" class="createEventFormInput" name="Event Name" placeholder="Something neat">
     <br>
     <br>
-    <label style="font-size: 110%">Description</label>
+    <label style="width: 100%; font-size: 110%; text-align: center">Description</label>
     <br>
-    <textarea style="vertical-align: top; max-width:99%" id="evDesc" name="Event Description" placeholder="Tell us all about it" rows="4" cols="50"></textarea>
+    <textarea style="vertical-align: top; max-width:100%; min-width:100%" id="evDesc" name="Event Description" placeholder="Tell us all about it" rows="4" cols="50" class="createEventFormInput"></textarea>
     <br>
     <br>
     <!--Choosing the category-->
     <!-- Talvez faca sentido termos guardado em base de dados e carregarmos as opcoes dinamicamente de forma a ser future proof e nao necessitar de deploys -->
-    <label style="font-size: 110%">Event Category</label>
+    <label style="width: 100%; font-size: 110%; text-align: center">Event Category</label>
     <br>
-    <select id="eventCategory" style="color: dimgray; text-align:center; border-style:ridge; border-radius:5px; border-color:lightgray; max-width:99%; min-width:94%" placeholder="Category" value="">
+    <select id="eventCategory" style="color: dimgray; border-style: solid;
+    border-color: white;
+    border-width: 1px;
+    border-radius: 12px;
+    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px; text-align:center; border-style:ridge; border-radius:5px; border-color:lightgray; max-width:100%; min-width:100%" placeholder="Category" value="">
         <option value="CUIDAR_DE_ANIMAIS" selected="selected">Animal Caring</option>
         <option value="ENSINAR_IDIOMAS">Language Teaching</option>
         <option value="ENSINAR_MUSICA">Music Teaching</option>
@@ -195,22 +199,29 @@
     </select>
     <br>
     <br>
-    <label style="font-size: 110%">Location</label>
+    <label style="width: 100%; font-size: 110%; text-align: center">Location</label>
     <br>
-    <input type="text" style="max-width:99%; min-width:94%" id="evLoc" name="Event Location" placeholder="Click the map or search for a location using the search bar above it">
-    <small style="display: block; margin-top: 5px; margin-bottom: 10px;" id="evLocName" name="Event Location Name">The Adress name will display here</small>
+    <input readonly class="createEventFormInput" type="text" style="text-align:center; max-width:100%; min-width:100%" id="evLoc" name="Event Location" placeholder="Click the map or search for a location using the search bar above it">
+    <small style="display: block; margin-top: 5px; margin-bottom: 10px; width: 100%; text-align: center" id="evLocName" name="Event Location Name">The Adress name will display here</small>
 
-    <label style="font-size: 110%">Start Date and time</label>
+    <label style="width: 100%; font-size: 110%; text-align: center">It will take place on</label>
     <br>
-    <input type="date" style="max-width:99%" id="evDate" name="Event Date" placeholder="When will it happen">
-    <input type="time" style="max-width:99%" id="evTime" name="Event Time" placeholder="At what time">
-    <br>
-    <label style="font-size: 110%">End Date and time</label>
-    <br>
-    <input type="date" style="max-width:99%" id="evDateEnd" name="Event Date" placeholder="When will it happen">
-    <input type="time" style="max-width:99%" id="evTimeEnd" name="Event Time" placeholder="At what time">
-    <small style="display: block; margin-top: 5px; margin-bottom: 10px;" id="dateMsg" name="Datemsg">Put your time correctly, no going back in time allowed here!</small>
-    <label style="font-size: 110%">Privacy: </label><span class="container_lock lock" id="eventPrivacyLock" style="margin-left:10px; display: inline-block" value=""></span><p style="display: inline-block; margin-left:10px;" id="EventPrivacy">PUBLIC</p>
-    <br>
-    <button type="button" onclick="return createEventRequest()">Submit</button>
+    <div style="width: 100%; text-align: center">
+        <input class="createEventFormInput" type="date" style="max-width:100%" id="evDate" name="Event Date" placeholder="When will it happen">
+        <input class="createEventFormInput" type="time" style="max-width:100%" id="evTime" name="Event Time" placeholder="At what time">
+    </div>
+    
+    <label style="margin-top: 5px; width: 100%; font-size: 110%; text-align: center">Up until</label>
+        
+    <div style="width: 100%; text-align: center">
+        <input class="createEventFormInput" type="date" style="" id="evDateEnd" name="Event Date" placeholder="When will it happen">
+        <input class="createEventFormInput" type="time" style="" id="evTimeEnd" name="Event Time" placeholder="At what time">
+        <small style="display: block; margin-top: 5px; margin-bottom: 10px;" id="dateMsg" name="Datemsg">Put your time correctly, no going back in time allowed here!</small>
+    </div>
+    
+    <div style="width: 100%; text-align: center">
+        <label style="font-size: 110%">Privacy: </label><span class="container_lock lock" id="eventPrivacyLock" style="margin-left:10px; display: inline-block" value=""></span><p style="display: inline-block; margin-left:10px;" id="EventPrivacy">PUBLIC</p>
+    </div>
+    <button style="width: 100%; font-size: 110%; text-align: center" type="button" class="btn btn-primary"   onclick="return createEventRequest()">Submit</button>
+    <p id="createEventErrMsg" style="display:none; color:red; font-size:90%"></p>
 </div>

@@ -4,7 +4,7 @@
 // locate you.
 let map, infoWindow;
 let mapPreview;
-var previewMarker;
+var previewmarker = null;
 var clickListener, clickmarker;
 var geoHashArray = [];
 var geoHash;
@@ -128,7 +128,7 @@ function initMapPreview() {
   mapPreview = new google.maps.Map(document.getElementById("mapPreview"), {
     //center at FCT NOVA
     center: { lat: 38.66128, lng: - 9.20343 },
-    zoom: 6,
+    zoom: 13,
     disableDefaultUI: true,
     styles:myStyles,
       gestureHandling: "greedy",
@@ -318,7 +318,7 @@ function loadEventMiniature(attributes) {
 
    
     //side panel content
-    var sideContentString = "<div style='text-align: center; border-style: solid; border-color: lightgray; border-width: 1px'>" + contentString;
+    var sideContentString = "<div style='text-align: center; border-style: solid; border-color: white; border-width: 1px; border-radius: 12px; box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px; background-color: #FDFDFD'>" + contentString;
     
     //last touches to info window's content
     contentString = "<div style='text-align: center'>" + contentString + "</div>";
@@ -547,4 +547,28 @@ function clickMarker(location) {
   } else {
     clickmarker.setPosition(location);
   }
+}
+
+function previewMarker(lat, lng) {
+    let latLng = new google.maps.LatLng(lat, lng);
+    if (previewmarker == null) {
+        const icon = {
+            url: "https://i.pinimg.com/originals/25/62/aa/2562aacd1a4c2af60cce9629b1e05cf2.png",
+            scaledSize: new google.maps.Size(35, 35), // scaled size
+            origin: new google.maps.Point(0, 0), // origin
+            anchor: new google.maps.Point(17.5, 35) // anchor
+        };
+        previewmarker = new google.maps.Marker({
+            position: latLng,
+            map: mapPreview,
+            icon: icon
+        });
+    }
+    else {
+        previewmarker.setPosition(latLng);
+    }
+    mapPreview.panTo(previewmarker.getPosition());
+    
+
+
 }
