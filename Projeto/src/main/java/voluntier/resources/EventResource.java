@@ -36,7 +36,7 @@ import voluntier.util.consumes.event.CreateEventData;
 import voluntier.util.consumes.event.DeletePictureData;
 import voluntier.util.consumes.event.EventData;
 import voluntier.util.consumes.event.EventParticipantsData;
-import voluntier.util.consumes.event.RemoveParticipantData;
+import voluntier.util.consumes.event.ParticipantData;
 import voluntier.util.consumes.event.UserEventsData;
 import voluntier.util.eventdata.DB_Event;
 import voluntier.util.eventdata.EventParticipantData;
@@ -128,15 +128,28 @@ public class EventResource {
 		try {
 			TokensResource.checkIsValidAccess(data.token, data.email);
 
-			Entity event = DB_Event.participateInEvent(data.event_id, data.email);
-			Key userKey = usersFactory.newKey(data.email);
-			Entity user = datastore.get(userKey);
-			Entity updated_user = DB_User.participateEvent(userKey, user, data.event_id);
+			Pair <Entity, Boolean> participate_event = DB_Event.participateInEvent(data.event_id, data.email, false);
+			
+			Entity event = participate_event.getValue0();
+			boolean participate = participate_event.getValue1();
 
-			txn.put(event, updated_user);
+			if (participate) {
+				Key userKey = usersFactory.newKey(data.email);
+				Entity user = datastore.get(userKey);
+				Entity updated_user = DB_User.participateEvent(userKey, user, data.event_id);
+
+				txn.put(event, updated_user);
+			}
+			else
+				txn.put(event);
+			
 			txn.commit();
 
-			LOG.fine("Participant inserted correctly.");
+			if (participate)
+				LOG.fine("User inserted correctly.");
+			else
+				LOG.fine("User inserted in the requests list");
+			
 			return Response.status(Status.NO_CONTENT).build();
 
 		} catch (InvalidTokenException | ImpossibleActionException | InexistentEventException e) {
@@ -159,7 +172,7 @@ public class EventResource {
 	@POST
 	@Path("/removeParticipant")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response removeParticipant(RemoveParticipantData data) {
+	public Response removeParticipant(ParticipantData data) {
 		LOG.fine("Trying to make chat moderator in event: " + data.event_id);
 
 		if (!data.isValid())
@@ -219,7 +232,7 @@ public class EventResource {
 
 			Entity event = DB_Event.getEvent(data.event_id);
 			List<DownloadEventPictureReturn> download_urls = DB_Event.getPicturesURLs(event);
-			
+
 			return Response.ok(JsonUtil.json.toJson(new EventDataReturn(event, download_urls))).build();
 
 		} catch (InvalidTokenException | InexistentEventException e) {
@@ -245,12 +258,12 @@ public class EventResource {
 			TokensResource.checkIsValidAccess(data.token, data.email);
 
 			Triplet<List<EventParticipantData>, Integer, MoreResultsType> return_data = DB_Event
-					.getParticipantRoles(data.event_id, data.cursor == null ? 0 : data.cursor);
-			
+					.getEventLists(data.event_id, data.cursor == null ? 0 : data.cursor, true);
+
 			List<EventParticipantData> participants = return_data.getValue0();
 			Integer cursor = return_data.getValue1();
 			MoreResultsType result = return_data.getValue2();
-			
+
 			return Response.ok(JsonUtil.json.toJson(new EventParticipantsReturn(participants, cursor, result))).build();
 
 		} catch (InvalidTokenException | InexistentChatIdException | InexistentEventException e) {
@@ -315,7 +328,7 @@ public class EventResource {
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 	}
-	
+
 	@POST
 	@Path("/event/addPicture")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -328,16 +341,16 @@ public class EventResource {
 
 		try {
 			TokensResource.checkIsValidAccess(data.token, data.email);
-			
+
 			Pair<Entity, String> res = DB_Event.addPicture(data.event_id, data.email);
 			Entity event = res.getValue0();
 			String filename = res.getValue1();
-			
+
 			URL upload_url = GoogleStorageUtil.signURLForUpload(filename);
-			
+
 			txn.put(event);
 			txn.commit();
-			
+
 			return Response.ok(JsonUtil.json.toJson(new UploadEventPictureReturn(upload_url, filename))).build();
 
 		} catch (InvalidTokenException | InexistentEventException | 
@@ -349,7 +362,7 @@ public class EventResource {
 			LOG.severe(e.getMessage());
 			txn.rollback();
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-			
+
 		} finally {
 			if (txn.isActive()) {
 				txn.rollback();
@@ -357,7 +370,7 @@ public class EventResource {
 			}
 		}
 	}
-	
+
 	@POST
 	@Path("/event/deletePicture")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -370,12 +383,12 @@ public class EventResource {
 
 		try {
 			TokensResource.checkIsValidAccess(data.token, data.email);
-			
+
 			Entity updated_event = DB_Event.deletePicture(data.event_id, data.pic_id, data.email);
-						
+
 			txn.put(updated_event);
 			txn.commit();
-			
+
 			return Response.status(Status.NO_CONTENT).build();
 
 		} catch (InvalidTokenException | InexistentEventException | 
@@ -387,7 +400,7 @@ public class EventResource {
 			LOG.severe(e.getMessage());
 			txn.rollback();
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-			
+
 		} finally {
 			if (txn.isActive()) {
 				txn.rollback();
@@ -395,7 +408,7 @@ public class EventResource {
 			}
 		}
 	}
-	
+
 	@POST
 	@Path("/event/getPictures")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -406,9 +419,9 @@ public class EventResource {
 
 		try {
 			TokensResource.checkIsValidAccess(data.token, data.email);
-			
+
 			List<DownloadEventPictureReturn> download_urls = DB_Event.getPicturesURLs(data.event_id);
-				
+
 			return Response.ok(JsonUtil.json.toJson(new EventPicturesReturn(download_urls))).build();
 
 		} catch (InvalidTokenException | InexistentEventException e) {
