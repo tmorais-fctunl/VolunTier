@@ -406,4 +406,11 @@ public class DB_User {
 	public static String getProfilePictureFilename(String username, String ext) {
 		return username + "_profile_picture." + ext;
 	}
+	
+	public static String getName (String user_email) {
+		Key userKey = usersFactory.newKey(user_email);
+		Entity user = datastore.get(userKey);
+		
+		return user.getString(FULL_NAME);
+	}
 }

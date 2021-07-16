@@ -4,7 +4,7 @@ import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
-import java.util.logging.Logger;
+//import java.util.logging.Logger;
 
 import org.javatuples.Pair;
 import org.javatuples.Triplet;
@@ -33,7 +33,6 @@ import voluntier.exceptions.InexistentUserException;
 import voluntier.exceptions.InvalidCursorException;
 import voluntier.exceptions.MaximumSizeReachedException;
 import voluntier.exceptions.SomethingWrongException;
-import voluntier.resources.RegisterResource;
 import voluntier.util.GeoHashUtil;
 import voluntier.util.GoogleStorageUtil;
 import voluntier.util.consumes.event.CreateEventData;
@@ -44,6 +43,7 @@ import voluntier.util.produces.DownloadSignedURLReturn;
 import voluntier.util.userdata.DB_User;
 import voluntier.util.userdata.Profile;
 import voluntier.util.userdata.State;
+import voluntier.util.userdata.StatusEvent;
 
 public class DB_Event {
 
@@ -90,7 +90,7 @@ public class DB_Event {
 	private static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	private static KeyFactory eventFactory = datastore.newKeyFactory().setKind("Event");
 
-	private static final Logger LOG = Logger.getLogger(RegisterResource.class.getName());
+	//private static final Logger LOG = Logger.getLogger(RegisterResource.class.getName());
 
 	public static Entity updateProperty(UpdateEventData data)
 			throws InexistentEventException, ImpossibleActionException {
@@ -395,15 +395,49 @@ public class DB_Event {
 		if (isFull(event))
 			throw new ImpossibleActionException("event full");
 	}
+	
+	public static boolean belongsToList (Entity event, String email, boolean participant) throws InexistentEventException {
+		List<String> participants = getListEmails(event, participant);
+		
+		if (participants.contains(email))
+			return true;
+		return false;
+	}
 
-	public static Entity getEvent(String event_id) throws InexistentEventException {
+	public static Entity getEvent(String event_id) throws InexistentEventException{
 		Key eventKey = eventFactory.newKey(event_id);
 		Entity event = datastore.get(eventKey);
 
 		if (event == null)
 			throw new InexistentEventException("No event with id: " + event_id);
-
+		
 		return event;
+	}
+	
+	public static Triplet <Entity, StatusEvent, String> getEvent (String event_id, String user_email) throws InexistentEventException{
+		Entity event = getEvent(event_id);
+		
+		StatusEvent status = getStatus(event, user_email);
+
+		String owner_name = getOwnerName(event);
+		
+		return new Triplet<>(event, status, owner_name);
+	}
+	
+	private static StatusEvent getStatus (Entity event, String user_email) throws InexistentEventException {
+		if (belongsToList(event, user_email, true))
+			return StatusEvent.PARTICIPANT;
+		if (isOwner(event, user_email))
+			return StatusEvent.OWNER;
+		if (belongsToList(event, user_email, false))
+			return StatusEvent.PENDING;
+		return StatusEvent.NON_PARTICIPANT;
+	}
+	
+	private static String getOwnerName (Entity event) {
+		String owner_email = event.getString(OWNER_EMAIL);
+		
+		return DB_User.getName (owner_email);
 	}
 
 	public static Pair<List<Entity>, Integer> postComment(String event_id, String email, String username,
@@ -511,20 +545,20 @@ public class DB_Event {
 			String username = user.getString(DB_User.USERNAME);
 
 			if (event.getString(OWNER_EMAIL).equals(participant_email)) {
-				participant_roles.add(new EventParticipantData(participant_email, username, encodedPicture, "ADMIN"));
+				participant_roles.add(new EventParticipantData(participant_email, username, encodedPicture, StatusEvent.OWNER.toString()));
 				continue;
 			}
 
 			if (mods.contains(participant_email)) {
 				//if (isParticipants), esta condicao nunca sera verdade...
-				participant_roles.add(new EventParticipantData(participant_email, username, encodedPicture, "MOD"));
+				participant_roles.add(new EventParticipantData(participant_email, username, encodedPicture, StatusEvent.MOD.toString()));
 				continue;
 			}
 
 			if (isParticipants)
-				participant_roles.add(new EventParticipantData(participant_email, username, encodedPicture, "PARTICIPANT"));
+				participant_roles.add(new EventParticipantData(participant_email, username, encodedPicture, StatusEvent.PARTICIPANT.toString()));
 			else
-				participant_roles.add(new EventParticipantData(participant_email, username, encodedPicture, "PENDING"));
+				participant_roles.add(new EventParticipantData(participant_email, username, encodedPicture, StatusEvent.PENDING.toString()));
 		}
 
 		int new_cursor = i;
@@ -551,8 +585,9 @@ public class DB_Event {
 		checkIsActive(event);
 		checkNotFull(event);
 
-		if (!isPublic(event)) {
-			if (!accepted)
+		boolean isParticipant = belongsToList(event, user_email, true);	//verifica se e participante
+		
+		if (!isParticipant && !isPublic(event)) {
 				return new Pair<>(requestParticipation (event, user_email), false);
 		}
 

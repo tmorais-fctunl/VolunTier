@@ -6,6 +6,7 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.LatLng;
 
 import voluntier.util.eventdata.DB_Event;
+import voluntier.util.userdata.StatusEvent;
 
 public class EventDataReturn extends EventPicturesReturn {
 	public String profile;
@@ -30,11 +31,14 @@ public class EventDataReturn extends EventPicturesReturn {
 	public String facebook;
 	public String instagram;
 	public String twitter;
+	
+	public String status;
+	public String owner_name;
 		
 	public EventDataReturn() {
 	}
 	
-	public EventDataReturn (Entity event, List<DownloadEventPictureReturn> download_urls) {
+	public EventDataReturn (Entity event, List<DownloadEventPictureReturn> download_urls, StatusEvent status, String owner_name) {
 		super(download_urls);
 		
 		this.profile = event.getString(DB_Event.PROFILE);
@@ -59,5 +63,8 @@ public class EventDataReturn extends EventPicturesReturn {
 		this.facebook = event.getString(DB_Event.FACEBOOK);
 		this.instagram = event.getString(DB_Event.INSTAGRAM);
 		this.twitter = event.getString(DB_Event.TWITTER);
+		
+		this.status = status.toString();
+		this.owner_name = owner_name;
 	}
 }

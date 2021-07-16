@@ -230,10 +230,11 @@ public class EventResource {
 		try {
 			TokensResource.checkIsValidAccess(data.token, data.email);
 
-			Entity event = DB_Event.getEvent(data.event_id);
-			List<DownloadEventPictureReturn> download_urls = DB_Event.getPicturesURLs(event);
+			Triplet<Entity, StatusEvent, String> event = DB_Event.getEvent(data.event_id, data.email);
+			List<DownloadEventPictureReturn> download_urls = DB_Event.getPicturesURLs(event.getValue0());
 
-			return Response.ok(JsonUtil.json.toJson(new EventDataReturn(event, download_urls))).build();
+			return Response.ok(JsonUtil.json.toJson(new EventDataReturn(
+					event.getValue0(), download_urls, event.getValue1(), event.getValue2()))).build();
 
 		} catch (InvalidTokenException | InexistentEventException e) {
 			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
