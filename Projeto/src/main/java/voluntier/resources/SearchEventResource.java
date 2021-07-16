@@ -23,13 +23,13 @@ import com.google.cloud.datastore.StructuredQuery.Builder;
 import com.google.cloud.datastore.StructuredQuery.CompositeFilter;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 
+import voluntier.exceptions.IllegalCoordinatesException;
 import voluntier.exceptions.InvalidTokenException;
 import voluntier.util.GeoHashUtil;
 import voluntier.util.JsonUtil;
 import voluntier.util.consumes.event.SearchByRange;
 import voluntier.util.eventdata.DB_Event;
 import voluntier.util.produces.SearchEventsReturn;
-import voluntier.util.userdata.Profile;
 import voluntier.util.userdata.State;
 
 @Path("/")
@@ -58,7 +58,7 @@ public class SearchEventResource {
 			
 			return Response.ok(JsonUtil.json.toJson(new SearchEventsReturn(events.getValue0(), events.getValue1()))).build();
 			
-		} catch (InvalidTokenException e) {
+		} catch (InvalidTokenException | IllegalCoordinatesException e) {
 			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
 
 		} catch (Exception e) {
@@ -68,13 +68,12 @@ public class SearchEventResource {
 		}
 	}
 	
-	private Pair<List<Entity>, String> queryEventsByArea (double[] location) {
+	private Pair<List<Entity>, String> queryEventsByArea (double[] location) throws IllegalCoordinatesException {
 		String geohash = GeoHashUtil.convertCoordsToGeoHashLowPrecision(location[0], location[1]);
 		
 		Builder<Entity> b = Query.newEntityQueryBuilder().setKind("Event").
 				setFilter(CompositeFilter.and(PropertyFilter.ge(DB_Event.GEOHASH, geohash),
 						PropertyFilter.lt(DB_Event.GEOHASH, geohash + "z"),
-						PropertyFilter.eq(DB_Event.PROFILE, Profile.PUBLIC.toString()),
 						PropertyFilter.eq(DB_Event.STATE, State.ENABLED.toString()))
 						);
 
@@ -90,31 +89,23 @@ public class SearchEventResource {
 		return new Pair<>(events, geohash);
 	}
 	
-	/*@POST
-	@Path("/searchAllEvents")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response getAllEvents(RequestData data) {
-		//LOG.fine("Trying to find events near event : " + data.event_id);
-
-		if (!data.isValid())
-			return Response.status(Status.BAD_REQUEST).build();
-
-		try {
-		TokensResource.checkIsValidAccess(data.token, data.email);
-		} catch (InvalidTokenException e) {
-			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
-		}
-
+	/*
+	// FOR DEBUG ONLY, USE THIS TO ADD A NEW PROPERTY TO ALL EXISTENT EVENTS 
+	@POST
+	@Path("/rewriteAll")
+	public Response rewrite() {
+	
+		Transaction txn = datastore.newTransaction();
 		List<Entity> events = getAllEvents();
 		
-		List<SearchEventReturn> events_return = new LinkedList<>();
+		events.forEach(event -> {
+			event = DB_Event.REWRITE(event);
+			txn.put(event);
+		});
 		
-		for (Entity e : events)
-			events_return.add(new SearchEventReturn(e));
-
-		LOG.fine("All events were searched and returned.");
-		return Response.ok(JsonUtil.json.toJson(events_return)).build();
+		txn.commit();
+		
+		return Response.ok().build();
 	}
 	
 	private List<Entity> getAllEvents(){

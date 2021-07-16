@@ -13,6 +13,7 @@ public class SearchEventReturn {
 	public String start_date;
 	public String end_date;
 	public String category;
+	public String visibility;
 
 	public SearchEventReturn() {
 	}
@@ -25,6 +26,7 @@ public class SearchEventReturn {
 		this.start_date = event.getString(DB_Event.START_DATE);
 		this.end_date = event.getString(DB_Event.END_DATE);
 		this.category = event.getString(DB_Event.CATEGORY);
+		this.visibility = event.getString(DB_Event.PROFILE);
 
 		this.num_participants = (int) event.getLong(DB_Event.N_PARTICIPANTS);
 	}

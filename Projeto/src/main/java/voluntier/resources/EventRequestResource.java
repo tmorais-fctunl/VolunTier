@@ -21,6 +21,7 @@ import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Transaction;
 import com.google.datastore.v1.QueryResultBatch.MoreResultsType;
 
+import voluntier.exceptions.ImpossibleActionException;
 import voluntier.exceptions.InexistentChatIdException;
 import voluntier.exceptions.InexistentEventException;
 import voluntier.exceptions.InexistentUserException;
@@ -36,7 +37,7 @@ import voluntier.util.userdata.DB_User;
 @Path("/")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class EventRequestResource {
-	private static final Logger LOG = Logger.getLogger(RegisterResource.class.getName());
+	private static final Logger LOG = Logger.getLogger(EventRequestResource.class.getName());
 
 	private static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	private static KeyFactory usersFactory = datastore.newKeyFactory().setKind("User");
@@ -47,7 +48,7 @@ public class EventRequestResource {
 	@POST
 	@Path("/acceptRequest")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response eventAcceptRequest (ParticipantData data) {
+	public Response eventAcceptRequest(ParticipantData data) {
 		LOG.fine("Trying to accept event participation from user: " + data.participant);
 
 		if (!data.isValid())
@@ -56,7 +57,7 @@ public class EventRequestResource {
 		Transaction txn = datastore.newTransaction();
 
 		try {
-			
+
 			TokensResource.checkIsValidAccess(data.token, data.email);
 
 			Key userKey = usersFactory.newKey(data.participant);
@@ -64,19 +65,19 @@ public class EventRequestResource {
 
 			if (target_user == null || ActionsResource.isRemovedOrBannedUser(target_user)) {
 				txn.rollback();
-				LOG.warning("User:" + target_user.getString(DB_User.EMAIL) + " does not even exist.");
+				LOG.warning("User:" + target_user.getString(DB_User.EMAIL) + " is banned or removed");
 				return Response.status(Status.FORBIDDEN).build();
 			}
-			
+
 			Entity event = DB_Event.acceptRequest(data.event_id, data.participant, data.email);
-			
+
 			txn.put(event);
 			txn.commit();
 
 			LOG.fine("User " + data.participant + " inserted in event correctly.");
 			return Response.status(Status.NO_CONTENT).build();
 
-		} catch (InvalidTokenException e) {
+		} catch (InvalidTokenException | ImpossibleActionException | InexistentEventException e) {
 			txn.rollback();
 			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
 
@@ -96,7 +97,7 @@ public class EventRequestResource {
 	@POST
 	@Path("/declineRequest")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response eventDeclineRequest (ParticipantData data) {
+	public Response eventDeclineRequest(ParticipantData data) {
 		LOG.fine("Trying to accept event participation from user: " + data.participant);
 
 		if (!data.isValid())
@@ -107,15 +108,6 @@ public class EventRequestResource {
 		try {
 			TokensResource.checkIsValidAccess(data.token, data.email);
 
-			Key userKey = usersFactory.newKey(data.email);
-			Entity user = txn.get(userKey);
-
-			if (user == null || ActionsResource.isRemovedOrBannedUser(user)) {
-				txn.rollback();
-				LOG.warning("User: " + user.getString(DB_User.EMAIL) + " does not even exist.");
-				return Response.status(Status.FORBIDDEN).build();
-			}
-			
 			Entity event = DB_Event.declineRequest(data.event_id, data.participant, data.email);
 
 			txn.put(event);
@@ -124,8 +116,9 @@ public class EventRequestResource {
 			LOG.fine("User " + data.participant + " deleted from event request list.");
 			return Response.status(Status.NO_CONTENT).build();
 
-		} catch (InvalidTokenException e) {
+		} catch (InvalidTokenException | ImpossibleActionException | InexistentEventException e) {
 			txn.rollback();
+			LOG.severe(e.getMessage());
 			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
 
 		} catch (Exception e) {
@@ -140,11 +133,11 @@ public class EventRequestResource {
 			}
 		}
 	}
-	
+
 	@POST
 	@Path("/getRequests")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response eventListRequests (EventParticipantsData data) 
+	public Response eventRequestList(EventParticipantsData data)
 			throws InvalidTokenException, InexistentChatIdException, InexistentEventException, InexistentUserException {
 		LOG.fine("Trying to list participations from event: " + data.event_id + ". Request from: " + data.email);
 
@@ -153,11 +146,9 @@ public class EventRequestResource {
 
 		try {
 			TokensResource.checkIsValidAccess(data.token, data.email);
-			
-			DB_Event.checkIsOwner(data.event_id, data.email);
 
 			Triplet<List<EventParticipantData>, Integer, MoreResultsType> return_data = DB_Event
-					.getEventLists(data.event_id, data.cursor == null ? 0 : data.cursor, false);
+					.getEventLists(data.event_id, data.cursor == null ? 0 : data.cursor, false, data.email);
 
 			List<EventParticipantData> requests = return_data.getValue0();
 			Integer cursor = return_data.getValue1();
@@ -166,14 +157,14 @@ public class EventRequestResource {
 			LOG.fine("Event: " + data.event_id + " requests presented correctly.");
 			return Response.ok(JsonUtil.json.toJson(new EventParticipantsReturn(requests, cursor, result))).build();
 
-		} catch (InvalidTokenException e) {
-			
+		} catch (InvalidTokenException | InexistentEventException | InexistentUserException
+				| ImpossibleActionException e) {
+
 			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
 		} catch (Exception e) {
 			LOG.severe(e.getMessage());
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
-
 	}
 
 }

@@ -4,6 +4,7 @@ import java.time.format.DateTimeParseException;
 
 import com.google.cloud.Timestamp;
 
+import voluntier.util.GeoHashUtil;
 import voluntier.util.consumes.event.CreateEventData;
 import voluntier.util.userdata.Profile;
 import voluntier.util.userdata.State;
@@ -80,11 +81,21 @@ public class EventData_Minimal {
 	}
 	
 	public static boolean nameValid (String name) {
-		return name != null && name.length() < 100 && !name.equals("");
+		return name != null && name.length() <= DB_Event.MAX_NAME_SIZE && !name.equals("");
 	}
 	
 	public static boolean locationValid (double[] location) {
-		return location != null && location.length == 2;
+		return location != null && location.length == 2 && GeoHashUtil.isValidCoords(location[0], location[1]);
+	}
+	
+	public static boolean datesValid(String start_date, String end_date) {
+		try {
+			Timestamp start = Timestamp.parseTimestamp(start_date);
+			Timestamp end = Timestamp.parseTimestamp(end_date);
+			return start.compareTo(end) < 0;
+		} catch (DateTimeParseException e) {
+			return false;
+		}
 	}
 	
 	public static boolean startDateValid (String start_date) {
@@ -108,7 +119,7 @@ public class EventData_Minimal {
 	}
 	
 	public static boolean descriptionValid (String description) {
-		return description != null && description != "" && description.length() < 500;
+		return description != null && description != "" && description.length() <= DB_Event.MAX_DSCRIPTION_SIZE;
 	}
 	
 	public static boolean categoryValid (String category) {

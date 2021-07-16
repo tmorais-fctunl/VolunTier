@@ -25,13 +25,16 @@ import com.google.datastore.v1.QueryResultBatch.MoreResultsType;
 
 import voluntier.exceptions.ImpossibleActionException;
 import voluntier.exceptions.InexistentChatIdException;
+import voluntier.exceptions.IllegalCoordinatesException;
 import voluntier.exceptions.InexistentModeratorException;
+import voluntier.exceptions.InexistentParticipantException;
 import voluntier.exceptions.InexistentPictureException;
 import voluntier.exceptions.InexistentEventException;
 import voluntier.exceptions.InvalidTokenException;
 import voluntier.exceptions.MaximumSizeReachedException;
 import voluntier.util.GoogleStorageUtil;
 import voluntier.util.JsonUtil;
+import voluntier.util.consumes.event.ConfirmPresenceData;
 import voluntier.util.consumes.event.CreateEventData;
 import voluntier.util.consumes.event.DeletePictureData;
 import voluntier.util.consumes.event.EventData;
@@ -45,6 +48,7 @@ import voluntier.util.produces.DownloadEventPictureReturn;
 import voluntier.util.produces.EventDataReturn;
 import voluntier.util.produces.EventParticipantsReturn;
 import voluntier.util.produces.EventPicturesReturn;
+import voluntier.util.produces.PresenceCodeReturn;
 import voluntier.util.produces.UploadEventPictureReturn;
 import voluntier.util.produces.UserEventsReturn;
 import voluntier.util.userdata.*;
@@ -52,7 +56,7 @@ import voluntier.util.userdata.*;
 @Path("/")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class EventResource {
-	private static final Logger LOG = Logger.getLogger(RegisterResource.class.getName());
+	private static final Logger LOG = Logger.getLogger(EventResource.class.getName());
 
 	private static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	private static KeyFactory usersFactory = datastore.newKeyFactory().setKind("User");
@@ -97,7 +101,7 @@ public class EventResource {
 			LOG.fine("Event: " + data.event_name + " inserted correctly.");
 			return Response.ok(JsonUtil.json.toJson(new CreateEventReturn(event_id, upload_url))).build();
 
-		} catch (InvalidTokenException e) {
+		} catch (InvalidTokenException | IllegalCoordinatesException e) {
 			txn.rollback();
 			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
 
@@ -259,7 +263,7 @@ public class EventResource {
 			TokensResource.checkIsValidAccess(data.token, data.email);
 
 			Triplet<List<EventParticipantData>, Integer, MoreResultsType> return_data = DB_Event
-					.getEventLists(data.event_id, data.cursor == null ? 0 : data.cursor, true);
+					.getEventLists(data.event_id, data.cursor == null ? 0 : data.cursor, true, null);
 
 			List<EventParticipantData> participants = return_data.getValue0();
 			Integer cursor = return_data.getValue1();
@@ -354,8 +358,8 @@ public class EventResource {
 
 			return Response.ok(JsonUtil.json.toJson(new UploadEventPictureReturn(upload_url, filename))).build();
 
-		} catch (InvalidTokenException | InexistentEventException | 
-				ImpossibleActionException | MaximumSizeReachedException e) {
+		} catch (InvalidTokenException | InexistentEventException | ImpossibleActionException
+				| MaximumSizeReachedException e) {
 			txn.rollback();
 			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
 
@@ -392,8 +396,8 @@ public class EventResource {
 
 			return Response.status(Status.NO_CONTENT).build();
 
-		} catch (InvalidTokenException | InexistentEventException | 
-				ImpossibleActionException | InexistentPictureException e) {
+		} catch (InvalidTokenException | InexistentEventException | ImpossibleActionException
+				| InexistentPictureException e) {
 			txn.rollback();
 			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
 
@@ -431,6 +435,69 @@ public class EventResource {
 		} catch (Exception e) {
 			LOG.severe(e.getMessage());
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
+	}
+
+	@POST
+	@Path("/event/presenceCode")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response requestPresenceCode(EventData data) {
+		if (!data.isValid())
+			return Response.status(Status.BAD_REQUEST).build();
+
+		try {
+			TokensResource.checkIsValidAccess(data.token, data.email);
+
+			String code = DB_Event.getPresenceConfirmationCode(data.event_id, data.email);
+
+			return Response.ok(JsonUtil.json.toJson(new PresenceCodeReturn(code))).build();
+
+		} catch (InvalidTokenException | InexistentEventException | ImpossibleActionException e) {
+			LOG.severe(e.getMessage());
+			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
+
+		} catch (Exception e) {
+			LOG.severe(e.getMessage());
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
+	}
+
+	@POST
+	@Path("/event/confirmPresence")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response confirmPresence(ConfirmPresenceData data) {
+		if (!data.isValid())
+			return Response.status(Status.BAD_REQUEST).build();
+
+		Transaction txn = datastore.newTransaction();
+		try {
+			TokensResource.checkIsValidAccess(data.token, data.email);
+
+			Entity updated_event = DB_Event.confirmPresence(data.event_id, data.email);
+
+			txn.put(updated_event);
+			txn.commit();
+
+			return Response.status(Status.NO_CONTENT).build();
+
+		} catch (InvalidTokenException | InexistentEventException | 
+				ImpossibleActionException | InexistentParticipantException e) {
+			txn.rollback();
+			LOG.severe(e.getMessage());
+			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
+
+		} catch (Exception e) {
+			LOG.severe(e.getMessage());
+			txn.rollback();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+
+		} finally {
+			if (txn.isActive()) {
+				txn.rollback();
+				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+			}
 		}
 	}
 

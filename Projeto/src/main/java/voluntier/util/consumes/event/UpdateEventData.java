@@ -2,6 +2,7 @@ package voluntier.util.consumes.event;
 
 import com.google.cloud.datastore.LatLng;
 
+import voluntier.exceptions.IllegalCoordinatesException;
 import voluntier.util.GeoHashUtil;
 import voluntier.util.eventdata.EventData_Minimal;
 
@@ -98,7 +99,7 @@ public class UpdateEventData extends EventData {
 		return profile == null ? a_default : profile;
 	}
 	
-	public String getGeohash(String a_default) {
+	public String getGeohash(String a_default) throws IllegalCoordinatesException {
 		return location == null ? a_default : GeoHashUtil.convertCoordsToGeoHashHighPrecision(location[0], location[1]);
 	}
 	

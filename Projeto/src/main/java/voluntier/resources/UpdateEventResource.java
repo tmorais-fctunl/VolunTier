@@ -18,6 +18,7 @@ import com.google.cloud.datastore.Transaction;
 import voluntier.exceptions.InvalidTokenException;
 import voluntier.exceptions.InexistentEventException;
 import voluntier.exceptions.ImpossibleActionException;
+import voluntier.exceptions.IllegalCoordinatesException;
 import voluntier.util.consumes.event.EventData;
 import voluntier.util.consumes.event.UpdateEventData;
 import voluntier.util.consumes.event.UpdateProfileData;
@@ -72,7 +73,8 @@ public class UpdateEventResource {
 			LOG.fine("User " + data.email + " updated the attributes of event " + data.event_id);
 			return Response.status(Status.NO_CONTENT).build();
 
-		} catch (InvalidTokenException | InexistentEventException | ImpossibleActionException e) {
+		} catch (InvalidTokenException | InexistentEventException | 
+				ImpossibleActionException | IllegalCoordinatesException e) {
 			txn.rollback();
 			LOG.severe(e.getMessage());
 			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
