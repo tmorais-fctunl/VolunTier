@@ -575,7 +575,7 @@ public class DB_Event {
 		return DB_Chat.getModerators(chat_id);
 	}
 
-	public static List<Entity> participateInEvent(String event_id, String user_email, boolean accepted)
+	public static List<Entity> participateInEvent(String event_id, String user_email)
 			throws ImpossibleActionException, InexistentEventException, InexistentUserException {
 
 		Entity event = getEvent(event_id);
@@ -619,7 +619,7 @@ public class DB_Event {
 		checkIsOwner(event, user_email);
 
 		List<Entity> updated_event;
-		updated_event = participateInEvent (event_id, target_user, true);
+		updated_event = participateInEvent (event_id, target_user);
 
 		return removeRequest(updated_event.get(0), target_user);
 	}

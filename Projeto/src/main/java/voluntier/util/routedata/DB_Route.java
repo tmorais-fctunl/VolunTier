@@ -23,6 +23,7 @@ import voluntier.exceptions.InexistentElementException;
 import voluntier.exceptions.InexistentEventException;
 import voluntier.exceptions.InexistentParticipantException;
 import voluntier.exceptions.InexistentRouteException;
+import voluntier.exceptions.InexistentUserException;
 import voluntier.exceptions.MaximumSizeReachedException;
 import voluntier.exceptions.RouteAlreadyExistsException;
 import voluntier.exceptions.SomethingWrongException;
@@ -56,17 +57,11 @@ public class DB_Route {
 	private static KeyFactory routesFactory = datastore.newKeyFactory().setKind("Route");
 
 	private static DB_Util util = new DB_Util((e, builder) -> {
-		builder = Entity.newBuilder(e.getKey())
-				.set(ID, e.getString(ID))
-				.set(EVENT_IDS, e.getList(EVENT_IDS))
-				.set(GEOHASH, e.getString(GEOHASH))
-				.set(CREATOR, e.getString(CREATOR))
-				.set(CREATION_DATE, e.getTimestamp(CREATION_DATE))
-				.set(NUM_PARTICIPANTS, e.getLong(NUM_PARTICIPANTS))
-				.set(PICTURES, e.getList(PICTURES))
-				.set(PARTICIPANTS, e.getList(PARTICIPANTS))
-				.set(RATING_ID, e.getString(RATING_ID))
-				.set(RATING_ID, e.getString(RATING_ID))
+		builder = Entity.newBuilder(e.getKey()).set(ID, e.getString(ID)).set(EVENT_IDS, e.getList(EVENT_IDS))
+				.set(GEOHASH, e.getString(GEOHASH)).set(CREATOR, e.getString(CREATOR))
+				.set(CREATION_DATE, e.getTimestamp(CREATION_DATE)).set(NUM_PARTICIPANTS, e.getLong(NUM_PARTICIPANTS))
+				.set(PICTURES, e.getList(PICTURES)).set(PARTICIPANTS, e.getList(PARTICIPANTS))
+				.set(RATING_ID, e.getString(RATING_ID)).set(RATING_ID, e.getString(RATING_ID))
 				.set(STATE, e.getString(STATE));
 	});
 
@@ -124,17 +119,10 @@ public class DB_Route {
 		// int rating_num = 0;
 		// ListValue.Builder rated_participants = ListValue.newBuilder();
 
-		entities.add(Entity.newBuilder(routeKey)
-				.set(ID, route_id).set(GEOHASH, geohash)
-				.set(CREATOR, creator)
-				.set(CREATION_DATE, creation_date)
-				.set(NUM_PARTICIPANTS, num_participants)
-				.set(PICTURES, pictures.build())
-				.set(PARTICIPANTS, participants.build())
-				.set(RATING_ID, rating_id)
-				.set(RATING_ID, chat_id)
-				.set(STATE, State.ENABLED.toString())
-				.build());
+		entities.add(Entity.newBuilder(routeKey).set(ID, route_id).set(GEOHASH, geohash).set(CREATOR, creator)
+				.set(CREATION_DATE, creation_date).set(NUM_PARTICIPANTS, num_participants)
+				.set(PICTURES, pictures.build()).set(PARTICIPANTS, participants.build()).set(RATING_ID, rating_id)
+				.set(RATING_ID, chat_id).set(STATE, State.ENABLED.toString()).build());
 
 		return new Pair<>(entities, route_id);
 	}
@@ -161,49 +149,59 @@ public class DB_Route {
 
 		return id + "-" + number;
 	}
-	
-	public static List<Entity> getEventsInRoute(Entity route) throws InexistentEventException{
+
+	public static List<Entity> getEventsInRoute(Entity route) throws InexistentEventException {
 		List<String> event_ids = DB_Util.getStringList(route, EVENT_IDS);
 		List<Entity> event_entities = new LinkedList<>();
-		
-		for(String id : event_ids)
+
+		for (String id : event_ids)
 			event_entities.add(DB_Event.getEvent(id));
-		
+
 		return event_entities;
 	}
 
-	public static Entity participate(String route_id, String user_email) 
-			throws InexistentRouteException, InexistentEventException {
+	public static List<Entity> participate(String route_id, String user_email)
+			throws InexistentRouteException, InexistentEventException, AlreadyExistsException, 
+			ImpossibleActionException, InexistentUserException {
 		Entity route = getRoute(route_id);
 
-		try {
-			List<Entity> events = getEventsInRoute(route);
-			boolean canParticipate = true;
-			
-			for(Entity event : events)
-				if(!DB_Event.isActive(event) || !DB_Event.isFull(event) || !DB_Event.isPublic(event))
-					canParticipate = false;
-			
-			if(canParticipate)
-			
-			route = util.addUniqueStringToList(route, PARTICIPANTS, user_email);
-		} catch (AlreadyExistsException e) {
+		if (DB_Util.existsInStringList(route, PARTICIPANTS, user_email))
+			throw new AlreadyExistsException("User already in this route");
+
+		List<Entity> events = getEventsInRoute(route);
+		boolean canParticipate = true;
+
+		for (Entity event : events)
+			if (!DB_Event.isActive(event) || !DB_Event.isFull(event) || !DB_Event.isPublic(event))
+				canParticipate = false;
+
+		List<Entity> ents = new LinkedList<>();
+
+		if (canParticipate) {
+			for(Entity event : events) {
+				List<Entity> updated_event_and_user = DB_Event.participateInEvent(event.getString(DB_Event.ID),
+						user_email);
+				updated_event_and_user.forEach(e -> ents.add(event));
+			}
 		}
 
-		return route;
+		route = util.addUniqueStringToList(route, PARTICIPANTS, user_email);
+
+		ents.add(route);
+		return ents;
 	}
 
-	public static Pair<Entity, String> addPicture(String event_id, String req_email)
-			throws ImpossibleActionException, MaximumSizeReachedException, InexistentRouteException, SomethingWrongException {
+	public static Pair<Entity, String> addPicture(String event_id, String req_email) throws ImpossibleActionException,
+			MaximumSizeReachedException, InexistentRouteException, SomethingWrongException {
 		Entity route = getRoute(event_id);
 		checkIsActive(route);
 
 		try {
 			String new_pic_id = generateNewPictureID(route);
 			PictureData pic = new PictureData(new_pic_id, req_email);
-			
+
 			route = util.addUniqueJsonToList(route, PICTURES, pic);
-			
+
 			return new Pair<>(route, new_pic_id);
 		} catch (AlreadyExistsException e) {
 			throw new SomethingWrongException("The unique picture id was already in use");
@@ -214,11 +212,11 @@ public class DB_Route {
 			throws ImpossibleActionException, InexistentRouteException {
 		Entity route = getRoute(route_id);
 		checkIsActive(route);
-		
+
 		PictureData request_picture_delete = new PictureData(pic_id, req_email);
-		
+
 		try {
-			route = util.removeJsonFromList(route,  PICTURES, request_picture_delete);
+			route = util.removeJsonFromList(route, PICTURES, request_picture_delete);
 			return route;
 		} catch (InexistentElementException e) {
 			throw new ImpossibleActionException("The pair " + req_email + " + " + pic_id + " does not exist");
