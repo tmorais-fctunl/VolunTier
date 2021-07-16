@@ -575,42 +575,53 @@ public class DB_Event {
 		return DB_Chat.getModerators(chat_id);
 	}
 
-	public static Pair<Entity, Boolean> participateInEvent(String event_id, String user_email, boolean accepted)
-			throws ImpossibleActionException, InexistentEventException {
+	public static List<Entity> participateInEvent(String event_id, String user_email, boolean accepted)
+			throws ImpossibleActionException, InexistentEventException, InexistentUserException {
 
 		Entity event = getEvent(event_id);
 		checkIsActive(event);
 		checkNotFull(event);
 		checkNotEnded(event);
 
-
 		boolean isParticipant = belongsToList(event, user_email, true);	//verifica se e participante
 		
+		List<Entity> ents = new LinkedList<>();
+		
 		if (!isParticipant && !isPublic(event)) {
-				return new Pair<>(requestParticipation (event, user_email), false);
+			ents.add(requestParticipation (event, user_email));
+			return ents;
 		}
 
 		List<Value<?>> participants = event.getList(DB_Event.PARTICIPANTS);
 
 		ListValue.Builder newParticipants = ListValue.newBuilder().set(participants);
 
-		if (participants.contains(StringValue.of(user_email)))
-			return new Pair<>(event, true);
+		if (participants.contains(StringValue.of(user_email))) {
+			ents.add(event);
+			return ents;
+		}
 
 		newParticipants.addValue(user_email);
 
-		return new Pair<>(updateParticipants(event.getKey(), event, newParticipants.build(), true), true);
+		ents.add(updateParticipants(event.getKey(), event, newParticipants.build(), true));
+		
+		Entity user = DB_User.getUser(user_email);
+		user = DB_User.participateEvent(user.getKey(), user, event_id);
+		ents.add(user);
+		
+		return ents;
 	}
 
 	public static Entity acceptRequest (String event_id, String target_user, String user_email)
-			throws ImpossibleActionException, InexistentEventException {
+			throws ImpossibleActionException, InexistentEventException, InexistentUserException {
 
 		Entity event = getEvent(event_id);
 		checkIsOwner(event, user_email);
 
-		Pair<Entity, Boolean> updated_event = participateInEvent (event_id, target_user, true);
+		List<Entity> updated_event;
+		updated_event = participateInEvent (event_id, target_user, true);
 
-		return removeRequest(updated_event.getValue0(), target_user);
+		return removeRequest(updated_event.get(0), target_user);
 	}
 
 	public static Entity declineRequest (String event_id, String target_user, String user_email) 

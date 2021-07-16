@@ -132,28 +132,12 @@ public class EventResource {
 		try {
 			TokensResource.checkIsValidAccess(data.token, data.email);
 
-			Pair <Entity, Boolean> participate_event = DB_Event.participateInEvent(data.event_id, data.email, false);
+			List<Entity> ents = DB_Event.participateInEvent(data.event_id, data.email, false);
 			
-			Entity event = participate_event.getValue0();
-			boolean participate = participate_event.getValue1();
-
-			if (participate) {
-				Key userKey = usersFactory.newKey(data.email);
-				Entity user = datastore.get(userKey);
-				Entity updated_user = DB_User.participateEvent(userKey, user, data.event_id);
-
-				txn.put(event, updated_user);
-			}
-			else
-				txn.put(event);
+			ents.forEach(e -> txn.put(e));
 			
 			txn.commit();
 
-			if (participate)
-				LOG.fine("User inserted correctly.");
-			else
-				LOG.fine("User inserted in the requests list");
-			
 			return Response.status(Status.NO_CONTENT).build();
 
 		} catch (InvalidTokenException | ImpossibleActionException | InexistentEventException e) {

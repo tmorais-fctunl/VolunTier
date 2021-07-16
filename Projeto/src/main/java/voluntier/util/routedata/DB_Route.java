@@ -14,17 +14,19 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.LatLng;
 import com.google.cloud.datastore.ListValue;
-import com.google.cloud.datastore.StringValue;
 import com.google.cloud.datastore.Value;
 
+import voluntier.exceptions.AlreadyExistsException;
 import voluntier.exceptions.IllegalCoordinatesException;
 import voluntier.exceptions.ImpossibleActionException;
+import voluntier.exceptions.InexistentElementException;
 import voluntier.exceptions.InexistentEventException;
 import voluntier.exceptions.InexistentParticipantException;
-import voluntier.exceptions.InexistentPictureException;
 import voluntier.exceptions.InexistentRouteException;
 import voluntier.exceptions.MaximumSizeReachedException;
 import voluntier.exceptions.RouteAlreadyExistsException;
+import voluntier.exceptions.SomethingWrongException;
+import voluntier.util.DB_Util;
 import voluntier.util.GeoHashUtil;
 import voluntier.util.GoogleStorageUtil;
 import voluntier.util.consumes.route.CreateRouteData;
@@ -53,12 +55,27 @@ public class DB_Route {
 	private static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	private static KeyFactory routesFactory = datastore.newKeyFactory().setKind("Route");
 
+	private static DB_Util util = new DB_Util((e, builder) -> {
+		builder = Entity.newBuilder(e.getKey())
+				.set(ID, e.getString(ID))
+				.set(EVENT_IDS, e.getList(EVENT_IDS))
+				.set(GEOHASH, e.getString(GEOHASH))
+				.set(CREATOR, e.getString(CREATOR))
+				.set(CREATION_DATE, e.getTimestamp(CREATION_DATE))
+				.set(NUM_PARTICIPANTS, e.getLong(NUM_PARTICIPANTS))
+				.set(PICTURES, e.getList(PICTURES))
+				.set(PARTICIPANTS, e.getList(PARTICIPANTS))
+				.set(RATING_ID, e.getString(RATING_ID))
+				.set(RATING_ID, e.getString(RATING_ID))
+				.set(STATE, e.getString(STATE));
+	});
+
 	private static Key generateRouteKey(List<String> event_ids) throws RouteAlreadyExistsException {
 
 		String id = "";
-		for(String event : event_ids)
+		for (String event : event_ids)
 			id += event;
-		
+
 		Key key = routesFactory.newKey(id);
 
 		if (datastore.get(key) != null)
@@ -70,20 +87,21 @@ public class DB_Route {
 	public static Pair<List<Entity>, String> createNew(CreateRouteData create_event_data)
 			throws IllegalCoordinatesException, RouteAlreadyExistsException, InexistentEventException,
 			ImpossibleActionException {
-				
+
 		String first_event_id = create_event_data.event_ids.get(0);
 		Entity first_event = DB_Event.getEvent(first_event_id);
 		LatLng first_event_location = first_event.getLatLng(DB_Event.LOCATION);
 
-		String geohash = GeoHashUtil.convertCoordsToGeoHashHighPrecision(first_event_location.getLatitude(), first_event_location.getLongitude());
-		
-		for(String e : create_event_data.event_ids) {
-			if(!e.equals(first_event_id)) {
+		String geohash = GeoHashUtil.convertCoordsToGeoHashHighPrecision(first_event_location.getLatitude(),
+				first_event_location.getLongitude());
+
+		for (String e : create_event_data.event_ids) {
+			if (!e.equals(first_event_id)) {
 				Entity event = DB_Event.getEvent(e);
 				DB_Event.checkNotEnded(event);
 			}
 		}
-		
+
 		ListValue.Builder participants = ListValue.newBuilder();
 
 		Pair<List<Entity>, String> chat = DB_Chat.createNew(create_event_data.email);
@@ -102,13 +120,12 @@ public class DB_Route {
 		String creator = create_event_data.email;
 
 		String rating_id = "";
-		//int rating_sum = 0;
-		//int rating_num = 0;
-		//ListValue.Builder rated_participants = ListValue.newBuilder();
+		// int rating_sum = 0;
+		// int rating_num = 0;
+		// ListValue.Builder rated_participants = ListValue.newBuilder();
 
 		entities.add(Entity.newBuilder(routeKey)
-				.set(ID, route_id)
-				.set(GEOHASH, geohash)
+				.set(ID, route_id).set(GEOHASH, geohash)
 				.set(CREATOR, creator)
 				.set(CREATION_DATE, creation_date)
 				.set(NUM_PARTICIPANTS, num_participants)
@@ -121,37 +138,7 @@ public class DB_Route {
 
 		return new Pair<>(entities, route_id);
 	}
-	
-	private static Entity updateParticipants(Entity route, ListValue newParticipants) {
-		return Entity.newBuilder(route.getKey())
-				.set(ID, route.getString(ID))
-				.set(GEOHASH, route.getString(GEOHASH))
-				.set(CREATOR, route.getString(CREATOR))
-				.set(CREATION_DATE, route.getString(CREATION_DATE))
-				.set(NUM_PARTICIPANTS, route.getString(NUM_PARTICIPANTS))
-				.set(PICTURES, route.getList(PICTURES))
-				.set(PARTICIPANTS, newParticipants)
-				.set(RATING_ID, route.getString(RATING_ID))
-				.set(RATING_ID, route.getString(CHAT_ID))
-				.set(STATE, route.getString(STATE))
-				.build();
-	}
-	
-	private static Entity updatePictures(Entity route, ListValue newPictures) {
-		return Entity.newBuilder(route.getKey())
-				.set(ID, route.getString(ID))
-				.set(GEOHASH, route.getString(GEOHASH))
-				.set(CREATOR, route.getString(CREATOR))
-				.set(CREATION_DATE, route.getString(CREATION_DATE))
-				.set(NUM_PARTICIPANTS, route.getString(NUM_PARTICIPANTS))
-				.set(PICTURES, newPictures)
-				.set(PARTICIPANTS, route.getList(PARTICIPANTS))
-				.set(RATING_ID, route.getString(RATING_ID))
-				.set(RATING_ID, route.getString(CHAT_ID))
-				.set(STATE, route.getString(STATE))
-				.build();
-	}
-	
+
 	public static Entity getRoute(String route_id) throws InexistentRouteException {
 		Key routeKey = routesFactory.newKey(route_id);
 		Entity route = datastore.get(routeKey);
@@ -161,7 +148,7 @@ public class DB_Route {
 
 		return route;
 	}
-	
+
 	private static String generateNewPictureID(Entity route) {
 		String id = route.getString(ID);
 		int number;
@@ -175,60 +162,67 @@ public class DB_Route {
 		return id + "-" + number;
 	}
 	
-	public static Entity participate(String route_id, String user_email) throws InexistentRouteException {
-		Entity route = getRoute(route_id);
+	public static List<Entity> getEventsInRoute(Entity route) throws InexistentEventException{
+		List<String> event_ids = DB_Util.getStringList(route, EVENT_IDS);
+		List<Entity> event_entities = new LinkedList<>();
 		
-		List<Value<?>> participants = route.getList(PARTICIPANTS);
-
-		ListValue.Builder newParticipants = ListValue.newBuilder().set(participants);
-
-		if (participants.contains(StringValue.of(user_email)))
-			return route;
-
-		newParticipants.addValue(user_email);
+		for(String id : event_ids)
+			event_entities.add(DB_Event.getEvent(id));
 		
-		return updateParticipants(route, newParticipants.build());
+		return event_entities;
 	}
-	
+
+	public static Entity participate(String route_id, String user_email) 
+			throws InexistentRouteException, InexistentEventException {
+		Entity route = getRoute(route_id);
+
+		try {
+			List<Entity> events = getEventsInRoute(route);
+			boolean canParticipate = true;
+			
+			for(Entity event : events)
+				if(!DB_Event.isActive(event) || !DB_Event.isFull(event) || !DB_Event.isPublic(event))
+					canParticipate = false;
+			
+			if(canParticipate)
+			
+			route = util.addUniqueStringToList(route, PARTICIPANTS, user_email);
+		} catch (AlreadyExistsException e) {
+		}
+
+		return route;
+	}
+
 	public static Pair<Entity, String> addPicture(String event_id, String req_email)
-			throws ImpossibleActionException, MaximumSizeReachedException, InexistentRouteException {
+			throws ImpossibleActionException, MaximumSizeReachedException, InexistentRouteException, SomethingWrongException {
 		Entity route = getRoute(event_id);
 		checkIsActive(route);
 
-		String new_pic_id = generateNewPictureID(route);
-
-		List<Value<?>> pics = route.getList(PICTURES);
-
-		ListValue.Builder newList = ListValue.newBuilder().set(pics);
-		newList.addValue(new_pic_id);
-
-		return new Pair<>(updatePictures(route, newList.build()), new_pic_id);
+		try {
+			String new_pic_id = generateNewPictureID(route);
+			PictureData pic = new PictureData(new_pic_id, req_email);
+			
+			route = util.addUniqueJsonToList(route, PICTURES, pic);
+			
+			return new Pair<>(route, new_pic_id);
+		} catch (AlreadyExistsException e) {
+			throw new SomethingWrongException("The unique picture id was already in use");
+		}
 	}
 
-	public static Entity deletePicture(String event_id, String pic_id, String req_email)
-			throws ImpossibleActionException, InexistentPictureException, InexistentRouteException {
-		Entity event = getRoute(event_id);
-		checkIsActive(event);
-
-		List<String> pictures = getPicturesList(event);
-		if (!pictures.contains(pic_id))
-			throw new InexistentPictureException("12:There is no picture with id:" + pic_id + " for this route");
-
-		pictures.remove(pic_id);
-
-		ListValue.Builder newList = ListValue.newBuilder();
-		pictures.forEach(pic -> newList.addValue(pic));
-
-		return updatePictures(event, newList.build());
-	}
-
-	private static List<String> getPicturesList(Entity event) {
-			List<Value<?>> pictures = event.getList(PICTURES);
-			List<String> picture_ids = new LinkedList<>();
-
-			pictures.forEach(pic -> picture_ids.add((String) pic.get()));
-
-			return picture_ids;
+	public static Entity deletePicture(String route_id, String pic_id, String req_email)
+			throws ImpossibleActionException, InexistentRouteException {
+		Entity route = getRoute(route_id);
+		checkIsActive(route);
+		
+		PictureData request_picture_delete = new PictureData(pic_id, req_email);
+		
+		try {
+			route = util.removeJsonFromList(route,  PICTURES, request_picture_delete);
+			return route;
+		} catch (InexistentElementException e) {
+			throw new ImpossibleActionException("The pair " + req_email + " + " + pic_id + " does not exist");
+		}
 	}
 
 	public static List<DownloadEventPictureReturn> getPicturesURLs(String route) throws InexistentRouteException {
@@ -237,52 +231,42 @@ public class DB_Route {
 	}
 
 	public static List<DownloadEventPictureReturn> getPicturesURLs(Entity route) {
-		List<String> filenames = getPicturesList(route);
+		List<PictureData> pictures = DB_Util.getJsonList(route, PICTURES, PictureData.class);
 		List<DownloadEventPictureReturn> download_urls = new LinkedList<>();
 
-		filenames.forEach(file -> {
-			Pair<URL, Long> url = GoogleStorageUtil.signURLForDownload(file);
+		pictures.forEach(picture -> {
+			Pair<URL, Long> url = GoogleStorageUtil.signURLForDownload(picture.picture_id);
 			DownloadSignedURLReturn dwld_url = new DownloadSignedURLReturn(url.getValue0(), url.getValue1());
-			download_urls.add(new DownloadEventPictureReturn(dwld_url, file));
+			download_urls.add(new DownloadEventPictureReturn(dwld_url, picture.picture_id));
 		});
 
 		return download_urls;
 	}
-	
-	public static Entity giveRating(String route_id, String user_email, float rating) 
+
+	public static Entity giveRating(String route_id, String user_email, float rating)
 			throws InexistentRouteException, InexistentParticipantException {
 		Entity route = getRoute(route_id);
 		checkIsParticipant(route, user_email);
-		
-		//String rating_id = route.getSting(RATING_ID);
-		//Entity rating = DB_Rating.giveRating(rating_id, user_email, rating);
-		//return rating;
-		
+
+		// String rating_id = route.getSting(RATING_ID);
+		// Entity rating = DB_Rating.giveRating(rating_id, user_email, rating);
+		// return rating;
+
 		return null;
 	}
 
-	private static List<String> getParticipantEmails(Entity route) {
-		List<String> participants = new LinkedList<>();
-		List<Value<?>> route_participants = route.getList(PARTICIPANTS);
-		route_participants.forEach(participant -> {
-			String participant_email = (String) participant.get();
-			participants.add(participant_email);
-		});
-
-		return participants;
-	}
-	
 	public static void checkIsParticipant(Entity route, String email) throws InexistentParticipantException {
-		List<String> participants = getParticipantEmails(route);
+		List<String> participants = DB_Util.getStringList(route, PARTICIPANTS);
 		if (!participants.contains(email))
-			throw new InexistentParticipantException("1: User " + email + " does not participate in this route: " + route.getString(ID));
+			throw new InexistentParticipantException(
+					"1: User " + email + " does not participate in this route: " + route.getString(ID));
 	}
-	
+
 	public static void checkIsActive(Entity route) throws ImpossibleActionException {
 		if (!isActive(route))
-			throw new ImpossibleActionException("2: Event not active: " + route.getString(ID));
+			throw new ImpossibleActionException("2: Route not active: " + route.getString(ID));
 	}
-	
+
 	public static boolean isActive(Entity route) {
 		return route.getString(STATE).equals(State.ENABLED.toString());
 	}
