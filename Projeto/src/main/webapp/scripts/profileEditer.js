@@ -8,12 +8,7 @@ var fileData;
 
 //Regex for inputs:
 var phonesRegex = new RegExp("([+][0-9]{2,3}\s)?[2789][0-9]{8}");
-console.log(phonesRegex.test("965821895"));
-console.log(phonesRegex.test(""));
-console.log(phonesRegex.test("96582189"));
-console.log(phonesRegex.test("+351 965821895"));
-console.log(phonesRegex.test("211814686"));
-console.log(phonesRegex.test("+351 211814686"));
+
 
 //Check validity of the attributes:
 function updateEditInputs() {
@@ -120,6 +115,7 @@ function saveUserPhoto(base64) {
         '", "data": "' + 'data:image/'+imgext+';base64,' + base64 + '"}';
     xmlhttp.send(ItemJSON);
     if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+        document.getElementById("user64img").src = ('data:image/' + imgext + ';base64,' + base64);
         const obj = JSON.parse(xmlhttp.responseText);
         let cloudURL = obj.url;
         sendFile(cloudURL, fileData);

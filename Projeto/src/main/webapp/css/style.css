@@ -58,6 +58,17 @@ header {
     box-sizing: border-box;
 }
 
+.comments {
+
+    flex-shrink: 0;
+    min-width: 200px;
+    /* just one way to do it */
+    max-height:400px;
+    overflow: auto;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
 .map-area {
     flex-basis: 100%;
 }

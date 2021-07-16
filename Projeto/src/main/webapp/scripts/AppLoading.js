@@ -25,6 +25,7 @@ function requestUserInfo() {
         //We need to wait fror the page to load before changing any fields.
         complete: function () {
             document.getElementById("profile_username").innerHTML = obj.username;
+            
             document.getElementById("user_tag").innerHTML = obj.username;
             document.getElementById("profile_fullname").innerHTML = obj.full_name;
             document.getElementById("profile_visibility").innerHTML = obj.profile;
@@ -117,9 +118,12 @@ function requestUserPicture(username) {
         var cloudURL = obj.url;
         var pic = obj.pic; 
         var size = obj.size;
-        //Can't do nothing with pic right now
+        
 
-        //TODO
+        document.getElementById("user64img").src = obj.pic;
+
+
+        
 
 
         console.log(cloudURL);
@@ -143,4 +147,19 @@ window.onload = function () {
     loadContent("appTab", "../pages/contents/loggedTab.html");
 
     requestUserInfo();
+
+
+    //For event tab
+    $('#event_comments').on('scroll', function () {
+        if ($(this).scrollTop() +
+            $(this).innerHeight() >=
+            $(this)[0].scrollHeight) {
+
+            roamComments(true);
+        }
+    });
+    $('body').on("keyup", '#newEventComment', function () {
+        if ($(this).val() != "") $('#submitCommentBtn').removeAttr('disabled');
+        else $('#submitCommentBtn').prop("disabled", true);
+    });
 }

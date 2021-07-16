@@ -151,9 +151,17 @@ function createEventButton() {
       let sidebar = document.getElementById("sidebar_content");
       document.getElementById("sidebar_content_event_list").style.display = 'none';
 
-    $.get("contents/createEventForm.html", function (data) {
-        $('#sidebar_content').html(data);
-    });
+      jQuery.ajax({
+          url: "contents/createEventForm.html",
+          success: function (data) {
+              $('#sidebar_content').html(data);
+          },
+          async: true,
+          complete: function () {
+              updateFormInputs();
+          }
+      });
+
     //document.getElementById("pac-input").style.display="none";
     map.setOptions({ draggableCursor: 'default' });
     clickListener = google.maps.event.addListener(map, "click", function(event) {

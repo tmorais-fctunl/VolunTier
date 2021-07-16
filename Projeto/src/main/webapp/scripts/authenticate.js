@@ -58,14 +58,14 @@ function refreshToken(userId, rtoken) {
     xmlhttp.send(ItemJSON);
 
     if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200))
-        return false;
+        return false;   
 
     const obj = JSON.parse(xmlhttp.responseText);
     localStorage.setItem('jwt', obj.accessToken);
     localStorage.setItem('jwrt', obj.refreshToken);
-    localStorage.setItem("jwt_creation_date", creationDate)
-    localStorage.setItem("jwt_expiration_date", expirationDate)
-    localStorage.setItem("jwrt_expiration_date", refresh_expirationDate)
+    localStorage.setItem("jwt_creation_date", obj.creationDate)
+    localStorage.setItem("jwt_expiration_date", obj.expirationDate)
+    localStorage.setItem("jwrt_expiration_date", obj.refresh_expirationDate)
     return true;
 
 }

@@ -38,8 +38,8 @@
         currTime = $("#evTime").val();
         currDate = $("#evDate").val();
 
-        console.log("Start Date:");
-        console.log("Inputs date: " + currDate + ", time:" + currTime + ".\nMins date: " + minDateCondition + ", time: " + minTimeCondition + "?");
+        //console.log("Start Date:");
+        //console.log("Inputs date: " + currDate + ", time:" + currTime + ".\nMins date: " + minDateCondition + ", time: " + minTimeCondition + "?");
 
 
 
@@ -49,8 +49,8 @@
         endCurrTime = $("#evTimeEnd").val();
         endCurrDate = $("#evDateEnd").val();
 
-        console.log("End Date:");
-        console.log("Inputs date: " + endCurrDate + ", time:" + endCurrTime + ".\nMins date: " + endMinDateCondition + ", time: " + endMinTimeCondition + "?");
+        //console.log("End Date:");
+        //console.log("Inputs date: " + endCurrDate + ", time:" + endCurrTime + ".\nMins date: " + endMinDateCondition + ", time: " + endMinTimeCondition + "?");
 
         //update end-date if the start-date interferes
         $('#evDateEnd').prop('min', endMinDateCondition);
@@ -71,25 +71,30 @@
         if (currTime < minTimeCondition && currDate == minDateCondition) {
             console.log("Time and date violating the rules!")
             document.getElementById("dateMsg").innerHTML = "Choose a starting date which takes place in the future";
-            canSubmit = false;
-            return;
+            $("#dateMsg").css("color", "red");
+           // canSubmit = false;
+            return false;
         }
         else {
             document.getElementById("dateMsg").innerHTML = "The starting date is valid";
-            canSubmit = true;
+            $("#dateMsg").css("color", "lightgreen");
+           // canSubmit = true;
         }
 
         //end conditions
         if (endCurrTime < endMinTimeCondition && endCurrDate == endMinDateCondition) {
             console.log("Time and date violating the rules!")
             document.getElementById("dateMsg").innerHTML = "Choose a end date which takes place after your start date";
-            canSubmit = false;
-            return;
+            $("#dateMsg").css("color", "red");
+           // canSubmit = false;
+            return false;
         }
         else {
             document.getElementById("dateMsg").innerHTML = "The event schedule is valid";
-            canSubmit = true;
+            $("#dateMsg").css("color", "lightgreen");
+            //canSubmit = true;
         }
+        return true;
     }
 
     function eventLoadFunction() {
@@ -154,8 +159,64 @@
 
 </script>
 
+<script>
+    function updateFormInputs() {
+        $(document).ready(function () {
+            $('body').on("keyup change", '#form input, textarea', function () {
+                if (allFormInputsValid()) $('#submitFormBtn').removeAttr('disabled');
+                else $('#submitFormBtn').prop("disabled", true);
+            });
+        });
+    }
 
-<div sstyle="background-color: #FDFDFD">
+    function allFormInputsValid() {
+        var createEventErrMsg = document.getElementById("createEventErrMsg");
+        createEventErrMsg.style.display = "block";
+        console.log($("#evName").val());
+
+        if ($("#evName").val().length > 100) {
+            createEventErrMsg.innerHTML = "Event name must not excede 100 characters";
+            return false;
+        }
+        if ($("#evName").val().length == 0) {
+            createEventErrMsg.innerHTML = "Event Name must not be empty";
+            return false;
+        }
+        console.log($("#evDesc").val());
+        if ($("#evDesc").val().length > 500) {
+            createEventErrMsg.innerHTML = "Event description must not excede 500 characters";
+            return false;
+        }
+        if ($("#evDesc").val().length == 0) {
+            createEventErrMsg.innerHTML = "Event description must not be empty";
+            return false;
+        }
+        if ($("#evCapacity").val() > 100) {
+            createEventErrMsg.innerHTML = "Event Capacity must not excede 100 participants";
+            return false;
+        }
+        if (!DateTimeListenerFunction()) {
+            createEventErrMsg.innerHTML = "Schedule is invalid";
+            return false;
+        }
+        let phone = $("#evContactPhone").val();
+        if (phone.length != 0 && !phonesRegex.test(phone)) {
+            createEventErrMsg.innerHTML = "Phone Number is invalid";
+            return false;
+        }
+        //Para o email nao ha?
+        
+
+
+        //Everything ok
+        createEventErrMsg.style.display = "none";
+        return true;
+    }
+
+</script>
+
+
+<div id="form" style="background-color: #FDFDFD">
     <span id="disableCreate" class="topright">&times</span>
     <label style="width: 100%; font-size: 110%; text-align: center">Event name</label>
     <br>
@@ -164,9 +225,8 @@
     <br>
     <label style="width: 100%; font-size: 110%; text-align: center">Description</label>
     <br>
-    <textarea style="vertical-align: top; max-width:100%; min-width:100%" id="evDesc" name="Event Description" placeholder="Tell us all about it" rows="4" cols="50" class="createEventFormInput"></textarea>
-    <br>
-    <br>
+    <textarea onkeyup="countChar(this, 'charNum')" style="vertical-align: top; max-width:100%; min-width:100%" id="evDesc" name="Event Description" placeholder="Tell us all about it" rows="4" cols="50" class="createEventFormInput"></textarea>
+    <div id="charNum" style="margin-left: 95%; font-size: 80%">500</div>
     <!--Choosing the category-->
     <!-- Talvez faca sentido termos guardado em base de dados e carregarmos as opcoes dinamicamente de forma a ser future proof e nao necessitar de deploys -->
     <label style="width: 100%; font-size: 110%; text-align: center">Event Category</label>
@@ -210,18 +270,30 @@
         <input class="createEventFormInput" type="date" style="max-width:100%" id="evDate" name="Event Date" placeholder="When will it happen">
         <input class="createEventFormInput" type="time" style="max-width:100%" id="evTime" name="Event Time" placeholder="At what time">
     </div>
-    
+
     <label style="margin-top: 5px; width: 100%; font-size: 110%; text-align: center">Up until</label>
-        
+
     <div style="width: 100%; text-align: center">
         <input class="createEventFormInput" type="date" style="" id="evDateEnd" name="Event Date" placeholder="When will it happen">
         <input class="createEventFormInput" type="time" style="" id="evTimeEnd" name="Event Time" placeholder="At what time">
         <small style="display: block; margin-top: 5px; margin-bottom: 10px;" id="dateMsg" name="Datemsg">Put your time correctly, no going back in time allowed here!</small>
     </div>
-    
-    <div style="width: 100%; text-align: center">
-        <label style="font-size: 110%">Privacy: </label><span class="container_lock lock" id="eventPrivacyLock" style="margin-left:10px; display: inline-block" value=""></span><p style="display: inline-block; margin-left:10px;" id="EventPrivacy">PUBLIC</p>
+    <br>
+    <label style="width: 100%; font-size: 110%; text-align: center">Participant Capacity</label>
+    <br>
+    <input class="createEventFormInput" type="number" style="text-align:center; max-width:100%; min-width:100%" id="evCapacity" name="Event Capacity" placeholder="Max 100 (Optional, default is 100)">
+    <br>
+    <br>
+    <div>
+        <label style="width: 100%; font-size: 110%; text-align: center">Contact</label>
+        <!-- <input class="createEventFormInput" type="text" style="text-align:center; max-width:100%; min-width:100%" id="evContactEmail" name="Event Contact Email" placeholder="Email (optional)">-->
+
+        <input class="createEventFormInput" type="text" style="text-align:center; max-width:100%; min-width:100%" id="evContactPhone" name="Event Contact Number" placeholder="Phone number (Optional)">
     </div>
-    <button style="width: 100%; font-size: 110%; text-align: center" type="button" class="btn btn-primary"   onclick="return createEventRequest()">Submit</button>
-    <p id="createEventErrMsg" style="display:none; color:red; font-size:90%"></p>
-</div>
+        <br>
+            <div style="width: 100%; text-align: center">
+            <label style="font-size: 110%">Privacy: </label><span class="container_lock lock" id="eventPrivacyLock" style="margin-left:10px; display: inline-block" value=""></span><p style="display: inline-block; margin-left:10px;" id="EventPrivacy">PUBLIC</p>
+        </div>
+        <button id="submitFormBtn" style="width: 100%; font-size: 110%; text-align: center" type="button" class="btn btn-primary" onclick="return createEventRequest()" disabled="disabled">Submit</button>
+        <p id="createEventErrMsg" style="display: none; color: red; font-size: 90%; width: 100%; text-align: center"></p>
+    </div>
