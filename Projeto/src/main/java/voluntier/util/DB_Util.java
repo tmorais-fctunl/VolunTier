@@ -3,6 +3,7 @@ package voluntier.util;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Predicate;
 
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.ListValue;
@@ -25,20 +26,30 @@ public class DB_Util {
 		return builder;
 	}
 	
-	public Entity updateListProperty(Entity e, String list_property, ListValue newList) {
+	public <T extends Value<?>> Entity updateProperty(Entity e, String number_property, T newNumber) {
 		getDeafultBuilder(e);
-		return builder.set(list_property, newList).build();
-	}
-	
-	public Entity updateStringProperty(Entity e, String string_property, String newString) {
-		getDeafultBuilder(e);
-		return builder.set(string_property, newString).build();
+		return builder.set(number_property, newNumber).build();
 	}
 	
 	public static boolean existsInStringList(Entity e, String list_property, String looking_for) {
 		List<String> list = getStringList(e, list_property);
 		
 		return list.contains(looking_for);
+	}
+	
+	public static <T> T findInJsonList(Entity e, String list_property, Predicate<T> condition, Class<T> typeOfSource) {
+		List<T> list = getJsonList(e, list_property, typeOfSource);
+		
+		T found = null;
+		for(T elem : list)
+			if(condition.test(elem))
+				found = elem;
+		
+		return found;
+	}
+	
+	public static <T> boolean existsInJsonList(Entity e, String list_property, Predicate<T> condition, Class<T> typeOfSource) {
+		return findInJsonList(e, list_property, condition, typeOfSource) != null;
 	}
 	
 	public Entity addUniqueStringToList(Entity e, String list_property, String newElement) throws AlreadyExistsException {
@@ -50,7 +61,7 @@ public class DB_Util {
 		ListValue.Builder newList = ListValue.newBuilder().set(current_list);
 		newList.addValue(newElement);
 		
-		return updateListProperty(e, list_property, newList.build());
+		return updateProperty(e, list_property, newList.build());
 	}
 	
 	public <T> Entity addUniqueJsonToList(Entity e, String list_property, T newElement) throws AlreadyExistsException {
@@ -67,7 +78,7 @@ public class DB_Util {
 		current_list.remove(elem);
 
 		ListValue.Builder newList = ListValue.newBuilder().set(current_list);
-		return updateListProperty(e, list_property, newList.build());
+		return updateProperty(e, list_property, newList.build());
 	}
 	
 	public <T> Entity removeJsonFromList(Entity e, String list_property, T remElement) throws InexistentElementException {

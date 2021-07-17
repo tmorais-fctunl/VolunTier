@@ -204,7 +204,7 @@ public class ChatResource {
 		try {
 			TokensResource.checkIsValidAccess(data.token, data.email);
 
-			Entity event = DB_Event.likeComment(data.event_id, data.comment_id, data.email);
+			Entity event = DB_Event.giveOrRemoveLikeInComment(data.event_id, data.comment_id, data.email);
 
 			txn.put(event);
 			txn.commit();

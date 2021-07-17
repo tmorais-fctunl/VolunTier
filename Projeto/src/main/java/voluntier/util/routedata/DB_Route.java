@@ -23,6 +23,7 @@ import voluntier.exceptions.ImpossibleActionException;
 import voluntier.exceptions.InexistentElementException;
 import voluntier.exceptions.InexistentEventException;
 import voluntier.exceptions.InexistentParticipantException;
+import voluntier.exceptions.InexistentRatingException;
 import voluntier.exceptions.InexistentRouteException;
 import voluntier.exceptions.InexistentUserException;
 import voluntier.exceptions.MaximumSizeReachedException;
@@ -36,6 +37,7 @@ import voluntier.util.eventdata.DB_Event;
 import voluntier.util.eventdata.chatdata.DB_Chat;
 import voluntier.util.produces.DownloadEventPictureReturn;
 import voluntier.util.produces.DownloadSignedURLReturn;
+import voluntier.util.routedata.rating.DB_Rating;
 import voluntier.util.userdata.State;
 
 public class DB_Route {
@@ -64,11 +66,10 @@ public class DB_Route {
 				.set(GEOHASH, e.getString(GEOHASH))
 				.set(CREATOR, e.getString(CREATOR))
 				.set(CREATION_DATE, e.getTimestamp(CREATION_DATE))
-				.set(NUM_PARTICIPANTS, e.getLong(NUM_PARTICIPANTS))
 				.set(PICTURES, e.getList(PICTURES))
 				.set(PARTICIPANTS, e.getList(PARTICIPANTS))
 				.set(RATING_ID, e.getString(RATING_ID))
-				.set(RATING_ID, e.getString(RATING_ID))
+				.set(CHAT_ID, e.getString(CHAT_ID))
 				.set(STATE, e.getString(STATE));
 	});
 
@@ -117,19 +118,25 @@ public class DB_Route {
 
 		Timestamp creation_date = Timestamp.now();
 
-		int num_participants = 0;
-
 		String creator = create_event_data.email;
 
-		String rating_id = "";
-		// int rating_sum = 0;
-		// int rating_num = 0;
-		// ListValue.Builder rated_participants = ListValue.newBuilder();
+		Pair<Entity, String> rating = DB_Rating.createNew();
+		String rating_id = rating.getValue1();
+		Entity rating_ent = rating.getValue0();
+		
+		entities.add(rating_ent);
 
-		entities.add(Entity.newBuilder(routeKey).set(ID, route_id).set(GEOHASH, geohash).set(CREATOR, creator)
-				.set(CREATION_DATE, creation_date).set(NUM_PARTICIPANTS, num_participants)
-				.set(PICTURES, pictures.build()).set(PARTICIPANTS, participants.build()).set(RATING_ID, rating_id)
-				.set(RATING_ID, chat_id).set(STATE, State.ENABLED.toString()).build());
+		entities.add(Entity.newBuilder(routeKey)
+				.set(ID, route_id)
+				.set(GEOHASH, geohash)
+				.set(CREATOR, creator)
+				.set(CREATION_DATE, creation_date)
+				.set(PICTURES, pictures.build())
+				.set(PARTICIPANTS, participants.build())
+				.set(RATING_ID, rating_id)
+				.set(CHAT_ID, chat_id)
+				.set(STATE, State.ENABLED.toString())
+				.build());
 
 		return new Pair<>(entities, route_id);
 	}
@@ -173,13 +180,13 @@ public class DB_Route {
 		Entity route = getRoute(route_id);
 
 		if (DB_Util.existsInStringList(route, PARTICIPANTS, user_email))
-			throw new AlreadyExistsException("User already in this route");
+			throw new AlreadyExistsException("User is already apart of this route");
 
 		List<Entity> events = getEventsInRoute(route);
 		boolean canParticipate = true;
 
 		for (Entity event : events)
-			if (!DB_Event.isActive(event) || !DB_Event.isFull(event) || !DB_Event.isPublic(event))
+			if (!DB_Event.isActive(event) || DB_Event.isFull(event) || !DB_Event.isPublic(event))
 				canParticipate = false;
 
 		List<Entity> ents = new LinkedList<>();
@@ -197,7 +204,7 @@ public class DB_Route {
 			return ents;
 			
 		} else
-			throw new CannotParticipateInSomeEventsException("Some events are full or removed");
+			throw new CannotParticipateInSomeEventsException("Some events are full or removed or private");
 	}
 	
 	public static Pair<Entity, String> addPicture(String event_id, String req_email) throws ImpossibleActionException,
@@ -252,22 +259,20 @@ public class DB_Route {
 		return download_urls;
 	}
 
-	public static Entity giveRating(String route_id, String user_email, float rating)
-			throws InexistentRouteException, InexistentParticipantException {
+	public static Entity giveRating(String route_id, String user_email, float rating_number)
+			throws InexistentRouteException, InexistentParticipantException, InexistentRatingException {
 		Entity route = getRoute(route_id);
 		checkIsParticipant(route, user_email);
 
-		// String rating_id = route.getSting(RATING_ID);
-		// Entity rating = DB_Rating.giveRating(rating_id, user_email, rating);
-		// return rating;
+		String rating_id = route.getString(RATING_ID);
+		Entity rating = DB_Rating.giveRating(rating_id, rating_number, user_email);
 
-		return null;
+		return rating;
 	}
 
 	public static void checkIsParticipant(Entity route, String email) throws InexistentParticipantException {
 		if(!DB_Util.existsInStringList(route, PARTICIPANTS, email))
 			throw new InexistentParticipantException("1: User " + email + " does not participate in this route: " + route.getString(ID));
-		
 	}
 
 	public static void checkIsActive(Entity route) throws ImpossibleActionException {

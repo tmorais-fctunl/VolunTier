@@ -417,10 +417,10 @@ public class DB_Event {
 	}
 	
 	private static StatusEvent getStatus (Entity event, String user_email) throws InexistentEventException {
-		if (belongsToList(event, user_email, true))
-			return StatusEvent.PARTICIPANT;
 		if (isOwner(event, user_email))
 			return StatusEvent.OWNER;
+		if (belongsToList(event, user_email, true))
+			return StatusEvent.PARTICIPANT;
 		if (belongsToList(event, user_email, false))
 			return StatusEvent.PENDING;
 		return StatusEvent.NON_PARTICIPANT;
@@ -465,7 +465,7 @@ public class DB_Event {
 		return DB_Chat.editMessage(chat_id, comment_id, user_email, comment_content);
 	}
 
-	public static Entity likeComment(String event_id, int comment_id, String req_email)
+	public static Entity giveOrRemoveLikeInComment(String event_id, int comment_id, String req_email)
 			throws InexistentChatIdException, InexistentLogIdException, InexistentMessageIdException,
 			InexistentParticipantException, ImpossibleActionException, InexistentEventException {
 
@@ -474,7 +474,7 @@ public class DB_Event {
 		checkIsParticipant(event, req_email);
 
 		String chat_id = event.getString(CHAT_ID);
-		return DB_Chat.likeMessage(chat_id, comment_id);
+		return DB_Chat.giveOrRemoveLikeInMessage(chat_id, comment_id);
 	}
 
 	public static Entity makeChatModerator(String event_id, String req_email, String target_email)
@@ -636,7 +636,10 @@ public class DB_Event {
 
 		Entity event = getEvent(event_id);
 
-		checkIsOwner (event, user_email);
+		// if they are the same then the user is canceling his own request, 
+		// if not then it must be the owner declining the request
+		if(!user_email.equals(target_user))
+			checkIsOwner (event, user_email);
 
 		return removeRequest (event, target_user);
 	}
@@ -706,7 +709,7 @@ public class DB_Event {
 	InexistentLogIdException, InexistentParticipantException, InexistentEventException {
 
 		Entity event = getEvent(event_id);
-		checkIsParticipant(event, req_email);
+		//checkIsParticipant(event, req_email);
 
 		String chat_id = event.getString(CHAT_ID);
 		return DB_Chat.getChat(chat_id, cursor == null ? 0 : cursor, lastest_first);

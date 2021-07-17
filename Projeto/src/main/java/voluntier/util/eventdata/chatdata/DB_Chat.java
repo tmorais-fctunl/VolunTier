@@ -239,7 +239,7 @@ public class DB_Chat {
 		return newMessageLog;
 	}
 
-	public static Entity likeMessage(String chat_id, int message_id)
+	public static Entity giveOrRemoveLikeInMessage(String chat_id, int message_id)
 			throws InexistentChatIdException, InexistentLogIdException, InexistentMessageIdException {
 
 		Key idKey = chatFactory.newKey(chat_id);
@@ -250,7 +250,7 @@ public class DB_Chat {
 
 		MessageLog log_data = getMessageLogWithMessageId(chat, message_id);
 
-		Entity newMessageLog = DB_MessageLog.likeMessage(log_data.id, message_id);
+		Entity newMessageLog = DB_MessageLog.giveOrRemoveLikeInMessage(log_data.id, message_id);
 
 		return newMessageLog;
 	}

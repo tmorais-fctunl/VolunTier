@@ -185,7 +185,7 @@ public class DB_MessageLog {
 		return updateMessages(idKey, log, newList.build());
 	}
 
-	public static Entity likeMessage(String log_id, int message_id)
+	public static Entity giveOrRemoveLikeInMessage(String log_id, int message_id)
 			throws InexistentMessageIdException, InexistentLogIdException {
 		Key idKey = logFactory.newKey(log_id);
 		Entity log = datastore.get(idKey);
