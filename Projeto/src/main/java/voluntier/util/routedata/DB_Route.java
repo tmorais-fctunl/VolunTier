@@ -17,6 +17,7 @@ import com.google.cloud.datastore.ListValue;
 import com.google.cloud.datastore.Value;
 
 import voluntier.exceptions.AlreadyExistsException;
+import voluntier.exceptions.CannotParticipateInSomeEventsException;
 import voluntier.exceptions.IllegalCoordinatesException;
 import voluntier.exceptions.ImpossibleActionException;
 import voluntier.exceptions.InexistentElementException;
@@ -57,11 +58,17 @@ public class DB_Route {
 	private static KeyFactory routesFactory = datastore.newKeyFactory().setKind("Route");
 
 	private static DB_Util util = new DB_Util((e, builder) -> {
-		builder = Entity.newBuilder(e.getKey()).set(ID, e.getString(ID)).set(EVENT_IDS, e.getList(EVENT_IDS))
-				.set(GEOHASH, e.getString(GEOHASH)).set(CREATOR, e.getString(CREATOR))
-				.set(CREATION_DATE, e.getTimestamp(CREATION_DATE)).set(NUM_PARTICIPANTS, e.getLong(NUM_PARTICIPANTS))
-				.set(PICTURES, e.getList(PICTURES)).set(PARTICIPANTS, e.getList(PARTICIPANTS))
-				.set(RATING_ID, e.getString(RATING_ID)).set(RATING_ID, e.getString(RATING_ID))
+		builder = Entity.newBuilder(e.getKey())
+				.set(ID, e.getString(ID))
+				.set(EVENT_IDS, e.getList(EVENT_IDS))
+				.set(GEOHASH, e.getString(GEOHASH))
+				.set(CREATOR, e.getString(CREATOR))
+				.set(CREATION_DATE, e.getTimestamp(CREATION_DATE))
+				.set(NUM_PARTICIPANTS, e.getLong(NUM_PARTICIPANTS))
+				.set(PICTURES, e.getList(PICTURES))
+				.set(PARTICIPANTS, e.getList(PARTICIPANTS))
+				.set(RATING_ID, e.getString(RATING_ID))
+				.set(RATING_ID, e.getString(RATING_ID))
 				.set(STATE, e.getString(STATE));
 	});
 
@@ -162,7 +169,7 @@ public class DB_Route {
 
 	public static List<Entity> participate(String route_id, String user_email)
 			throws InexistentRouteException, InexistentEventException, AlreadyExistsException, 
-			ImpossibleActionException, InexistentUserException {
+			ImpossibleActionException, InexistentUserException, CannotParticipateInSomeEventsException {
 		Entity route = getRoute(route_id);
 
 		if (DB_Util.existsInStringList(route, PARTICIPANTS, user_email))
@@ -183,19 +190,22 @@ public class DB_Route {
 						user_email);
 				updated_event_and_user.forEach(e -> ents.add(event));
 			}
-		}
 
-		route = util.addUniqueStringToList(route, PARTICIPANTS, user_email);
+			route = util.addUniqueStringToList(route, PARTICIPANTS, user_email);
 
-		ents.add(route);
-		return ents;
+			ents.add(route);
+			return ents;
+			
+		} else
+			throw new CannotParticipateInSomeEventsException("Some events are full or removed");
 	}
-
+	
 	public static Pair<Entity, String> addPicture(String event_id, String req_email) throws ImpossibleActionException,
-			MaximumSizeReachedException, InexistentRouteException, SomethingWrongException {
+			MaximumSizeReachedException, InexistentRouteException, SomethingWrongException, InexistentParticipantException {
 		Entity route = getRoute(event_id);
 		checkIsActive(route);
-
+		checkIsParticipant(route, req_email);
+		
 		try {
 			String new_pic_id = generateNewPictureID(route);
 			PictureData pic = new PictureData(new_pic_id, req_email);
@@ -209,9 +219,10 @@ public class DB_Route {
 	}
 
 	public static Entity deletePicture(String route_id, String pic_id, String req_email)
-			throws ImpossibleActionException, InexistentRouteException {
+			throws ImpossibleActionException, InexistentRouteException, InexistentParticipantException {
 		Entity route = getRoute(route_id);
 		checkIsActive(route);
+		checkIsParticipant(route, req_email);
 
 		PictureData request_picture_delete = new PictureData(pic_id, req_email);
 
@@ -254,10 +265,9 @@ public class DB_Route {
 	}
 
 	public static void checkIsParticipant(Entity route, String email) throws InexistentParticipantException {
-		List<String> participants = DB_Util.getStringList(route, PARTICIPANTS);
-		if (!participants.contains(email))
-			throw new InexistentParticipantException(
-					"1: User " + email + " does not participate in this route: " + route.getString(ID));
+		if(!DB_Util.existsInStringList(route, PARTICIPANTS, email))
+			throw new InexistentParticipantException("1: User " + email + " does not participate in this route: " + route.getString(ID));
+		
 	}
 
 	public static void checkIsActive(Entity route) throws ImpossibleActionException {

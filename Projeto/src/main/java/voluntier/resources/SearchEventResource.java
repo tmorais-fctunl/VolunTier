@@ -22,6 +22,7 @@ import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.StructuredQuery.Builder;
 import com.google.cloud.datastore.StructuredQuery.CompositeFilter;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
+import com.google.cloud.datastore.Transaction;
 
 import voluntier.exceptions.IllegalCoordinatesException;
 import voluntier.exceptions.InvalidTokenException;
@@ -89,7 +90,7 @@ public class SearchEventResource {
 		return new Pair<>(events, geohash);
 	}
 	
-	/*
+	
 	// FOR DEBUG ONLY, USE THIS TO ADD A NEW PROPERTY TO ALL EXISTENT EVENTS 
 	@POST
 	@Path("/rewriteAll")
@@ -121,5 +122,5 @@ public class SearchEventResource {
 		});
 
 		return events;
-	}*/
+	}
 }

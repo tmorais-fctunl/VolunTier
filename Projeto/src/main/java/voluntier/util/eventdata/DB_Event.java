@@ -106,6 +106,8 @@ public class DB_Event {
 				.set(GEOHASH, event.getString(GEOHASH)).set(PICTURES, event.getList(PICTURES))
 				.set(PRESENCE_CODE, event.getString(PRESENCE_CODE))
 				.set(PRESENCES, event.getList(PRESENCES))
+				.set(REQUESTS, event.getList(REQUESTS))
+				.set(N_REQUESTS, 0)
 				// additional properties here
 				.build();
 	}
@@ -141,7 +143,8 @@ public class DB_Event {
 				.set(PICTURES, event.getList(PICTURES))
 				.set(PRESENCE_CODE, event.getString(PRESENCE_CODE))
 				.set(PRESENCES, event.getList(PRESENCES))
-				.set(GEOHASH, data.getGeohash(event.getString(GEOHASH))).set(PICTURES, event.getList(PICTURES))
+				.set(GEOHASH, data.getGeohash(event.getString(GEOHASH)))
+				.set(PICTURES, event.getList(PICTURES))
 				.set(REQUESTS, event.getList(REQUESTS))
 				.set(N_REQUESTS, event.getLong(N_REQUESTS)).build();
 	}
@@ -186,6 +189,7 @@ public class DB_Event {
 				.set(TWITTER, event.getString(TWITTER)).set(GEOHASH, event.getString(GEOHASH)).set(PICTURES, event.getList(PICTURES))
 				.set(PRESENCE_CODE, event.getString(PRESENCE_CODE))
 				.set(PRESENCES, event.getList(PRESENCES))
+				.set(REQUESTS, event.getList(REQUESTS)).set(N_REQUESTS, event.getLong(N_REQUESTS))
 				.build();
 	}
 
@@ -242,7 +246,8 @@ public class DB_Event {
 				.set(WEBSITE, event.getString(WEBSITE)).set(FACEBOOK, event.getString(FACEBOOK))
 				.set(INSTAGRAM, event.getString(INSTAGRAM)).set(TWITTER, event.getString(TWITTER))
 				.set(GEOHASH, event.getString(GEOHASH)).set(PICTURES, newPictures)
-				.set(PRESENCE_CODE, event.getString(PRESENCE_CODE)).set(PRESENCES, event.getList(PRESENCES)).build();
+				.set(PRESENCE_CODE, event.getString(PRESENCE_CODE)).set(PRESENCES, event.getList(PRESENCES))
+				.set(REQUESTS, event.getList(REQUESTS)).set(N_REQUESTS, event.getLong(N_REQUESTS)).build();
 	}
 	
 	private static Entity updatePresenceList(Entity event, ListValue presences) {
@@ -259,7 +264,7 @@ public class DB_Event {
 				.set(INSTAGRAM, event.getString(INSTAGRAM)).set(TWITTER, event.getString(TWITTER))
 				.set(GEOHASH, event.getString(GEOHASH)).set(PICTURES, event.getList(PICTURES))
 				.set(PRESENCE_CODE, event.getString(PRESENCE_CODE))
-				.set(PRESENCES, presences).build();
+				.set(PRESENCES, presences).set(REQUESTS, event.getList(REQUESTS)).set(N_REQUESTS, event.getLong(N_REQUESTS)).build();
 	}
 
 	public static Pair<Entity, String> addPicture(String event_id, String req_email)
@@ -355,7 +360,8 @@ public class DB_Event {
 				.set(PROFILE, event.getString(PROFILE)).set(WEBSITE, event.getString(WEBSITE))
 				.set(FACEBOOK, event.getString(FACEBOOK)).set(INSTAGRAM, event.getString(INSTAGRAM))
 				.set(TWITTER, event.getString(TWITTER)).set(GEOHASH, event.getString(GEOHASH)).set(PICTURES, event.getList(PICTURES))
-				.set(REQUESTS, event.getList(REQUESTS)).set(N_REQUESTS, event.getLong(N_REQUESTS))
+				.set(REQUESTS, event.getList(REQUESTS)).set(N_REQUESTS, event.getLong(N_REQUESTS)).set(PRESENCE_CODE, event.getString(PRESENCE_CODE))
+				.set(PRESENCES, event.getList(PRESENCES))
 				.build();
 	}
 
@@ -378,7 +384,8 @@ public class DB_Event {
 				.set(PROFILE, event.getString(PROFILE)).set(WEBSITE, event.getString(WEBSITE))
 				.set(FACEBOOK, event.getString(FACEBOOK)).set(INSTAGRAM, event.getString(INSTAGRAM))
 				.set(TWITTER, event.getString(TWITTER)).set(GEOHASH, event.getString(GEOHASH)).set(PICTURES, event.getList(PICTURES))
-				.set(REQUESTS, newRequests).build();
+				.set(REQUESTS, newRequests).set(PRESENCE_CODE, event.getString(PRESENCE_CODE))
+				.set(PRESENCES, event.getList(PRESENCES)).build();
 	}
 
 	public static boolean belongsToList (Entity event, String email, boolean participant) throws InexistentEventException {
