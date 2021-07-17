@@ -1,4 +1,4 @@
-package voluntier.util.routedata.rating;
+package voluntier.util;
 
 import java.util.Random;
 
@@ -19,7 +19,7 @@ import voluntier.exceptions.AlreadyExistsException;
 import voluntier.exceptions.InexistentElementException;
 import voluntier.exceptions.InexistentRatingException;
 import voluntier.exceptions.InexistentUserException;
-import voluntier.util.DB_Util;
+import voluntier.util.routedata.rating.UserRatingData;
 
 public class DB_Rating {
 	
@@ -30,12 +30,14 @@ public class DB_Rating {
 	private static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	private static KeyFactory ratingFactory = datastore.newKeyFactory().setKind("Rating");
 	
-	private static DB_Util util = new DB_Util((e, builder) -> {
-		builder = Entity.newBuilder(e.getKey())
+	private static DB_Util util = new DB_Util(DB_Rating::defaultBuilder);
+	
+	private static void defaultBuilder (Entity e) {
+		util.builder = Entity.newBuilder(e.getKey())
 				.set(ID, e.getString(ID))
 				.set(USERS, e.getList(USERS))
 				.set(SUM, e.getDouble(SUM));
-	});
+	}
 	
 	private static Key generateKey() {
 		Random rand = new Random();
@@ -58,7 +60,7 @@ public class DB_Rating {
 		
 		Entity rating = Entity.newBuilder(key)
 				.set(ID, id)
-				.set(SUM, 0)
+				.set(SUM, 0.0)
 				.set(USERS, users.build())
 				.build();
 		
@@ -77,22 +79,23 @@ public class DB_Rating {
 	
 	public static Entity giveRating(String rating_id, double rating_number, String user_email) throws InexistentRatingException {
 		Entity rating = getRating(rating_id);
-		
+
 		double current_sum = rating.getDouble(SUM);
 		
 		try {
 			UserRatingData old_rating = DB_Util.findInJsonList(rating, USERS, 
 					(u -> u.user_email.equals(user_email)), UserRatingData.class);
-			
+
 			if(old_rating != null) {
 				rating = util.removeJsonFromList(rating, USERS, old_rating);
 				current_sum -= old_rating.rating;
 			}
-			
+
 			UserRatingData data = new UserRatingData(user_email, rating_number);
-			
+
 			rating = util.addUniqueJsonToList(rating, USERS, data);
 			rating = util.updateProperty(rating, SUM, DoubleValue.of(current_sum + rating_number));
+
 		} catch (AlreadyExistsException | InexistentElementException e) {}
 		
 		return rating;
@@ -101,15 +104,13 @@ public class DB_Rating {
 	public static Entity removeRating(String rating_id, String user_email) throws InexistentRatingException, InexistentUserException {
 		Entity rating = getRating(rating_id);
 		double current_sum = rating.getDouble(SUM);
-		
 		try {
 			UserRatingData old_rating = DB_Util.findInJsonList(rating, USERS, 
 					(u -> u.user_email.equals(user_email)), UserRatingData.class);
-		
 			if(old_rating != null) {
 				rating = util.removeJsonFromList(rating, USERS, old_rating);
 			} else
-				throw new InexistentUserException("User ha not rated yet: " + rating_id);
+				throw new InexistentUserException("User has not rated yet: " + rating_id);
 			
 			rating = util.updateProperty(rating, SUM, DoubleValue.of(current_sum - old_rating.rating));
 			

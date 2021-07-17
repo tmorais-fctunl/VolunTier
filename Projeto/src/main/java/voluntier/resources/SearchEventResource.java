@@ -100,8 +100,8 @@ public class SearchEventResource {
 		List<Entity> events = getAllEvents();
 		
 		events.forEach(event -> {
-			event = DB_Event.REWRITE(event);
-			txn.put(event);
+			List<Entity> ents = DB_Event.REWRITE(event);
+			ents.forEach(e -> txn.put(e));
 		});
 		
 		txn.commit();

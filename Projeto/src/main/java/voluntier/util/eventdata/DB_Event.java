@@ -30,6 +30,7 @@ import voluntier.exceptions.InexistentMessageIdException;
 import voluntier.exceptions.InexistentModeratorException;
 import voluntier.exceptions.InexistentParticipantException;
 import voluntier.exceptions.InexistentPictureException;
+import voluntier.exceptions.InexistentRatingException;
 import voluntier.exceptions.InexistentUserException;
 import voluntier.exceptions.InvalidCursorException;
 import voluntier.exceptions.MaximumSizeReachedException;
@@ -91,12 +92,16 @@ public class DB_Event {
 	// private static final Logger LOG =
 	// Logger.getLogger(RegisterResource.class.getName());
 	
-	public static Entity REWRITE(Entity event) {
+	public static List<Entity> REWRITE(Entity event) {
+		
+		Pair<List<Entity>, String> chat = DB_Chat.createNew(event.getString(OWNER_EMAIL));
+		List<Entity> entities = chat.getValue0();
 
-		return Entity.newBuilder(event.getKey()).set(NAME, event.getString(NAME)).set(ID, event.getString(ID))
+
+		entities.add(Entity.newBuilder(event.getKey()).set(NAME, event.getString(NAME)).set(ID, event.getString(ID))
 				.set(LOCATION, event.getLatLng(LOCATION)).set(START_DATE, event.getString(START_DATE))
 				.set(END_DATE, event.getString(END_DATE)).set(CREATION_DATE, event.getString(CREATION_DATE))
-				.set(CHAT_ID, event.getString(CHAT_ID)).set(PARTICIPANTS, event.getList(PARTICIPANTS))
+				.set(CHAT_ID, chat.getValue1()).set(PARTICIPANTS, event.getList(PARTICIPANTS))
 				.set(N_PARTICIPANTS, event.getLong(N_PARTICIPANTS)).set(OWNER_EMAIL, event.getString(OWNER_EMAIL))
 				.set(CONTACT, event.getString(CONTACT)).set(DESCRIPTION, event.getString(DESCRIPTION))
 				.set(CATEGORY, event.getString(CATEGORY)).set(CAPACITY, event.getLong(CAPACITY))
@@ -107,9 +112,11 @@ public class DB_Event {
 				.set(PRESENCE_CODE, event.getString(PRESENCE_CODE))
 				.set(PRESENCES, event.getList(PRESENCES))
 				.set(REQUESTS, event.getList(REQUESTS))
-				.set(N_REQUESTS, 0)
-				// additional properties here
-				.build();
+				.set(N_REQUESTS, event.getLong(N_REQUESTS))
+				// additional properties here or change above
+				.build());
+		
+		return entities;
 	}
 
 	public static Entity updateProperty(UpdateEventData data)
@@ -467,14 +474,14 @@ public class DB_Event {
 
 	public static Entity giveOrRemoveLikeInComment(String event_id, int comment_id, String req_email)
 			throws InexistentChatIdException, InexistentLogIdException, InexistentMessageIdException,
-			InexistentParticipantException, ImpossibleActionException, InexistentEventException {
+			InexistentParticipantException, ImpossibleActionException, InexistentEventException, InexistentRatingException {
 
 		Entity event = getEvent(event_id);
 		checkIsActive(event);
 		checkIsParticipant(event, req_email);
 
 		String chat_id = event.getString(CHAT_ID);
-		return DB_Chat.giveOrRemoveLikeInMessage(chat_id, comment_id);
+		return DB_Chat.giveOrRemoveLikeInMessage(chat_id, comment_id, req_email);
 	}
 
 	public static Entity makeChatModerator(String event_id, String req_email, String target_email)
@@ -704,7 +711,7 @@ public class DB_Event {
 		throw new ImpossibleActionException();
 	}
 
-	public static Triplet<List<MessageData>, Integer, MoreResultsType> getChat(String event_id, Integer cursor,
+	public static Triplet<List<MessageDataReturn>, Integer, MoreResultsType> getChat(String event_id, Integer cursor,
 			boolean lastest_first, String req_email) throws InexistentChatIdException, InvalidCursorException,
 	InexistentLogIdException, InexistentParticipantException, InexistentEventException {
 

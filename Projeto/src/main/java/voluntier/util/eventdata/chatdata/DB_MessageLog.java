@@ -19,9 +19,12 @@ import com.google.cloud.datastore.Value;
 
 import voluntier.exceptions.InexistentLogIdException;
 import voluntier.exceptions.InexistentMessageIdException;
+import voluntier.exceptions.InexistentRatingException;
 import voluntier.exceptions.MaximumSizeReachedException;
+import voluntier.util.DB_Rating;
 import voluntier.util.JsonUtil;
 import voluntier.util.eventdata.MessageData;
+import voluntier.util.eventdata.MessageDataReturn;
 
 public class DB_MessageLog {
 	public static final String MESSAGES = "messages";
@@ -88,11 +91,11 @@ public class DB_MessageLog {
 		return out;
 	}
 
-	public static Triplet<Entity, String, Integer> createLogAndAddMessage(String chat_id, int start_index, String email, String username, 
+	public static Triplet<List<Entity>, String, Integer> createLogAndAddMessage(String chat_id, int start_index, String email, String username, 
 			String message) {
 		Pair<Entity, String> newLog = createNew(chat_id, start_index);
 		String message_log_id = newLog.getValue1();
-		Pair<Entity, Integer> updated_log;
+		Pair<List<Entity>, Integer> updated_log;
 
 		updated_log = addMessage(newLog.getValue0().getKey(), newLog.getValue0(), email, username, message);
 		Integer message_id = updated_log.getValue1();
@@ -100,19 +103,24 @@ public class DB_MessageLog {
 		return new Triplet<>(updated_log.getValue0(), message_log_id, message_id);
 	}
 
-	private static Pair<Entity, Integer> addMessage(Key key, Entity log, String email, String username, String message) {
+	private static Pair<List<Entity>, Integer> addMessage(Key key, Entity log, String email, String username, String message) {
 		List<Value<?>> messages = log.getList(MESSAGES);
+		Pair<Entity, String> rating = DB_Rating.createNew();
 
 		ListValue.Builder newList = ListValue.newBuilder().set(messages);
 		int message_id = (int) (log.getLong(START_INDEX) + messages.size());
-		MessageData message_data = new MessageData(email, username, message, Timestamp.now().toString(), message_id, 0);
+		MessageData message_data = new MessageData(email, username, message, Timestamp.now().toString(), message_id, rating.getValue1());
 
 		newList.addValue(JsonUtil.json.toJson(message_data));
+		
+		List<Entity> ents = new LinkedList<>();
+		ents.add(updateMessages(key, log, newList.build()));
+		ents.add(rating.getValue0());
 
-		return new Pair<Entity, Integer>(updateMessages(key, log, newList.build()), message_id);
+		return new Pair<>(ents, message_id);
 	}
 
-	public static Pair<Entity, Integer> addMessage(String log_id, String email, String username, String message)
+	public static Pair<List<Entity>, Integer> addMessage(String log_id, String email, String username, String message)
 			throws InexistentLogIdException, MaximumSizeReachedException {
 		Key idKey = logFactory.newKey(log_id);
 		Entity log = datastore.get(idKey);
@@ -185,8 +193,8 @@ public class DB_MessageLog {
 		return updateMessages(idKey, log, newList.build());
 	}
 
-	public static Entity giveOrRemoveLikeInMessage(String log_id, int message_id)
-			throws InexistentMessageIdException, InexistentLogIdException {
+	public static Entity giveOrRemoveLikeInMessage(String log_id, int message_id, String req_email)
+			throws InexistentMessageIdException, InexistentLogIdException, InexistentRatingException {
 		Key idKey = logFactory.newKey(log_id);
 		Entity log = datastore.get(idKey);
 
@@ -194,43 +202,39 @@ public class DB_MessageLog {
 			throw new InexistentLogIdException();
 
 		List<Value<?>> messages = log.getList(MESSAGES);
-		ListValue.Builder newList = ListValue.newBuilder();
 		Iterator<Value<?>> it = messages.iterator();
 		boolean changed = false;
 
 		while (it.hasNext()) {
 			Value<?> comment = it.next();
 			MessageData comment_data = JsonUtil.json.fromJson((String) comment.get(), MessageData.class);
-
-			if (message_id != comment_data.comment_id)
-				newList.addValue(comment);
-			else {
-				comment_data.likes += 1;
-				newList.addValue(JsonUtil.json.toJson(comment_data));
+			if (message_id == comment_data.comment_id) {
+				log = DB_Rating.giveOrRemoveLike(comment_data.rating_id, req_email);
 				changed = true;
 			}
 		}
 		if (!changed)
 			throw new InexistentMessageIdException("There is no message with id: " + message_id + ".");
 
-		return updateMessages(idKey, log, newList.build());
+		return log;
 	}
 
-	public static List<MessageData> getMessages(String log_id, boolean latest_first) throws InexistentLogIdException {
+	public static List<MessageDataReturn> getMessages(String log_id, boolean latest_first) throws InexistentLogIdException {
 		Key idKey = logFactory.newKey(log_id);
 		Entity log = datastore.get(idKey);
 
 		if (log == null)
-			throw new InexistentLogIdException();
+			throw new InexistentLogIdException("log id invalid");
 
 		List<Value<?>> messages = log.getList(MESSAGES);
-		List<MessageData> out = new LinkedList<>();
+		List<MessageDataReturn> out = new LinkedList<>();
 		messages.forEach(message -> {
 			MessageData message_data = JsonUtil.json.fromJson((String) message.get(), MessageData.class);
+			MessageDataReturn return_data = new MessageDataReturn(message_data);
 			if (latest_first)
-				out.add(0, message_data);
+				out.add(0, return_data);
 			else
-				out.add(message_data);
+				out.add(return_data);
 		});
 
 		return out;

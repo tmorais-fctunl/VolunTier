@@ -23,11 +23,13 @@ import voluntier.exceptions.InexistentChatIdException;
 import voluntier.exceptions.InexistentLogIdException;
 import voluntier.exceptions.InexistentMessageIdException;
 import voluntier.exceptions.InexistentModeratorException;
+import voluntier.exceptions.InexistentRatingException;
 import voluntier.exceptions.InvalidCursorException;
 import voluntier.exceptions.MaximumSizeReachedException;
 import voluntier.exceptions.SomethingWrongException;
 import voluntier.util.JsonUtil;
 import voluntier.util.eventdata.MessageData;
+import voluntier.util.eventdata.MessageDataReturn;
 
 public class DB_Chat {
 	public static final String MLs = "chat_message_logs";
@@ -155,7 +157,7 @@ public class DB_Chat {
 		Entity chat = datastore.get(idKey);
 
 		if (chat == null)
-			throw new InexistentChatIdException();
+			throw new InexistentChatIdException("Chat id invalid");
 
 		List<Entity> ents = new LinkedList<>();
 
@@ -166,17 +168,19 @@ public class DB_Chat {
 		int message_id = -1;
 
 		try {
-			Pair<Entity, Integer> message_log = DB_MessageLog.addMessage(last_log_id, email, username, message);
-			ents.add(message_log.getValue0());
+			Pair<List<Entity>, Integer> message_log = DB_MessageLog.addMessage(last_log_id, email, username, message);
+			List<Entity> logs_ratings = message_log.getValue0();
+			logs_ratings.forEach(e -> ents.add(e));
+			
 			message_id = message_log.getValue1();
 
 		} catch (MaximumSizeReachedException e) {
 			// need to create a new MessageLog and add it to current list with the new message
 			//get the last index from the last log, +1 will be the starting index of the new log
-			List<MessageData> messages = DB_MessageLog.getMessages(last_log_id, false);
+			List<MessageDataReturn> messages = DB_MessageLog.getMessages(last_log_id, false);
 			int new_start_index = messages.get(messages.size() - 1).comment_id + 1;
 
-			Triplet<Entity, String, Integer> new_message_log = DB_MessageLog.createLogAndAddMessage(chat_id,
+			Triplet<List<Entity>, String, Integer> new_message_log = DB_MessageLog.createLogAndAddMessage(chat_id,
 					new_start_index, email, username, message);
 
 			String message_log_id = new_message_log.getValue1();
@@ -184,8 +188,9 @@ public class DB_Chat {
 
 			Entity newChatMessageLogs = addMessageLog(idKey, chat, new MessageLog(message_log_id, new_start_index));
 			ents.add(newChatMessageLogs);
-
-			ents.add(new_message_log.getValue0());
+			
+			List<Entity> logs_ratings = new_message_log.getValue0();
+			logs_ratings.forEach(r -> ents.add(r));
 		}
 
 		return new Pair<>(ents, message_id);
@@ -239,8 +244,8 @@ public class DB_Chat {
 		return newMessageLog;
 	}
 
-	public static Entity giveOrRemoveLikeInMessage(String chat_id, int message_id)
-			throws InexistentChatIdException, InexistentLogIdException, InexistentMessageIdException {
+	public static Entity giveOrRemoveLikeInMessage(String chat_id, int message_id, String req_email)
+			throws InexistentChatIdException, InexistentLogIdException, InexistentMessageIdException, InexistentRatingException {
 
 		Key idKey = chatFactory.newKey(chat_id);
 		Entity chat = datastore.get(idKey);
@@ -250,19 +255,19 @@ public class DB_Chat {
 
 		MessageLog log_data = getMessageLogWithMessageId(chat, message_id);
 
-		Entity newMessageLog = DB_MessageLog.giveOrRemoveLikeInMessage(log_data.id, message_id);
+		Entity newRating = DB_MessageLog.giveOrRemoveLikeInMessage(log_data.id, message_id, req_email);
 
-		return newMessageLog;
+		return newRating;
 	}
 
-	public static Triplet<List<MessageData>, Integer, QueryResultBatch.MoreResultsType> getChat(String chat_id,
+	public static Triplet<List<MessageDataReturn>, Integer, QueryResultBatch.MoreResultsType> getChat(String chat_id,
 			int cursor, boolean latest_first) throws InexistentChatIdException, InvalidCursorException, InexistentLogIdException {
 
 		Key idKey = chatFactory.newKey(chat_id);
 		Entity chat = datastore.get(idKey);
 
 		if (chat == null)
-			throw new InexistentChatIdException();
+			throw new InexistentChatIdException("Chat id invalid");
 
 		List<MessageLog> logs = getMessageLogs(chat);
 
@@ -274,7 +279,7 @@ public class DB_Chat {
 		MessageLog log = logs.get(index);
 		boolean more_results = cursor < logs.size() - 1;
 		
-		List<MessageData> messages = DB_MessageLog.getMessages(log.id, latest_first);
+		List<MessageDataReturn> messages = DB_MessageLog.getMessages(log.id, latest_first);
 		
 		int new_cursor = cursor + 1;
 		

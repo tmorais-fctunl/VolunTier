@@ -29,6 +29,7 @@ import voluntier.exceptions.InexistentUserException;
 import voluntier.exceptions.MaximumSizeReachedException;
 import voluntier.exceptions.RouteAlreadyExistsException;
 import voluntier.exceptions.SomethingWrongException;
+import voluntier.util.DB_Rating;
 import voluntier.util.DB_Util;
 import voluntier.util.GeoHashUtil;
 import voluntier.util.GoogleStorageUtil;
@@ -37,7 +38,6 @@ import voluntier.util.eventdata.DB_Event;
 import voluntier.util.eventdata.chatdata.DB_Chat;
 import voluntier.util.produces.DownloadEventPictureReturn;
 import voluntier.util.produces.DownloadSignedURLReturn;
-import voluntier.util.routedata.rating.DB_Rating;
 import voluntier.util.userdata.State;
 
 public class DB_Route {
@@ -59,8 +59,10 @@ public class DB_Route {
 	private static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	private static KeyFactory routesFactory = datastore.newKeyFactory().setKind("Route");
 
-	private static DB_Util util = new DB_Util((e, builder) -> {
-		builder = Entity.newBuilder(e.getKey())
+	private static DB_Util util = new DB_Util(DB_Route::defaultBuilder);
+	
+	private static void defaultBuilder (Entity e) {
+		util.builder = Entity.newBuilder(e.getKey())
 				.set(ID, e.getString(ID))
 				.set(EVENT_IDS, e.getList(EVENT_IDS))
 				.set(GEOHASH, e.getString(GEOHASH))
@@ -71,7 +73,7 @@ public class DB_Route {
 				.set(RATING_ID, e.getString(RATING_ID))
 				.set(CHAT_ID, e.getString(CHAT_ID))
 				.set(STATE, e.getString(STATE));
-	});
+	}
 
 	private static Key generateRouteKey(List<String> event_ids) throws RouteAlreadyExistsException {
 
@@ -85,6 +87,19 @@ public class DB_Route {
 			throw new RouteAlreadyExistsException("10: A route with the same events in this order already exists");
 
 		return key;
+	}
+	
+	private static String generateNewPictureID(Entity route) {
+		String id = route.getString(ID);
+		int number;
+
+		List<Value<?>> pictures = route.getList(PICTURES);
+		if (pictures.size() > 0)
+			number = (Integer.parseInt(((String) pictures.get(pictures.size() - 1).get()).split(id + "-")[1]) + 1);
+		else
+			number = 1;
+
+		return id + "-" + number;
 	}
 
 	public static Pair<List<Entity>, String> createNew(CreateRouteData create_event_data)
@@ -149,19 +164,6 @@ public class DB_Route {
 			throw new InexistentRouteException("11: No route with id: " + route_id);
 
 		return route;
-	}
-
-	private static String generateNewPictureID(Entity route) {
-		String id = route.getString(ID);
-		int number;
-
-		List<Value<?>> pictures = route.getList(PICTURES);
-		if (pictures.size() > 0)
-			number = (Integer.parseInt(((String) pictures.get(pictures.size() - 1).get()).split(id + "-")[1]) + 1);
-		else
-			number = 1;
-
-		return id + "-" + number;
 	}
 
 	public static List<Entity> getEventsInRoute(Entity route) throws InexistentEventException {
@@ -266,6 +268,16 @@ public class DB_Route {
 
 		String rating_id = route.getString(RATING_ID);
 		Entity rating = DB_Rating.giveRating(rating_id, rating_number, user_email);
+
+		return rating;
+	}
+	
+	public static double getAverageRating(String route_id, String user_email, float rating_number)
+			throws InexistentRouteException, InexistentRatingException {
+		Entity route = getRoute(route_id);
+
+		String rating_id = route.getString(RATING_ID);
+		double rating = DB_Rating.getAverageRating(rating_id);
 
 		return rating;
 	}

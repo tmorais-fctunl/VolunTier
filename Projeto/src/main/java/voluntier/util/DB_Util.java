@@ -2,7 +2,7 @@ package voluntier.util;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import com.google.cloud.datastore.Entity;
@@ -14,21 +14,28 @@ import voluntier.exceptions.AlreadyExistsException;
 import voluntier.exceptions.InexistentElementException;
 
 public class DB_Util {
-	BiConsumer<Entity, Entity.Builder> action;
-	Entity.Builder builder;
+	Consumer<Entity> action;
+	public Entity.Builder builder;
 	
-	public DB_Util(BiConsumer<Entity, Entity.Builder> action) {
+	public DB_Util(Consumer<Entity> action) {
 		this.action = action;
 	}
 	
 	public Entity.Builder getDeafultBuilder(Entity e) {
-		action.accept(e, builder);
+		action.accept(e);
 		return builder;
 	}
 	
-	public <T extends Value<?>> Entity updateProperty(Entity e, String number_property, T newNumber) {
+	public <T extends Value<?>> Entity updateProperty(Entity e, String property_name, T new_value) {
 		getDeafultBuilder(e);
-		return builder.set(number_property, newNumber).build();
+		return builder.set(property_name, new_value).build();
+	}
+	
+	public Entity setStringListProperty(Entity e, String list_property, List<String> list) {
+		ListValue.Builder newList = ListValue.newBuilder();
+		list.forEach(str -> newList.addValue(str));
+		
+		return updateProperty(e, list_property, newList.build());
 	}
 	
 	public static boolean existsInStringList(Entity e, String list_property, String looking_for) {
@@ -69,16 +76,14 @@ public class DB_Util {
 	}
 	
 	public Entity removeStringFromList(Entity e, String list_property, String remElement) throws InexistentElementException {
-		List<Value<?>> current_list = e.getList(list_property);
-		StringValue elem = StringValue.of(remElement);
+		List<String> string_list = getStringList(e, list_property);
 		
-		if (!current_list.contains(elem))
-			throw new InexistentElementException();
+		if (!string_list.contains(remElement))
+			throw new InexistentElementException("Inesistent element in list: " + remElement);
 
-		current_list.remove(elem);
+		string_list.remove(remElement);
 
-		ListValue.Builder newList = ListValue.newBuilder().set(current_list);
-		return updateProperty(e, list_property, newList.build());
+		return setStringListProperty(e, list_property, string_list);
 	}
 	
 	public <T> Entity removeJsonFromList(Entity e, String list_property, T remElement) throws InexistentElementException {

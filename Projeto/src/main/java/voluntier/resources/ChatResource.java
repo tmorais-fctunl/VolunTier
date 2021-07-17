@@ -41,6 +41,7 @@ import voluntier.util.consumes.event.PostCommentData;
 import voluntier.util.consumes.event.UpdateCommentData;
 import voluntier.util.eventdata.DB_Event;
 import voluntier.util.eventdata.MessageData;
+import voluntier.util.eventdata.MessageDataReturn;
 import voluntier.util.produces.ChatReturn;
 import voluntier.util.produces.EventModeratorsReturn;
 import voluntier.util.produces.PostCommentReturn;
@@ -244,7 +245,7 @@ public class ChatResource {
 		try {
 			TokensResource.checkIsValidAccess(data.token, data.email);
 
-			Triplet<List<MessageData>, Integer, MoreResultsType> messages = DB_Event.getChat(data.event_id, data.cursor,
+			Triplet<List<MessageDataReturn>, Integer, MoreResultsType> messages = DB_Event.getChat(data.event_id, data.cursor,
 					data.latest_first, data.email);
 			return Response
 					.ok(JsonUtil.json
