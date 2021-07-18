@@ -21,7 +21,10 @@ function loadEventTab() {
     for (i = 0; i < tabcontent.length; i++) {
         if (tabcontent[i].style.display == "block") {
             console.log(tabcontent[i].id);
-            openedTab = tabcontent[i];
+            if (tabcontent[i].id == "User")
+                openedTab = tabcontent[0];
+            else
+                openedTab = tabcontent[i];
         }
     }
     openedTab.style.display = "none";
@@ -33,3 +36,25 @@ function closeEventTab() {
     document.getElementById("Event").style.display = "none";
     openedTab.style.display = "block";
 }
+
+function loadUserTab() {
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+        if (tabcontent[i].style.display == "block") {
+            console.log(tabcontent[i].id);
+            openedTab = tabcontent[i];
+        }
+    }
+    openedTab.style.display = "none";
+    document.getElementById("User").style.display = "block";
+
+}
+
+function closeUserTab() {
+    document.getElementById("User").style.display = "none";
+    openedTab.style.display = "block";
+}
+
+
+
+

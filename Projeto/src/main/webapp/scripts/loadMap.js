@@ -277,9 +277,15 @@ function loadEventWithID() {
                 const events = attributes.events;
                 console.log("Loading "+events.length+" events.");
                 var obj;
+                var now = new Date();
+                var exp;
                 for (var i = 0; i < events.length; i++) {
                     obj = events[i];
-                    timeOutAddition(obj, i);
+
+                    //Ver se expirou
+                    exp = new Date(attributes.end_date);
+                    //if (exp>now)
+                        timeOutAddition(obj, i);
                     //loadEventMiniature(obj);
                     //loadEvent(obj.event_id, true);
                 }
@@ -314,7 +320,6 @@ function loadEventMiniature(attributes) {
     end = "End: " + end.getDate() + "/" + end.getMonth() + "/" + end.getFullYear() + " " + end.getHours() + ":" + end.getMinutes();
     var contentString = 
         "<p style='text-align: center; font-size: 150%; color: #009999'>" + attributes.name + "</p>" +
-        
         "<p style=\"display:inline-block; text-align: center; margin-left: 4px; font-size:140%\">" + category + "</p>" +
         "<br>" +
         "<label style=\"font-size: 110%; text-align: center \">Event Schedule:</label>" +
@@ -325,8 +330,8 @@ function loadEventMiniature(attributes) {
         "<button class=\"btn btn-primary\" style='margin-bottom: 10px' type = \"button\" onclick = \"loadEvent(\'" + attributes.event_id + "\', false"+")\">View more details</button>";
 
    
-    //side panel content
-    var sideContentString = "<div style='text-align: center; border-style: solid; border-color: white; border-width: 1px; border-radius: 12px; box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px; background-color: #FDFDFD'>" + contentString;
+   
+    var sideContentString = "<div id='eventsectionid_" + attributes.event_id+"' style='text-align: center; border-style: solid; border-color: white; border-width: 1px; border-radius: 12px; box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px; background-color: #FDFDFD'>" + contentString;
     
     //last touches to info window's content
     contentString = "<div style='text-align: center'>" + contentString + "</div>";
@@ -341,7 +346,7 @@ function loadEventMiniature(attributes) {
     let i = markers.length;
 
     //add the content to the side panel with additional touches
-    var goToButton = "<button class=\"btn btn-secondary\" style='margin-left:10px; margin-bottom: 10px' type = \"button\" onclick = \"goToEvent(\'" + i + "\')\">Go to</button>";
+    var goToButton = "<button id=\"gotobutton\" class=\"btn btn-secondary\" style='margin-left:10px; margin-bottom: 10px' type = \"button\" onclick = \"goToEvent(\'" + i + "\')\">Go to</button>";
     sideContentString = sideContentString + goToButton + "</div><br>";
     $("#sidebar_content_event_list").append($(sideContentString));
 
@@ -351,6 +356,11 @@ function goToEvent(i) {
     let marker = markers[i - 1];
     map.panTo(marker.getPosition());
     new google.maps.event.trigger(marker, 'click');
+}
+
+function hideMarker(i) {
+    let marker = markers[i - 1];
+    marker.setVisible(false);
 }
 
 //Requires callback function

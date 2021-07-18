@@ -85,7 +85,7 @@ function requestUserPictureGCS(url) {
     xmlhttp.responseType = "blob";
     xmlhttp.onload = function (oEvent) {
         if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200)) {
-            alert("Couldn't load user image from GCS, message: " + xmlhttp.status);
+            console.log("Couldn't load user image from GCS, message: " + xmlhttp.status);
             return false;
         }
        // var blob = new Blob([xmlhttp.response]);
@@ -110,7 +110,7 @@ function requestUserPicture(username) {
 
     xmlhttp.onload = function (oEvent) {
         if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200)) {
-            alert("Couldn't load user image, message: " + xmlhttp.status);
+            console.log("Couldn't load user image, message: " + xmlhttp.status);
             return false;
         }
         //Other wise...
@@ -154,12 +154,13 @@ window.onload = function () {
         if ($(this).scrollTop() +
             $(this).innerHeight() >=
             $(this)[0].scrollHeight) {
-
-            roamComments(true);
+                roamComments(true);
         }
     });
     $('body').on("keyup", '#newEventComment', function () {
         if ($(this).val() != "") $('#submitCommentBtn').removeAttr('disabled');
         else $('#submitCommentBtn').prop("disabled", true);
     });
+
+    loadUser("tiagoap99morais@gmail.com");
 }

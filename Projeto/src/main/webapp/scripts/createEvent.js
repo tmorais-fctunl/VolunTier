@@ -1,10 +1,13 @@
 var participant_cursor;
-var participant_cursor_limit = -1;
+var participantCursors = [];
 var comments_cursor;
-var comments_cursor_limit = -1;
+var commentsCursors = [];
 var isEditing = false;
 let prevSectionContent = '';
 var isDeleting = false;
+var event_capacity = 0;
+var event_num_participants = 0;
+
 
 
 function countChar(val, id) {
@@ -61,6 +64,7 @@ function createEventRequest() {
             const obj = JSON.parse(xmlhttp.responseText);
             alert("Create event: SUCCESS. Id: " + obj.event_id);
             // localStorage.setItem(obj.event_id, ItemJSON);
+            $('span#disableCreate').trigger('click');
             loadEvent(obj.event_id, true);
             return false;
 
@@ -78,7 +82,11 @@ function fillEventAttributes(attributes) {
     document.getElementById("event_id").innerHTML = attributes.event_id;
     document.getElementById("event_name").innerHTML = attributes.name;
     document.getElementById("event_profile").innerHTML = attributes.profile;
-    document.getElementById("event_joined_capacity").innerHTML = attributes.num_participants +"/"+attributes.capacity;
+    document.getElementById("event_joined_capacity").innerHTML = attributes.num_participants + "/" + attributes.capacity;
+
+    event_capacity = attributes.capacity;
+    event_num_participants = attributes.num_participants;
+
     document.getElementById("event_creator").innerHTML = attributes.owner_email;
     //Remove previous markers and add marker on preview of event
     let location = {
@@ -92,8 +100,9 @@ function fillEventAttributes(attributes) {
     getReverseGeocodingData(location.lat, location.lng, function (address) {
         document.getElementById("event_address").innerHTML = address;
     });
-    
-    
+
+    //handle the join/ask to join button:
+    handleEventMainButton(attributes.status, attributes.profile, attributes.num_participants, attributes.capacity);
 
 
     //date:
@@ -124,16 +133,16 @@ function fillEventAttributes(attributes) {
 
 
     //Participants:
-    participant_cursor = 0;
-    participant_cursor_limit = -1;
-    fillEventParticipants(attributes.event_id, participant_cursor);
+    handleParticipants();
+    
 
 
 
     //Comments:
-    comments_cursor = 0;
-    comments_cursor_limit = -1;
-    fillEventComments(attributes.event_id, comments_cursor)
+    console.log("Are you allowed to comment: " + (attributes.status == "PARTICIPANT" || attributes.status == "OWNER"));
+    newCommentVerification(attributes.status == "PARTICIPANT" || attributes.status == "OWNER");
+    handleComments();
+   
     //Photos:
     
     //The rest
@@ -141,40 +150,348 @@ function fillEventAttributes(attributes) {
 
 
 }
+//Handle comments loads or deloads the comments based on user participation in event, and also enables/disables the comment box
+function handleComments() {
+    let event_id = document.getElementById("event_id").innerHTML;
+    let commentElement = $("#event_comments");
+    commentElement.empty();
+    comments_cursor = 0;
+    commentsCursors = [];
+    commentsCursors.push(0);
+    fillEventComments(event_id, comments_cursor)
+}
+
+function newCommentVerification(canShow) {
+    let new_comment_section = $("#new_comment_section");
+    if (canShow) {
+        console.log("Showing comment box");
+        new_comment_section.html(
+            '<h6 class="mb-0" style="width:100%; text-align:center">Write a Comment</h6>' +
+            '<textarea onkeyup="countChar(this, \'charNumComment\')" style="vertical-align: top; max-width:94%; min-width:94%; margin-left:3%; margin-right:3%; margin-top:4px;" id="newEventComment" name="Your comment" placeholder="Remember all comments are subject to review" rows="4" cols="50" class="createEventFormInput"></textarea>' +
+            '<div id="charNumComment" style="margin-left: 95%; font-size: 80%">500</div>' +
+            '<button style="display:inline-flex; vertical-align:auto; margin:auto; height:auto; width:auto; font-size: 0.7em" id="submitCommentBtn" onclick="submitComment()" disabled="disabled" class="btn btn-primary">Submit</button>'
+        );
+    }
+    else {
+        console.log("Hide comment box");
+        new_comment_section.html('<h6 class="mb-0" style="width:100%; text-align:center">You can not comment as you are not a participant.</h6>');
+    }
+}
+
+function handleParticipants() {
+    let event_id = document.getElementById("event_id").innerHTML;
+    let participantElement = $("#event_participants");
+    participantElement.empty();
+    participant_cursor = 0;
+    participantCursors = [];
+    participantCursors.push(0);
+    fillEventParticipants(event_id, participant_cursor);
+}
+
+/*
+*  When an event is loaded the Join/Ask to join button suffers changes:
+*  if the event is owned by the user, change the button to "Delete" with red button color
+*  if the user participates, change the button to "Leave" with toasted yellow button color. If clicked decrease participant count (Ignore participants row for now)
+*  if the user doesnt participate, change the button to Join keeping the blue color. Can be disabled if its maxed out
+*  Buttons Join and Leave are interchangeable as the user joins or leaves an event
+*  
+*  If the event is private the button changes to "Ask to join", keeping the blue color.
+*  If the user presses it, change it and keep it as "Awaiting aprovance", which when hovered can display "Cancel"
+*/
+function handleEventMainButton(status, profile, num_participants, capacity) {
+    let button = $("#joinBtn");
+    button.attr("disabled", false);
+    button.unbind("mouseenter mouseleave");
+    button.css({
+        width: "",
+        height: ""
+    });
+
+    console.log("In button function");
+
+    //Change to delete if owner:
+    if (status == "OWNER") {
+        button.css("background-color", "red");
+        button.html("Delete");
+        button.attr("onclick", "deleteEvent()");
+        //change onclick to delete
+        return;
+    }
+
+    //Check if private
+    if (profile == "PRIVATE") {
+        if (status == "PARTICIPANT") {
+            button.css("background-color", "#eead2d");
+            button.html("Leave");
+            button.attr("onclick", "leaveEvent(false)");
+            return;
+        }
+        if (status == "NON_PARTICIPANT") {
+            button.css("background-color", "#0aa4ec");
+            button.html("Ask to join");
+            button.attr("onclick", "joinEvent(false)");
+            if (num_participants == capacity)
+                button.attr("disabled", "disabled");
+            return;
+        }
+        if (status == "PENDING") {
+            button.html("Awaiting approvance");
+            button.attr("onclick", "cancelEventJoin(false)");
+            button.css("background-color", "#0aa4ec");
+           
+            button.mouseenter(function () {
+                $(this).css({
+                    width: $(this).outerWidth(),
+                    height: $(this).outerHeight()
+                });
+                $(this).html("Cancel");
+                button.css("background-color", "#999999");
+            }).mouseleave(function () {
+                $(this).html("Awaiting approvance");
+                button.css("background-color", "#0aa4ec");
+            });
+            return;
+        }
+    }
+    else {    
+        if (status == "PARTICIPANT") {
+            button.css("background-color", "#eead2d");
+            button.html("Leave");
+            button.attr("onclick", "leaveEvent(true)");
+            return;
+        }
+        if (status == "NON_PARTICIPANT") {
+            button.css("background-color", "#0aa4ec");
+            button.html("Join");
+            button.attr("onclick", "joinEvent(true)");
+            if (num_participants == capacity)
+                button.attr("disabled", "disabled");
+            return;
+        }
+    }
+
+    return;
+}
+
+function deleteEvent() {
+    let event_id = document.getElementById("event_id").innerHTML;
+    var urlvariable = "/rest/updateEvent/remove"
+    var userId = localStorage.getItem("email"), token = localStorage.getItem("jwt");  
+    var ItemJSON = '{"email": "' + userId +
+        '", "token": "' + token +
+        '", "event_id": "' + event_id +
+        '"}';
+
+        
+    var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //DELETE EVENT REST URL
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.open("POST", URL, false);
+    xmlhttp.setRequestHeader("Content-Type", "application/json");
+    xmlhttp.onload = function (oEvent) {
+        if (!(xmlhttp.readyState == 4 && xmlhttp.status == 204)) {
+            console.log("Couldn't delete event");
+            return;
+        }
+        closeEventTab();
+        //Mais alguma coisa...?
+        //Delete da lista de eventos e do mapa
+        let btnref = "#eventsectionid_" + event_id + " #gotobutton";
+        console.log(btnref);
+        let fnc = $("#eventsectionid_" + event_id + " #gotobutton").attr("onclick");
+        let str = fnc.split("goToEvent(")[1];
+        console.log(str);
+        let markerId = str.charAt(1);
+        hideMarker(markerId);
+        $("#eventsectionid_" + event_id).remove();
+    }
+    xmlhttp.send(ItemJSON);
+
+
+}
+//public true means the event is public, false private.
+function leaveEvent(public) {
+    //Http request:
+
+    let event_id = document.getElementById("event_id").innerHTML;
+    var urlvariable = "/rest/removeParticipant"
+    var userId = localStorage.getItem("email"), token = localStorage.getItem("jwt");
+    var ItemJSON = '{"email": "' + userId +
+        '", "token": "' + token +
+        '", "event_id": "' + event_id +
+        '", "participant": "' + userId +
+        '"}';
+
+
+    var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //LEAVE EVENT REST URL
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.open("POST", URL, false);
+    xmlhttp.setRequestHeader("Content-Type", "application/json");
+    xmlhttp.onload = function (oEvent) {
+        if (!(xmlhttp.readyState == 4 && xmlhttp.status == 204)) {
+            console.log("Couldn't leave event");
+            return;
+        }
+        //Success:
+        let button = $("#joinBtn");
+        button.css("background-color", "#0aa4ec");
+        if (public) {
+            button.html("Join");
+            button.attr("onclick", "joinEvent(true)");
+        }
+        else {
+            button.html("Ask to join");
+            button.attr("onclick", "joinEvent(false)");
+        }
+        event_num_participants--;
+        handleParticipants();
+        handleComments();
+        newCommentVerification(false);
+        document.getElementById("event_joined_capacity").innerHTML = event_num_participants + "/" + event_capacity;
+
+        return;
+
+    }
+    xmlhttp.send(ItemJSON);
+}
+
+function joinEvent(public) {
+    //Http request:
+
+    let event_id = document.getElementById("event_id").innerHTML;
+    var urlvariable = "/rest/participateEvent"
+    var userId = localStorage.getItem("email"), token = localStorage.getItem("jwt");
+    var ItemJSON = '{"email": "' + userId +
+        '", "token": "' + token +
+        '", "event_id": "' + event_id +
+        '"}';
+
+
+    var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //Participate EVENT REST URL
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.open("POST", URL, false);
+    xmlhttp.setRequestHeader("Content-Type", "application/json");
+    xmlhttp.onload = function (oEvent) {
+        if (!(xmlhttp.readyState == 4 && xmlhttp.status == 204)) {
+            console.log("Couldn't join event")
+            return;
+        }
+        let button = $("#joinBtn");
+        if (public) {
+            button.css("background-color", "#eead2d");
+            button.html("Leave");
+            button.attr("onclick", "leaveEvent(true)");
+            event_num_participants++;
+            handleParticipants();
+            handleComments();
+            newCommentVerification(true);
+            document.getElementById("event_joined_capacity").innerHTML = event_num_participants + "/" + event_capacity;
+        }
+        else {
+            button.html("Awaiting approvance");
+            button.attr("onclick", "cancelEventJoin(false)");
+            button.css("background-color", "#0aa4ec");
+            
+            button.mouseenter(function () {
+                $(this).css({
+                    width: $(this).outerWidth(),
+                    height: $(this).outerHeight()
+                });
+                $(this).html("Cancel");
+                $(this).css("background-color", "#999999");
+            }).mouseleave(function () {
+                $(this).html("Awaiting approvance");
+                $(this).css("background-color", "#0aa4ec");
+            });
+        }
+        return;
+
+    }
+    xmlhttp.send(ItemJSON);
+}
+
+function cancelEventJoin(public) {
+    
+
+
+    let event_id = document.getElementById("event_id").innerHTML;
+    var urlvariable = "/rest/declineRequest"
+    var userId = localStorage.getItem("email"), token = localStorage.getItem("jwt");
+    var ItemJSON = '{"email": "' + userId +
+        '", "token": "' + token +
+        '", "event_id": "' + event_id +
+        '", "participant": "' + userId +
+        '"}';
+
+
+    var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //Participate EVENT REST URL
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.open("POST", URL, false);
+    xmlhttp.setRequestHeader("Content-Type", "application/json");
+    xmlhttp.onload = function (oEvent) {
+        if (!(xmlhttp.readyState == 4 && xmlhttp.status == 204)) {
+            console.log("Couldn't cancel join ask event")
+        }
+        let button = $("#joinBtn");
+        button.css("background-color", "#0aa4ec");
+        button.unbind("mouseenter");
+        button.unbind("mouseleave");
+        button.css({
+            width: "",
+            height: ""
+        });
+        if (public) {
+            button.html("Join");
+            button.attr("onclick", "joinEvent(true)");
+        }
+        else {
+            button.html("Ask to join");
+            button.attr("onclick", "joinEvent(false)");
+        }
+        return;
+    }
+    xmlhttp.send(ItemJSON);
+
+
+
+    
+
+
+}
+
+
 
 
 //next is a boolean that when true loads the next participants, when false the previous. for the event
 
 function roamParticipants(next) {
     let event_id = document.getElementById("event_id").innerHTML;
-    console.log("Page hiding: "+participant_cursor);
+    
 
-    if (next && (participant_cursor_limit >= participant_cursor + 1)) {
+    if (next && (participant_cursor + 1 <participantCursors.length)) {
         $("#event_participants_page_" + participant_cursor).hide();
         participant_cursor++;
-        fillEventParticipants(event_id, participant_cursor);
+        fillEventParticipants(event_id, participantCursors[participant_cursor]);
     }
-    else if (!next && (0 <= participant_cursor - 1)) {
+    else if (!next && ((participant_cursor - 1) >= 0)) {
         $("#event_participants_page_" + participant_cursor).hide();
         participant_cursor--;
-        fillEventParticipants(event_id, participant_cursor);
+        fillEventParticipants(event_id, participantCursors[participant_cursor]);
     }    
 }
 
 
 function fillEventParticipants(event_id, cursor) {
 
-    let participantElement = $("#event_participants");
+   let participantElement = $("#event_participants");
     //participantElement.empty();
 
-    //if they are:
+    //if they are loaded:
     if ($("#event_participants_page_" + participant_cursor).length) {
         console.log("Page Showing: " + participant_cursor);
         $("#event_participants_page_" + participant_cursor).show();
         return;
     }
     //else...
-
     //If the participants arent loaded:
 
     var urlvariable = "/rest/getParticipants";
@@ -199,14 +516,8 @@ function fillEventParticipants(event_id, cursor) {
 
         //Fill and update the participants
         let participants = attributes.participants;
-        let results = attributes.results;
-
-        if (results == "NO_MORE_RESULTS")
-            participant_cursor_limit = cursor;
-        else
-            participant_cursor_limit = cursor + 1;
-        let content = '<div id="event_participants_page_' + cursor + '" style="display:inline-block; margin-left: 5px">';
-        console.log("Participants page: " + cursor + " with " + participants.length + " participants");
+        let content = '<div id="event_participants_page_' + participant_cursor + '" style="display:inline-block; margin-left: 5px">';
+        console.log("Participants page: " + participant_cursor + " with " + participants.length + " participants");
         for (i = 0; i < participants.length; i++) {
             content = content.concat('<span style="display:none">' + participants[i].email + '</span>');
             if (participants[i].pic != '')
@@ -215,6 +526,9 @@ function fillEventParticipants(event_id, cursor) {
         }
         content = content.concat('</div>');
         participantElement.append(content);
+        let results = attributes.results;
+        if (results != "NO_MORE_RESULTS")
+            participantCursors.push(attributes.cursor);
     };
     xmlhttp.send(ItemJSON);
 
@@ -224,22 +538,23 @@ function fillEventParticipants(event_id, cursor) {
 }
 
 function roamComments(next) {
+    console.log("Roam activated, commentsCursors length: " + commentsCursors.length);
     let event_id = document.getElementById("event_id").innerHTML;
+    console.log("before cursor: " + comments_cursor);
 
-    if (next && (comments_cursor_limit >= comments_cursor + 1)) {
+    if (next && (comments_cursor + 1 < commentsCursors.length)) {
         comments_cursor++;
-        fillEventComments(event_id, comments_cursor);
+        fillEventComments(event_id, commentsCursors[comments_cursor]);
     }
-    else if (!next && (0 <= comments_cursor - 1)) {
+    /*else if (!next && (0 <= comments_cursor - 1)) {
         comments_cursor--;
         fillEventComments(event_id, comments_cursor);
-    }
-    
+    }*/  
 }
 
 
 function fillEventComments(event_id, cursor) {
-
+    console.log("activated fill with cursor: "+cursor+" 'page' "+ comments_cursor);
     let commentElement = $("#event_comments");
     //commentElement.empty();
 
@@ -269,10 +584,15 @@ function fillEventComments(event_id, cursor) {
         let results = attributes.results;
         var timestamp;
 
-        if (results == "NO_MORE_RESULTS")
-            comments_cursor_limit = cursor;
-        else
-            comments_cursor_limit = cursor + 1;
+        if (results != "NO_MORE_RESULTS")
+            commentsCursors.push(attributes.cursor);
+
+        console.log("I have acquired the comments, and the number of comments is: " + comments.length);
+        console.log("Next cursor is: " + attributes.cursor);
+        if (comments.length == 0) {
+            roamComments(true);
+            return false;
+        }
 
         let deleteEditButtons = '';
         for (i = 0; i < comments.length; i++) {
@@ -284,8 +604,6 @@ function fillEventComments(event_id, cursor) {
                 deleteEditButtons = '<span style="margin-left:5px; display:inline-block"><a href="" style="color:red; font-size: 0.7em" onclick="return deleteComment(\''+comments[i].comment_id+'\')">' + "Delete" + '</a></span>' +
                                     '<span style="margin-left:5px; display:inline-block"><a href="" style="color:blue; font-size: 0.7em" onclick="return editComment(\''+comments[i].comment_id+'\')">' + "Edit" + '</a></span>';
             
-
-
             commentElement.append(
             '<div id="comment_'+comments[i].comment_id+'">'+
                 '<div class="row" style="margin-top:10px">' +
@@ -308,10 +626,8 @@ function fillEventComments(event_id, cursor) {
                 '</div>' +
             '</div>'
             );
+            
         }
-
-
-
     };
     xmlhttp.send(ItemJSON);
 
@@ -415,6 +731,7 @@ function loadEvent(eventID, createInMap) {
         if (!data) {
             alert("Could not load event");
         }
+        
         loadEventTab();
         fillEventAttributes(data);
         if (createInMap)

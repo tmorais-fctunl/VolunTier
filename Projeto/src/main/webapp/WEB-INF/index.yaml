@@ -1,6 +1,0 @@
-indexes:
-
-- kind: Event
-  properties:
-  - name: event_state 
-  - name: event_geohash

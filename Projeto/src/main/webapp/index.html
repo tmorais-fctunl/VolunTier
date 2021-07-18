@@ -25,6 +25,9 @@
             <div class="collapse navbar-collapse" id="navbarToggler30">
                 <ul class="navbar-nav mr-auto mt-2 mt-lg-0" id="indexTab"></ul>
             </div>
+            <a style="font-family: 'Alice', serif; font-size: 15px; color: #000000; letter-spacing: 1px; text-align: center;" id="user_tag"></a>
+            <!--Ver se o user tem imagem, se nao tiver mete com display none-->
+            <img id="user64img" src="" class="rounded-circle" width="30" height="30" style="margin-left: 10px; display:none">
         </nav>
         <section id="Sign-section" class="background-cover bg-dark  pb-5 position-relative pt-5 text-white" style="background-image: url('https://wallpaperaccess.com/full/2580733.jpg'); height: 83.5%;">
             <div class="container loginbox">
@@ -81,6 +84,7 @@
                     loadContent("indexTab", "../pages/contents/loggedTab.html");
                     //$('#login-register-box').remove();
                     //$('#login-registerLink').remove();
+                    $("#user_tag").html(localStorage.username);
                     document.getElementById("login-registerLink").parentElement.style.display="none";
                     document.getElementById("login-register-box").style.display="none";
                 }

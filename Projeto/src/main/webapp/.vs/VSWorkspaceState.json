@@ -1,12 +1,9 @@
 {
   "ExpandedNodes": [
     "",
-    "\\css",
-    "\\latlon-geohash-master",
-    "\\pages",
     "\\pages\\contents",
     "\\scripts"
   ],
-  "SelectedNode": "\\scripts\\createEvent.js",
+  "SelectedNode": "\\scripts\\AppLoading.js",
   "PreviewInSolutionExplorer": false
 }

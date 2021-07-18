@@ -18,6 +18,7 @@ function login() {
         localStorage.setItem("jwt_creation_date", obj.creationDate)
         localStorage.setItem("jwt_expiration_date", obj.expirationDate)
         localStorage.setItem("jwrt_expiration_date", obj.refresh_expirationDate)
+        localStorage.setItem("username", obj.username);
 
 
             $('body').removeClass('waiting');
