@@ -238,7 +238,7 @@ public class EventResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response getParticipants(ParticipantsData data) {
-		LOG.fine("Trying to get event participants: " + data.route_id);
+		LOG.fine("Trying to get event participants: " + data.event_id);
 
 		if (!data.isValid())
 			return Response.status(Status.BAD_REQUEST).build();
@@ -247,7 +247,7 @@ public class EventResource {
 			TokensResource.checkIsValidAccess(data.token, data.email);
 
 			Triplet<List<ParticipantDataReturn>, Integer, MoreResultsType> return_data = DB_Event
-					.getEventLists(data.route_id, data.cursor == null ? 0 : data.cursor, true, null);
+					.getEventLists(data.event_id, data.cursor == null ? 0 : data.cursor, true, null);
 
 			List<ParticipantDataReturn> participants = return_data.getValue0();
 			Integer cursor = return_data.getValue1();

@@ -83,7 +83,7 @@ public class DB_Event {
 
 	public static final int MAX_COMMENT_SIZE = 500;
 	public static final int MAX_NAME_SIZE = 100;
-	public static final int MAX_DSCRIPTION_SIZE = 500;
+	public static final int MAX_DESCRIPTION_SIZE = 500;
 	public static final long DEFAULT_CAPACITY = 100;
 
 	public static final long MAX_PARTICIPANTS_RETURN = 5;

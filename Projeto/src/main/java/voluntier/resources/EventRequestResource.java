@@ -139,7 +139,7 @@ public class EventRequestResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response eventRequestList(ParticipantsData data)
 			throws InvalidTokenException, InexistentChatIdException, InexistentEventException, InexistentUserException {
-		LOG.fine("Trying to list participations from event: " + data.route_id + ". Request from: " + data.email);
+		LOG.fine("Trying to list participations from event: " + data.event_id + ". Request from: " + data.email);
 
 		if (!data.isValid())
 			return Response.status(Status.BAD_REQUEST).build();
@@ -148,13 +148,13 @@ public class EventRequestResource {
 			TokensResource.checkIsValidAccess(data.token, data.email);
 
 			Triplet<List<ParticipantDataReturn>, Integer, MoreResultsType> return_data = DB_Event
-					.getEventLists(data.route_id, data.cursor == null ? 0 : data.cursor, false, data.email);
+					.getEventLists(data.event_id, data.cursor == null ? 0 : data.cursor, false, data.email);
 
 			List<ParticipantDataReturn> requests = return_data.getValue0();
 			Integer cursor = return_data.getValue1();
 			MoreResultsType result = return_data.getValue2();
 
-			LOG.fine("Event: " + data.route_id + " requests presented correctly.");
+			LOG.fine("Event: " + data.event_id + " requests presented correctly.");
 			return Response.ok(JsonUtil.json.toJson(new ParticipantsReturn(requests, cursor, result))).build();
 
 		} catch (InvalidTokenException | InexistentEventException | InexistentUserException

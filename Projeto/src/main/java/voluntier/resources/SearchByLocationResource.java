@@ -31,17 +31,18 @@ import voluntier.util.JsonUtil;
 import voluntier.util.consumes.event.SearchByRange;
 import voluntier.util.eventdata.DB_Event;
 import voluntier.util.produces.SearchEventsReturn;
+import voluntier.util.routedata.DB_Route;
 import voluntier.util.userdata.State;
 
 @Path("/")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
-public class SearchEventResource {
-	private static final Logger LOG = Logger.getLogger(SearchEventResource.class.getName());
+public class SearchByLocationResource {
+	private static final Logger LOG = Logger.getLogger(SearchByLocationResource.class.getName());
 
 	private static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	//private static KeyFactory usersFactory = datastore.newKeyFactory().setKind("User");
 
-	public SearchEventResource() {
+	public SearchByLocationResource() {
 	}
 	
 	@POST
@@ -49,6 +50,31 @@ public class SearchEventResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getEventsInSameRegion(SearchByRange data) {
+		if (!data.isValid())
+			return Response.status(Status.BAD_REQUEST).build();
+
+		try {
+			TokensResource.checkIsValidAccess(data.token, data.email);
+
+			Pair<List<Entity>, String> events = queryEventsByArea(data.location);
+			
+			return Response.ok(JsonUtil.json.toJson(new SearchEventsReturn(events.getValue0(), events.getValue1()))).build();
+			
+		} catch (InvalidTokenException | IllegalCoordinatesException e) {
+			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
+
+		} catch (Exception e) {
+			LOG.severe(e.getMessage());
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+
+		}
+	}
+	
+	@POST
+	@Path("/searchRoutesByRange")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getRoutesInSameRegion(SearchByRange data) {
 		if (!data.isValid())
 			return Response.status(Status.BAD_REQUEST).build();
 
@@ -94,7 +120,7 @@ public class SearchEventResource {
 	// FOR DEBUG ONLY, USE THIS TO ADD/CHANGE PROPERTIES TO ALL EXISTENT USERS
 	@POST
 	@Path("/events/rewrite")
-	public Response rewrite() {
+	public Response rewriteEvents() {
 	
 		Transaction txn = datastore.newTransaction();
 		List<Entity> events = getAllEvents();
@@ -109,8 +135,34 @@ public class SearchEventResource {
 		return Response.ok().build();
 	}
 	
+	// FOR DEBUG ONLY, USE THIS TO ADD/CHANGE PROPERTIES TO ALL EXISTENT USERS
+		@POST
+		@Path("/routes/rewrite")
+		public Response rewriteRoutes() {
+		
+			Transaction txn = datastore.newTransaction();
+			List<Entity> routes = getAllRoutes();
+			
+			routes.forEach(route -> {
+				List<Entity> ents = DB_Route.REWRITE(route);
+				ents.forEach(e -> txn.put(e));
+			});
+			
+			txn.commit();
+			
+			return Response.ok().build();
+		}
+	
 	private List<Entity> getAllEvents(){
-		Builder<Entity> b = Query.newEntityQueryBuilder().setKind("Event");
+		return getAll("Event");
+	}
+	
+	private List<Entity> getAllRoutes(){
+		return getAll("Routes");
+	}
+	
+	private List<Entity> getAll(String type){
+		Builder<Entity> b = Query.newEntityQueryBuilder().setKind(type);
 
 		Query<Entity> query = b.build();
 

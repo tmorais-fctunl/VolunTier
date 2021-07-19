@@ -122,7 +122,7 @@ public class EventData_Minimal {
 	}
 	
 	public static boolean descriptionValid (String description) {
-		return description != null && description != "" && description.length() <= DB_Event.MAX_DSCRIPTION_SIZE;
+		return description != null && description != "" && description.length() <= DB_Event.MAX_DESCRIPTION_SIZE;
 	}
 	
 	public static boolean categoryValid (String category) {

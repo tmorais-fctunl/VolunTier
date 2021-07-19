@@ -3,7 +3,7 @@ package voluntier.util.consumes.route;
 import java.util.List;
 
 import voluntier.util.consumes.RequestData;
-import voluntier.util.eventdata.DB_Event;
+import voluntier.util.routedata.DB_Route;
 
 public class CreateRouteData extends RequestData {
 
@@ -24,11 +24,11 @@ public class CreateRouteData extends RequestData {
 	}
 
 	public boolean nameValid () {
-		return route_name != null && route_name != "" && route_name.length() <= DB_Event.MAX_NAME_SIZE;
+		return route_name != null && route_name != "" && route_name.length() <= DB_Route.MAX_NAME_SIZE;
 	}
 
 	public boolean descriptionValid () {
-		return description != null && description != "" && description.length() <= DB_Event.MAX_DSCRIPTION_SIZE;
+		return description != null && description != "" && description.length() <= DB_Route.MAX_DESCRIPTION_SIZE;
 	}
 	
 	public boolean isValid () {

@@ -69,7 +69,8 @@ public class DB_Route {
 	public static final String DESCRIPTION = "route_description";
 	public static final String NAME = "route_name";
 
-	public static final int MAX_DESCRIPTION_SIZE = 500;
+	public static final int MAX_NAME_SIZE = 100;
+	public static final int MAX_DESCRIPTION_SIZE = 1000;
 	public static final int MAX_PARTICIPANTS_RETURN = 5;
 
 	private static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
@@ -92,6 +93,27 @@ public class DB_Route {
 				.set(CHAT_ID, e.getString(CHAT_ID))
 				.set(NUM_PARTICIPANTS, e.getLong(NUM_PARTICIPANTS))
 				.set(STATE, e.getString(STATE));
+	}
+	
+	public static List<Entity> REWRITE(Entity route) {
+		List<Entity> entities = new LinkedList<>();
+		entities.add(Entity.newBuilder(route.getKey())
+		.set(ID, route.getString(ID))
+		.set(EVENTS, route.getList(EVENTS))
+		.set(GEOHASH, route.getString(GEOHASH))
+		.set(CREATOR, route.getString(CREATOR))
+		.set(DESCRIPTION, route.getString(DESCRIPTION))
+		.set(NAME, route.getString(NAME))
+		.set(CREATION_DATE, route.getTimestamp(CREATION_DATE))
+		.set(PICTURES, route.getList(PICTURES))
+		.set(PARTICIPANTS, route.getList(PARTICIPANTS))
+		.set(RATING_ID, route.getString(RATING_ID))
+		.set(CHAT_ID, route.getString(CHAT_ID))
+		.set(NUM_PARTICIPANTS, route.getLong(NUM_PARTICIPANTS))
+		.set(STATE, route.getString(STATE))
+		.build());
+		
+		return entities;
 	}
 
 	private static Key generateRouteKey(List<String> event_ids) throws RouteAlreadyExistsException {
