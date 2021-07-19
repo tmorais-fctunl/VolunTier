@@ -7,6 +7,7 @@ let prevSectionContent = '';
 var isDeleting = false;
 var event_capacity = 0;
 var event_num_participants = 0;
+var permissions = false;
 
 
 
@@ -84,10 +85,15 @@ function fillEventAttributes(attributes) {
     document.getElementById("event_profile").innerHTML = attributes.profile;
     document.getElementById("event_joined_capacity").innerHTML = attributes.num_participants + "/" + attributes.capacity;
 
+    if (attributes.status == "OWNER")
+        document.getElementById("editEventBtn").style.display = "block";
+    else
+        document.getElementById("editEventBtn").style.display = "none";
+
     event_capacity = attributes.capacity;
     event_num_participants = attributes.num_participants;
 
-    document.getElementById("event_creator").innerHTML = attributes.owner_email;
+    
     //Remove previous markers and add marker on preview of event
     let location = {
         lat: attributes.location[0],
@@ -139,8 +145,12 @@ function fillEventAttributes(attributes) {
 
 
     //Comments:
+    if (attributes.status == "OWNER" || attributes.status == "MOD")
+        permissions = true;
+    else
+        permissions = false;
     console.log("Are you allowed to comment: " + (attributes.status == "PARTICIPANT" || attributes.status == "OWNER"));
-    newCommentVerification(attributes.status == "PARTICIPANT" || attributes.status == "OWNER");
+    newCommentVerification(attributes.status == "PARTICIPANT" || attributes.status == "OWNER" || attributes.status == "MOD");
     handleComments();
    
     //Photos:
@@ -439,7 +449,6 @@ function cancelEventJoin(public) {
             width: "",
             height: ""
         });
-
         if (public) {
             button.html("Join");
             button.attr("onclick", "joinEvent(true)");
@@ -523,7 +532,20 @@ function fillEventParticipants(event_id, cursor) {
             content = content.concat('<span style="display:none">' + participants[i].email + '</span>');
             if (participants[i].pic != '')
                 content = content.concat('<img src="' + participants[i].pic + '" class="rounded-circle userImg" height="20" width="20" style="display: inline-block; margin-left: 5px">');
-            content = content.concat('<span style="display:inline-block; margin-left:5px"><a href="">' + participants[i].username + '</a></span>');
+            if (participants[i].role == "OWNER") {
+                let creator = $("#event_creator");
+                creator.attr("onclick", "return loadUser(\'"+participants[i].email+"\')")
+                creator.html(participants[i].username);
+                creator.css("color", "green");
+
+                content = content.concat('<span style="display:inline-block; margin-left:5px"><i style="font-size: 0.7em; color:yellow; text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000" class="fa fa-star" aria-hidden="true"></i><a style="color: green; margin-left:4px" href="" onclick="return loadUser(\'' + participants[i].email + '\')">' + participants[i].username + '</a></span>');
+            }
+            else if (participants[i].role == "MOD")
+                content = content.concat('<span style="display:inline-block; margin-left:5px"><i style="font-size: 0.7em; color:yellow; text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000" class="fa fa-user-secret" aria-hidden="true"></i><a style="color: blue; margin-left:4px" href="" onclick="return loadUser(\'' + participants[i].email + '\')">' + participants[i].username + '</a></span>');
+            else
+                content = content.concat('<span style="display:inline-block; margin-left:5px"><a href="" onclick="return loadUser(\'' + participants[i].email + '\')">' + participants[i].username + '</a></span>');
+
+            
         }
         content = content.concat('</div>');
         participantElement.append(content);
@@ -559,7 +581,7 @@ function fillEventComments(event_id, cursor) {
     let commentElement = $("#event_comments");
     //commentElement.empty();
 
-    var urlvariable = "/rest/getEventChat";
+    var urlvariable = "/rest/getChat";
     var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //GET COMMENTS EVENT REST URL
     var xmlhttp = new XMLHttpRequest();
     var userId = localStorage.getItem("email"), token = localStorage.getItem("jwt");
@@ -596,14 +618,23 @@ function fillEventComments(event_id, cursor) {
         }
 
         let deleteEditButtons = '';
+        let likes = '';
         for (i = 0; i < comments.length; i++) {
             timestamp = new Date(comments[i].timestamp);
             timestamp = timestamp.getDate() + "/" + timestamp.getMonth() + "/" + timestamp.getFullYear() + " " + timestamp.getHours() + ":" + timestamp.getMinutes();
             
             //Check for user and moderators
             if (comments[i].email == userId)
-                deleteEditButtons = '<span style="margin-left:5px; display:inline-block"><a href="" style="color:red; font-size: 0.7em" onclick="return deleteComment(\''+comments[i].comment_id+'\')">' + "Delete" + '</a></span>' +
-                                    '<span style="margin-left:5px; display:inline-block"><a href="" style="color:blue; font-size: 0.7em" onclick="return editComment(\''+comments[i].comment_id+'\')">' + "Edit" + '</a></span>';
+                deleteEditButtons = '<span style="margin-left:5px; display:inline-block"><a href="" style="color:red; font-size: 0.7em" onclick="return deleteComment(\'' + comments[i].comment_id + '\')">' + "Delete" + '</a></span>' +
+                    '<span style="margin-left:5px; display:inline-block"><a href="" style="color:blue; font-size: 0.7em" onclick="return editComment(\'' + comments[i].comment_id + '\')">' + "Edit" + '</a></span>';
+            else if (permissions)
+                deleteEditButtons = '<span style="margin-left:5px; display:inline-block"><a href="" style="color:red; font-size: 0.7em" onclick="return deleteComment(\'' + comments[i].comment_id + '\')">' + "Delete" + '</a></span>';
+            if (true)
+                likes = '<span id="event_likes" style="margin-left:5px; color:green"><i onclick="return likeDislikeComment(\'' + comments[i].comment_id + '\')" class="fa fa-thumbs-o-up likeBtn" aria-hidden="true"></i>' + " " + comments[i].likes + '</span><div id="delEditBtnsDiv"' + deleteEditButtons + '</div>'
+            else
+                likes = '<span id="event_likes" style="margin-left:5px; color:blue"><i onclick="return likeDislikeComment(\'' + comments[i].comment_id + '\')" class="fa fa-thumbs-o-up likeBtn" aria-hidden="true"></i>' + " " + comments[i].likes + '</span><div id="delEditBtnsDiv"' + deleteEditButtons + '</div>'
+                
+
             
             commentElement.append(
             '<div id="comment_'+comments[i].comment_id+'">'+
@@ -611,7 +642,7 @@ function fillEventComments(event_id, cursor) {
                     '<p id="event_user_email" style="display:none">' + comments[i].email + '</p>' +
                     '<div class="col-sm-6">' +
                             //'<img src="' + participants[i].pic + '" class="rounded-circle userImg" height="20" width="20">' +
-                        '<span id="event_user" style="margin-left:5px"><a href="">' + comments[i].username + '</a><span>' +
+                '<span id="event_user" style="margin-left:5px"><a href="" onclick="return loadUser(\'' + comments[i].email + '\')">' + comments[i].username + '</a><span>' +
                         '<span id="event_timestamp" style="color: lightgray; display: inline; margin-left:5px">' + timestamp + '</span>' +
                     '</div>' +
                 '</div>' +
@@ -622,19 +653,31 @@ function fillEventComments(event_id, cursor) {
                 '</div>' +
                 '<div class="row">' +
                     '<div class="col-sm-12">' +
-                        '<span  id="event_likes" style="margin-left:5px; color:blue">' + "Likes " + comments[i].likes + '</span><div id="delEditBtnsDiv"' + deleteEditButtons + '</div>' +
+                        likes +
                     '</div>' +
                 '</div>' +
             '</div>'
             );
             
         }
+        handleLikes(event_id);
     };
     xmlhttp.send(ItemJSON);
 
 
 
 
+}
+
+function handleLikes(event_id) {
+    let comments = $("#event_comments").children();
+    var commentid;
+    for (i = 0; i < comments.length; i++) {
+        commentid = comments[i].id;
+        let like = $("#"+commentid+" #event_likes i");
+        like.css("color","blue");
+        console.log(like);
+    }
 }
 
 function submitComment() {
@@ -728,16 +771,22 @@ function getEvent(eventID, callback) {
 
 //CreateInMap is a flag to determine if it should create the marker in the maps window
 function loadEvent(eventID, createInMap) {
+    $("body").css("cursor", "progress");
     getEvent(eventID, function (data) {
         if (!data) {
             alert("Could not load event");
         }
-        
-        loadEventTab();
-        fillEventAttributes(data);
-        if (createInMap)
-            loadEventMiniature(data);
+        else {
+            loadEventTab(eventID);
+            fillEventAttributes(data);
+
+            if (createInMap)
+                loadEventMiniature(data);
+            
+        }
+        $("body").css("cursor", "default");
     });
+    return false;
 }
 
 function deleteComment(comment_id) {
@@ -869,4 +918,11 @@ function submitEdit(comment_id) {
 
     };
     xmlhttp.send(ItemJSON);
+}
+
+function editEvent() {
+    $('#Event .editable').each(function () {
+        // console.log($(this.value));
+        $(this).attr("contenteditable", "true");
+    });
 }

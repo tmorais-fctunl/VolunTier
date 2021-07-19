@@ -240,7 +240,7 @@ function loadEventWithID() {
                 lng: position.coords.longitude,
             };*/
 
-
+    $("body").css("cursor", "progress");
     let pos = map.getCenter();
     let bounds = map.getBounds();
     let ne = bounds.getNorthEast().lat();
@@ -271,6 +271,8 @@ function loadEventWithID() {
             xmlhttp.onload = function (oEvent) {
                 if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200)) {
                     alert("Couldn't load events, message: " + xmlhttp.status);
+                    
+                    $("body").css("cursor", "default");
                     return false;
                 }
                 const attributes = JSON.parse(xmlhttp.responseText);
@@ -290,6 +292,7 @@ function loadEventWithID() {
                     //loadEvent(obj.event_id, true);
                 }
                 geoHashArray.push(attributes.region_hash);
+                $("body").css("cursor", "default");
             };
             xmlhttp.send(ItemJSON);
 

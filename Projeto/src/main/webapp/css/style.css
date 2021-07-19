@@ -241,4 +241,14 @@ div.createEvent label:after {
     border-radius: 12px;
 }
 
+.likeBtn {
+
+}
+.likeBtn:hover {
+    cursor: pointer;
+
+}
+
+.eventInfo {
+
 }

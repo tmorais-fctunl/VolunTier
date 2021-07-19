@@ -1,3 +1,6 @@
+var tabStack = [];
+var openedTab;
+var tabPrev;
 function openTab(evt, tab) {
     var i, tabcontent, tablinks;
     tabcontent = document.getElementsByClassName("tabcontent");
@@ -10,49 +13,65 @@ function openTab(evt, tab) {
     }
     document.getElementById(tab).style.display = "block";
     evt.currentTarget.className += " active";
+    tabstack = [];
+    openedTab = document.getElementById(tab);
+    tabPrev = openedTab.id;
+ 
 }
 
 // Get the element with id="defaultOpen" and click on it
 document.getElementById("defaultOpen").click();
 
-var openedTab;
-function loadEventTab() {
-    tabcontent = document.getElementsByClassName("tabcontent");
-    for (i = 0; i < tabcontent.length; i++) {
-        if (tabcontent[i].style.display == "block") {
-            console.log(tabcontent[i].id);
-            if (tabcontent[i].id == "User")
-                openedTab = tabcontent[0];
-            else
-                openedTab = tabcontent[i];
-        }
-    }
-    openedTab.style.display = "none";
-    document.getElementById("Event").style.display = "block";
 
+function loadEventTab(id) {
+    openedTab.style.display = "none";
+    document.getElementById(tabPrev).style.display = "none";
+    document.getElementById("Event").style.display = "block";
+    tabStack.push({ Tab: "Event", id: id });
+    tabPrev = "Event";
 }
 
 function closeEventTab() {
     document.getElementById("Event").style.display = "none";
-    openedTab.style.display = "block";
+    tabStack.pop();
+    let openPrev;
+    if (tabStack.length == 0) 
+        openedTab.style.display = "block";
+    else {
+        openPrev = tabStack.pop();
+        let tab = openPrev.Tab;
+        document.getElementById(openPrev.Tab).style.display = "block";
+        if (tab == "Event")
+            loadEvent(openPrev.id);
+        else if (tab == "User")
+            loadUser(openPrev.id);
+    }
 }
 
-function loadUserTab() {
-    tabcontent = document.getElementsByClassName("tabcontent");
-    for (i = 0; i < tabcontent.length; i++) {
-        if (tabcontent[i].style.display == "block") {
-            console.log(tabcontent[i].id);
-            openedTab = tabcontent[i];
-        }
-    }
+function loadUserTab(id) {
     openedTab.style.display = "none";
+    document.getElementById(tabPrev).style.display = "none";
     document.getElementById("User").style.display = "block";
+    tabStack.push({ Tab: "User", id: id });
+    tabPrev = "User";
 
 }
 
 function closeUserTab() {
     document.getElementById("User").style.display = "none";
-    openedTab.style.display = "block";
+    tabStack.pop();
+    let openPrev;
+    if (tabStack.length == 0)
+        openedTab.style.display = "block";
+    else {
+        openPrev = tabStack.pop();
+        let tab = openPrev.Tab;
+        document.getElementById(openPrev.Tab).style.display = "block";
+        if (tab == "Event")
+            loadEvent(openPrev.id);
+        else if (tab == "User")
+            loadUser(openPrev.id);
+    }
 }
 
 

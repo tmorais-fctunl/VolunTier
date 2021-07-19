@@ -64,6 +64,8 @@ function requestUserInfo() {
 
             //request picture
             requestUserPicture(obj.username);
+            loadProfileEvents(obj.email);
+            loadProfileParticipatingEvents(obj.email);
 
             updateEditInputs();
         }
@@ -136,6 +138,38 @@ function requestUserPicture(username) {
     xmlhttp.send(ItemJSON);
 }
 
+function loadProfileEvents(username) {
+    getUserEvents(username, function (obj) {
+        let event_section = $("#profile_events");
+        let events = obj.events;
+        var event, content;
+        for (i = 0; i < events.length; i++) {
+            event = events[i];
+            content = '<div class="row">' +
+                '<a href="" id="profile_event_' + event + '" onclick="return loadEvent(\'' + event + '\', false)">' + event + '</a></div>';
+            event_section.append(content);
+        }
+
+    });
+
+}
+
+function loadProfileParticipatingEvents(username) {
+    getUserParticipatingEvents(username, function (obj) {
+        let event_section = $("#profile_participating_events");
+        let events = obj.events;
+        var event, content;
+        for (i = 0; i < events.length; i++) {
+            event = events[i];
+            content = '<div class="row">' +
+                '<a href="" id="profile_participating_event_' + event + '" onclick="return loadEvent(\'' + event + '\', false)">' + event + '</a></div>';
+            event_section.append(content);
+        }
+
+    });
+}
+
+
 
 window.onload = function () {
     // For debugging purposes: loadContents();
@@ -162,5 +196,5 @@ window.onload = function () {
         else $('#submitCommentBtn').prop("disabled", true);
     });
 
-    loadUser("tiagoap99morais@gmail.com");
+    //loadUser("tiagoap99morais@gmail.com");
 }

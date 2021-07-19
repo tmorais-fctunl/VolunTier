@@ -1,4 +1,5 @@
 function loadUser(user_id) {
+    $("body").css("cursor", "progress");
     var urlvariable = "/rest/user";
     var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //LookUp REST URL
     var xmlhttp = new XMLHttpRequest();
@@ -12,6 +13,7 @@ function loadUser(user_id) {
     xmlhttp.onload = function (oEvent) {
         if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200)) {
             alert("Could not load user info, message: " + xmlhttp.status);
+            $("body").css("cursor", "default");
             return false;
         }
         //Success:
@@ -52,8 +54,14 @@ function loadUser(user_id) {
         });
         //request picture
         requestOtherUserPicture(obj.username);
+        loadUserEvents(obj.email);
+        loadUserParticipatingEvents(obj.email);
+        loadUserTab(user_id);
+        $("body").css("cursor", "default");
+       
     }
-    xmlhttp.send(ItemJSON); 
+    xmlhttp.send(ItemJSON);
+    return false;
 }
 
 function requestOtherUserPictureGCS(url) {
@@ -94,4 +102,81 @@ function requestOtherUserPicture(username) {
         requestOtherUserPictureGCS(cloudURL);
     }
     xmlhttp.send(ItemJSON);
+}
+
+function getUserEvents(username, callback) {
+    var urlvariable = "/rest/user/events"
+    var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //LookUp REST URL
+    var xmlhttp = new XMLHttpRequest();
+    var userId = localStorage.getItem("email"), token = localStorage.getItem("jwt");
+    var ItemJSON = '{"email": "' + userId +
+        '", "token": "' + token +
+        '", "target": "' + username +
+        '"}';
+    xmlhttp.open("POST", URL, true);
+    xmlhttp.setRequestHeader("Content-Type", "application/json");
+    xmlhttp.onload = function (oEvent) {
+        if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200)) {
+            console.log("Couldn't load user events, message: " + xmlhttp.status);
+            return false;
+        }
+        const obj = JSON.parse(xmlhttp.responseText);
+        callback(obj);
+
+    }
+    xmlhttp.send(ItemJSON);
+}
+
+function getUserParticipatingEvents(username, callback) {
+    var urlvariable = "/rest/user/participatingEvents"
+    var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //LookUp REST URL
+    var xmlhttp = new XMLHttpRequest();
+    var userId = localStorage.getItem("email"), token = localStorage.getItem("jwt");
+    var ItemJSON = '{"email": "' + userId +
+        '", "token": "' + token +
+        '", "target": "' + username +
+        '"}';
+    xmlhttp.open("POST", URL, true);
+    xmlhttp.setRequestHeader("Content-Type", "application/json");
+    xmlhttp.onload = function (oEvent) {
+        if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200)) {
+            console.log("Couldn't load user participating events, message: " + xmlhttp.status);
+            return false;
+        }
+        const obj = JSON.parse(xmlhttp.responseText);
+        callback(obj);
+
+    }
+    xmlhttp.send(ItemJSON);
+}
+
+function loadUserEvents(username) {
+    getUserEvents(username, function (obj) {
+        let event_section = $("#user_events");
+        let events = obj.events;
+        var event, content;
+        for (i = 0; i < events.length; i++) {
+            event = events[i];
+            content = '<div class="row">' +
+                '<a href="" id="user_event_' + event + '" onclick="return loadEvent(\'' + event + '\', false)">' + event + '</a></div>';
+            event_section.append(content);
+        }
+
+    });
+
+}
+
+function loadUserParticipatingEvents(username) {
+    getUserParticipatingEvents(username, function (obj) {
+        let event_section = $("#user_participating_events");
+        let events = obj.events;
+        var event, content;
+        for (i = 0; i < events.length; i++) {
+            event = events[i];
+            content = '<div class="row">' +
+                '<a href="" id="user_participating_event_' + event + '" onclick="return loadEvent(\'' + event + '\', false)">' + event + '</a></div>';
+            event_section.append(content);
+        }
+
+    });
 }
