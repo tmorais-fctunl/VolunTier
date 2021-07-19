@@ -42,12 +42,12 @@ import voluntier.util.consumes.event.EventParticipantsData;
 import voluntier.util.consumes.event.ParticipantData;
 import voluntier.util.consumes.event.UserEventsData;
 import voluntier.util.eventdata.DB_Event;
-import voluntier.util.eventdata.EventParticipantData;
+import voluntier.util.eventdata.ParticipantDataReturn;
 import voluntier.util.produces.CreateEventReturn;
 import voluntier.util.produces.DownloadEventPictureReturn;
 import voluntier.util.produces.EventDataReturn;
 import voluntier.util.produces.EventParticipantsReturn;
-import voluntier.util.produces.EventPicturesReturn;
+import voluntier.util.produces.PicturesReturn;
 import voluntier.util.produces.PresenceCodeReturn;
 import voluntier.util.produces.UploadEventPictureReturn;
 import voluntier.util.produces.UserEventsReturn;
@@ -132,7 +132,7 @@ public class EventResource {
 		try {
 			TokensResource.checkIsValidAccess(data.token, data.email);
 
-			List<Entity> ents = DB_Event.participateInEvent(data.event_id, data.email);
+			List<Entity> ents = DB_Event.participateInEvent(data.event_id, data.email, false);
 			
 			ents.forEach(e -> txn.put(e));
 			
@@ -218,8 +218,8 @@ public class EventResource {
 		try {
 			TokensResource.checkIsValidAccess(data.token, data.email);
 
-			Triplet<Entity, StatusEvent, String> event = DB_Event.getEvent(data.event_id, data.email);
-			List<DownloadEventPictureReturn> download_urls = DB_Event.getPicturesURLs(event.getValue0());
+			Triplet<Entity, ParticipantStatus, String> event = DB_Event.getEvent(data.event_id, data.email);
+			List<DownloadEventPictureReturn> download_urls = DB_Event.getPicturesDownloadURLs(event.getValue0());
 
 			return Response.ok(JsonUtil.json.toJson(new EventDataReturn(
 					event.getValue0(), download_urls, event.getValue1(), event.getValue2()))).build();
@@ -246,10 +246,10 @@ public class EventResource {
 		try {
 			TokensResource.checkIsValidAccess(data.token, data.email);
 
-			Triplet<List<EventParticipantData>, Integer, MoreResultsType> return_data = DB_Event
+			Triplet<List<ParticipantDataReturn>, Integer, MoreResultsType> return_data = DB_Event
 					.getEventLists(data.event_id, data.cursor == null ? 0 : data.cursor, true, null);
 
-			List<EventParticipantData> participants = return_data.getValue0();
+			List<ParticipantDataReturn> participants = return_data.getValue0();
 			Integer cursor = return_data.getValue1();
 			MoreResultsType result = return_data.getValue2();
 
@@ -409,9 +409,9 @@ public class EventResource {
 		try {
 			TokensResource.checkIsValidAccess(data.token, data.email);
 
-			List<DownloadEventPictureReturn> download_urls = DB_Event.getPicturesURLs(data.event_id);
+			List<DownloadEventPictureReturn> download_urls = DB_Event.getPicturesDownloadURLs(data.event_id);
 
-			return Response.ok(JsonUtil.json.toJson(new EventPicturesReturn(download_urls))).build();
+			return Response.ok(JsonUtil.json.toJson(new PicturesReturn(download_urls))).build();
 
 		} catch (InvalidTokenException | InexistentEventException e) {
 			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();

@@ -30,7 +30,7 @@ import voluntier.util.JsonUtil;
 import voluntier.util.consumes.event.EventParticipantsData;
 import voluntier.util.consumes.event.ParticipantData;
 import voluntier.util.eventdata.DB_Event;
-import voluntier.util.eventdata.EventParticipantData;
+import voluntier.util.eventdata.ParticipantDataReturn;
 import voluntier.util.produces.EventParticipantsReturn;
 import voluntier.util.userdata.DB_User;
 
@@ -69,9 +69,9 @@ public class EventRequestResource {
 				return Response.status(Status.FORBIDDEN).build();
 			}
 
-			Entity event = DB_Event.acceptRequest(data.event_id, data.participant, data.email);
-
-			txn.put(event);
+			List<Entity> ents = DB_Event.acceptRequest(data.event_id, data.participant, data.email);
+			ents.forEach(e -> txn.put(e));
+			
 			txn.commit();
 
 			LOG.fine("User " + data.participant + " inserted in event correctly.");
@@ -147,10 +147,10 @@ public class EventRequestResource {
 		try {
 			TokensResource.checkIsValidAccess(data.token, data.email);
 
-			Triplet<List<EventParticipantData>, Integer, MoreResultsType> return_data = DB_Event
+			Triplet<List<ParticipantDataReturn>, Integer, MoreResultsType> return_data = DB_Event
 					.getEventLists(data.event_id, data.cursor == null ? 0 : data.cursor, false, data.email);
 
-			List<EventParticipantData> requests = return_data.getValue0();
+			List<ParticipantDataReturn> requests = return_data.getValue0();
 			Integer cursor = return_data.getValue1();
 			MoreResultsType result = return_data.getValue2();
 

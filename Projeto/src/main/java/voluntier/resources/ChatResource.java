@@ -40,7 +40,6 @@ import voluntier.util.consumes.event.ChatModeratorData;
 import voluntier.util.consumes.event.PostCommentData;
 import voluntier.util.consumes.event.UpdateCommentData;
 import voluntier.util.eventdata.DB_Event;
-import voluntier.util.eventdata.MessageData;
 import voluntier.util.eventdata.MessageDataReturn;
 import voluntier.util.produces.ChatReturn;
 import voluntier.util.produces.EventModeratorsReturn;

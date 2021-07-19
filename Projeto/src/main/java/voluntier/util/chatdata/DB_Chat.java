@@ -1,6 +1,5 @@
-package voluntier.util.eventdata.chatdata;
+package voluntier.util.chatdata;
 
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -18,8 +17,10 @@ import com.google.cloud.datastore.Value;
 import com.google.datastore.v1.QueryResultBatch;
 import com.google.datastore.v1.QueryResultBatch.MoreResultsType;
 
+import voluntier.exceptions.AlreadyExistsException;
 import voluntier.exceptions.ImpossibleActionException;
 import voluntier.exceptions.InexistentChatIdException;
+import voluntier.exceptions.InexistentElementException;
 import voluntier.exceptions.InexistentLogIdException;
 import voluntier.exceptions.InexistentMessageIdException;
 import voluntier.exceptions.InexistentModeratorException;
@@ -27,6 +28,7 @@ import voluntier.exceptions.InexistentRatingException;
 import voluntier.exceptions.InvalidCursorException;
 import voluntier.exceptions.MaximumSizeReachedException;
 import voluntier.exceptions.SomethingWrongException;
+import voluntier.util.DB_Util;
 import voluntier.util.JsonUtil;
 import voluntier.util.eventdata.MessageData;
 import voluntier.util.eventdata.MessageDataReturn;
@@ -39,6 +41,16 @@ public class DB_Chat {
 
 	private static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	private static KeyFactory chatFactory = datastore.newKeyFactory().setKind("Chat");
+	
+	private static DB_Util util = new DB_Util(DB_Chat::defaultBuilder);
+	
+	private static void defaultBuilder(Entity chat) {
+		util.builder = Entity.newBuilder(chat.getKey())
+				.set(ID, chat.getString(ID))
+				.set(MODS, chat.getList(MODS))
+				.set(MLs, chat.getList(MLs))
+				.set(ADMIN, chat.getString(ADMIN));
+	}
 
 	private static Key generateChatID() {
 		Random rand = new Random();
@@ -60,104 +72,57 @@ public class DB_Chat {
 		message_logs.addValue(JsonUtil.json.toJson(new MessageLog(message_log.getValue1(), 0)));
 
 		List<Entity> ents = new LinkedList<>();
-		ents.add(Entity.newBuilder(idKey).set(ID, idKey.getName()).set(MODS, moderators.build())
-				.set(MLs, message_logs.build()).set(ADMIN, admin_email).build());
+		ents.add(Entity.newBuilder(idKey)
+				.set(ID, idKey.getName())
+				.set(MODS, moderators.build())
+				.set(MLs, message_logs.build())
+				.set(ADMIN, admin_email)
+				.build());
+		
 		ents.add(message_log.getValue0());
 
 		return new Pair<>(ents, idKey.getName());
 	}
 
 	private static Entity addMessageLog(Key key, Entity chat, MessageLog data) {
-		List<Value<?>> messages = chat.getList(MLs);
-
-		ListValue.Builder newList = ListValue.newBuilder().set(messages);
-		newList.addValue(JsonUtil.json.toJson(data));
-
-		return Entity.newBuilder(key).set(ID, chat.getString(ID)).set(MODS, chat.getList(MODS))
-				.set(MLs, newList.build()).set(ADMIN, chat.getString(ADMIN)).build();
+		return util.addJsonToList(chat, MLs, data);
 	}
 
-	private static Entity updateModeratorList(Key key, Entity chat, ListValue list) {
-		return Entity.newBuilder(key).set(ID, chat.getString(ID)).set(MODS, list).set(MLs, chat.getList(MLs))
-				.set(ADMIN, chat.getString(ADMIN)).build();
-	}
-
-	private static Entity addModerator(Key key, Entity chat, String email) {
-		List<Value<?>> mods = chat.getList(MODS);
-
-		ListValue.Builder newList = ListValue.newBuilder().set(mods);
-		newList.addValue(email);
-
-		return updateModeratorList(key, chat, newList.build());
+	private static Entity addModerator(Key key, Entity chat, String email) throws AlreadyExistsException {
+		return util.addUniqueStringToList(chat, MLs, email);
 	}
 
 	private static Entity removeModerator(Key key, Entity chat, String email) throws InexistentModeratorException {
-
-		List<Value<?>> mods = chat.getList(MODS);
-		ListValue.Builder newList = ListValue.newBuilder();
-		Iterator<Value<?>> it = mods.iterator();
-
-		boolean changed = false;
-		while (it.hasNext()) {
-			Value<?> mod = it.next();
-			String mod_email = (String) mod.get();
-			if (!email.equals(mod_email)) {
-				newList.addValue(mod);
-			} else
-				changed = true;
-		}
-
-		if (!changed)
+		try {
+			return util.removeStringFromList(chat, MODS, email);
+		} catch (InexistentElementException e) {
 			throw new InexistentModeratorException();
-
-		return updateModeratorList(key, chat, newList.build());
+		}
 	}
 
 	private static MessageLog getLastMessageLog(Entity chat) {
 		List<Value<?>> message_logs = chat.getList(MLs);
 		Value<?> last_log = message_logs.get(message_logs.size() - 1);
 		MessageLog last_log_data = JsonUtil.json.fromJson((String) last_log.get(), MessageLog.class);
-
+		
 		return last_log_data;
 	}
 
 	private static MessageLog getMessageLogWithMessageId(Entity chat, Integer message_id) {
-		List<MessageLog> message_logs = getMessageLogs(chat);
-		MessageLog message_log = null;
-
-		for (MessageLog ml : message_logs) {
-			if (ml.start_index <= message_id)
-				message_log = ml;
-			else 
-				break;
-		}
-			
-		return message_log;
+		return DB_Util.findLastInJsonList(chat, MLs, (ml -> ml.start_index <= message_id) , MessageLog.class);
 	}
 
 	private static List<MessageLog> getMessageLogs(Entity chat) {
-		List<Value<?>> message_logs = chat.getList(MLs);
-		List<MessageLog> logs = new LinkedList<>();
-		message_logs.forEach(log -> logs.add(JsonUtil.json.fromJson((String) log.get(), MessageLog.class)));
-
-		return logs;
+		return DB_Util.getJsonList(chat, MLs, MessageLog.class);
 	}
 
 	private static List<String> getModeratorList(Entity chat) {
-		List<Value<?>> moderators = chat.getList(MODS);
-		List<String> mods = new LinkedList<>();
-		moderators.forEach(mod -> mods.add((String) mod.get()));
-
-		return mods;
+		return DB_Util.getStringList(chat, MODS);
 	}
 
 	public static Pair<List<Entity>, Integer> postMessage(String chat_id, String email, String username, String message)
 			throws InexistentChatIdException, InexistentLogIdException, SomethingWrongException {
-		Key idKey = chatFactory.newKey(chat_id);
-		Entity chat = datastore.get(idKey);
-
-		if (chat == null)
-			throw new InexistentChatIdException("Chat id invalid");
+		Entity chat = getChat(chat_id);
 
 		List<Entity> ents = new LinkedList<>();
 
@@ -169,8 +134,8 @@ public class DB_Chat {
 
 		try {
 			Pair<List<Entity>, Integer> message_log = DB_MessageLog.addMessage(last_log_id, email, username, message);
-			List<Entity> logs_ratings = message_log.getValue0();
-			logs_ratings.forEach(e -> ents.add(e));
+			List<Entity> logs_and_ratings = message_log.getValue0();
+			logs_and_ratings.forEach(e -> ents.add(e));
 			
 			message_id = message_log.getValue1();
 
@@ -186,7 +151,7 @@ public class DB_Chat {
 			String message_log_id = new_message_log.getValue1();
 			message_id = new_message_log.getValue2();
 
-			Entity newChatMessageLogs = addMessageLog(idKey, chat, new MessageLog(message_log_id, new_start_index));
+			Entity newChatMessageLogs = addMessageLog(chat.getKey(), chat, new MessageLog(message_log_id, new_start_index));
 			ents.add(newChatMessageLogs);
 			
 			List<Entity> logs_ratings = new_message_log.getValue0();
@@ -198,20 +163,13 @@ public class DB_Chat {
 
 	public static Entity deleteMessage(String chat_id, int message_id, String email) throws InexistentChatIdException,
 			InexistentLogIdException, InexistentMessageIdException, ImpossibleActionException {
+		Entity chat = getChat(chat_id);
 
-		Key idKey = chatFactory.newKey(chat_id);
-		Entity chat = datastore.get(idKey);
-
-		if (chat == null)
-			throw new InexistentChatIdException("inexistent chat");
-
-		System.out.println(1);
 		if(message_id < 0)
 			throw new InexistentMessageIdException("inexistent message");
 
 		MessageLog log_data = getMessageLogWithMessageId(chat, message_id);
 
-		System.out.println(log_data.id + log_data.start_index);
 		MessageData message = DB_MessageLog.getMessage(log_data.id, message_id);
 
 		List<String> mods = getModeratorList(chat);
@@ -226,12 +184,7 @@ public class DB_Chat {
 	public static Entity editMessage(String chat_id, int message_id, String email, String new_message)
 			throws InexistentChatIdException, InexistentLogIdException, InexistentMessageIdException,
 			ImpossibleActionException {
-
-		Key idKey = chatFactory.newKey(chat_id);
-		Entity chat = datastore.get(idKey);
-
-		if (chat == null)
-			throw new InexistentChatIdException();
+		Entity chat = getChat(chat_id);
 
 		MessageLog log_data = getMessageLogWithMessageId(chat, message_id);
 
@@ -246,12 +199,7 @@ public class DB_Chat {
 
 	public static Entity giveOrRemoveLikeInMessage(String chat_id, int message_id, String req_email)
 			throws InexistentChatIdException, InexistentLogIdException, InexistentMessageIdException, InexistentRatingException {
-
-		Key idKey = chatFactory.newKey(chat_id);
-		Entity chat = datastore.get(idKey);
-
-		if (chat == null)
-			throw new InexistentChatIdException();
+		Entity chat = getChat(chat_id);
 
 		MessageLog log_data = getMessageLogWithMessageId(chat, message_id);
 
@@ -263,11 +211,7 @@ public class DB_Chat {
 	public static Triplet<List<MessageDataReturn>, Integer, QueryResultBatch.MoreResultsType> getChat(String chat_id,
 			int cursor, boolean latest_first) throws InexistentChatIdException, InvalidCursorException, InexistentLogIdException {
 
-		Key idKey = chatFactory.newKey(chat_id);
-		Entity chat = datastore.get(idKey);
-
-		if (chat == null)
-			throw new InexistentChatIdException("Chat id invalid");
+		Entity chat = getChat(chat_id);
 
 		List<MessageLog> logs = getMessageLogs(chat);
 
@@ -288,6 +232,9 @@ public class DB_Chat {
 			more_results = cursor < logs.size() - 2;
 			new_cursor = cursor + 2;
 		}
+		
+		if(more_results && messages.size() == 0)
+			return getChat(chat_id, new_cursor, latest_first);
 
 		return new Triplet<>(messages, more_results ? new_cursor : null,
 				more_results ? MoreResultsType.MORE_RESULTS_AFTER_LIMIT : MoreResultsType.NO_MORE_RESULTS);
@@ -296,49 +243,41 @@ public class DB_Chat {
 	public static Entity makeModerator(String chat_id, String target_email, String req_email)
 			throws InexistentChatIdException, ImpossibleActionException {
 
-		Key idKey = chatFactory.newKey(chat_id);
-		Entity chat = datastore.get(idKey);
+		Entity chat = getChat(chat_id);
 
-		if (chat == null)
-			throw new InexistentChatIdException();
-
-		List<String> mods = getModerators(chat_id);
-		if (mods.contains(target_email) || !req_email.equals(chat.getString(ADMIN)))
+		if (!req_email.equals(chat.getString(ADMIN)))
 			throw new ImpossibleActionException();
 
-		return addModerator(idKey, chat, target_email);
+		try {
+			return addModerator(chat.getKey(), chat, target_email);
+		} catch (AlreadyExistsException e) {
+			throw new ImpossibleActionException();
+		}
 	}
 
 	public static Entity removeModerator(String chat_id, String target_email, String req_email)
 			throws InexistentChatIdException, ImpossibleActionException, InexistentModeratorException {
 
-		Key idKey = chatFactory.newKey(chat_id);
-		Entity chat = datastore.get(idKey);
-
-		if (chat == null)
-			throw new InexistentChatIdException();
+		Entity chat = getChat(chat_id);
 
 		if (!req_email.equals(chat.getString(ADMIN)))
 			throw new ImpossibleActionException();
 
-		return removeModerator(idKey, chat, target_email);
+		return removeModerator(chat.getKey(), chat, target_email);
 	}
-
-	public static List<String> getModerators(String chat_id) throws InexistentChatIdException {
-		
+	
+	public static List<String> getModerators(String chat_id) throws InexistentChatIdException{
+		Entity chat = getChat(chat_id);
+		return DB_Util.getStringList(chat, MODS);
+	}
+	
+	private static Entity getChat(String chat_id) throws InexistentChatIdException {
 		Key idKey = chatFactory.newKey(chat_id);
 		Entity chat = datastore.get(idKey);
 
 		if (chat == null)
-			throw new InexistentChatIdException();
-
-		List<String> moderators = new LinkedList<>();
-		List<Value<?>> event_moderators = chat.getList(MODS);
-		event_moderators.forEach(moderator -> {
-			String moderator_email = (String) moderator.get();
-			moderators.add(moderator_email);
-		});
+			throw new InexistentChatIdException("Inexistent chat id");
 		
-		return moderators;
+		return chat;
 	}
 }

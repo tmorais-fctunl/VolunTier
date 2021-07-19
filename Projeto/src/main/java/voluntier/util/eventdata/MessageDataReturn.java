@@ -1,7 +1,7 @@
 package voluntier.util.eventdata;
 
 import voluntier.exceptions.InexistentRatingException;
-import voluntier.util.DB_Rating;
+import voluntier.util.rating.DB_Rating;
 
 public class MessageDataReturn {
 	

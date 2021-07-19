@@ -1,4 +1,4 @@
-package voluntier.util.eventdata.chatdata;
+package voluntier.util.chatdata;
 
 public class MessageLog {
 	public String id;

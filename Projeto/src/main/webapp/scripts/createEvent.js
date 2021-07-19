@@ -439,6 +439,7 @@ function cancelEventJoin(public) {
             width: "",
             height: ""
         });
+
         if (public) {
             button.html("Join");
             button.attr("onclick", "joinEvent(true)");

@@ -1,4 +1,4 @@
-package voluntier.util.routedata.rating;
+package voluntier.util.rating;
 
 public class UserRatingData {
 	public String user_email;

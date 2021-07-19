@@ -155,7 +155,10 @@ public class SearchResource {
 			Key usernameKey = usernamesFactory.newKey(username);
 			Entity usernameEnt = datastore.get(usernameKey);
 
-			if (usernameEnt != null) {
+			if (usernameEnt == null)
+				return Response.status(Status.NOT_FOUND).build();
+			
+			else {
 				Key emailKey = usersFactory.newKey(usernameEnt.getString(DB_User.EMAIL));
 				Entity emailEnt = datastore.get(emailKey);
 				String encodedMiniature = emailEnt.getString(DB_User.PROFILE_PICTURE_MINIATURE);
@@ -173,8 +176,6 @@ public class SearchResource {
 								downloadData.getValue1(), encodedMiniature.equals("") ? null : encodedMiniature)))
 						.build();
 			}
-
-			return Response.status(Status.NOT_FOUND).build();
 
 		} catch (InvalidTokenException e) {
 			LOG.severe(e.getMessage());

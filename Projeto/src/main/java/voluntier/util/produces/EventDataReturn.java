@@ -6,9 +6,9 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.LatLng;
 
 import voluntier.util.eventdata.DB_Event;
-import voluntier.util.userdata.StatusEvent;
+import voluntier.util.userdata.ParticipantStatus;
 
-public class EventDataReturn extends EventPicturesReturn {
+public class EventDataReturn extends PicturesReturn {
 	public String profile;
 	
 	public String name;
@@ -38,7 +38,7 @@ public class EventDataReturn extends EventPicturesReturn {
 	public EventDataReturn() {
 	}
 	
-	public EventDataReturn (Entity event, List<DownloadEventPictureReturn> download_urls, StatusEvent status, String owner_name) {
+	public EventDataReturn (Entity event, List<DownloadEventPictureReturn> download_urls, ParticipantStatus status, String owner_name) {
 		super(download_urls);
 		
 		this.profile = event.getString(DB_Event.PROFILE);

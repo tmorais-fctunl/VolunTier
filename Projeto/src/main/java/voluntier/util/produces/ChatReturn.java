@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.google.datastore.v1.QueryResultBatch.MoreResultsType;
 
-import voluntier.util.eventdata.MessageData;
 import voluntier.util.eventdata.MessageDataReturn;
 
 public class ChatReturn {

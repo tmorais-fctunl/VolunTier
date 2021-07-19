@@ -37,15 +37,15 @@ import voluntier.exceptions.MaximumSizeReachedException;
 import voluntier.exceptions.SomethingWrongException;
 import voluntier.util.GeoHashUtil;
 import voluntier.util.GoogleStorageUtil;
+import voluntier.util.chatdata.DB_Chat;
 import voluntier.util.consumes.event.CreateEventData;
 import voluntier.util.consumes.event.UpdateEventData;
-import voluntier.util.eventdata.chatdata.DB_Chat;
 import voluntier.util.produces.DownloadEventPictureReturn;
 import voluntier.util.produces.DownloadSignedURLReturn;
 import voluntier.util.userdata.DB_User;
 import voluntier.util.userdata.Profile;
 import voluntier.util.userdata.State;
-import voluntier.util.userdata.StatusEvent;
+import voluntier.util.userdata.ParticipantStatus;
 
 public class DB_Event {
 
@@ -89,8 +89,6 @@ public class DB_Event {
 
 	private static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	private static KeyFactory eventFactory = datastore.newKeyFactory().setKind("Event");
-	// private static final Logger LOG =
-	// Logger.getLogger(RegisterResource.class.getName());
 	
 	public static List<Entity> REWRITE(Entity event) {
 		
@@ -239,6 +237,8 @@ public class DB_Event {
 
 		return new Triplet<>(entities, event_id, picture_id);
 	}
+
+	// TODO refactor every single line of this class please...
 	
 	private static Entity updatePictures(Entity event, ListValue newPictures) {
 
@@ -319,19 +319,19 @@ public class DB_Event {
 			return picture_ids;
 	}
 
-	public static List<DownloadEventPictureReturn> getPicturesURLs(String event_id) throws InexistentEventException {
+	public static List<DownloadEventPictureReturn> getPicturesDownloadURLs(String event_id) throws InexistentEventException {
 		Entity event = getEvent(event_id);
-		return getPicturesURLs(event);
+		return getPicturesDownloadURLs(event);
 	}
 
-	public static List<DownloadEventPictureReturn> getPicturesURLs(Entity event) throws InexistentEventException {
+	public static List<DownloadEventPictureReturn> getPicturesDownloadURLs(Entity event) throws InexistentEventException {
 		List<String> filenames = getPicturesList(event);
 		List<DownloadEventPictureReturn> download_urls = new LinkedList<>();
 
 		filenames.forEach(file -> {
 			Pair<URL, Long> url = GoogleStorageUtil.signURLForDownload(file);
 			DownloadSignedURLReturn dwld_url = new DownloadSignedURLReturn(url.getValue0(), url.getValue1());
-			download_urls.add(new DownloadEventPictureReturn(dwld_url, file));
+			download_urls.add(new DownloadEventPictureReturn(dwld_url, file, null));
 		});
 
 		return download_urls;
@@ -413,24 +413,27 @@ public class DB_Event {
 		return event;
 	}
 	
-	public static Triplet <Entity, StatusEvent, String> getEvent (String event_id, String user_email) throws InexistentEventException{
+	public static Triplet <Entity, ParticipantStatus, String> getEvent (String event_id, String user_email) throws InexistentEventException, InexistentChatIdException{
 		Entity event = getEvent(event_id);
 		
-		StatusEvent status = getStatus(event, user_email);
+		ParticipantStatus status = getStatus(event, user_email);
 
 		String owner_name = getOwnerName(event);
 		
 		return new Triplet<>(event, status, owner_name);
 	}
 	
-	private static StatusEvent getStatus (Entity event, String user_email) throws InexistentEventException {
+	private static ParticipantStatus getStatus (Entity event, String user_email) throws InexistentEventException, InexistentChatIdException {
 		if (isOwner(event, user_email))
-			return StatusEvent.OWNER;
+			return ParticipantStatus.OWNER;
+		List<String> mods = DB_Chat.getModerators(event.getString(CHAT_ID));
+		if(mods.contains(user_email))
+			return ParticipantStatus.MOD;
 		if (belongsToList(event, user_email, true))
-			return StatusEvent.PARTICIPANT;
+			return ParticipantStatus.PARTICIPANT;
 		if (belongsToList(event, user_email, false))
-			return StatusEvent.PENDING;
-		return StatusEvent.NON_PARTICIPANT;
+			return ParticipantStatus.PENDING;
+		return ParticipantStatus.NON_PARTICIPANT;
 	}
 	
 	private static String getOwnerName (Entity event) {
@@ -484,6 +487,18 @@ public class DB_Event {
 		return DB_Chat.giveOrRemoveLikeInMessage(chat_id, comment_id, req_email);
 	}
 
+	public static Triplet<List<MessageDataReturn>, Integer, MoreResultsType> getChat(String event_id, Integer cursor,
+			boolean lastest_first, String req_email) throws InexistentChatIdException, InvalidCursorException,
+	InexistentLogIdException, InexistentParticipantException, InexistentEventException {
+
+		Entity event = getEvent(event_id);
+		if(!isPublic(event))
+			checkIsParticipant(event, req_email);
+
+		String chat_id = event.getString(CHAT_ID);
+		return DB_Chat.getChat(chat_id, cursor == null ? 0 : cursor, lastest_first);
+	}
+
 	public static Entity makeChatModerator(String event_id, String req_email, String target_email)
 			throws InexistentChatIdException, InexistentParticipantException, ImpossibleActionException,
 			InexistentEventException {
@@ -521,7 +536,7 @@ public class DB_Event {
 		return emails;
 	}
 	
-	public static Triplet<List<EventParticipantData>, Integer, MoreResultsType> getRequestsList(String event_id,
+	public static Triplet<List<ParticipantDataReturn>, Integer, MoreResultsType> getRequestsList(String event_id,
 			int cursor, String user_email) throws InexistentEventException, ImpossibleActionException{
 		Entity event = getEvent(event_id);
 		checkIsOwner(event, user_email);
@@ -529,7 +544,7 @@ public class DB_Event {
 		return null;
 	}
 
-	public static Triplet<List<EventParticipantData>, Integer, MoreResultsType> getEventLists(String event_id,
+	public static Triplet<List<ParticipantDataReturn>, Integer, MoreResultsType> getEventLists(String event_id,
 			int cursor, boolean isParticipants, String user_email) throws InexistentChatIdException,
 			InexistentEventException, InexistentUserException, ImpossibleActionException {
 
@@ -538,8 +553,7 @@ public class DB_Event {
 			checkIsOwner(event, user_email);
 
 		List<String> people_emails = getListEmails(event, isParticipants);
-		List<String> mods = DB_Chat.getModerators(event.getString(CHAT_ID));
-		List<EventParticipantData> participant_roles = new LinkedList<>();
+		List<ParticipantDataReturn> participant_roles = new LinkedList<>();
 
 		int i = 0;
 		int counter = 0;
@@ -554,22 +568,9 @@ public class DB_Event {
 			Entity user = DB_User.getUser(participant_email);
 			String encodedPicture = user.getString(DB_User.PROFILE_PICTURE_MINIATURE);
 			String username = user.getString(DB_User.USERNAME);
-
-			if (event.getString(OWNER_EMAIL).equals(participant_email)) {
-				participant_roles.add(new EventParticipantData(participant_email, username, encodedPicture, StatusEvent.OWNER.toString()));
-				continue;
-			}
-
-			if (mods.contains(participant_email)) {
-				//if (isParticipants), esta condicao nunca sera verdade...
-				participant_roles.add(new EventParticipantData(participant_email, username, encodedPicture, StatusEvent.MOD.toString()));
-				continue;
-			}
-
-			if (isParticipants)
-				participant_roles.add(new EventParticipantData(participant_email, username, encodedPicture, StatusEvent.PARTICIPANT.toString()));
-			else
-				participant_roles.add(new EventParticipantData(participant_email, username, encodedPicture, StatusEvent.PENDING.toString()));
+			
+			ParticipantStatus status = getStatus(event, participant_email);
+			participant_roles.add(new ParticipantDataReturn(participant_email, username, encodedPicture, status.toString()));
 		}
 
 		int new_cursor = i;
@@ -589,7 +590,7 @@ public class DB_Event {
 		return DB_Chat.getModerators(chat_id);
 	}
 
-	public static List<Entity> participateInEvent(String event_id, String user_email)
+	public static List<Entity> participateInEvent(String event_id, String user_email, boolean accepted)
 			throws ImpossibleActionException, InexistentEventException, InexistentUserException {
 
 		Entity event = getEvent(event_id);
@@ -600,8 +601,8 @@ public class DB_Event {
 		boolean isParticipant = belongsToList(event, user_email, true);	//verifica se e participante
 		
 		List<Entity> ents = new LinkedList<>();
-		
-		if (!isParticipant && !isPublic(event)) {
+
+		if (!accepted && !isParticipant && !isPublic(event)) {
 			ents.add(requestParticipation (event, user_email));
 			return ents;
 		}
@@ -622,20 +623,19 @@ public class DB_Event {
 		Entity user = DB_User.getUser(user_email);
 		user = DB_User.participateEvent(user.getKey(), user, event_id);
 		ents.add(user);
-		
 		return ents;
 	}
 
-	public static Entity acceptRequest (String event_id, String target_user, String user_email)
+	public static List<Entity> acceptRequest (String event_id, String target_user, String user_email)
 			throws ImpossibleActionException, InexistentEventException, InexistentUserException {
 
 		Entity event = getEvent(event_id);
 		checkIsOwner(event, user_email);
 
-		List<Entity> updated_event;
-		updated_event = participateInEvent (event_id, target_user);
-
-		return removeRequest(updated_event.get(0), target_user);
+		List<Entity> updated_event = participateInEvent (event_id, target_user, true);
+		Entity temp = updated_event.remove(0);
+		updated_event.add(removeRequest(temp, target_user));
+		return updated_event;
 	}
 
 	public static Entity declineRequest (String event_id, String target_user, String user_email) 
@@ -711,16 +711,6 @@ public class DB_Event {
 		throw new ImpossibleActionException();
 	}
 
-	public static Triplet<List<MessageDataReturn>, Integer, MoreResultsType> getChat(String event_id, Integer cursor,
-			boolean lastest_first, String req_email) throws InexistentChatIdException, InvalidCursorException,
-	InexistentLogIdException, InexistentParticipantException, InexistentEventException {
-
-		Entity event = getEvent(event_id);
-		//checkIsParticipant(event, req_email);
-
-		String chat_id = event.getString(CHAT_ID);
-		return DB_Chat.getChat(chat_id, cursor == null ? 0 : cursor, lastest_first);
-	}
 	
 	public static String getPresenceConfirmationCode(String event_id, String req_email)
 			throws ImpossibleActionException, InexistentEventException {

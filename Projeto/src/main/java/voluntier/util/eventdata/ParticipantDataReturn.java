@@ -1,16 +1,16 @@
 package voluntier.util.eventdata;
 
-public class EventParticipantData {
+public class ParticipantDataReturn {
 	
 	public String email;
 	String username;
 	String pic;
 	public String role;
 	
-	public EventParticipantData() {
+	public ParticipantDataReturn() {
 	}
 	
-	public EventParticipantData (String email, String username, String pic, String role) {
+	public ParticipantDataReturn (String email, String username, String pic, String role) {
 		this.email = email;
 		this.role = role;
 		this.pic = pic;

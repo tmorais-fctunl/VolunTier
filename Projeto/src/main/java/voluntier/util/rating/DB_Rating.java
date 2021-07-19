@@ -1,4 +1,4 @@
-package voluntier.util;
+package voluntier.util.rating;
 
 import java.util.Random;
 
@@ -19,7 +19,7 @@ import voluntier.exceptions.AlreadyExistsException;
 import voluntier.exceptions.InexistentElementException;
 import voluntier.exceptions.InexistentRatingException;
 import voluntier.exceptions.InexistentUserException;
-import voluntier.util.routedata.rating.UserRatingData;
+import voluntier.util.DB_Util;
 
 public class DB_Rating {
 	

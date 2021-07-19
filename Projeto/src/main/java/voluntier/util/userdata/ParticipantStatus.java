@@ -1,7 +1,8 @@
 package voluntier.util.userdata;
 
-public enum StatusEvent {
+public enum ParticipantStatus {
 	OWNER,
+	CREATOR,
 	MOD,
 	PARTICIPANT,
 	PENDING,
