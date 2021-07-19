@@ -80,7 +80,7 @@ public class DB_Util {
 	public Entity removeStringFromList(Entity e, String list_property, String remElement) throws InexistentElementException {
 		List<String> string_list = getStringList(e, list_property);
 		
-		if (!string_list.contains(remElement))
+		if (remElement == null || !string_list.contains(remElement))
 			throw new InexistentElementException("Inesistent element in list: " + remElement);
 
 		string_list.remove(remElement);

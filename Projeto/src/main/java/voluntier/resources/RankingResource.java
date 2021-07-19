@@ -74,7 +74,7 @@ public class RankingResource {
 	}
 	
 	@POST
-	@Path("/totalCurrencyRank")
+	@Path("/presencesRank")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response eventsParticipatedRank (CursorData data) {

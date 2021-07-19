@@ -6,16 +6,16 @@ import com.google.datastore.v1.QueryResultBatch.MoreResultsType;
 
 import voluntier.util.eventdata.ParticipantDataReturn;
 
-public class EventParticipantsReturn {
+public class ParticipantsReturn {
 
 	public List<ParticipantDataReturn> participants;
 	public Integer cursor;
 	public String results;
 
-	public EventParticipantsReturn() {
+	public ParticipantsReturn() {
 	}
 
-	public EventParticipantsReturn(List<ParticipantDataReturn> participants, Integer cursor, MoreResultsType results) {
+	public ParticipantsReturn(List<ParticipantDataReturn> participants, Integer cursor, MoreResultsType results) {
 		this.participants = participants;
 		this.cursor = cursor;
 		this.results = results.toString();

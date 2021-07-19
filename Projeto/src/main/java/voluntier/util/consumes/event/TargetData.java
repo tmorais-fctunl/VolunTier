@@ -2,11 +2,11 @@ package voluntier.util.consumes.event;
 
 import voluntier.util.consumes.RequestData;
 
-public class UserEventsData extends RequestData{
+public class TargetData extends RequestData{
 	public String target;
 
-	public UserEventsData() {}
-	public UserEventsData(String email, String token, String target) {
+	public TargetData() {}
+	public TargetData(String email, String token, String target) {
 		super(email, token);
 		this.target = target;
 	}

@@ -39,6 +39,7 @@ import voluntier.exceptions.SomethingWrongException;
 import voluntier.util.DB_Util;
 import voluntier.util.GeoHashUtil;
 import voluntier.util.GoogleStorageUtil;
+import voluntier.util.JsonUtil;
 import voluntier.util.chatdata.DB_Chat;
 import voluntier.util.consumes.route.CreateRouteData;
 import voluntier.util.eventdata.DB_Event;
@@ -46,6 +47,7 @@ import voluntier.util.eventdata.ParticipantDataReturn;
 import voluntier.util.eventdata.MessageDataReturn;
 import voluntier.util.produces.DownloadEventPictureReturn;
 import voluntier.util.produces.DownloadSignedURLReturn;
+import voluntier.util.produces.SearchEventReturn;
 import voluntier.util.rating.DB_Rating;
 import voluntier.util.userdata.DB_User;
 import voluntier.util.userdata.State;
@@ -54,7 +56,7 @@ import voluntier.util.userdata.ParticipantStatus;
 public class DB_Route {
 
 	public static final String ID = "route_id";
-	public static final String EVENT_IDS = "route_events";
+	public static final String EVENTS = "route_events";
 	public static final String PICTURES = "route_pictures";
 	public static final String RATING_ID = "route_rating_id";
 	public static final String CHAT_ID = "chat_id";
@@ -78,7 +80,7 @@ public class DB_Route {
 	private static void defaultBuilder(Entity e) {
 		util.builder = Entity.newBuilder(e.getKey())
 				.set(ID, e.getString(ID))
-				.set(EVENT_IDS, e.getList(EVENT_IDS))
+				.set(EVENTS, e.getList(EVENTS))
 				.set(GEOHASH, e.getString(GEOHASH))
 				.set(CREATOR, e.getString(CREATOR))
 				.set(DESCRIPTION, e.getString(DESCRIPTION))
@@ -121,7 +123,7 @@ public class DB_Route {
 
 	public static Pair<List<Entity>, String> createNew(CreateRouteData create_route_data)
 			throws IllegalCoordinatesException, RouteAlreadyExistsException, InexistentEventException,
-			ImpossibleActionException {
+			ImpossibleActionException, InexistentUserException {
 
 		String first_event_id = create_route_data.event_ids.get(0);
 		Entity first_event = DB_Event.getEvent(first_event_id);
@@ -151,6 +153,12 @@ public class DB_Route {
 		Timestamp creation_date = Timestamp.now();
 
 		String creator = create_route_data.email;
+		
+		ListValue.Builder events = ListValue.newBuilder();
+		for(String id : create_route_data.event_ids){
+			Entity event = DB_Event.getEvent(id);
+			events.addValue(JsonUtil.json.toJson(new SearchEventReturn(event)));
+		}
 
 		Pair<Entity, String> rating = DB_Rating.createNew();
 		String rating_id = rating.getValue1();
@@ -160,17 +168,24 @@ public class DB_Route {
 
 		entities.add(Entity.newBuilder(routeKey)
 				.set(ID, route_id)
-				.set(GEOHASH, geohash).set(CREATOR, creator)
+				.set(EVENTS, events.build())
+				.set(GEOHASH, geohash)
+				.set(CREATOR, creator)
 				.set(NAME, create_route_data.route_name)
 				.set(DESCRIPTION, create_route_data.description)
 				.set(CREATION_DATE, creation_date)
 				.set(PICTURES, pictures.build())
 				.set(PARTICIPANTS, participants.build())
-				.set(RATING_ID, rating_id).set(CHAT_ID, chat_id)
+				.set(RATING_ID, rating_id)
+				.set(CHAT_ID, chat_id)
 				.set(NUM_PARTICIPANTS, 0)
 				.set(STATE, State.ENABLED.toString())
 				.build());
-
+		
+		Entity user = DB_User.getUser(create_route_data.email);
+		Entity updated_user = DB_User.addRoute(user.getKey(), user, route_id);
+		entities.add(updated_user);
+		
 		return new Pair<>(entities, route_id);
 	}
 
@@ -184,12 +199,12 @@ public class DB_Route {
 		return route;
 	}
 
-	public static List<Entity> getEventsInRoute(Entity route) throws InexistentEventException {
-		List<String> event_ids = DB_Util.getStringList(route, EVENT_IDS);
+	private static List<Entity> getEventsInRoute(Entity route) throws InexistentEventException {
+		List<SearchEventReturn> event_ids = DB_Util.getJsonList(route, EVENTS, SearchEventReturn.class);
 		List<Entity> event_entities = new LinkedList<>();
 
-		for (String id : event_ids)
-			event_entities.add(DB_Event.getEvent(id));
+		for (SearchEventReturn e : event_ids)
+			event_entities.add(DB_Event.getEvent(e.event_id));
 
 		return event_entities;
 	}
@@ -215,7 +230,11 @@ public class DB_Route {
 			for (Entity event : events) {
 				List<Entity> updated_event_and_user = DB_Event.participateInEvent(event.getString(DB_Event.ID),
 						user_email, false);
-				updated_event_and_user.forEach(e -> ents.add(event));
+				Entity updated_event = updated_event_and_user.get(0);
+				Entity updated_user = updated_event_and_user.get(1);
+				updated_user = DB_User.participateRoute(updated_user.getKey(), updated_user, route_id);
+				ents.add(updated_event);
+				ents.add(updated_user);
 			}
 
 			route = util.addUniqueStringToList(route, PARTICIPANTS, user_email);
@@ -251,21 +270,23 @@ public class DB_Route {
 		Entity route = getRoute(route_id);
 		checkIsActive(route);
 		checkIsParticipant(route, req_email);
-		
+
 		try {
-			route = util.removeJsonFromList(route, PICTURES, (pic -> pic_id.equals(pic.picture_id)), PictureData.class);
+			route = util.removeJsonFromList(route, PICTURES,
+					(pic -> pic.picture_id.equals(pic_id) && pic.author.equals(req_email)), PictureData.class);
 			return route;
 		} catch (InexistentElementException e) {
 			throw new ImpossibleActionException("The pair " + req_email + " + " + pic_id + " does not exist");
 		}
 	}
 
-	public static List<DownloadEventPictureReturn> getPicturesURLs(String route) throws InexistentRouteException {
+	public static List<DownloadEventPictureReturn> getPicturesDownloadURLs(String route)
+			throws InexistentRouteException {
 		Entity event = getRoute(route);
-		return getPicturesURLs(event);
+		return getPicturesDownloadURLs(event);
 	}
 
-	public static List<DownloadEventPictureReturn> getPicturesURLs(Entity route) {
+	public static List<DownloadEventPictureReturn> getPicturesDownloadURLs(Entity route) {
 		List<PictureData> pictures = DB_Util.getJsonList(route, PICTURES, PictureData.class);
 		List<DownloadEventPictureReturn> download_urls = new LinkedList<>();
 
@@ -331,6 +352,7 @@ public class DB_Route {
 
 		Entity event = getRoute(route_id);
 		checkIsActive(event);
+
 		String chat_id = event.getString(CHAT_ID);
 		return DB_Chat.deleteMessage(chat_id, comment_id, email);
 	}

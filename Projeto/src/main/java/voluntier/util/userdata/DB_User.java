@@ -15,6 +15,7 @@ import com.google.cloud.datastore.Value;
 
 import voluntier.exceptions.ImpossibleActionException;
 import voluntier.exceptions.InexistentEventException;
+import voluntier.exceptions.InexistentRouteException;
 import voluntier.exceptions.InexistentUserException;
 import voluntier.util.consumes.RegisterData;
 import voluntier.util.consumes.UpdateProfileData;
@@ -53,6 +54,9 @@ public class DB_User {
 	public static final String CURRENT_CURRENCY = "current_currency";
 	public static final String DONATIONS = "donations";
 	
+	public static final String ROUTES = "user_routes";
+	public static final String ROUTES_PARTICIPATING = "user_routes_participating";
+	
 	public static final String EMAIL_REGEX = ".+@.+[.].+";
 	public static final String POSTAL_CODE_REGEX = "[0-9]{4}-[0-9]{3}";
 	public static final String MOBILE_REGEX = "([+][0-9]{2,3}\\s)?[2789][0-9]{8}";
@@ -60,6 +64,41 @@ public class DB_User {
 	
 	private static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	private static KeyFactory usersFactory = datastore.newKeyFactory().setKind("User");
+	
+	public static Entity REWRITE(Entity user) {
+		ListValue empty_list = ListValue.newBuilder().build();
+		return Entity.newBuilder(user.getKey())
+				.set(USERNAME, user.getString(USERNAME))
+				.set(EMAIL, user.getString(EMAIL))
+				.set(PASSWORD, user.getString(PASSWORD))
+				.set(FULL_NAME, user.getString(FULL_NAME))
+				.set(LANDLINE, user.getString(LANDLINE))
+				.set(MOBILE, user.getString(MOBILE))
+				.set(ADDRESS, user.getString(ADDRESS))
+				.set(ADDRESS2, user.getString(ADDRESS2))
+				.set(REGION, user.getString(REGION))
+				.set(POSTAL_CODE, user.getString(POSTAL_CODE))
+				.set(ACCOUNT, user.getString(ACCOUNT))
+				.set(ROLE, user.getString(ROLE))
+				.set(STATE, user.getString(STATE))
+				.set(PROFILE, user.getString(PROFILE))
+				.set(WEBSITE, user.getString(WEBSITE))
+				.set(FACEBOOK, user.getString(FACEBOOK))
+				.set(INSTAGRAM, user.getString(INSTAGRAM))
+				.set(TWITTER, user.getString(TWITTER))
+				.set(N_EVENTS_PARTICIPATED, 0)
+				.set(TOTAL_CURRENCY, 0)
+				.set(CURRENT_CURRENCY, 0)
+				.set(DONATIONS, empty_list)
+				.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(user.getString(PROFILE_PICTURE_MINIATURE))
+						.setExcludeFromIndexes(true)
+						.build())
+				.set(EVENTS, user.getList(EVENTS))
+				.set(EVENTS_PARTICIPATING, user.getList(EVENTS_PARTICIPATING))
+				.set(ROUTES, empty_list)
+				.set(ROUTES_PARTICIPATING, empty_list)
+				.build();
+	}
 		
 	public static Entity changePassword(String new_password, Key userKey, Entity user) {
 		return Entity.newBuilder(userKey)
@@ -90,6 +129,8 @@ public class DB_User {
 						.build())
 				.set(EVENTS, user.getList(EVENTS))
 				.set(EVENTS_PARTICIPATING, user.getList(EVENTS_PARTICIPATING))
+				.set(ROUTES, user.getList(ROUTES))
+				.set(ROUTES_PARTICIPATING, user.getList(ROUTES_PARTICIPATING))
 				.build();
 	}
 	
@@ -122,6 +163,8 @@ public class DB_User {
 						.build())
 				.set(EVENTS, user.getList(EVENTS))
 				.set(EVENTS_PARTICIPATING, user.getList(EVENTS_PARTICIPATING))
+				.set(ROUTES, user.getList(ROUTES))
+				.set(ROUTES_PARTICIPATING, user.getList(ROUTES_PARTICIPATING))
 				.build();
 	}
 	
@@ -154,6 +197,8 @@ public class DB_User {
 						.build())
 				.set(EVENTS, user.getList(EVENTS))
 				.set(EVENTS_PARTICIPATING, user.getList(EVENTS_PARTICIPATING))
+				.set(ROUTES, user.getList(ROUTES))
+				.set(ROUTES_PARTICIPATING, user.getList(ROUTES_PARTICIPATING))
 				.build();
 	}
 	
@@ -186,6 +231,8 @@ public class DB_User {
 						.build())
 				.set(EVENTS, user.getList(EVENTS))
 				.set(EVENTS_PARTICIPATING, user.getList(EVENTS_PARTICIPATING))
+				.set(ROUTES, user.getList(ROUTES))
+				.set(ROUTES_PARTICIPATING, user.getList(ROUTES_PARTICIPATING))
 				.build();
 	}
 	
@@ -218,6 +265,8 @@ public class DB_User {
 						.build())
 				.set(EVENTS, user.getList(EVENTS))
 				.set(EVENTS_PARTICIPATING, user.getList(EVENTS_PARTICIPATING))
+				.set(ROUTES, user.getList(ROUTES))
+				.set(ROUTES_PARTICIPATING, user.getList(ROUTES_PARTICIPATING))
 				.build();
 	}
 	
@@ -250,6 +299,8 @@ public class DB_User {
 						.build())
 				.set(EVENTS, user.getList(EVENTS))
 				.set(EVENTS_PARTICIPATING, user.getList(EVENTS_PARTICIPATING))
+				.set(ROUTES, user.getList(ROUTES))
+				.set(ROUTES_PARTICIPATING, user.getList(ROUTES_PARTICIPATING))
 				.build();
 	}
 	
@@ -271,6 +322,17 @@ public class DB_User {
 		return events;
 	}
 	
+	public static List<String> getRoutes(Entity user) {
+		List<String> routes = new LinkedList<>();
+		List<Value<?>> route_list = user.getList(ROUTES);
+		route_list.forEach(route -> {
+			String route_id = (String) route.get();
+			routes.add(route_id);
+		});
+		
+		return routes;
+	}
+	
 	public static List<String> getParticipatingEvents(Entity user) {
 		List<String> participating_events = new LinkedList<>();
 		List<Value<?>> event_list = user.getList(EVENTS_PARTICIPATING);
@@ -280,6 +342,17 @@ public class DB_User {
 		});
 		
 		return participating_events;
+	}
+	
+	public static List<String> getParticipatingRoutes(Entity user) {
+		List<String> participating_routes = new LinkedList<>();
+		List<Value<?>> routes_list = user.getList(ROUTES_PARTICIPATING);
+		routes_list.forEach(route -> {
+			String route_id = (String) route.get();
+			participating_routes.add(route_id);
+		});
+		
+		return participating_routes;
 	}
 	
 	private static Entity updateEventList(Key userKey, Entity user, ListValue events_list) {
@@ -311,6 +384,8 @@ public class DB_User {
 						.build())
 				.set(EVENTS, events_list)
 				.set(EVENTS_PARTICIPATING, user.getList(EVENTS_PARTICIPATING))
+				.set(ROUTES, user.getList(ROUTES))
+				.set(ROUTES_PARTICIPATING, user.getList(ROUTES_PARTICIPATING))
 				.build();
 	}
 	
@@ -343,6 +418,68 @@ public class DB_User {
 						.build())
 				.set(EVENTS, user.getList(EVENTS))
 				.set(EVENTS_PARTICIPATING, participating_list)
+				.set(ROUTES, user.getList(ROUTES))
+				.set(ROUTES_PARTICIPATING, user.getList(ROUTES_PARTICIPATING))
+				.build();
+	}
+	
+	private static Entity updateRouteList(Key userKey, Entity user, ListValue routes_list) {
+		return Entity.newBuilder(userKey)
+				.set(USERNAME, user.getString(USERNAME))
+				.set(EMAIL, user.getString(EMAIL))
+				.set(PASSWORD, user.getString(PASSWORD))
+				.set(FULL_NAME, user.getString(FULL_NAME))
+				.set(LANDLINE, user.getString(LANDLINE))
+				.set(MOBILE, user.getString(MOBILE))
+				.set(ADDRESS, user.getString(ADDRESS))
+				.set(ADDRESS2, user.getString(ADDRESS2))
+				.set(REGION, user.getString(REGION))
+				.set(POSTAL_CODE, user.getString(POSTAL_CODE))
+				.set(ACCOUNT, user.getString(ACCOUNT))
+				.set(ROLE, user.getString(ROLE))
+				.set(STATE, user.getString(STATE))
+				.set(PROFILE, user.getString(PROFILE))
+				.set(WEBSITE, user.getString(WEBSITE))
+				.set(FACEBOOK, user.getString(FACEBOOK))
+				.set(INSTAGRAM, user.getString(INSTAGRAM))
+				.set(TWITTER, user.getString(TWITTER))
+				.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(user.getString(PROFILE_PICTURE_MINIATURE))
+						.setExcludeFromIndexes(true)
+						.build())
+				.set(EVENTS, user.getList(EVENTS))
+				.set(EVENTS_PARTICIPATING, user.getList(EVENTS_PARTICIPATING))
+				.set(ROUTES, routes_list)
+				.set(ROUTES_PARTICIPATING, user.getList(ROUTES_PARTICIPATING))
+				.build();
+	}
+	
+	private static Entity updateParticipatingRouteList(Key userKey, Entity user, ListValue participating_list) {
+		return Entity.newBuilder(userKey)
+				.set(USERNAME, user.getString(USERNAME))
+				.set(EMAIL, user.getString(EMAIL))
+				.set(PASSWORD, user.getString(PASSWORD))
+				.set(FULL_NAME, user.getString(FULL_NAME))
+				.set(LANDLINE, user.getString(LANDLINE))
+				.set(MOBILE, user.getString(MOBILE))
+				.set(ADDRESS, user.getString(ADDRESS))
+				.set(ADDRESS2, user.getString(ADDRESS2))
+				.set(REGION, user.getString(REGION))
+				.set(POSTAL_CODE, user.getString(POSTAL_CODE))
+				.set(ACCOUNT, user.getString(ACCOUNT))
+				.set(ROLE, user.getString(ROLE))
+				.set(STATE, user.getString(STATE))
+				.set(PROFILE, user.getString(PROFILE))
+				.set(WEBSITE, user.getString(WEBSITE))
+				.set(FACEBOOK, user.getString(FACEBOOK))
+				.set(INSTAGRAM, user.getString(INSTAGRAM))
+				.set(TWITTER, user.getString(TWITTER))
+				.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(user.getString(PROFILE_PICTURE_MINIATURE))
+						.setExcludeFromIndexes(true)
+						.build())
+				.set(EVENTS, user.getList(EVENTS))
+				.set(EVENTS_PARTICIPATING, user.getList(EVENTS_PARTICIPATING))
+				.set(ROUTES, user.getList(ROUTES))
+				.set(ROUTES_PARTICIPATING, participating_list)
 				.build();
 	}
 	
@@ -383,6 +520,43 @@ public class DB_User {
 		return updateParticipatingEventList(userKey, user, events_list.build());
 	}
 	
+	public static Entity addRoute(Key userKey, Entity user, String route_id) {
+		
+		List<String> routes = getRoutes(user);
+		if(routes.contains(route_id))
+			return user;
+
+		ListValue.Builder routes_list = ListValue.newBuilder().set(user.getList(ROUTES));
+		routes_list.addValue(route_id);
+		
+		return updateRouteList(userKey, user, routes_list.build());
+	}
+	
+	public static Entity removeRoute(Key userKey, Entity user, String route_id) throws InexistentRouteException {
+		List<String> routes = getRoutes(user);
+		if(!routes.contains(route_id))
+			throw new InexistentRouteException();
+		
+		ListValue.Builder routes_list = ListValue.newBuilder();
+		
+		routes.remove(route_id);
+		routes.forEach(route -> routes_list.addValue(route));
+
+		return updateRouteList(userKey, user, routes_list.build());
+	}
+	
+	public static Entity participateRoute(Key userKey, Entity user, String route_id) throws ImpossibleActionException {
+		
+		List<String> route_ids = getParticipatingRoutes(user);
+		if(route_ids.contains(route_id))
+			throw new ImpossibleActionException("User already participating in route: " + route_id);
+
+		ListValue.Builder routes_list = ListValue.newBuilder().set(user.getList(ROUTES_PARTICIPATING));
+		routes_list.addValue(route_id);
+		
+		return updateParticipatingRouteList(userKey, user, routes_list.build());
+	}
+	
 	public static Entity leaveEvent(Key userKey, Entity user, String event_id) throws InexistentEventException {
 		List<String> events = getParticipatingEvents(user);
 		if(!events.contains(event_id))
@@ -398,9 +572,7 @@ public class DB_User {
 	
 	public static Entity createNew(String email, String username, String password, Key userKey) {
 		UserData_AllProperties data = new UserData_AllProperties(new RegisterData(email, username, password));
-		ListValue.Builder events_list = ListValue.newBuilder();
-		ListValue.Builder participating_events_list = ListValue.newBuilder();
-		ListValue.Builder donations_list = ListValue.newBuilder();
+		ListValue empty_list = ListValue.newBuilder().build();
 		
 		return Entity.newBuilder(userKey)
 				.set(USERNAME, data.username)
@@ -424,12 +596,14 @@ public class DB_User {
 				.set(TOTAL_CURRENCY, 0)
 				.set(CURRENT_CURRENCY, 0)
 				.set(N_EVENTS_PARTICIPATED, 0)
-				.set(DONATIONS, donations_list.build())
+				.set(DONATIONS, empty_list)
 				.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(data.profile_pic)
 						.setExcludeFromIndexes(true)
 						.build())
-				.set(EVENTS, events_list.build())
-				.set(EVENTS_PARTICIPATING, participating_events_list.build())
+				.set(EVENTS, empty_list)
+				.set(EVENTS_PARTICIPATING, empty_list)
+				.set(ROUTES, empty_list)
+				.set(ROUTES_PARTICIPATING, empty_list)
 				.build();
 	}
 		

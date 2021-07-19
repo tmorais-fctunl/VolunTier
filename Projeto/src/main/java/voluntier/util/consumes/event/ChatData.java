@@ -2,23 +2,25 @@ package voluntier.util.consumes.event;
 
 import voluntier.util.consumes.RequestData;
 
-public class EventChatData extends RequestData{
+public class ChatData extends RequestData {
 
 	public String event_id;
+	public String route_id;
 	public Integer cursor;
 	public boolean latest_first = true;
 	
-	public EventChatData () {
+	public ChatData () {
 	}
 	
-	public EventChatData (String email, String token, String event_id, Integer cursor, boolean latest_first) {
+	public ChatData (String email, String token, String event_id, String route_id, Integer cursor, boolean latest_first) {
 		super(email, token);
 		this.event_id = event_id;
+		this.route_id = route_id;
 		this.cursor = cursor;
 		this.latest_first = latest_first;
 	}
 	
 	public boolean isValid () {
-		return super.isValid() && event_id != null;
+		return super.isValid() && (event_id != null || route_id != null);
 	}
 }

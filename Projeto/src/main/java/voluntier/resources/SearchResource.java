@@ -152,6 +152,34 @@ public class SearchResource {
 		}
 	}
 
+	// FOR DEBUG ONLY, USE THIS TO ADD/CHANGE PROPERTIES TO ALL EXISTENT USERS
+	@POST
+	@Path("/users/rewrite")
+	public Response rewrite() {
+		Transaction txn = datastore.newTransaction();
+		try {
+		
+			List<Entity> res = searchAll();
+			res.forEach(user -> {
+				txn.put(DB_User.REWRITE(user));
+			});
+			
+			txn.commit();
+			return Response.ok().build();
+			
+		} catch (Exception e) {
+			txn.rollback();
+			LOG.severe(e.getMessage());
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+
+		} finally {
+			if (txn.isActive()) {
+				txn.rollback();
+				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+			}
+		}
+	}
+
 	@POST
 	@Path("/picture/{username}")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -239,6 +267,19 @@ public class SearchResource {
 			String cursor) {
 		return runQuery(CompositeFilter.and(PropertyFilter.ge(DB_User.FULL_NAME, q),
 				PropertyFilter.lt(DB_User.FULL_NAME, q + "z")), cursor);
+	}
+	
+	public static List<Entity> searchAll() {
+		Query<Entity> query = Query.newEntityQueryBuilder().setKind("User").build();
+
+		QueryResults<Entity> res = datastore.run(query);
+
+		List<Entity> users = new LinkedList<>();
+		res.forEachRemaining(user -> {
+			users.add(user);
+		});
+
+		return users;
 	}
 
 	public static Triplet<List<Entity>, Cursor, QueryResultBatch.MoreResultsType> runQuery(Filter filter,

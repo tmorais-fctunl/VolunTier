@@ -12,6 +12,8 @@ import com.google.cloud.storage.HttpMethod;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
 
+import voluntier.exceptions.InexistentFileException;
+
 //import com.google.cloud.storage.Bucket;
 //import com.google.cloud.storage.Cors;
 //import com.google.common.collect.ImmutableList;
@@ -38,20 +40,25 @@ public class GoogleStorageUtil {
 	
 	private static Storage storage = StorageOptions.getDefaultInstance().getService();
 	
-	private static Pair<URL, Long> common(String filename, HttpMethod method) {
-		
+	private static BlobInfo getBlobInfo(String filename) {
 		String bucketName = "voluntier-317915.appspot.com";
 		String fileName = filename;
 		BlobId blobId = BlobId.of(bucketName, fileName);
 		BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType("text/plain").build();
 		
+		return blobInfo;
+	}
+	
+	private static Pair<URL, Long> common(String filename, HttpMethod method) {
+		
+		BlobInfo blobInfo = getBlobInfo(filename);
 		//configureBucketCors(bucketName, "*", 15*60);
 
 		URL signedURL = storage.signUrl(blobInfo, 15, TimeUnit.MINUTES,
 				Storage.SignUrlOption.httpMethod(method)/*, Storage.SignUrlOption.withExtHeaders(extHeaders)*/);
 		
 		long size = 0;
-		Blob obj = storage.get(blobId);
+		Blob obj = storage.get(blobInfo.getBlobId());
 		if (obj != null)
 			size = obj.getSize();
 		
@@ -64,5 +71,16 @@ public class GoogleStorageUtil {
 	
 	public static Pair<URL, Long> signURLForDownload(String filename) {
 		return common(filename, HttpMethod.GET);
+	}
+	
+	// not used
+	public static void removeFile(String filename) throws InexistentFileException {
+		BlobInfo blobInfo = getBlobInfo(filename);
+		
+		Blob obj = storage.get(blobInfo.getBlobId());
+		if(obj == null)
+			throw new InexistentFileException();
+		
+		storage.delete(blobInfo.getBlobId());
 	}
 }

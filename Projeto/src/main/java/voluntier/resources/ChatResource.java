@@ -23,7 +23,7 @@ import com.google.cloud.datastore.Transaction;
 import com.google.datastore.v1.QueryResultBatch.MoreResultsType;
 
 import voluntier.util.consumes.event.DeleteCommentData;
-import voluntier.util.consumes.event.EventChatData;
+import voluntier.util.consumes.event.ChatData;
 import voluntier.exceptions.ImpossibleActionException;
 import voluntier.exceptions.InexistentChatIdException;
 import voluntier.exceptions.InexistentLogIdException;
@@ -33,6 +33,9 @@ import voluntier.exceptions.InexistentParticipantException;
 import voluntier.exceptions.InexistentEventException;
 import voluntier.exceptions.InvalidCursorException;
 import voluntier.exceptions.InvalidTokenException;
+import voluntier.exceptions.InexistentRouteException;
+import voluntier.exceptions.InexistentUserException;
+import voluntier.exceptions.SomethingWrongException;
 import voluntier.util.JsonUtil;
 import voluntier.util.consumes.event.EventData;
 import voluntier.util.consumes.event.LikeCommentData;
@@ -44,6 +47,7 @@ import voluntier.util.eventdata.MessageDataReturn;
 import voluntier.util.produces.ChatReturn;
 import voluntier.util.produces.EventModeratorsReturn;
 import voluntier.util.produces.PostCommentReturn;
+import voluntier.util.routedata.DB_Route;
 import voluntier.util.userdata.*;
 
 @Path("/")
@@ -62,8 +66,6 @@ public class ChatResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response addComment(PostCommentData data) {
-		LOG.fine("Trying to add comment to event: " + data.event_id);
-
 		if (!data.isValid())
 			return Response.status(Status.BAD_REQUEST).build();
 
@@ -75,16 +77,17 @@ public class ChatResource {
 			Key userKey = usersFactory.newKey(data.email);
 			Entity user = txn.get(userKey);
 
-			if (user == null || ActionsResource.isRemovedOrBannedUser(user)) {
-				txn.rollback();
-				LOG.warning("Failed comment attempt by user: " + data.email);
-				return Response.status(Status.FORBIDDEN).entity("Session expired or invalid: " + data.email).build();
-			}
+			if (user == null)
+				throw new InexistentUserException();
 			
 			String username = user.getString(DB_User.USERNAME);
-
-			Pair<List<Entity>, Integer> recieved_data = DB_Event.postComment(data.event_id, data.email, username, data.comment);
-
+			
+			Pair<List<Entity>, Integer> recieved_data = null;
+			if(data.event_id != null)
+				recieved_data = DB_Event.postComment(data.event_id, data.email, username, data.comment);
+			if(data.route_id != null)
+				recieved_data = DB_Route.postComment(data.route_id, data.email, username, data.comment);
+			
 			recieved_data.getValue0().forEach(ent -> txn.put(ent));
 
 			txn.commit();
@@ -93,8 +96,10 @@ public class ChatResource {
 			return Response.ok(JsonUtil.json.toJson(new PostCommentReturn(recieved_data.getValue1()))).build();
 
 		} catch (InvalidTokenException | InexistentChatIdException | InexistentLogIdException
-				| InexistentParticipantException | ImpossibleActionException | InexistentEventException e) {
+				| InexistentParticipantException | ImpossibleActionException | InexistentEventException
+				| InexistentRouteException | SomethingWrongException e) {
 			txn.rollback();
+			LOG.severe(e.getMessage());
 			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
 
 		} catch (Exception e) {
@@ -115,8 +120,6 @@ public class ChatResource {
 	@Path("/deleteComment")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response deleteComment(DeleteCommentData data) {
-		LOG.fine("Trying to delete comment from event: " + data.event_id);
-
 		if (!data.isValid())
 			return Response.status(Status.BAD_REQUEST).build();
 
@@ -124,17 +127,24 @@ public class ChatResource {
 
 		try {
 			TokensResource.checkIsValidAccess(data.token, data.email);
-
-			Entity event = DB_Event.deleteComment(data.event_id, data.comment_id, data.email);
-			txn.put(event);
+			
+			Entity event_or_route = null;
+			if(data.event_id != null)
+				event_or_route = DB_Event.deleteComment(data.event_id, data.comment_id, data.email);
+			if(data.route_id != null)
+				event_or_route = DB_Route.deleteComment(data.route_id, data.comment_id, data.email);
+			
+			txn.put(event_or_route);
 			txn.commit();
 
 			LOG.fine("Comment deleted correctly.");
 			return Response.status(Status.NO_CONTENT).build();
 
 		} catch (InvalidTokenException | ImpossibleActionException | InexistentMessageIdException
-				| InexistentChatIdException | InexistentLogIdException | InexistentEventException e) {
+				| InexistentChatIdException | InexistentLogIdException | InexistentEventException | 
+				InexistentRouteException | InexistentParticipantException e) {
 			txn.rollback();
+			LOG.severe(e.getMessage());
 			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
 
 		} catch (Exception e) {
@@ -154,8 +164,6 @@ public class ChatResource {
 	@Path("/updateComment")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response updateComment(UpdateCommentData data) {
-		LOG.fine("Trying to update comment from event: " + data.event_id);
-
 		if (!data.isValid())
 			return Response.status(Status.BAD_REQUEST).build();
 
@@ -163,17 +171,22 @@ public class ChatResource {
 
 		try {
 			TokensResource.checkIsValidAccess(data.token, data.email);
-
-			Entity event = DB_Event.updateComment(data.event_id, data.comment_id, data.email, data.comment);
-
-			txn.put(event);
+			
+			Entity event_or_route = null;
+			if(data.event_id != null)
+				event_or_route = DB_Event.updateComment(data.event_id, data.comment_id, data.email, data.comment);
+			if(data.route_id != null)
+				event_or_route = DB_Route.updateComment(data.route_id, data.comment_id, data.email, data.comment);
+			
+			txn.put(event_or_route);
 			txn.commit();
 
 			LOG.fine("Comment updated correctly.");
 			return Response.status(Status.NO_CONTENT).build();
 
 		} catch (InvalidTokenException | ImpossibleActionException | InexistentMessageIdException
-				| InexistentChatIdException | InexistentLogIdException | InexistentEventException e) {
+				| InexistentChatIdException | InexistentLogIdException | InexistentEventException 
+				| InexistentRouteException e) {
 			txn.rollback();
 			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
 
@@ -194,8 +207,6 @@ public class ChatResource {
 	@Path("/likeComment")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response likeComment(LikeCommentData data) {
-		LOG.fine("Trying to like a comment from event: " + data.event_id);
-
 		if (!data.isValid())
 			return Response.status(Status.BAD_REQUEST).build();
 
@@ -203,19 +214,24 @@ public class ChatResource {
 
 		try {
 			TokensResource.checkIsValidAccess(data.token, data.email);
-
-			Entity event = DB_Event.giveOrRemoveLikeInComment(data.event_id, data.comment_id, data.email);
-
-			txn.put(event);
+			
+			Entity event_or_route = null;
+			if(data.event_id != null)
+				event_or_route = DB_Event.giveOrRemoveLikeInComment(data.event_id, data.comment_id, data.email);
+			if(data.route_id != null)
+				event_or_route = DB_Route.giveOrRemoveLikeInComment(data.route_id, data.comment_id, data.email);
+			
+			txn.put(event_or_route);
 			txn.commit();
 
-			LOG.fine("Comment updated correctly.");
+			LOG.fine("Comment liked correctly.");
 			return Response.status(Status.NO_CONTENT).build();
 
 		} catch (InvalidTokenException | InexistentChatIdException | InexistentLogIdException
 				| InexistentMessageIdException | InexistentParticipantException | ImpossibleActionException
 				| InexistentEventException e) {
 			txn.rollback();
+			LOG.severe(e.getMessage());
 			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
 
 		} catch (Exception e) {
@@ -232,27 +248,32 @@ public class ChatResource {
 	}
 
 	@POST
-	@Path("/getEventChat")
+	@Path("/getChat")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response getChat(EventChatData data) {
-		LOG.fine("Trying to get chat from event: " + data.event_id);
-
+	public Response getChat(ChatData data) {
 		if (!data.isValid())
 			return Response.status(Status.BAD_REQUEST).build();
 
 		try {
 			TokensResource.checkIsValidAccess(data.token, data.email);
-
-			Triplet<List<MessageDataReturn>, Integer, MoreResultsType> messages = DB_Event.getChat(data.event_id, data.cursor,
+			
+			Triplet<List<MessageDataReturn>, Integer, MoreResultsType> messages = null;
+			if(data.event_id != null)
+				messages = DB_Event.getChat(data.event_id, data.cursor,
 					data.latest_first, data.email);
+			if(data.route_id != null)
+				messages = DB_Route.getChat(data.route_id, data.cursor,
+						data.latest_first, data.email);
+			
 			return Response
 					.ok(JsonUtil.json
 							.toJson(new ChatReturn(messages.getValue0(), messages.getValue1(), messages.getValue2())))
 					.build();
 
 		} catch (InvalidTokenException | InexistentChatIdException | InvalidCursorException | InexistentLogIdException
-				| InexistentParticipantException | InexistentEventException e) {
+				| InexistentParticipantException | InexistentEventException  | InexistentRouteException e) {
+			LOG.severe(e.getMessage());
 			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
 
 		} catch (Exception e) {
@@ -265,29 +286,30 @@ public class ChatResource {
 	@Path("/moderator/add")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response makeChatModerator(ChatModeratorData data) {
-		LOG.fine("Trying to make chat moderator in event: " + data.event_id);
-
 		if (!data.isValid())
 			return Response.status(Status.BAD_REQUEST).build();
 
 		Transaction txn = datastore.newTransaction();
 
 		try {
-			Entity token = TokensResource.checkIsValidAccess(data.token, data.email);
-
-			String req_email = token.getString(TokensResource.ACCESS_EMAIL);
-
-			Entity event = DB_Event.makeChatModerator(data.event_id, req_email, data.mod);
-
-			txn.put(event);
+			TokensResource.checkIsValidAccess(data.token, data.email);
+			
+			Entity event_or_route = null;
+			if(data.event_id != null)
+				event_or_route = DB_Event.makeChatModerator(data.event_id, data.email, data.mod);
+			if(data.route_id != null)
+				event_or_route = DB_Route.makeChatModerator(data.route_id, data.email, data.mod);
+			
+			txn.put(event_or_route);
 			txn.commit();
 
-			LOG.fine("Added " + data.email + "to event chat moderators : " + data.event_id);
+			LOG.fine("Added " + data.email + "to chat moderators");
 			return Response.status(Status.NO_CONTENT).build();
 
 		} catch (InvalidTokenException | ImpossibleActionException | InexistentChatIdException
-				| InexistentParticipantException | InexistentEventException e) {
+				| InexistentParticipantException | InexistentEventException | InexistentRouteException e) {
 			txn.rollback();
+			LOG.severe(e.getMessage());
 			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
 
 		} catch (Exception e) {
@@ -319,16 +341,20 @@ public class ChatResource {
 
 			String req_email = data.email;
 
-			Entity event = DB_Event.removeChatModerator(data.event_id, req_email, data.mod);
-
-			txn.put(event);
+			Entity event_or_route = null;
+			if(data.event_id != null)
+				event_or_route = DB_Event.removeChatModerator(data.event_id, req_email, data.mod);
+			if(data.route_id != null)
+				event_or_route = DB_Route.removeChatModerator(data.route_id, req_email, data.mod);
+			
+			txn.put(event_or_route);
 			txn.commit();
 
-			LOG.fine("Removed " + data.mod + "from event chat moderators: " + data.event_id);
+			LOG.fine("Removed " + data.mod + "from chat moderators");
 			return Response.status(Status.NO_CONTENT).build();
 
 		} catch (InvalidTokenException | InexistentChatIdException | ImpossibleActionException
-				| InexistentModeratorException | InexistentEventException e) {
+				| InexistentModeratorException | InexistentEventException | InexistentRouteException e) {
 			txn.rollback();
 			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
 
@@ -350,7 +376,7 @@ public class ChatResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response getChatModerators(EventData data) {
-		LOG.fine("Trying to get event participants: " + data.event_id);
+		LOG.fine("Trying to get event moderators: " + data.event_id);
 
 		if (!data.isValid())
 			return Response.status(Status.BAD_REQUEST).build();

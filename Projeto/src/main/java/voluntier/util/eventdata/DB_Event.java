@@ -96,7 +96,6 @@ public class DB_Event {
 		Pair<List<Entity>, String> chat = DB_Chat.createNew(event.getString(OWNER_EMAIL));
 		List<Entity> entities = chat.getValue0();
 
-
 		entities.add(Entity.newBuilder(event.getKey()).set(NAME, event.getString(NAME)).set(ID, event.getString(ID))
 				.set(LOCATION, event.getLatLng(LOCATION)).set(START_DATE, event.getString(START_DATE))
 				.set(END_DATE, event.getString(END_DATE)).set(CREATION_DATE, event.getString(CREATION_DATE))
@@ -107,10 +106,10 @@ public class DB_Event {
 				.set(STATE, event.getString(STATE)).set(PROFILE, event.getString(PROFILE))
 				.set(WEBSITE, event.getString(WEBSITE)).set(FACEBOOK, event.getString(FACEBOOK))
 				.set(INSTAGRAM, event.getString(INSTAGRAM)).set(TWITTER, event.getString(TWITTER))
-				.set(GEOHASH, event.getString(GEOHASH)).set(DIFFICULTY, event.getLong(DIFFICULTY))
+				.set(GEOHASH, event.getString(GEOHASH))
 				.set(PICTURES, event.getList(PICTURES)).set(PRESENCE_CODE, event.getString(PRESENCE_CODE))
 				.set(PRESENCES, event.getList(PRESENCES)).set(REQUESTS, event.getList(REQUESTS))
-				.set(N_REQUESTS, event.getLong(N_REQUESTS))
+				.set(N_REQUESTS, event.getLong(N_REQUESTS)).set(DIFFICULTY, event.getLong(DIFFICULTY))
 				// additional properties here or change above
 				.build());
 		

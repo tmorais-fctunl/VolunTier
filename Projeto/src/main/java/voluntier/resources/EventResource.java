@@ -36,20 +36,20 @@ import voluntier.util.GoogleStorageUtil;
 import voluntier.util.JsonUtil;
 import voluntier.util.consumes.event.ConfirmPresenceData;
 import voluntier.util.consumes.event.CreateEventData;
-import voluntier.util.consumes.event.DeletePictureData;
+import voluntier.util.consumes.event.DeleteEventPictureData;
 import voluntier.util.consumes.event.EventData;
-import voluntier.util.consumes.event.EventParticipantsData;
+import voluntier.util.consumes.event.ParticipantsData;
 import voluntier.util.consumes.event.ParticipantData;
-import voluntier.util.consumes.event.UserEventsData;
+import voluntier.util.consumes.event.TargetData;
 import voluntier.util.eventdata.DB_Event;
 import voluntier.util.eventdata.ParticipantDataReturn;
 import voluntier.util.produces.CreateEventReturn;
 import voluntier.util.produces.DownloadEventPictureReturn;
 import voluntier.util.produces.EventDataReturn;
-import voluntier.util.produces.EventParticipantsReturn;
+import voluntier.util.produces.ParticipantsReturn;
 import voluntier.util.produces.PicturesReturn;
 import voluntier.util.produces.PresenceCodeReturn;
-import voluntier.util.produces.UploadEventPictureReturn;
+import voluntier.util.produces.UploadPictureReturn;
 import voluntier.util.produces.UserEventsReturn;
 import voluntier.util.userdata.*;
 
@@ -237,8 +237,8 @@ public class EventResource {
 	@Path("/getParticipants")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response getParticipants(EventParticipantsData data) {
-		LOG.fine("Trying to get event participants: " + data.event_id);
+	public Response getParticipants(ParticipantsData data) {
+		LOG.fine("Trying to get event participants: " + data.route_id);
 
 		if (!data.isValid())
 			return Response.status(Status.BAD_REQUEST).build();
@@ -247,13 +247,13 @@ public class EventResource {
 			TokensResource.checkIsValidAccess(data.token, data.email);
 
 			Triplet<List<ParticipantDataReturn>, Integer, MoreResultsType> return_data = DB_Event
-					.getEventLists(data.event_id, data.cursor == null ? 0 : data.cursor, true, null);
+					.getEventLists(data.route_id, data.cursor == null ? 0 : data.cursor, true, null);
 
 			List<ParticipantDataReturn> participants = return_data.getValue0();
 			Integer cursor = return_data.getValue1();
 			MoreResultsType result = return_data.getValue2();
 
-			return Response.ok(JsonUtil.json.toJson(new EventParticipantsReturn(participants, cursor, result))).build();
+			return Response.ok(JsonUtil.json.toJson(new ParticipantsReturn(participants, cursor, result))).build();
 
 		} catch (InvalidTokenException | InexistentChatIdException | InexistentEventException e) {
 			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
@@ -268,7 +268,7 @@ public class EventResource {
 	@Path("/user/events")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response getUserEvents(UserEventsData data) {
+	public Response getUserEvents(TargetData data) {
 		LOG.fine("Trying to get user events: " + data.target);
 
 		if (!data.isValid())
@@ -295,7 +295,7 @@ public class EventResource {
 	@Path("/user/participatingEvents")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response getUserParticipatingEvents(UserEventsData data) {
+	public Response getUserParticipatingEvents(TargetData data) {
 		LOG.fine("Trying to get user participating events: " + data.target);
 
 		if (!data.isValid())
@@ -340,7 +340,7 @@ public class EventResource {
 			txn.put(event);
 			txn.commit();
 
-			return Response.ok(JsonUtil.json.toJson(new UploadEventPictureReturn(upload_url, filename))).build();
+			return Response.ok(JsonUtil.json.toJson(new UploadPictureReturn(upload_url, filename))).build();
 
 		} catch (InvalidTokenException | InexistentEventException | ImpossibleActionException
 				| MaximumSizeReachedException e) {
@@ -364,7 +364,7 @@ public class EventResource {
 	@Path("/event/deletePicture")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response deletePictureFromEvent(DeletePictureData data) {
+	public Response deletePictureFromEvent(DeleteEventPictureData data) {
 		if (!data.isValid())
 			return Response.status(Status.BAD_REQUEST).build();
 

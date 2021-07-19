@@ -90,10 +90,10 @@ public class SearchEventResource {
 		return new Pair<>(events, geohash);
 	}
 	
-	
-	// FOR DEBUG ONLY, USE THIS TO ADD A NEW PROPERTY TO ALL EXISTENT EVENTS 
+
+	// FOR DEBUG ONLY, USE THIS TO ADD/CHANGE PROPERTIES TO ALL EXISTENT USERS
 	@POST
-	@Path("/rewriteAll")
+	@Path("/events/rewrite")
 	public Response rewrite() {
 	
 		Transaction txn = datastore.newTransaction();
