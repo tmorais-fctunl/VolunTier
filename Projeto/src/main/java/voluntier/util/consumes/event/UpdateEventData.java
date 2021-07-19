@@ -26,13 +26,15 @@ public class UpdateEventData extends EventData {
 	public String instagram;
 	public String twitter;
 	
+	public Integer difficulty;
+	
 	public UpdateEventData () {
 	}
 	
 	public UpdateEventData (String email, String token, String event_id, double[] location, String start_date, 
 			String end_date, String owner_email, String contact, String description, String category, 
 			long capacity, String website, String facebook, String instagram,String twitter, String profile,
-			String event_name) {
+			String event_name, int dificulty) {
 		super (email, token, event_id);
 		this.event_name = event_name;
 		this.location = location;
@@ -49,6 +51,8 @@ public class UpdateEventData extends EventData {
 		this.twitter = twitter;
 		
 		this.profile = profile;
+		
+		this.difficulty = dificulty;
 	}
 	
 	public LatLng getLocation (LatLng a_default) {
@@ -61,6 +65,10 @@ public class UpdateEventData extends EventData {
 	
 	public String getEndDate (String a_default) {
 		return end_date == null ? a_default : end_date;
+	}
+	
+	public int getDificulty (int a_default) {
+		return difficulty == null ? a_default : difficulty;
 	}
 		
 	public String getContact (String a_default) {
@@ -107,6 +115,7 @@ public class UpdateEventData extends EventData {
 		return super.isValid()
 				&& (event_name == null || EventData_Minimal.nameValid(event_name))
 				&& (location == null || EventData_Minimal.locationValid(location))
+				&& (difficulty == null || EventData_Minimal.difficultyValid(difficulty))
 				&& (profile == null || EventData_Minimal.profileValid(profile))
 				&& (start_date == null || EventData_Minimal.startDateValid(start_date))
 				&& (end_date == null || EventData_Minimal.endDateValid(end_date))

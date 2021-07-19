@@ -40,6 +40,7 @@ import voluntier.util.GoogleStorageUtil;
 import voluntier.util.chatdata.DB_Chat;
 import voluntier.util.consumes.event.CreateEventData;
 import voluntier.util.consumes.event.UpdateEventData;
+import voluntier.util.produces.ChatReturn;
 import voluntier.util.produces.DownloadEventPictureReturn;
 import voluntier.util.produces.DownloadSignedURLReturn;
 import voluntier.util.userdata.DB_User;
@@ -92,24 +93,36 @@ public class DB_Event {
 	private static KeyFactory eventFactory = datastore.newKeyFactory().setKind("Event");
 	
 	public static List<Entity> REWRITE(Entity event) {
-		
-		Pair<List<Entity>, String> chat = DB_Chat.createNew(event.getString(OWNER_EMAIL));
-		List<Entity> entities = chat.getValue0();
 
-		entities.add(Entity.newBuilder(event.getKey()).set(NAME, event.getString(NAME)).set(ID, event.getString(ID))
-				.set(LOCATION, event.getLatLng(LOCATION)).set(START_DATE, event.getString(START_DATE))
-				.set(END_DATE, event.getString(END_DATE)).set(CREATION_DATE, event.getString(CREATION_DATE))
-				.set(CHAT_ID, chat.getValue1()).set(PARTICIPANTS, event.getList(PARTICIPANTS))
-				.set(N_PARTICIPANTS, event.getLong(N_PARTICIPANTS)).set(OWNER_EMAIL, event.getString(OWNER_EMAIL))
-				.set(CONTACT, event.getString(CONTACT)).set(DESCRIPTION, event.getString(DESCRIPTION))
-				.set(CATEGORY, event.getString(CATEGORY)).set(CAPACITY, event.getLong(CAPACITY))
-				.set(STATE, event.getString(STATE)).set(PROFILE, event.getString(PROFILE))
-				.set(WEBSITE, event.getString(WEBSITE)).set(FACEBOOK, event.getString(FACEBOOK))
-				.set(INSTAGRAM, event.getString(INSTAGRAM)).set(TWITTER, event.getString(TWITTER))
+		List<Entity> entities = new LinkedList<>();
+		entities.add(Entity.newBuilder(event.getKey())
+				.set(NAME, event.getString(NAME))
+				.set(ID, event.getString(ID))
+				.set(LOCATION, event.getLatLng(LOCATION))
+				.set(START_DATE, event.getString(START_DATE))
+				.set(END_DATE, event.getString(END_DATE))
+				.set(CREATION_DATE, event.getString(CREATION_DATE))
+				.set(CHAT_ID, event.getString(CHAT_ID))
+				.set(PARTICIPANTS, event.getList(PARTICIPANTS))
+				.set(N_PARTICIPANTS, event.getLong(N_PARTICIPANTS))
+				.set(OWNER_EMAIL, event.getString(OWNER_EMAIL))
+				.set(CONTACT, event.getString(CONTACT))
+				.set(DESCRIPTION, event.getString(DESCRIPTION))
+				.set(CATEGORY, event.getString(CATEGORY))
+				.set(CAPACITY, event.getLong(CAPACITY))
+				.set(STATE, event.getString(STATE))
+				.set(PROFILE, event.getString(PROFILE))
+				.set(WEBSITE, event.getString(WEBSITE))
+				.set(FACEBOOK, event.getString(FACEBOOK))
+				.set(INSTAGRAM, event.getString(INSTAGRAM))
+				.set(TWITTER, event.getString(TWITTER))
 				.set(GEOHASH, event.getString(GEOHASH))
-				.set(PICTURES, event.getList(PICTURES)).set(PRESENCE_CODE, event.getString(PRESENCE_CODE))
-				.set(PRESENCES, event.getList(PRESENCES)).set(REQUESTS, event.getList(REQUESTS))
-				.set(N_REQUESTS, event.getLong(N_REQUESTS)).set(DIFFICULTY, event.getLong(DIFFICULTY))
+				.set(PICTURES, event.getList(PICTURES))
+				.set(PRESENCE_CODE, event.getString(PRESENCE_CODE))
+				.set(PRESENCES, event.getList(PRESENCES))
+				.set(REQUESTS, event.getList(REQUESTS))
+				.set(N_REQUESTS, event.getLong(N_REQUESTS))
+				.set(DIFFICULTY, event.getLong(DIFFICULTY))
 				// additional properties here or change above
 				.build());
 		
@@ -144,7 +157,7 @@ public class DB_Event {
 				.set(INSTAGRAM, data.getInstagram(event.getString(INSTAGRAM)))
 				.set(TWITTER, data.getTwitter(event.getString(TWITTER)))
 				.set(GEOHASH, data.getGeohash(event.getString(GEOHASH)))
-				.set(DIFFICULTY, event.getLong(DIFFICULTY))
+				.set(DIFFICULTY, data.getDificulty((int) event.getLong(DIFFICULTY)))
 				.set(PICTURES, event.getList(PICTURES))
 				.set(PRESENCE_CODE, event.getString(PRESENCE_CODE))
 				.set(PRESENCES, event.getList(PRESENCES))
@@ -489,7 +502,7 @@ public class DB_Event {
 		return DB_Chat.giveOrRemoveLikeInMessage(chat_id, comment_id, req_email);
 	}
 
-	public static Triplet<List<MessageDataReturn>, Integer, MoreResultsType> getChat(String event_id, Integer cursor,
+	public static ChatReturn getChat(String event_id, Integer cursor,
 			boolean lastest_first, String req_email) throws InexistentChatIdException, InvalidCursorException,
 	InexistentLogIdException, InexistentParticipantException, InexistentEventException {
 
@@ -498,7 +511,7 @@ public class DB_Event {
 			checkIsParticipant(event, req_email);
 
 		String chat_id = event.getString(CHAT_ID);
-		return DB_Chat.getChat(chat_id, cursor == null ? 0 : cursor, lastest_first);
+		return DB_Chat.getChat(chat_id, cursor == null ? 0 : cursor, lastest_first, req_email);
 	}
 
 	public static Entity makeChatModerator(String event_id, String req_email, String target_email)

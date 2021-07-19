@@ -131,6 +131,11 @@ public class DB_Rating {
 		return rating;
 	}
 	
+	public static boolean hasRated(String rating_id, String user_email) throws InexistentRatingException {
+		Entity rating = getRating(rating_id);
+		return DB_Util.existsInJsonList(rating, USERS, (u -> u.user_email.equals(user_email)), UserRatingData.class);
+	}
+	
 	public static double getSumRating(String rating_id) throws InexistentRatingException {
 		Entity rating = getRating(rating_id);
 		double sum = rating.getDouble(SUM);

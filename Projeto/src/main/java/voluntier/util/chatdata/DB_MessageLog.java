@@ -158,14 +158,14 @@ public class DB_MessageLog {
 		return DB_Rating.giveOrRemoveLike(message.rating_id, req_email);
 	}
 
-	public static List<MessageDataReturn> getMessages(String log_id, boolean latest_first) throws InexistentLogIdException {
+	public static List<MessageDataReturn> getMessages(String log_id, boolean latest_first, String user_email) throws InexistentLogIdException {
 		Entity log = getLog(log_id);
 		
 		List<MessageData> messages = DB_Util.getJsonList(log, MESSAGES, MessageData.class);
 
 		List<MessageDataReturn> out = new LinkedList<>();
 		messages.forEach(message -> {
-			MessageDataReturn return_data = new MessageDataReturn(message);
+			MessageDataReturn return_data = new MessageDataReturn(message, user_email);
 			if (latest_first)
 				out.add(0, return_data);
 			else

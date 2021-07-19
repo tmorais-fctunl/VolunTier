@@ -14,7 +14,6 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.ListValue;
 import com.google.cloud.datastore.Value;
-import com.google.datastore.v1.QueryResultBatch;
 import com.google.datastore.v1.QueryResultBatch.MoreResultsType;
 
 import voluntier.exceptions.AlreadyExistsException;
@@ -32,6 +31,7 @@ import voluntier.util.DB_Util;
 import voluntier.util.JsonUtil;
 import voluntier.util.eventdata.MessageData;
 import voluntier.util.eventdata.MessageDataReturn;
+import voluntier.util.produces.ChatReturn;
 
 public class DB_Chat {
 	public static final String MLs = "chat_message_logs";
@@ -142,7 +142,7 @@ public class DB_Chat {
 		} catch (MaximumSizeReachedException e) {
 			// need to create a new MessageLog and add it to current list with the new message
 			//get the last index from the last log, +1 will be the starting index of the new log
-			List<MessageDataReturn> messages = DB_MessageLog.getMessages(last_log_id, false);
+			List<MessageDataReturn> messages = DB_MessageLog.getMessages(last_log_id, false, email);
 			int new_start_index = messages.get(messages.size() - 1).comment_id + 1;
 
 			Triplet<List<Entity>, String, Integer> new_message_log = DB_MessageLog.createLogAndAddMessage(chat_id,
@@ -207,9 +207,9 @@ public class DB_Chat {
 
 		return newRating;
 	}
-
-	public static Triplet<List<MessageDataReturn>, Integer, QueryResultBatch.MoreResultsType> getChat(String chat_id,
-			int cursor, boolean latest_first) throws InexistentChatIdException, InvalidCursorException, InexistentLogIdException {
+	
+	public static ChatReturn getChat(String chat_id,
+			int cursor, boolean latest_first, String user_email) throws InexistentChatIdException, InvalidCursorException, InexistentLogIdException {
 
 		Entity chat = getChat(chat_id);
 
@@ -223,20 +223,20 @@ public class DB_Chat {
 		MessageLog log = logs.get(index);
 		boolean more_results = cursor < logs.size() - 1;
 		
-		List<MessageDataReturn> messages = DB_MessageLog.getMessages(log.id, latest_first);
+		List<MessageDataReturn> messages = DB_MessageLog.getMessages(log.id, latest_first, user_email);
 		
 		int new_cursor = cursor + 1;
 		
 		if(latest_first && cursor == 0 && logs.size() > 1) {
-			messages.addAll(DB_MessageLog.getMessages(logs.get(index - 1).id, latest_first));
+			messages.addAll(DB_MessageLog.getMessages(logs.get(index - 1).id, latest_first, user_email));
 			more_results = cursor < logs.size() - 2;
 			new_cursor = cursor + 2;
 		}
 		
 		if(more_results && messages.size() == 0)
-			return getChat(chat_id, new_cursor, latest_first);
+			return getChat(chat_id, new_cursor, latest_first, user_email);
 
-		return new Triplet<>(messages, more_results ? new_cursor : null,
+		return new ChatReturn(messages, more_results ? new_cursor : null,
 				more_results ? MoreResultsType.MORE_RESULTS_AFTER_LIMIT : MoreResultsType.NO_MORE_RESULTS);
 	}
 

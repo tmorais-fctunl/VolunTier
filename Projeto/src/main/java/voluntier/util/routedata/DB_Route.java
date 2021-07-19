@@ -44,7 +44,7 @@ import voluntier.util.chatdata.DB_Chat;
 import voluntier.util.consumes.route.CreateRouteData;
 import voluntier.util.eventdata.DB_Event;
 import voluntier.util.eventdata.ParticipantDataReturn;
-import voluntier.util.eventdata.MessageDataReturn;
+import voluntier.util.produces.ChatReturn;
 import voluntier.util.produces.DownloadEventPictureReturn;
 import voluntier.util.produces.DownloadSignedURLReturn;
 import voluntier.util.produces.SearchEventReturn;
@@ -381,7 +381,7 @@ public class DB_Route {
 		return DB_Chat.giveOrRemoveLikeInMessage(chat_id, comment_id, req_email);
 	}
 
-	public static Triplet<List<MessageDataReturn>, Integer, MoreResultsType> getChat(String route_id, Integer cursor,
+	public static ChatReturn getChat(String route_id, Integer cursor,
 			boolean lastest_first, String req_email) throws InexistentRouteException, InexistentChatIdException,
 			InvalidCursorException, InexistentLogIdException {
 
@@ -389,7 +389,7 @@ public class DB_Route {
 		// checkIsParticipant(event, req_email);
 
 		String chat_id = event.getString(CHAT_ID);
-		return DB_Chat.getChat(chat_id, cursor == null ? 0 : cursor, lastest_first);
+		return DB_Chat.getChat(chat_id, cursor == null ? 0 : cursor, lastest_first, req_email);
 	}
 
 	public static Entity giveRating(String route_id, String user_email, float rating_number)

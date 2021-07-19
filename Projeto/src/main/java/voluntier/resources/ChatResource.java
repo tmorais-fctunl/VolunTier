@@ -12,7 +12,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.javatuples.Pair;
-import org.javatuples.Triplet;
 
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
@@ -20,7 +19,6 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Transaction;
-import com.google.datastore.v1.QueryResultBatch.MoreResultsType;
 
 import voluntier.util.consumes.event.DeleteCommentData;
 import voluntier.util.consumes.event.ChatData;
@@ -43,7 +41,6 @@ import voluntier.util.consumes.event.ChatModeratorData;
 import voluntier.util.consumes.event.PostCommentData;
 import voluntier.util.consumes.event.UpdateCommentData;
 import voluntier.util.eventdata.DB_Event;
-import voluntier.util.eventdata.MessageDataReturn;
 import voluntier.util.produces.ChatReturn;
 import voluntier.util.produces.EventModeratorsReturn;
 import voluntier.util.produces.PostCommentReturn;
@@ -258,7 +255,7 @@ public class ChatResource {
 		try {
 			TokensResource.checkIsValidAccess(data.token, data.email);
 			
-			Triplet<List<MessageDataReturn>, Integer, MoreResultsType> messages = null;
+			ChatReturn messages = null;
 			if(data.event_id != null)
 				messages = DB_Event.getChat(data.event_id, data.cursor,
 					data.latest_first, data.email);
@@ -267,9 +264,7 @@ public class ChatResource {
 						data.latest_first, data.email);
 			
 			return Response
-					.ok(JsonUtil.json
-							.toJson(new ChatReturn(messages.getValue0(), messages.getValue1(), messages.getValue2())))
-					.build();
+					.ok(JsonUtil.json.toJson(messages)).build();
 
 		} catch (InvalidTokenException | InexistentChatIdException | InvalidCursorException | InexistentLogIdException
 				| InexistentParticipantException | InexistentEventException  | InexistentRouteException e) {
