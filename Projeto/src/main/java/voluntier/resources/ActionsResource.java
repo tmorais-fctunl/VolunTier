@@ -39,6 +39,16 @@ public class ActionsResource {
 
 		return target_level < user_level || target.getString(DB_User.EMAIL).equals(user.getString(DB_User.EMAIL));
 	}
+	
+	public static boolean hasSamePermission (Entity user, Entity target, Transaction txn) {
+		if (isRemovedUser(target) || isRemovedOrBannedUser(user))
+			return false;
+
+		int user_level = getLevel(Action.LOOK_UP, Roles.valueOf(user.getString(DB_User.ROLE)), txn);
+		int target_level = getLevel(Action.LOOK_UP, Roles.valueOf(target.getString(DB_User.ROLE)), txn);
+
+		return target_level == user_level || target.getString(DB_User.EMAIL).equals(user.getString(DB_User.EMAIL));
+	}
 
 	public static boolean hasAtribPermission(Entity user, Entity target, Transaction txn) {
 		if (isRemovedOrBannedUser(target) || isRemovedOrBannedUser(user))

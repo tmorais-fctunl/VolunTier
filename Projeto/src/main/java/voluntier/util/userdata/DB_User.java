@@ -48,6 +48,10 @@ public class DB_User {
 
 	public static final String EVENTS = "user_events";
 	public static final String EVENTS_PARTICIPATING = "user_events_participating";
+	public static final String N_EVENTS_PARTICIPATED = "n_user_events_participated";
+	public static final String TOTAL_CURRENCY = "total_currency";
+	public static final String CURRENT_CURRENCY = "current_currency";
+	public static final String DONATIONS = "donations";
 	
 	public static final String EMAIL_REGEX = ".+@.+[.].+";
 	public static final String POSTAL_CODE_REGEX = "[0-9]{4}-[0-9]{3}";
@@ -77,6 +81,10 @@ public class DB_User {
 				.set(FACEBOOK, user.getString(FACEBOOK))
 				.set(INSTAGRAM, user.getString(INSTAGRAM))
 				.set(TWITTER, user.getString(TWITTER))
+				.set(N_EVENTS_PARTICIPATED, user.getDouble(N_EVENTS_PARTICIPATED))
+				.set(TOTAL_CURRENCY, user.getDouble(TOTAL_CURRENCY))
+				.set(CURRENT_CURRENCY, user.getDouble(CURRENT_CURRENCY))
+				.set(DONATIONS, user.getList(DONATIONS))
 				.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(user.getString(PROFILE_PICTURE_MINIATURE))
 						.setExcludeFromIndexes(true)
 						.build())
@@ -105,6 +113,10 @@ public class DB_User {
 				.set(FACEBOOK, user.getString(FACEBOOK))
 				.set(INSTAGRAM, user.getString(INSTAGRAM))
 				.set(TWITTER, user.getString(TWITTER))
+				.set(N_EVENTS_PARTICIPATED, user.getDouble(N_EVENTS_PARTICIPATED))
+				.set(TOTAL_CURRENCY, user.getDouble(TOTAL_CURRENCY))
+				.set(CURRENT_CURRENCY, user.getDouble(CURRENT_CURRENCY))
+				.set(DONATIONS, user.getList(DONATIONS))
 				.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(user.getString(PROFILE_PICTURE_MINIATURE))
 						.setExcludeFromIndexes(true)
 						.build())
@@ -133,6 +145,10 @@ public class DB_User {
 				.set(FACEBOOK, user.getString(FACEBOOK))
 				.set(INSTAGRAM, user.getString(INSTAGRAM))
 				.set(TWITTER, user.getString(TWITTER))
+				.set(N_EVENTS_PARTICIPATED, user.getDouble(N_EVENTS_PARTICIPATED))
+				.set(TOTAL_CURRENCY, user.getDouble(TOTAL_CURRENCY))
+				.set(CURRENT_CURRENCY, user.getDouble(CURRENT_CURRENCY))
+				.set(DONATIONS, user.getList(DONATIONS))
 				.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(user.getString(PROFILE_PICTURE_MINIATURE))
 						.setExcludeFromIndexes(true)
 						.build())
@@ -161,6 +177,10 @@ public class DB_User {
 				.set(FACEBOOK, data.getFacebook(user.getString(FACEBOOK)))
 				.set(INSTAGRAM, data.getInstagram(user.getString(INSTAGRAM)))
 				.set(TWITTER, data.getTwitter(user.getString(TWITTER)))
+				.set(N_EVENTS_PARTICIPATED, user.getDouble(N_EVENTS_PARTICIPATED))
+				.set(TOTAL_CURRENCY, user.getDouble(TOTAL_CURRENCY))
+				.set(CURRENT_CURRENCY, user.getDouble(CURRENT_CURRENCY))
+				.set(DONATIONS, user.getList(DONATIONS))
 				.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(user.getString(PROFILE_PICTURE_MINIATURE))
 						.setExcludeFromIndexes(true)
 						.build())
@@ -189,6 +209,10 @@ public class DB_User {
 				.set(FACEBOOK, user.getString(FACEBOOK))
 				.set(INSTAGRAM, user.getString(INSTAGRAM))
 				.set(TWITTER, user.getString(TWITTER))
+				.set(N_EVENTS_PARTICIPATED, user.getDouble(N_EVENTS_PARTICIPATED))
+				.set(TOTAL_CURRENCY, user.getDouble(TOTAL_CURRENCY))
+				.set(CURRENT_CURRENCY, user.getDouble(CURRENT_CURRENCY))
+				.set(DONATIONS, user.getList(DONATIONS))
 				.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(user.getString(PROFILE_PICTURE_MINIATURE))
 						.setExcludeFromIndexes(true)
 						.build())
@@ -217,6 +241,10 @@ public class DB_User {
 				.set(FACEBOOK, user.getString(FACEBOOK))
 				.set(INSTAGRAM, user.getString(INSTAGRAM))
 				.set(TWITTER, user.getString(TWITTER))
+				.set(N_EVENTS_PARTICIPATED, user.getDouble(N_EVENTS_PARTICIPATED))
+				.set(TOTAL_CURRENCY, user.getDouble(TOTAL_CURRENCY))
+				.set(CURRENT_CURRENCY, user.getDouble(CURRENT_CURRENCY))
+				.set(DONATIONS, user.getList(DONATIONS))
 				.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(data)
 						.setExcludeFromIndexes(true)
 						.build())
@@ -274,6 +302,10 @@ public class DB_User {
 				.set(FACEBOOK, user.getString(FACEBOOK))
 				.set(INSTAGRAM, user.getString(INSTAGRAM))
 				.set(TWITTER, user.getString(TWITTER))
+				.set(N_EVENTS_PARTICIPATED, user.getDouble(N_EVENTS_PARTICIPATED))
+				.set(TOTAL_CURRENCY, user.getDouble(TOTAL_CURRENCY))
+				.set(CURRENT_CURRENCY, user.getDouble(CURRENT_CURRENCY))
+				.set(DONATIONS, user.getList(DONATIONS))
 				.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(user.getString(PROFILE_PICTURE_MINIATURE))
 						.setExcludeFromIndexes(true)
 						.build())
@@ -302,6 +334,10 @@ public class DB_User {
 				.set(FACEBOOK, user.getString(FACEBOOK))
 				.set(INSTAGRAM, user.getString(INSTAGRAM))
 				.set(TWITTER, user.getString(TWITTER))
+				.set(N_EVENTS_PARTICIPATED, user.getDouble(N_EVENTS_PARTICIPATED))
+				.set(TOTAL_CURRENCY, user.getDouble(TOTAL_CURRENCY))
+				.set(CURRENT_CURRENCY, user.getDouble(CURRENT_CURRENCY))
+				.set(DONATIONS, user.getList(DONATIONS))
 				.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(user.getString(PROFILE_PICTURE_MINIATURE))
 						.setExcludeFromIndexes(true)
 						.build())
@@ -364,6 +400,7 @@ public class DB_User {
 		UserData_AllProperties data = new UserData_AllProperties(new RegisterData(email, username, password));
 		ListValue.Builder events_list = ListValue.newBuilder();
 		ListValue.Builder participating_events_list = ListValue.newBuilder();
+		ListValue.Builder donations_list = ListValue.newBuilder();
 		
 		return Entity.newBuilder(userKey)
 				.set(USERNAME, data.username)
@@ -384,6 +421,10 @@ public class DB_User {
 				.set(FACEBOOK, data.facebook)
 				.set(INSTAGRAM, data.instagram)
 				.set(TWITTER, data.twitter)
+				.set(TOTAL_CURRENCY, 0)
+				.set(CURRENT_CURRENCY, 0)
+				.set(N_EVENTS_PARTICIPATED, 0)
+				.set(DONATIONS, donations_list.build())
 				.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(data.profile_pic)
 						.setExcludeFromIndexes(true)
 						.build())
@@ -412,5 +453,17 @@ public class DB_User {
 		Entity user = datastore.get(userKey);
 		
 		return user.getString(FULL_NAME);
+	}
+	
+	public static boolean isPublicProfile (Entity user) {
+		return user.getString(PROFILE).equals(Profile.PUBLIC.toString());
+	}
+	
+	public static List<String> getPrivateProfileInfo (Entity user){
+		List<String> info = new LinkedList<>();
+		info.add(user.getString(USERNAME));
+		info.add(user.getString(EMAIL));
+		info.add(user.getString(PROFILE_PICTURE_MINIATURE));
+		return info;
 	}
 }

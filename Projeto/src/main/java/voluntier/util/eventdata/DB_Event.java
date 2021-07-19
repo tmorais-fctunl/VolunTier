@@ -68,6 +68,7 @@ public class DB_Event {
 	public static final String INSTAGRAM = "event_instagram";
 	public static final String TWITTER = "event_twitter";
 	public static final String GEOHASH = "event_geohash";
+	public static final String DIFFICULTY = "event_difficulty";
 	public static final String PRESENCE_CODE = "event_presence_confirmation_code";
 	public static final String PRESENCES = "event_presences";
 	public static final String PICTURES = "event_pics_id";
@@ -106,10 +107,9 @@ public class DB_Event {
 				.set(STATE, event.getString(STATE)).set(PROFILE, event.getString(PROFILE))
 				.set(WEBSITE, event.getString(WEBSITE)).set(FACEBOOK, event.getString(FACEBOOK))
 				.set(INSTAGRAM, event.getString(INSTAGRAM)).set(TWITTER, event.getString(TWITTER))
-				.set(GEOHASH, event.getString(GEOHASH)).set(PICTURES, event.getList(PICTURES))
-				.set(PRESENCE_CODE, event.getString(PRESENCE_CODE))
-				.set(PRESENCES, event.getList(PRESENCES))
-				.set(REQUESTS, event.getList(REQUESTS))
+				.set(GEOHASH, event.getString(GEOHASH)).set(DIFFICULTY, event.getLong(DIFFICULTY))
+				.set(PICTURES, event.getList(PICTURES)).set(PRESENCE_CODE, event.getString(PRESENCE_CODE))
+				.set(PRESENCES, event.getList(PRESENCES)).set(REQUESTS, event.getList(REQUESTS))
 				.set(N_REQUESTS, event.getLong(N_REQUESTS))
 				// additional properties here or change above
 				.build());
@@ -145,6 +145,7 @@ public class DB_Event {
 				.set(INSTAGRAM, data.getInstagram(event.getString(INSTAGRAM)))
 				.set(TWITTER, data.getTwitter(event.getString(TWITTER)))
 				.set(GEOHASH, data.getGeohash(event.getString(GEOHASH)))
+				.set(DIFFICULTY, event.getLong(DIFFICULTY))
 				.set(PICTURES, event.getList(PICTURES))
 				.set(PRESENCE_CODE, event.getString(PRESENCE_CODE))
 				.set(PRESENCES, event.getList(PRESENCES))
@@ -169,8 +170,8 @@ public class DB_Event {
 				.set(CATEGORY, event.getString(CATEGORY)).set(CAPACITY, event.getLong(CAPACITY)).set(STATE, state)
 				.set(PROFILE, event.getString(PROFILE)).set(WEBSITE, event.getString(WEBSITE))
 				.set(FACEBOOK, event.getString(FACEBOOK)).set(INSTAGRAM, event.getString(INSTAGRAM))
-				.set(TWITTER, event.getString(TWITTER)).set(GEOHASH, event.getString(GEOHASH)).set(PICTURES, event.getList(PICTURES))
-				.set(PRESENCE_CODE, event.getString(PRESENCE_CODE))
+				.set(TWITTER, event.getString(TWITTER)).set(GEOHASH, event.getString(GEOHASH)).set(DIFFICULTY, event.getLong(DIFFICULTY))
+				.set(PICTURES, event.getList(PICTURES)).set(PRESENCE_CODE, event.getString(PRESENCE_CODE))
 				.set(PRESENCES, event.getList(PRESENCES))
 				.set(TWITTER, event.getString(TWITTER)).set(GEOHASH, event.getString(GEOHASH)).set(PICTURES, event.getList(PICTURES))
 				.set(REQUESTS, event.getList(REQUESTS)).set(N_REQUESTS, event.getLong(N_REQUESTS)).build();
@@ -191,8 +192,8 @@ public class DB_Event {
 				.set(CATEGORY, event.getString(CATEGORY)).set(CAPACITY, event.getLong(CAPACITY))
 				.set(STATE, event.getString(STATE)).set(PROFILE, profile).set(WEBSITE, event.getString(WEBSITE))
 				.set(FACEBOOK, event.getString(FACEBOOK)).set(INSTAGRAM, event.getString(INSTAGRAM))
-				.set(TWITTER, event.getString(TWITTER)).set(GEOHASH, event.getString(GEOHASH)).set(PICTURES, event.getList(PICTURES))
-				.set(PRESENCE_CODE, event.getString(PRESENCE_CODE))
+				.set(TWITTER, event.getString(TWITTER)).set(GEOHASH, event.getString(GEOHASH)).set(DIFFICULTY, event.getLong(DIFFICULTY))
+				.set(PICTURES, event.getList(PICTURES)).set(PRESENCE_CODE, event.getString(PRESENCE_CODE))
 				.set(PRESENCES, event.getList(PRESENCES))
 				.set(REQUESTS, event.getList(REQUESTS)).set(N_REQUESTS, event.getLong(N_REQUESTS))
 				.build();
@@ -230,6 +231,7 @@ public class DB_Event {
 				.set(CAPACITY, data.capacity).set(STATE, data.getState().toString())
 				.set(PROFILE, data.getProfile().toString()).set(WEBSITE, data.website).set(FACEBOOK, data.facebook)
 				.set(INSTAGRAM, data.instagram).set(TWITTER, data.twitter).set(GEOHASH, geohash)
+				.set(DIFFICULTY, data.difficulty)
 				.set(PICTURES, pictures.build()).set(PRESENCE_CODE, confirm_presence_code)
 				.set(PRESENCES, presences.build())
 				.set(PICTURES, pictures.build()).set(REQUESTS, requests.build())
@@ -252,7 +254,7 @@ public class DB_Event {
 				.set(STATE, event.getString(STATE)).set(PROFILE, event.getString(PROFILE))
 				.set(WEBSITE, event.getString(WEBSITE)).set(FACEBOOK, event.getString(FACEBOOK))
 				.set(INSTAGRAM, event.getString(INSTAGRAM)).set(TWITTER, event.getString(TWITTER))
-				.set(GEOHASH, event.getString(GEOHASH)).set(PICTURES, newPictures)
+				.set(GEOHASH, event.getString(GEOHASH)).set(DIFFICULTY, event.getLong(DIFFICULTY)).set(PICTURES, newPictures)
 				.set(PRESENCE_CODE, event.getString(PRESENCE_CODE)).set(PRESENCES, event.getList(PRESENCES))
 				.set(REQUESTS, event.getList(REQUESTS)).set(N_REQUESTS, event.getLong(N_REQUESTS)).build();
 	}
@@ -269,7 +271,7 @@ public class DB_Event {
 				.set(STATE, event.getString(STATE)).set(PROFILE, event.getString(PROFILE))
 				.set(WEBSITE, event.getString(WEBSITE)).set(FACEBOOK, event.getString(FACEBOOK))
 				.set(INSTAGRAM, event.getString(INSTAGRAM)).set(TWITTER, event.getString(TWITTER))
-				.set(GEOHASH, event.getString(GEOHASH)).set(PICTURES, event.getList(PICTURES))
+				.set(GEOHASH, event.getString(GEOHASH)).set(DIFFICULTY, event.getLong(DIFFICULTY)).set(PICTURES, event.getList(PICTURES))
 				.set(PRESENCE_CODE, event.getString(PRESENCE_CODE))
 				.set(PRESENCES, presences).set(REQUESTS, event.getList(REQUESTS)).set(N_REQUESTS, event.getLong(N_REQUESTS)).build();
 	}
@@ -366,9 +368,9 @@ public class DB_Event {
 				.set(CAPACITY, event.getLong(CAPACITY)).set(STATE, event.getString(STATE))
 				.set(PROFILE, event.getString(PROFILE)).set(WEBSITE, event.getString(WEBSITE))
 				.set(FACEBOOK, event.getString(FACEBOOK)).set(INSTAGRAM, event.getString(INSTAGRAM))
-				.set(TWITTER, event.getString(TWITTER)).set(GEOHASH, event.getString(GEOHASH)).set(PICTURES, event.getList(PICTURES))
-				.set(REQUESTS, event.getList(REQUESTS)).set(N_REQUESTS, event.getLong(N_REQUESTS)).set(PRESENCE_CODE, event.getString(PRESENCE_CODE))
-				.set(PRESENCES, event.getList(PRESENCES))
+				.set(TWITTER, event.getString(TWITTER)).set(GEOHASH, event.getString(GEOHASH)).set(DIFFICULTY, event.getLong(DIFFICULTY))
+				.set(PICTURES, event.getList(PICTURES)).set(REQUESTS, event.getList(REQUESTS)).set(N_REQUESTS, event.getLong(N_REQUESTS))
+				.set(PRESENCE_CODE, event.getString(PRESENCE_CODE)).set(PRESENCES, event.getList(PRESENCES))
 				.build();
 	}
 
@@ -390,7 +392,8 @@ public class DB_Event {
 				.set(CAPACITY, event.getLong(CAPACITY)).set(STATE, event.getString(STATE))
 				.set(PROFILE, event.getString(PROFILE)).set(WEBSITE, event.getString(WEBSITE))
 				.set(FACEBOOK, event.getString(FACEBOOK)).set(INSTAGRAM, event.getString(INSTAGRAM))
-				.set(TWITTER, event.getString(TWITTER)).set(GEOHASH, event.getString(GEOHASH)).set(PICTURES, event.getList(PICTURES))
+				.set(TWITTER, event.getString(TWITTER)).set(GEOHASH, event.getString(GEOHASH))
+				.set(DIFFICULTY, event.getLong(DIFFICULTY)).set(PICTURES, event.getList(PICTURES))
 				.set(REQUESTS, newRequests).set(PRESENCE_CODE, event.getString(PRESENCE_CODE))
 				.set(PRESENCES, event.getList(PRESENCES)).build();
 	}
@@ -403,7 +406,7 @@ public class DB_Event {
 		return false;
 	}
 
-	public static Entity getEvent(String event_id) throws InexistentEventException{
+	public static Entity getEvent(String event_id) throws InexistentEventException {
 		Key eventKey = eventFactory.newKey(event_id);
 		Entity event = datastore.get(eventKey);
 

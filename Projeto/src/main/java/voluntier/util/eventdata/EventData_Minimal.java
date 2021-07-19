@@ -25,6 +25,8 @@ public class EventData_Minimal {
 	public String owner_email;
 	public String contact;
 	
+	public int difficulty;
+	
 	//chat and participants...
 	
 	public String description;
@@ -55,6 +57,7 @@ public class EventData_Minimal {
 		
 		contact = data.contact;
 		capacity = data.capacity;
+		difficulty = data.difficulty;
 		
 		creation_date = Timestamp.now().toString();
 		
@@ -138,6 +141,10 @@ public class EventData_Minimal {
 	
 	public static boolean capacityValid (long capacity) {
 		return capacity > 0;
+	}
+	
+	public static boolean difficultyValid (int difficulty) {
+		return difficulty > 0 && difficulty <= 5;
 	}
 	
 	public static boolean websiteValid(String website) {

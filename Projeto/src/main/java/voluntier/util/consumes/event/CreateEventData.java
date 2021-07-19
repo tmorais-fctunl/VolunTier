@@ -16,12 +16,14 @@ public class CreateEventData extends RequestData {
 
 	public String contact;
 	public Long capacity;
+	
+	public int difficulty;
 
 	public CreateEventData() {
 	}
 
 	public CreateEventData(String user_email, String token, String event_name, double[] location, String profile,
-			String start_date, String end_date, String description, String category, String contact, long capacity) {
+			String start_date, String end_date, String description, String category, String contact, long capacity, int difficulty) {
 		super(user_email, token);
 		this.event_name = event_name;
 		this.location = location;
@@ -33,6 +35,8 @@ public class CreateEventData extends RequestData {
 
 		this.contact = contact;
 		this.capacity = capacity;
+		
+		this.difficulty = difficulty;
 	}
 
 	public void contactDefault() {
@@ -52,6 +56,7 @@ public class CreateEventData extends RequestData {
 				&& EventData_Minimal.descriptionValid(description) && EventData_Minimal.categoryValid(category)
 				&& (contact == null || EventData_Minimal.contactValid(contact))
 				&& (capacity == null || EventData_Minimal.capacityValid(capacity))
+				&& EventData_Minimal.difficultyValid(difficulty)
 				&& EventData_Minimal.profileValid(profile);
 	}
 

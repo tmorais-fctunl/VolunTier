@@ -84,10 +84,22 @@ public class SearchResource {
 				return Response.status(Status.FORBIDDEN).build();
 			} else {
 				// check permissions
-				if (!ActionsResource.hasLookUpPermission(rq_user, tg_user, txn)) {
+				if (ActionsResource.hasSamePermission(rq_user, tg_user, txn)) {
+					if (DB_User.isPublicProfile(tg_user)) {
+						UserData_Minimal user_data = new UserData_Minimal(tg_user);
+						txn.rollback();
+						return Response.ok(JsonUtil.json.toJson(user_data)).build();
+					}
+					else {
+						UserData_Minimal user_data = new UserData_Minimal(DB_User.getPrivateProfileInfo(tg_user));
+						txn.rollback();
+						return Response.ok(JsonUtil.json.toJson(user_data)).build();
+					}
+				}
+				else if (!ActionsResource.hasLookUpPermission(rq_user, tg_user, txn)) {
 					txn.rollback();
 					LOG.warning("User:" + rq_user.getString(DB_User.EMAIL)
-							+ " does not have enough permissions to look up: " + data.target);
+					+ " does not have enough permissions to look up: " + data.target);
 					return Response.status(Status.FORBIDDEN).build();
 				} else {
 					UserData_Minimal user_data = new UserData_Minimal(tg_user);
@@ -157,7 +169,7 @@ public class SearchResource {
 
 			if (usernameEnt == null)
 				return Response.status(Status.NOT_FOUND).build();
-			
+
 			else {
 				Key emailKey = usersFactory.newKey(usernameEnt.getString(DB_User.EMAIL));
 				Entity emailEnt = datastore.get(emailKey);

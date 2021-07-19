@@ -27,6 +27,8 @@ public class UserData_Minimal {
 	public String instagram;
 	public String twitter;
 	
+	public String pic_64;
+	
 	List<String> events_participating;
 	List<String> events_created;
 
@@ -68,8 +70,22 @@ public class UserData_Minimal {
 		this.instagram = user.getString(DB_User.INSTAGRAM);
 		this.twitter = user.getString(DB_User.TWITTER);
 
+		String encoded_picture = user.getString(DB_User.PROFILE_PICTURE_MINIATURE);
+		
+		this.pic_64 = encoded_picture.equals("") ? null : encoded_picture ;
+
 		events_participating = DB_User.getParticipatingEvents(user);
 		events_created = DB_User.getEvents(user);
+	}
+	
+	public UserData_Minimal (List<String> info) {
+		this.username = info.get(0);
+		this.email = info.get(1);
+		this.profile = Profile.PRIVATE.toString();
+		
+		String encoded_picture = info.get(2);
+		
+		this.pic_64 = encoded_picture.equals("") ? null : encoded_picture ;
 	}
 
 	public static boolean emailValid(String email) {
