@@ -388,7 +388,7 @@ public class DB_Event {
 		filenames.forEach(file -> {
 			Pair<URL, Long> url = GoogleStorageUtil.signURLForDownload(file);
 			DownloadSignedURLReturn dwld_url = new DownloadSignedURLReturn(url.getValue0(), url.getValue1());
-			download_urls.add(new DownloadPictureReturn(dwld_url, file, null));
+			download_urls.add(new DownloadPictureReturn(dwld_url, file, null, null));
 		});
 
 		return download_urls;

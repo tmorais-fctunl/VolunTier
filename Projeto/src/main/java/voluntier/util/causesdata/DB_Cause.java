@@ -54,7 +54,7 @@ public class DB_Cause {
 	public static final String CREATION_DATE = "cause_creation_date";
 	public static final String LAST_UPDATE = "cause_last_update";
 	public static final String STATUS = "cause_status";
-	private static final int MAX_PARTICIPANTS_RETURN = 5;
+	private static final int MAX_DONATORS_RETURN = 5;
 	
 	private static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	private static KeyFactory causesFactory = datastore.newKeyFactory().setKind("Cause");
@@ -128,7 +128,7 @@ public class DB_Cause {
 		images.forEach(image -> {
 			Pair<URL, Long> url = GoogleStorageUtil.signURLForDownload(image.picture_id);
 			DownloadSignedURLReturn dwld_url = new DownloadSignedURLReturn(url.getValue0(), url.getValue1());
-			download_urls.add(new DownloadPictureReturn(dwld_url, image.picture_id, image.timestamp));
+			download_urls.add(new DownloadPictureReturn(dwld_url, image.picture_id, image.timestamp, null));
 		});
 
 		return download_urls;
@@ -168,7 +168,7 @@ public class DB_Cause {
 		int i = 0;
 		int counter = 0;
 		for (DonatorData donator : donators_data) {
-			if (counter + 1 > MAX_PARTICIPANTS_RETURN)
+			if (counter + 1 > MAX_DONATORS_RETURN)
 				break;
 			if (++i <= cursor)
 				continue;
