@@ -67,7 +67,7 @@ public class DB_User {
 	private static KeyFactory usersFactory = datastore.newKeyFactory().setKind("User");
 	
 	public static Entity REWRITE(Entity user) {
-		ListValue emptyList = ListValue.newBuilder().build();
+		//ListValue emptyList = ListValue.newBuilder().build();
 		return Entity.newBuilder(user.getKey())
 				.set(USERNAME, user.getString(USERNAME))
 				.set(EMAIL, user.getString(EMAIL))
@@ -95,10 +95,10 @@ public class DB_User {
 				.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(user.getString(PROFILE_PICTURE_MINIATURE))
 						.setExcludeFromIndexes(true)
 						.build())
-				.set(EVENTS, emptyList)
-				.set(EVENTS_PARTICIPATING, emptyList)
-				.set(ROUTES, emptyList)
-				.set(ROUTES_PARTICIPATING, emptyList)
+				.set(EVENTS, user.getList(EVENTS))
+				.set(EVENTS_PARTICIPATING, user.getList(EVENTS_PARTICIPATING))
+				.set(ROUTES, user.getList(ROUTES))
+				.set(ROUTES_PARTICIPATING, user.getList(ROUTES_PARTICIPATING))
 				.build();
 	}
 		
