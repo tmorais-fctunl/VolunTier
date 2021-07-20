@@ -77,8 +77,8 @@ public class UserData_Minimal {
 		
 		this.pic_64 = encoded_picture.equals("") ? null : encoded_picture ;
 
-		events_participating = DB_User.getParticipatingEvents(user);
-		events_created = DB_User.getEvents(user);
+		events_participating = DB_User.getParticipatingEventIds(user);
+		events_created = DB_User.getEventIds(user);
 	}
 	
 	public UserData_Minimal (List<String> info) {

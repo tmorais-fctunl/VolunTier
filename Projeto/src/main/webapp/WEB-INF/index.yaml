@@ -1,0 +1,6 @@
+indexes:
+
+- kind: Route
+  properties:
+  - name: route_state
+  - name: route_geohash

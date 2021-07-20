@@ -1,6 +1,7 @@
 package voluntier.resources;
 
 import java.net.URL;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -215,7 +216,13 @@ public class RouteResource {
 			TokensResource.checkIsValidAccess(data.token, data.email);
 			Entity user = DB_User.getUser(data.target);
 
-			List<String> routes = DB_User.getRoutes(user);
+			List<String> ids = DB_User.getRouteIds(user);
+			List<RouteDataReturn> routes = new LinkedList<>();
+			ids.forEach(id -> {
+				try {
+					routes.add(new RouteDataReturn(DB_Route.getRoute(id), data.email));
+				} catch (InexistentRouteException e) {}});
+			
 			return Response.ok(JsonUtil.json.toJson(new UserRoutesReturn(routes))).build();
 
 		} catch (InvalidTokenException | InexistentUserException e) {
@@ -242,7 +249,13 @@ public class RouteResource {
 			TokensResource.checkIsValidAccess(data.token, data.email);
 			Entity user = DB_User.getUser(data.target);
 
-			List<String> routes = DB_User.getParticipatingRoutes(user);
+			List<String> ids = DB_User.getParticipatingRouteIds(user);
+			List<RouteDataReturn> routes = new LinkedList<>();
+			ids.forEach(id -> {
+				try {
+					routes.add(new RouteDataReturn(DB_Route.getRoute(id), data.email));
+				} catch (InexistentRouteException e) {}});
+			
 			return Response.ok(JsonUtil.json.toJson(new UserRoutesReturn(routes))).build();
 
 		} catch (InvalidTokenException | InexistentUserException e) {

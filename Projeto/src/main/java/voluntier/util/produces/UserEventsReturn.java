@@ -4,12 +4,12 @@ import java.util.List;
 
 public class UserEventsReturn {
 	
-	public List<String> events;
+	public List<SearchEventReturn> events;
 
 	public UserEventsReturn () {
 	}
 	
-	public UserEventsReturn (List<String> events) {
+	public UserEventsReturn (List<SearchEventReturn> events) {
 		this.events = events;
 	}
 }

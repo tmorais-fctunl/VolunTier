@@ -1,6 +1,7 @@
 package voluntier.resources;
 
 import java.net.URL;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -49,6 +50,7 @@ import voluntier.util.produces.EventDataReturn;
 import voluntier.util.produces.ParticipantsReturn;
 import voluntier.util.produces.PicturesReturn;
 import voluntier.util.produces.PresenceCodeReturn;
+import voluntier.util.produces.SearchEventReturn;
 import voluntier.util.produces.UploadPictureReturn;
 import voluntier.util.produces.UserEventsReturn;
 import voluntier.util.userdata.*;
@@ -279,7 +281,13 @@ public class EventResource {
 			Key userKey = usersFactory.newKey(data.target);
 			Entity user = datastore.get(userKey);
 
-			List<String> events = DB_User.getEvents(user);
+			List<String> ids = DB_User.getEventIds(user);
+			List<SearchEventReturn> events = new LinkedList<>();
+			ids.forEach(id -> {
+				try {
+					events.add(new SearchEventReturn(DB_Event.getEvent(id)));
+				} catch (InexistentEventException e) {}});
+			
 			return Response.ok(JsonUtil.json.toJson(new UserEventsReturn(events))).build();
 
 		} catch (InvalidTokenException e) {
@@ -306,7 +314,12 @@ public class EventResource {
 			Key userKey = usersFactory.newKey(data.target);
 			Entity user = datastore.get(userKey);
 
-			List<String> events = DB_User.getParticipatingEvents(user);
+			List<String> ids = DB_User.getParticipatingEventIds(user);
+			List<SearchEventReturn> events = new LinkedList<>();
+			ids.forEach(id -> {
+				try {
+					events.add(new SearchEventReturn(DB_Event.getEvent(id)));
+				} catch (InexistentEventException e) {}});
 			return Response.ok(JsonUtil.json.toJson(new UserEventsReturn(events))).build();
 
 		} catch (InvalidTokenException e) {

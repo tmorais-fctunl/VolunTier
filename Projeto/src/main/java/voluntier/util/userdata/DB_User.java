@@ -67,6 +67,7 @@ public class DB_User {
 	private static KeyFactory usersFactory = datastore.newKeyFactory().setKind("User");
 	
 	public static Entity REWRITE(Entity user) {
+		ListValue emptyList = ListValue.newBuilder().build();
 		return Entity.newBuilder(user.getKey())
 				.set(USERNAME, user.getString(USERNAME))
 				.set(EMAIL, user.getString(EMAIL))
@@ -94,10 +95,10 @@ public class DB_User {
 				.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(user.getString(PROFILE_PICTURE_MINIATURE))
 						.setExcludeFromIndexes(true)
 						.build())
-				.set(EVENTS, user.getList(EVENTS))
-				.set(EVENTS_PARTICIPATING, user.getList(EVENTS_PARTICIPATING))
-				.set(ROUTES, user.getList(ROUTES))
-				.set(ROUTES_PARTICIPATING, user.getList(ROUTES_PARTICIPATING))
+				.set(EVENTS, emptyList)
+				.set(EVENTS_PARTICIPATING, emptyList)
+				.set(ROUTES, emptyList)
+				.set(ROUTES_PARTICIPATING, emptyList)
 				.build();
 	}
 		
@@ -318,7 +319,7 @@ public class DB_User {
 				.build();
 	}
 	
-	public static List<String> getEvents(Entity user) {
+	public static List<String> getEventIds(Entity user) {
 		List<String> events = new LinkedList<>();
 		List<Value<?>> event_list = user.getList(EVENTS);
 		event_list.forEach(event -> {
@@ -329,7 +330,7 @@ public class DB_User {
 		return events;
 	}
 	
-	public static List<String> getRoutes(Entity user) {
+	public static List<String> getRouteIds(Entity user) {
 		List<String> routes = new LinkedList<>();
 		List<Value<?>> route_list = user.getList(ROUTES);
 		route_list.forEach(route -> {
@@ -340,7 +341,7 @@ public class DB_User {
 		return routes;
 	}
 	
-	public static List<String> getParticipatingEvents(Entity user) {
+	public static List<String> getParticipatingEventIds(Entity user) {
 		List<String> participating_events = new LinkedList<>();
 		List<Value<?>> event_list = user.getList(EVENTS_PARTICIPATING);
 		event_list.forEach(event -> {
@@ -351,7 +352,7 @@ public class DB_User {
 		return participating_events;
 	}
 	
-	public static List<String> getParticipatingRoutes(Entity user) {
+	public static List<String> getParticipatingRouteIds(Entity user) {
 		List<String> participating_routes = new LinkedList<>();
 		List<Value<?>> routes_list = user.getList(ROUTES_PARTICIPATING);
 		routes_list.forEach(route -> {
@@ -504,7 +505,7 @@ public class DB_User {
 	
 	public static Entity addEvent(Key userKey, Entity user, String event_id) {
 		
-		List<String> events = getEvents(user);
+		List<String> events = getEventIds(user);
 		if(events.contains(event_id))
 			return user;
 
@@ -515,7 +516,7 @@ public class DB_User {
 	}
 	
 	public static Entity removeEvent(Key userKey, Entity user, String event_id) throws InexistentEventException {
-		List<String> events = getEvents(user);
+		List<String> events = getEventIds(user);
 		if(!events.contains(event_id))
 			throw new InexistentEventException();
 		
@@ -529,7 +530,7 @@ public class DB_User {
 	
 	public static Entity participateEvent(Key userKey, Entity user, String event_id) throws ImpossibleActionException {
 		
-		List<String> events = getParticipatingEvents(user);
+		List<String> events = getParticipatingEventIds(user);
 		if(events.contains(event_id))
 			throw new ImpossibleActionException("User already participating in event: " + event_id);
 
@@ -541,7 +542,7 @@ public class DB_User {
 	
 	public static Entity addRoute(Key userKey, Entity user, String route_id) {
 		
-		List<String> routes = getRoutes(user);
+		List<String> routes = getRouteIds(user);
 		if(routes.contains(route_id))
 			return user;
 
@@ -552,7 +553,7 @@ public class DB_User {
 	}
 	
 	public static Entity removeRoute(Key userKey, Entity user, String route_id) throws InexistentRouteException {
-		List<String> routes = getRoutes(user);
+		List<String> routes = getRouteIds(user);
 		if(!routes.contains(route_id))
 			throw new InexistentRouteException();
 		
@@ -566,7 +567,7 @@ public class DB_User {
 	
 	public static Entity participateRoute(Key userKey, Entity user, String route_id) throws ImpossibleActionException {
 		
-		List<String> route_ids = getParticipatingRoutes(user);
+		List<String> route_ids = getParticipatingRouteIds(user);
 		if(route_ids.contains(route_id))
 			throw new ImpossibleActionException("User already participating in route: " + route_id);
 
@@ -577,7 +578,7 @@ public class DB_User {
 	}
 	
 	public static Entity leaveEvent(Key userKey, Entity user, String event_id) throws InexistentEventException {
-		List<String> events = getParticipatingEvents(user);
+		List<String> events = getParticipatingEventIds(user);
 		if(!events.contains(event_id))
 			throw new InexistentEventException();
 		

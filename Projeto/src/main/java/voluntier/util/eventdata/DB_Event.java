@@ -94,7 +94,8 @@ public class DB_Event {
 	
 	public static List<Entity> REWRITE(Entity event) {
 
-		List<Entity> entities = new LinkedList<>();
+		List<Entity> entities = new LinkedList<>();		
+
 		entities.add(Entity.newBuilder(event.getKey())
 				.set(NAME, event.getString(NAME))
 				.set(ID, event.getString(ID))
@@ -234,7 +235,7 @@ public class DB_Event {
 		
 		String confirm_presence_code = generatePresenceCode();
 		ListValue.Builder presences = ListValue.newBuilder();
-
+		
 		entities.add(Entity.newBuilder(eventKey).set(NAME, data.name).set(ID, event_id).set(LOCATION, event_location)
 				.set(START_DATE, data.start_date).set(END_DATE, data.end_date)
 				.set(CREATION_DATE, Timestamp.now().toString()).set(CHAT_ID, chat.getValue1())
