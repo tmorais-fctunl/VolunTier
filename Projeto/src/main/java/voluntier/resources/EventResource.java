@@ -45,7 +45,7 @@ import voluntier.util.consumes.event.TargetData;
 import voluntier.util.eventdata.DB_Event;
 import voluntier.util.eventdata.ParticipantDataReturn;
 import voluntier.util.produces.CreateEventReturn;
-import voluntier.util.produces.DownloadEventPictureReturn;
+import voluntier.util.produces.DownloadPictureReturn;
 import voluntier.util.produces.EventDataReturn;
 import voluntier.util.produces.ParticipantsReturn;
 import voluntier.util.produces.PicturesReturn;
@@ -221,7 +221,7 @@ public class EventResource {
 			TokensResource.checkIsValidAccess(data.token, data.email);
 
 			Triplet<Entity, ParticipantStatus, String> event = DB_Event.getEvent(data.event_id, data.email);
-			List<DownloadEventPictureReturn> download_urls = DB_Event.getPicturesDownloadURLs(event.getValue0());
+			List<DownloadPictureReturn> download_urls = DB_Event.getPicturesDownloadURLs(event.getValue0());
 
 			return Response.ok(JsonUtil.json.toJson(new EventDataReturn(
 					event.getValue0(), download_urls, event.getValue1(), event.getValue2()))).build();
@@ -422,7 +422,7 @@ public class EventResource {
 		try {
 			TokensResource.checkIsValidAccess(data.token, data.email);
 
-			List<DownloadEventPictureReturn> download_urls = DB_Event.getPicturesDownloadURLs(data.event_id);
+			List<DownloadPictureReturn> download_urls = DB_Event.getPicturesDownloadURLs(data.event_id);
 
 			return Response.ok(JsonUtil.json.toJson(new PicturesReturn(download_urls))).build();
 

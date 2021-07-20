@@ -3,12 +3,12 @@ package voluntier.util.produces;
 import java.util.List;
 
 public class PicturesReturn {
-	public List<DownloadEventPictureReturn> pics;
+	public List<DownloadPictureReturn> pics;
 	
 	public PicturesReturn() {
 	}
 	
-	public PicturesReturn(List<DownloadEventPictureReturn> pics) {
+	public PicturesReturn(List<DownloadPictureReturn> pics) {
 		this.pics = pics;
 	}
 }

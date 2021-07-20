@@ -15,7 +15,7 @@ public class RateData extends RouteData {
 	}
 	
 	public boolean isValid () {
-			return super.isValid() && rating != null;
+			return super.isValid() && rating != null && rating >= 0 && rating <= 5;
 	}
 
 }

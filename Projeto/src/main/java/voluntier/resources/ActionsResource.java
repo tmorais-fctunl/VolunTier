@@ -80,6 +80,30 @@ public class ActionsResource {
 
 		return target_level < user_level;
 	}
+	
+	public static boolean hasRoutePermission(Entity user) {
+		if (isRemovedOrBannedUser(user))
+			return false;
+
+		Roles role = Roles.valueOf(user.getString(DB_User.ROLE));
+		return role == Roles.GBO || role == Roles.GA || role == Roles.SU;
+	}
+	
+	public static boolean hasEventPermission(Entity user) {
+		if (isRemovedOrBannedUser(user))
+			return false;
+
+		Roles role = Roles.valueOf(user.getString(DB_User.ROLE));
+		return role == Roles.GBO || role == Roles.GA || role == Roles.SU;
+	}
+	
+	public static boolean hasCausePermission(Entity user) {
+		if (isRemovedOrBannedUser(user))
+			return false;
+
+		Roles role = Roles.valueOf(user.getString(DB_User.ROLE));
+		return role == Roles.GA || role == Roles.SU;
+	}
 
 	public static boolean isRemovedUser(Entity user) {
 		return user.getString(DB_User.ACCOUNT).equals(Account.REMOVED.toString());

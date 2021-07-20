@@ -43,13 +43,14 @@ import voluntier.util.chatdata.DB_Chat;
 import voluntier.util.consumes.event.CreateEventData;
 import voluntier.util.consumes.event.UpdateEventData;
 import voluntier.util.produces.ChatReturn;
-import voluntier.util.produces.DownloadEventPictureReturn;
+import voluntier.util.produces.DownloadPictureReturn;
 import voluntier.util.produces.DownloadSignedURLReturn;
 import voluntier.util.userdata.DB_User;
 import voluntier.util.userdata.Profile;
 import voluntier.util.userdata.State;
 import voluntier.util.userdata.ParticipantStatus;
 
+// TODO please refactor me
 public class DB_Event {
 
 	public static final String NAME = "event_name";
@@ -294,8 +295,6 @@ public class DB_Event {
 
 		return new Triplet<>(entities, event_id, picture_id);
 	}
-
-	// TODO refactor every single line of this class please...
 	
 	private static Entity updatePictures(Entity event, ListValue newPictures) {
 
@@ -377,19 +376,19 @@ public class DB_Event {
 			return picture_ids;
 	}
 
-	public static List<DownloadEventPictureReturn> getPicturesDownloadURLs(String event_id) throws InexistentEventException {
+	public static List<DownloadPictureReturn> getPicturesDownloadURLs(String event_id) throws InexistentEventException {
 		Entity event = getEvent(event_id);
 		return getPicturesDownloadURLs(event);
 	}
 
-	public static List<DownloadEventPictureReturn> getPicturesDownloadURLs(Entity event) throws InexistentEventException {
+	public static List<DownloadPictureReturn> getPicturesDownloadURLs(Entity event) throws InexistentEventException {
 		List<String> filenames = getPicturesList(event);
-		List<DownloadEventPictureReturn> download_urls = new LinkedList<>();
+		List<DownloadPictureReturn> download_urls = new LinkedList<>();
 
 		filenames.forEach(file -> {
 			Pair<URL, Long> url = GoogleStorageUtil.signURLForDownload(file);
 			DownloadSignedURLReturn dwld_url = new DownloadSignedURLReturn(url.getValue0(), url.getValue1());
-			download_urls.add(new DownloadEventPictureReturn(dwld_url, file, null));
+			download_urls.add(new DownloadPictureReturn(dwld_url, file, null));
 		});
 
 		return download_urls;

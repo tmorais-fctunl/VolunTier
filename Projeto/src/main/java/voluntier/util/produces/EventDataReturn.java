@@ -39,7 +39,7 @@ public class EventDataReturn extends PicturesReturn {
 	public EventDataReturn() {
 	}
 	
-	public EventDataReturn (Entity event, List<DownloadEventPictureReturn> download_urls, ParticipantStatus status, String owner_name) {
+	public EventDataReturn (Entity event, List<DownloadPictureReturn> download_urls, ParticipantStatus status, String owner_name) {
 		super(download_urls);
 		
 		this.profile = event.getString(DB_Event.PROFILE);

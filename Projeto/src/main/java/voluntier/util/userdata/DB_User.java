@@ -3,6 +3,7 @@ package voluntier.util.userdata;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.google.cloud.Timestamp;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Entity;
@@ -17,6 +18,8 @@ import voluntier.exceptions.ImpossibleActionException;
 import voluntier.exceptions.InexistentEventException;
 import voluntier.exceptions.InexistentRouteException;
 import voluntier.exceptions.InexistentUserException;
+import voluntier.exceptions.NotEnoughCurrencyException;
+import voluntier.util.JsonUtil;
 import voluntier.util.consumes.RegisterData;
 import voluntier.util.consumes.UpdateProfileData;
 
@@ -503,6 +506,41 @@ public class DB_User {
 				.build();
 	}
 	
+	private static Entity updateDonationsList(Key userKey, Entity user, ListValue donations) {
+		return Entity.newBuilder(userKey)
+				.set(USERNAME, user.getString(USERNAME))
+				.set(EMAIL, user.getString(EMAIL))
+				.set(PASSWORD, user.getString(PASSWORD))
+				.set(FULL_NAME, user.getString(FULL_NAME))
+				.set(LANDLINE, user.getString(LANDLINE))
+				.set(MOBILE, user.getString(MOBILE))
+				.set(ADDRESS, user.getString(ADDRESS))
+				.set(ADDRESS2, user.getString(ADDRESS2))
+				.set(REGION, user.getString(REGION))
+				.set(POSTAL_CODE, user.getString(POSTAL_CODE))
+				.set(ACCOUNT, user.getString(ACCOUNT))
+				.set(ROLE, user.getString(ROLE))
+				.set(STATE, user.getString(STATE))
+				.set(PROFILE, user.getString(PROFILE))
+				.set(DESCRIPTION, user.getString(DESCRIPTION))
+				.set(WEBSITE, user.getString(WEBSITE))
+				.set(FACEBOOK, user.getString(FACEBOOK))
+				.set(INSTAGRAM, user.getString(INSTAGRAM))
+				.set(TWITTER, user.getString(TWITTER))
+				.set(N_EVENTS_PARTICIPATED, user.getLong(N_EVENTS_PARTICIPATED))
+				.set(TOTAL_CURRENCY, user.getLong(TOTAL_CURRENCY))
+				.set(CURRENT_CURRENCY, user.getLong(CURRENT_CURRENCY))
+				.set(DONATIONS, donations)
+				.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(user.getString(PROFILE_PICTURE_MINIATURE))
+						.setExcludeFromIndexes(true)
+						.build())
+				.set(EVENTS, user.getList(EVENTS))
+				.set(EVENTS_PARTICIPATING, user.getList(EVENTS_PARTICIPATING))
+				.set(ROUTES, user.getList(ROUTES))
+				.set(ROUTES_PARTICIPATING, user.getList(ROUTES_PARTICIPATING))
+				.build();
+	}
+	
 	public static Entity addEvent(Key userKey, Entity user, String event_id) {
 		
 		List<String> events = getEventIds(user);
@@ -588,6 +626,27 @@ public class DB_User {
 		events.forEach(event -> events_list.addValue(event));
 
 		return updateParticipatingEventList(userKey, user, events_list.build());
+	}
+	
+	public static Entity donate(Entity user, float amount, String cause_id, String cause_name) throws NotEnoughCurrencyException {
+		if(user.getLong(CURRENT_CURRENCY) < amount)
+			throw new NotEnoughCurrencyException("User: " + user.getString(EMAIL) + " does not have enough currency to make this donation");
+		
+		ListValue.Builder donations_list = ListValue.newBuilder().set(user.getList(DONATIONS));
+		donations_list.addValue(JsonUtil.json.toJson(new DonationData(cause_name, cause_id, amount, Timestamp.now().toString())));
+		
+		return updateDonationsList(user.getKey(), user, donations_list.build());
+	}
+	
+	public static List<DonationData> getDonations(Entity user) {
+		List<DonationData> donations = new LinkedList<>();
+		List<Value<?>> donation_list = user.getList(DONATIONS);
+		donation_list.forEach(donation -> {
+			String donation_data = (String) donation.get();
+			donations.add(JsonUtil.json.fromJson(donation_data, DonationData.class));
+		});
+		
+		return donations;
 	}
 	
 	public static Entity createNew(String email, String username, String password, Key userKey) {

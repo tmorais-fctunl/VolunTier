@@ -46,7 +46,7 @@ import voluntier.util.consumes.route.RateData;
 import voluntier.util.consumes.route.RouteData;
 import voluntier.util.eventdata.ParticipantDataReturn;
 import voluntier.util.produces.CreateRouteReturn;
-import voluntier.util.produces.DownloadEventPictureReturn;
+import voluntier.util.produces.DownloadPictureReturn;
 import voluntier.util.produces.ParticipantsReturn;
 import voluntier.util.produces.PicturesReturn;
 import voluntier.util.produces.UploadPictureReturn;
@@ -359,7 +359,7 @@ public class RouteResource {
 		try {
 			TokensResource.checkIsValidAccess(data.token, data.email);
 
-			List<DownloadEventPictureReturn> download_urls = DB_Route.getPicturesDownloadURLs(data.route_id);
+			List<DownloadPictureReturn> download_urls = DB_Route.getPicturesDownloadURLs(data.route_id);
 
 			return Response.ok(JsonUtil.json.toJson(new PicturesReturn(download_urls))).build();
 

@@ -46,7 +46,7 @@ import voluntier.util.consumes.route.CreateRouteData;
 import voluntier.util.eventdata.DB_Event;
 import voluntier.util.eventdata.ParticipantDataReturn;
 import voluntier.util.produces.ChatReturn;
-import voluntier.util.produces.DownloadEventPictureReturn;
+import voluntier.util.produces.DownloadPictureReturn;
 import voluntier.util.produces.DownloadSignedURLReturn;
 import voluntier.util.produces.SearchEventReturn;
 import voluntier.util.rating.DB_Rating;
@@ -136,8 +136,12 @@ public class DB_Route {
 		int number;
 
 		List<Value<?>> pictures = route.getList(PICTURES);
-		if (pictures.size() > 0)
-			number = (Integer.parseInt(((String) pictures.get(pictures.size() - 1).get()).split(id + "-")[1]) + 1);
+		if (pictures.size() > 0) {
+			String last = (String) pictures.get(pictures.size() - 1).get();
+			PictureData last_data = JsonUtil.json.fromJson(last, PictureData.class);
+			
+			number = (Integer.parseInt((last_data.picture_id).split("-")[1]) + 1);
+		}
 		else
 			number = 1;
 
@@ -305,20 +309,20 @@ public class DB_Route {
 		}
 	}
 
-	public static List<DownloadEventPictureReturn> getPicturesDownloadURLs(String route)
+	public static List<DownloadPictureReturn> getPicturesDownloadURLs(String route_id)
 			throws InexistentRouteException {
-		Entity event = getRoute(route);
-		return getPicturesDownloadURLs(event);
+		Entity route = getRoute(route_id);
+		return getPicturesDownloadURLs(route);
 	}
 
-	public static List<DownloadEventPictureReturn> getPicturesDownloadURLs(Entity route) {
+	public static List<DownloadPictureReturn> getPicturesDownloadURLs(Entity route) {
 		List<PictureData> pictures = DB_Util.getJsonList(route, PICTURES, PictureData.class);
-		List<DownloadEventPictureReturn> download_urls = new LinkedList<>();
+		List<DownloadPictureReturn> download_urls = new LinkedList<>();
 
 		pictures.forEach(picture -> {
 			Pair<URL, Long> url = GoogleStorageUtil.signURLForDownload(picture.picture_id);
 			DownloadSignedURLReturn dwld_url = new DownloadSignedURLReturn(url.getValue0(), url.getValue1());
-			download_urls.add(new DownloadEventPictureReturn(dwld_url, picture.picture_id, picture.timestamp));
+			download_urls.add(new DownloadPictureReturn(dwld_url, picture.picture_id, picture.timestamp));
 		});
 
 		return download_urls;

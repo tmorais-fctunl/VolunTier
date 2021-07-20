@@ -176,11 +176,11 @@ public class SearchByLocationResource {
 
 		QueryResults<Entity> res = datastore.run(query);
 
-		List<Entity> events = new LinkedList<>();
-		res.forEachRemaining(event -> {
-			events.add(event);
+		List<Entity> ents = new LinkedList<>();
+		res.forEachRemaining(e -> {
+			ents.add(e);
 		});
 
-		return events;
+		return ents;
 	}
 }

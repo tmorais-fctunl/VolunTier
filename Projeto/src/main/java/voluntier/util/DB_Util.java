@@ -159,4 +159,7 @@ public class DB_Util {
 		return list;
 	}
 
+	public static ListValue.Builder emptyList(){
+		return ListValue.newBuilder();
+	}
 }
