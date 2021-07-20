@@ -166,6 +166,7 @@ public class DB_Route {
 		}
 
 		ListValue.Builder participants = ListValue.newBuilder();
+		participants.addValue(create_route_data.email);
 
 		Pair<List<Entity>, String> chat = DB_Chat.createNew(create_route_data.email);
 		String chat_id = chat.getValue1();
@@ -198,7 +199,7 @@ public class DB_Route {
 				.set(PARTICIPANTS, participants.build())
 				.set(RATING_ID, rating_id)
 				.set(CHAT_ID, chat_id)
-				.set(NUM_PARTICIPANTS, 0)
+				.set(NUM_PARTICIPANTS, 1)
 				.set(STATE, State.ENABLED.toString())
 				.build());
 		
