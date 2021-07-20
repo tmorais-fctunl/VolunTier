@@ -134,7 +134,7 @@ public class SearchByLocationResource {
 		
 		return Response.ok().build();
 	}
-	
+
 	// FOR DEBUG ONLY, USE THIS TO ADD/CHANGE PROPERTIES TO ALL EXISTENT USERS
 		@POST
 		@Path("/routes/rewrite")

@@ -14,6 +14,7 @@ public class UpdateProfileData extends RequestData {
 	public String address2;
 	public String region;
 	public String pc;
+	public String description;
 
 	public String website;
 	public String facebook;
@@ -27,8 +28,8 @@ public class UpdateProfileData extends RequestData {
 
 	public UpdateProfileData(String token, String email, String password, String full_name,
 			String confirmation_password, String profile, String landline, String mobile, String address,
-			String address2, String region, String pc, String state, String website, String facebook, String instagram,
-			String twitter, String target) {
+			String address2, String region, String pc, String state, String description, String website, String facebook, 
+			String instagram, String twitter, String target) {
 		super(email, token);
 		this.full_name = full_name;
 		this.password = password;
@@ -39,6 +40,7 @@ public class UpdateProfileData extends RequestData {
 		this.address2 = this.region = address2;
 		this.pc = pc;
 		this.profile = profile;
+		this.description = description;
 
 		this.website = website;
 		this.facebook = facebook;
@@ -103,6 +105,10 @@ public class UpdateProfileData extends RequestData {
 	public String getState(String a_default) {
 		return profile == null ? a_default : profile;
 	}
+	
+	public String getDescription (String a_default) {
+		return description == null ? a_default : description;
+	}
 
 	public boolean isValid() {
 		return super.isValid() && target != null
@@ -116,6 +122,7 @@ public class UpdateProfileData extends RequestData {
 				&& (address == null || address.equals("") || UserData_Modifiable.addressValid(address))
 				&& (address2 == null || address2.equals("") || UserData_Modifiable.addressValid(address2))
 				&& (region == null || region.equals("") || UserData_Modifiable.regionValid(region))
+				&& (description == null || description.equals("") || UserData_Modifiable.descriptionValid(description))
 				&& (website == null || website.equals("") || UserData_Modifiable.websiteValid(website))
 				&& (facebook == null || facebook.equals("") || UserData_Modifiable.facebookValid(facebook))
 				&& (instagram == null || instagram.equals("") || UserData_Modifiable.instagramValid(instagram))

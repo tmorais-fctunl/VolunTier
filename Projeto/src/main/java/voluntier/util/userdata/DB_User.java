@@ -39,6 +39,7 @@ public class DB_User {
 	public static final String ROLE = "user_role";
 	public static final String STATE = "user_state";
 	public static final String PROFILE = "user_profile";
+	public static final String DESCRIPTION = "user_description";
 
 	public static final String WEBSITE = "user_website";
 	public static final String FACEBOOK = "user_facebook";
@@ -66,7 +67,7 @@ public class DB_User {
 	private static KeyFactory usersFactory = datastore.newKeyFactory().setKind("User");
 	
 	public static Entity REWRITE(Entity user) {
-		ListValue empty_list = ListValue.newBuilder().build();
+		//ListValue empty_list = ListValue.newBuilder().build();
 		return Entity.newBuilder(user.getKey())
 				.set(USERNAME, user.getString(USERNAME))
 				.set(EMAIL, user.getString(EMAIL))
@@ -82,21 +83,22 @@ public class DB_User {
 				.set(ROLE, user.getString(ROLE))
 				.set(STATE, user.getString(STATE))
 				.set(PROFILE, user.getString(PROFILE))
+				.set(DESCRIPTION, "")
 				.set(WEBSITE, user.getString(WEBSITE))
 				.set(FACEBOOK, user.getString(FACEBOOK))
 				.set(INSTAGRAM, user.getString(INSTAGRAM))
 				.set(TWITTER, user.getString(TWITTER))
-				.set(N_EVENTS_PARTICIPATED, 0)
-				.set(TOTAL_CURRENCY, 0)
-				.set(CURRENT_CURRENCY, 0)
-				.set(DONATIONS, empty_list)
+				.set(N_EVENTS_PARTICIPATED, user.getLong(N_EVENTS_PARTICIPATED))
+				.set(TOTAL_CURRENCY, user.getLong(TOTAL_CURRENCY))
+				.set(CURRENT_CURRENCY, user.getLong(CURRENT_CURRENCY))
+				.set(DONATIONS, user.getList(DONATIONS))
 				.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(user.getString(PROFILE_PICTURE_MINIATURE))
 						.setExcludeFromIndexes(true)
 						.build())
 				.set(EVENTS, user.getList(EVENTS))
 				.set(EVENTS_PARTICIPATING, user.getList(EVENTS_PARTICIPATING))
-				.set(ROUTES, empty_list)
-				.set(ROUTES_PARTICIPATING, empty_list)
+				.set(ROUTES, user.getList(ROUTES))
+				.set(ROUTES_PARTICIPATING, user.getList(ROUTES_PARTICIPATING))
 				.build();
 	}
 		
@@ -116,6 +118,7 @@ public class DB_User {
 				.set(ROLE, user.getString(ROLE))
 				.set(STATE, user.getString(STATE))
 				.set(PROFILE, user.getString(PROFILE))
+				.set(DESCRIPTION, user.getString(DESCRIPTION))
 				.set(WEBSITE, user.getString(WEBSITE))
 				.set(FACEBOOK, user.getString(FACEBOOK))
 				.set(INSTAGRAM, user.getString(INSTAGRAM))
@@ -150,6 +153,7 @@ public class DB_User {
 				.set(ROLE, user.getString(ROLE))
 				.set(STATE, user.getString(STATE))
 				.set(PROFILE, user.getString(PROFILE))
+				.set(DESCRIPTION, user.getString(DESCRIPTION))
 				.set(WEBSITE, user.getString(WEBSITE))
 				.set(FACEBOOK, user.getString(FACEBOOK))
 				.set(INSTAGRAM, user.getString(INSTAGRAM))
@@ -184,6 +188,7 @@ public class DB_User {
 				.set(ROLE, user.getString(ROLE))
 				.set(STATE, state)
 				.set(PROFILE, user.getString(PROFILE))
+				.set(DESCRIPTION, user.getString(DESCRIPTION))
 				.set(WEBSITE, user.getString(WEBSITE))
 				.set(FACEBOOK, user.getString(FACEBOOK))
 				.set(INSTAGRAM, user.getString(INSTAGRAM))
@@ -218,6 +223,7 @@ public class DB_User {
 				.set(ROLE, user.getString(ROLE))
 				.set(STATE, user.getString(STATE))
 				.set(PROFILE, data.getProfile(user.getString(PROFILE)))
+				.set(DESCRIPTION, data.getDescription(user.getString(DESCRIPTION)))
 				.set(WEBSITE, data.getWebsite(user.getString(WEBSITE)))
 				.set(FACEBOOK, data.getFacebook(user.getString(FACEBOOK)))
 				.set(INSTAGRAM, data.getInstagram(user.getString(INSTAGRAM)))
@@ -252,6 +258,7 @@ public class DB_User {
 				.set(ROLE, role)
 				.set(STATE, user.getString(STATE))
 				.set(PROFILE, user.getString(PROFILE))
+				.set(DESCRIPTION, user.getString(DESCRIPTION))
 				.set(WEBSITE, user.getString(WEBSITE))
 				.set(FACEBOOK, user.getString(FACEBOOK))
 				.set(INSTAGRAM, user.getString(INSTAGRAM))
@@ -286,6 +293,7 @@ public class DB_User {
 				.set(ROLE, user.getString(ROLE))
 				.set(STATE, user.getString(STATE))
 				.set(PROFILE, user.getString(PROFILE))
+				.set(DESCRIPTION, user.getString(DESCRIPTION))
 				.set(WEBSITE, user.getString(WEBSITE))
 				.set(FACEBOOK, user.getString(FACEBOOK))
 				.set(INSTAGRAM, user.getString(INSTAGRAM))
@@ -371,6 +379,7 @@ public class DB_User {
 				.set(ROLE, user.getString(ROLE))
 				.set(STATE, user.getString(STATE))
 				.set(PROFILE, user.getString(PROFILE))
+				.set(DESCRIPTION, user.getString(DESCRIPTION))
 				.set(WEBSITE, user.getString(WEBSITE))
 				.set(FACEBOOK, user.getString(FACEBOOK))
 				.set(INSTAGRAM, user.getString(INSTAGRAM))
@@ -405,6 +414,7 @@ public class DB_User {
 				.set(ROLE, user.getString(ROLE))
 				.set(STATE, user.getString(STATE))
 				.set(PROFILE, user.getString(PROFILE))
+				.set(DESCRIPTION, user.getString(DESCRIPTION))
 				.set(WEBSITE, user.getString(WEBSITE))
 				.set(FACEBOOK, user.getString(FACEBOOK))
 				.set(INSTAGRAM, user.getString(INSTAGRAM))
@@ -439,6 +449,7 @@ public class DB_User {
 				.set(ROLE, user.getString(ROLE))
 				.set(STATE, user.getString(STATE))
 				.set(PROFILE, user.getString(PROFILE))
+				.set(DESCRIPTION, user.getString(DESCRIPTION))
 				.set(WEBSITE, user.getString(WEBSITE))
 				.set(FACEBOOK, user.getString(FACEBOOK))
 				.set(INSTAGRAM, user.getString(INSTAGRAM))
@@ -469,6 +480,7 @@ public class DB_User {
 				.set(ROLE, user.getString(ROLE))
 				.set(STATE, user.getString(STATE))
 				.set(PROFILE, user.getString(PROFILE))
+				.set(DESCRIPTION, user.getString(DESCRIPTION))
 				.set(WEBSITE, user.getString(WEBSITE))
 				.set(FACEBOOK, user.getString(FACEBOOK))
 				.set(INSTAGRAM, user.getString(INSTAGRAM))
@@ -589,6 +601,7 @@ public class DB_User {
 				.set(REGION, data.region)
 				.set(POSTAL_CODE, data.pc)
 				.set(ACCOUNT, data.getAccount().toString())
+				.set(DESCRIPTION, data.description)
 				.set(WEBSITE, data.website)
 				.set(FACEBOOK, data.facebook)
 				.set(INSTAGRAM, data.instagram)

@@ -13,6 +13,7 @@ public class UserData_Minimal {
 	public String email;
 
 	public String profile;
+	public String description;
 
 	public String full_name;
 	public String landline;
@@ -47,6 +48,7 @@ public class UserData_Minimal {
 		address2 = "";
 		region = "";
 		pc = "";
+		description = "";
 		website = "";
 		facebook = "";
 		instagram = "";
@@ -64,6 +66,7 @@ public class UserData_Minimal {
 		this.address2 = user.getString(DB_User.ADDRESS2);
 		this.region = user.getString(DB_User.REGION);
 		this.pc = user.getString(DB_User.POSTAL_CODE);
+		this.description = user.getString(DB_User.DESCRIPTION);
 
 		this.website = user.getString(DB_User.WEBSITE);
 		this.facebook = user.getString(DB_User.FACEBOOK);
@@ -119,6 +122,10 @@ public class UserData_Minimal {
 	public static boolean regionValid(String region) {
 		return (region != null && ((region.length() > 3 && region.length() < 120) || region.equals("")));
 	}
+	
+	public static boolean descriptionValid (String description) {
+		return (description != null && ((description.length() > 0 && description.length() < 500) || description.equals("")));
+	}
 
 	public static boolean websiteValid(String website) {
 		return website != null && website.length() < 120;
@@ -144,7 +151,7 @@ public class UserData_Minimal {
 	boolean isValid() {
 		return usernameValid(username) && emailValid(email) && fullNameValid(full_name) && pcValid(pc)
 				&& mobileValid(mobile) && landlineValid(landline) && addressValid(address) && addressValid(address2)
-				&& regionValid(region) && profileValid(profile) && websiteValid(website) && facebookValid(facebook)
+				&& regionValid(region) && profileValid(profile) && descriptionValid(description) && websiteValid(website) && facebookValid(facebook)
 				&& instagramValid(instagram) && twitterValid(twitter);
 	}
 }

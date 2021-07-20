@@ -92,6 +92,8 @@ public class EventData_Minimal {
 	}
 	
 	public static boolean datesValid(String start_date, String end_date) {
+		if (end_date.equalsIgnoreCase("undefined"))
+			return startDateValid(start_date);
 		try {
 			Timestamp start = Timestamp.parseTimestamp(start_date);
 			Timestamp end = Timestamp.parseTimestamp(end_date);
@@ -112,6 +114,8 @@ public class EventData_Minimal {
 	}
 	
 	public static boolean endDateValid (String end_date) {
+		if (end_date.equalsIgnoreCase("undefined"))
+			return true;
 		try {
 			Timestamp.parseTimestamp(end_date);
 			return true;
