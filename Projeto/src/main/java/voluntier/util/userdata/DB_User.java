@@ -67,7 +67,6 @@ public class DB_User {
 	private static KeyFactory usersFactory = datastore.newKeyFactory().setKind("User");
 	
 	public static Entity REWRITE(Entity user) {
-		//ListValue empty_list = ListValue.newBuilder().build();
 		return Entity.newBuilder(user.getKey())
 				.set(USERNAME, user.getString(USERNAME))
 				.set(EMAIL, user.getString(EMAIL))
@@ -457,6 +456,10 @@ public class DB_User {
 				.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(user.getString(PROFILE_PICTURE_MINIATURE))
 						.setExcludeFromIndexes(true)
 						.build())
+				.set(N_EVENTS_PARTICIPATED, user.getLong(N_EVENTS_PARTICIPATED))
+				.set(TOTAL_CURRENCY, user.getLong(TOTAL_CURRENCY))
+				.set(CURRENT_CURRENCY, user.getLong(CURRENT_CURRENCY))
+				.set(DONATIONS, user.getList(DONATIONS))
 				.set(EVENTS, user.getList(EVENTS))
 				.set(EVENTS_PARTICIPATING, user.getList(EVENTS_PARTICIPATING))
 				.set(ROUTES, routes_list)
@@ -485,6 +488,10 @@ public class DB_User {
 				.set(FACEBOOK, user.getString(FACEBOOK))
 				.set(INSTAGRAM, user.getString(INSTAGRAM))
 				.set(TWITTER, user.getString(TWITTER))
+				.set(N_EVENTS_PARTICIPATED, user.getLong(N_EVENTS_PARTICIPATED))
+				.set(TOTAL_CURRENCY, user.getLong(TOTAL_CURRENCY))
+				.set(CURRENT_CURRENCY, user.getLong(CURRENT_CURRENCY))
+				.set(DONATIONS, user.getList(DONATIONS))
 				.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(user.getString(PROFILE_PICTURE_MINIATURE))
 						.setExcludeFromIndexes(true)
 						.build())
@@ -613,6 +620,10 @@ public class DB_User {
 				.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(data.profile_pic)
 						.setExcludeFromIndexes(true)
 						.build())
+				.set(N_EVENTS_PARTICIPATED, 0)
+				.set(TOTAL_CURRENCY, 0)
+				.set(CURRENT_CURRENCY, 0)
+				.set(DONATIONS, empty_list)
 				.set(EVENTS, empty_list)
 				.set(EVENTS_PARTICIPATING, empty_list)
 				.set(ROUTES, empty_list)

@@ -298,7 +298,7 @@ public class RouteResource {
 	}
 
 	@POST
-	@Path("/event/pictures/delete")
+	@Path("/route/pictures/delete")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response deletePictureFromRoute(DeleteRoutePictureData data) {

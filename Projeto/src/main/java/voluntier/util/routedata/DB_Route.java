@@ -154,11 +154,14 @@ public class DB_Route {
 		String geohash = GeoHashUtil.convertCoordsToGeoHashHighPrecision(first_event_location.getLatitude(),
 				first_event_location.getLongitude());
 
+		ListValue.Builder events = ListValue.newBuilder();
 		for (String e : create_route_data.event_ids) {
-			if (!e.equals(first_event_id)) {
-				Entity event = DB_Event.getEvent(e);
-				DB_Event.checkNotEnded(event);
-			}
+			Entity event = DB_Event.getEvent(e);
+			DB_Event.checkNotEnded(event);
+			DB_Event.checkIsActive(event);
+			DB_Event.checkIsPublic(event);
+			
+			events.addValue(JsonUtil.json.toJson(new SearchEventReturn(event)));
 		}
 
 		ListValue.Builder participants = ListValue.newBuilder();
@@ -175,12 +178,6 @@ public class DB_Route {
 		Timestamp creation_date = Timestamp.now();
 
 		String creator = create_route_data.email;
-		
-		ListValue.Builder events = ListValue.newBuilder();
-		for(String id : create_route_data.event_ids){
-			Entity event = DB_Event.getEvent(id);
-			events.addValue(JsonUtil.json.toJson(new SearchEventReturn(event)));
-		}
 
 		Pair<Entity, String> rating = DB_Rating.createNew();
 		String rating_id = rating.getValue1();

@@ -19,14 +19,19 @@ public class RouteDataReturn extends PicturesReturn {
 	public double avg_rating;
 	public int num_participants;
 	
-	public RouteDataReturn(Entity route, String user_email) throws InexistentRatingException, InexistentChatIdException {
+	public RouteDataReturn(Entity route, String user_email) {
 		super(DB_Route.getPicturesDownloadURLs(route));
 		this.route_id = route.getString(DB_Route.ID);
 		this.creator = route.getString(DB_Route.CREATOR);
-		this.creation_date = route.getString(DB_Route.CREATION_DATE);
-		this.avg_rating = DB_Route.getAverageRating(route);
+		this.creation_date = route.getTimestamp(DB_Route.CREATION_DATE).toString();
+		
+		try {
+			this.avg_rating = DB_Route.getAverageRating(route);
+			this.status = DB_Route.getStatus(route, user_email).toString();
+		} catch (InexistentRatingException | InexistentChatIdException e) {}
+		
 		this.num_participants = (int) route.getLong(DB_Route.NUM_PARTICIPANTS);
-		this.status = DB_Route.getStatus(route, user_email).toString();
+
 		
 		events = DB_Util.getJsonList(route, DB_Route.EVENTS, SearchEventReturn.class);
 	}

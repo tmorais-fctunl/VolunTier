@@ -148,7 +148,10 @@ public class DB_Rating {
 		double sum = rating.getDouble(SUM);
 		List<Value<?>> users = rating.getList(USERS);
 		
-		return sum / users.size();
+		if(users.size() == 0)
+			return 0.0;
+		
+		return sum / (double) users.size();
 	}
 
 }
