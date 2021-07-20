@@ -81,7 +81,7 @@ public class DB_Util {
 		List<String> string_list = getStringList(e, list_property);
 		
 		if (remElement == null || !string_list.contains(remElement))
-			throw new InexistentElementException("Inesistent element in list: " + remElement);
+			throw new InexistentElementException("Inexistent element in list: " + remElement);
 
 		string_list.remove(remElement);
 

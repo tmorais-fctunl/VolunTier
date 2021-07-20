@@ -20,11 +20,13 @@ public class RankingData {
 	public class UserSearchData {
 		public String username;
 		public String full_name;
+		public String email;
 		public String pic_64;
 
-		public UserSearchData(String username, String full_name, String encodedPicture) {
+		public UserSearchData(String username, String full_name, String email, String encodedPicture) {
 			this.username = username;
 			this.full_name = full_name;
+			this.email = email;
 			this.pic_64 = encodedPicture;
 		}
 	}
@@ -36,8 +38,8 @@ public class RankingData {
 		users = new LinkedList<>();
 		entities.forEach(entity -> {
 			String pic = entity.getString(DB_User.PROFILE_PICTURE_MINIATURE);
-			users.add(new UserSearchData(entity.getString(DB_User.USERNAME), entity.getString(DB_User.FULL_NAME)
-					, pic.equals("") ? null : pic ));
+			users.add(new UserSearchData(entity.getString(DB_User.USERNAME), entity.getString(DB_User.FULL_NAME),
+					entity.getString(DB_User.EMAIL), pic.equals("") ? null : pic ));
 		});
 		
 		results = data.getValue2().toString();

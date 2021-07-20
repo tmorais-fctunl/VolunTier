@@ -26,6 +26,7 @@ public class EventDataReturn extends PicturesReturn {
 	public String description;
 	public String category;
 	public long capacity;
+	public int difficulty;
 	
 	public String website;
 	public String facebook;
@@ -58,6 +59,7 @@ public class EventDataReturn extends PicturesReturn {
 		this.description = event.getString(DB_Event.DESCRIPTION);
 		this.category = event.getString(DB_Event.CATEGORY);
 		this.capacity = event.getLong(DB_Event.CAPACITY);
+		this.difficulty = (int) event.getLong(DB_Event.DIFFICULTY);
 		
 		this.website = event.getString(DB_Event.WEBSITE);
 		this.facebook = event.getString(DB_Event.FACEBOOK);

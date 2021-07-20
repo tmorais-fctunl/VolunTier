@@ -85,7 +85,12 @@ public class SearchResource {
 			} else {
 				// check permissions
 				if (ActionsResource.hasSamePermission(rq_user, tg_user, txn)) {
-					if (DB_User.isPublicProfile(tg_user) || rq_user.equals(tg_user)) {
+					if (rq_user.equals(tg_user)) {
+						UserData_Minimal user_data = new UserData_Minimal(tg_user, true);
+						txn.rollback();
+						return Response.ok(JsonUtil.json.toJson(user_data)).build();
+					}
+					else if (DB_User.isPublicProfile(tg_user)) {
 						UserData_Minimal user_data = new UserData_Minimal(tg_user);
 						txn.rollback();
 						return Response.ok(JsonUtil.json.toJson(user_data)).build();

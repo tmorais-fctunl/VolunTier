@@ -32,6 +32,8 @@ public class UserData_Minimal {
 	
 	List<String> events_participating;
 	List<String> events_created;
+	
+	public int currentCurrency;
 
 	public UserData_Minimal() {
 	}
@@ -67,6 +69,33 @@ public class UserData_Minimal {
 		this.region = user.getString(DB_User.REGION);
 		this.pc = user.getString(DB_User.POSTAL_CODE);
 		this.description = user.getString(DB_User.DESCRIPTION);
+
+		this.website = user.getString(DB_User.WEBSITE);
+		this.facebook = user.getString(DB_User.FACEBOOK);
+		this.instagram = user.getString(DB_User.INSTAGRAM);
+		this.twitter = user.getString(DB_User.TWITTER);
+
+		String encoded_picture = user.getString(DB_User.PROFILE_PICTURE_MINIATURE);
+		
+		this.pic_64 = encoded_picture.equals("") ? null : encoded_picture ;
+
+		events_participating = DB_User.getParticipatingEventIds(user);
+		events_created = DB_User.getEventIds(user);
+	}
+	
+	public UserData_Minimal(Entity user, boolean b) {
+		this.username = user.getString(DB_User.USERNAME);
+		this.email = user.getString(DB_User.EMAIL);
+		this.full_name = user.getString(DB_User.FULL_NAME);
+		this.profile = user.getString(DB_User.PROFILE);
+		this.landline = user.getString(DB_User.LANDLINE);
+		this.mobile = user.getString(DB_User.MOBILE);
+		this.address = user.getString(DB_User.ADDRESS);
+		this.address2 = user.getString(DB_User.ADDRESS2);
+		this.region = user.getString(DB_User.REGION);
+		this.pc = user.getString(DB_User.POSTAL_CODE);
+		this.description = user.getString(DB_User.DESCRIPTION);
+		this.currentCurrency = (int) user.getLong(DB_User.CURRENT_CURRENCY);
 
 		this.website = user.getString(DB_User.WEBSITE);
 		this.facebook = user.getString(DB_User.FACEBOOK);

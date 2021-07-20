@@ -1,9 +1,9 @@
 package voluntier.util.produces;
 
-public class PresenceCodeReturn {
+public class QRCodeReturn {
 	public String code;
 	
-	public PresenceCodeReturn(String code) {
+	public QRCodeReturn(String code) {
 		this.code = code;
 	}
 }

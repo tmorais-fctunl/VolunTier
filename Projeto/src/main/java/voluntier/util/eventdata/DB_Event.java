@@ -24,6 +24,7 @@ import com.google.datastore.v1.QueryResultBatch.MoreResultsType;
 import voluntier.exceptions.IllegalCoordinatesException;
 import voluntier.exceptions.ImpossibleActionException;
 import voluntier.exceptions.InexistentChatIdException;
+import voluntier.exceptions.InexistentElementException;
 import voluntier.exceptions.InexistentEventException;
 import voluntier.exceptions.InexistentLogIdException;
 import voluntier.exceptions.InexistentMessageIdException;
@@ -35,6 +36,7 @@ import voluntier.exceptions.InexistentUserException;
 import voluntier.exceptions.InvalidCursorException;
 import voluntier.exceptions.MaximumSizeReachedException;
 import voluntier.exceptions.SomethingWrongException;
+import voluntier.util.DB_Util;
 import voluntier.util.GeoHashUtil;
 import voluntier.util.GoogleStorageUtil;
 import voluntier.util.chatdata.DB_Chat;
@@ -71,6 +73,7 @@ public class DB_Event {
 	public static final String GEOHASH = "event_geohash";
 	public static final String DIFFICULTY = "event_difficulty";
 	public static final String PRESENCE_CODE = "event_presence_confirmation_code";
+	public static final String LEAVE_CODE = "event_leave_confirmation_code";
 	public static final String PRESENCES = "event_presences";
 	public static final String PICTURES = "event_pics_id";
 	public static final String STATE = "event_state";
@@ -88,9 +91,45 @@ public class DB_Event {
 
 	public static final long MAX_PARTICIPANTS_RETURN = 5;
 	public static final long MAX_NUM_PICTURES = 10;
+	
+	public static final String SEPARATOR = "||";
 
 	private static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	private static KeyFactory eventFactory = datastore.newKeyFactory().setKind("Event");
+	
+	private static DB_Util util = new DB_Util(DB_Event::defaultBuilder);
+	
+	private static void defaultBuilder(Entity event) {
+		util.builder = Entity.newBuilder(event.getKey())
+				.set(NAME, event.getString(NAME))
+				.set(ID, event.getString(ID))
+				.set(LOCATION, event.getLatLng(LOCATION))
+				.set(START_DATE, event.getString(START_DATE))
+				.set(END_DATE, event.getString(END_DATE))
+				.set(CREATION_DATE, event.getString(CREATION_DATE))
+				.set(CHAT_ID, event.getString(CHAT_ID))
+				.set(PARTICIPANTS, event.getList(PARTICIPANTS))
+				.set(N_PARTICIPANTS, event.getLong(N_PARTICIPANTS))
+				.set(OWNER_EMAIL, event.getString(OWNER_EMAIL))
+				.set(CONTACT, event.getString(CONTACT))
+				.set(DESCRIPTION, event.getString(DESCRIPTION))
+				.set(CATEGORY, event.getString(CATEGORY))
+				.set(CAPACITY, event.getLong(CAPACITY))
+				.set(STATE, event.getString(STATE))
+				.set(PROFILE, event.getString(PROFILE))
+				.set(WEBSITE, event.getString(WEBSITE))
+				.set(FACEBOOK, event.getString(FACEBOOK))
+				.set(INSTAGRAM, event.getString(INSTAGRAM))
+				.set(TWITTER, event.getString(TWITTER))
+				.set(GEOHASH, event.getString(GEOHASH))
+				.set(PICTURES, event.getList(PICTURES))
+				.set(PRESENCE_CODE, event.getString(PRESENCE_CODE))
+				.set(LEAVE_CODE, event.getString(LEAVE_CODE))
+				.set(PRESENCES, event.getList(PRESENCES))
+				.set(REQUESTS, event.getList(REQUESTS))
+				.set(N_REQUESTS, event.getLong(N_REQUESTS))
+				.set(DIFFICULTY, event.getLong(DIFFICULTY));
+	}
 	
 	public static List<Entity> REWRITE(Entity event) {
 
@@ -120,6 +159,7 @@ public class DB_Event {
 				.set(GEOHASH, event.getString(GEOHASH))
 				.set(PICTURES, event.getList(PICTURES))
 				.set(PRESENCE_CODE, event.getString(PRESENCE_CODE))
+				.set(LEAVE_CODE, generateCode(ID))
 				.set(PRESENCES, event.getList(PRESENCES))
 				.set(REQUESTS, event.getList(REQUESTS))
 				.set(N_REQUESTS, event.getLong(N_REQUESTS))
@@ -161,6 +201,7 @@ public class DB_Event {
 				.set(DIFFICULTY, data.getDificulty((int) event.getLong(DIFFICULTY)))
 				.set(PICTURES, event.getList(PICTURES))
 				.set(PRESENCE_CODE, event.getString(PRESENCE_CODE))
+				.set(LEAVE_CODE, event.getString(LEAVE_CODE))
 				.set(PRESENCES, event.getList(PRESENCES))
 				.set(GEOHASH, data.getGeohash(event.getString(GEOHASH)))
 				.set(PICTURES, event.getList(PICTURES))
@@ -185,7 +226,7 @@ public class DB_Event {
 				.set(FACEBOOK, event.getString(FACEBOOK)).set(INSTAGRAM, event.getString(INSTAGRAM))
 				.set(TWITTER, event.getString(TWITTER)).set(GEOHASH, event.getString(GEOHASH)).set(DIFFICULTY, event.getLong(DIFFICULTY))
 				.set(PICTURES, event.getList(PICTURES)).set(PRESENCE_CODE, event.getString(PRESENCE_CODE))
-				.set(PRESENCES, event.getList(PRESENCES))
+				.set(LEAVE_CODE, event.getString(LEAVE_CODE)).set(PRESENCES, event.getList(PRESENCES))
 				.set(TWITTER, event.getString(TWITTER)).set(GEOHASH, event.getString(GEOHASH)).set(PICTURES, event.getList(PICTURES))
 				.set(REQUESTS, event.getList(REQUESTS)).set(N_REQUESTS, event.getLong(N_REQUESTS)).build();
 	}
@@ -207,7 +248,7 @@ public class DB_Event {
 				.set(FACEBOOK, event.getString(FACEBOOK)).set(INSTAGRAM, event.getString(INSTAGRAM))
 				.set(TWITTER, event.getString(TWITTER)).set(GEOHASH, event.getString(GEOHASH)).set(DIFFICULTY, event.getLong(DIFFICULTY))
 				.set(PICTURES, event.getList(PICTURES)).set(PRESENCE_CODE, event.getString(PRESENCE_CODE))
-				.set(PRESENCES, event.getList(PRESENCES))
+				.set(LEAVE_CODE, event.getString(LEAVE_CODE)).set(PRESENCES, event.getList(PRESENCES))
 				.set(REQUESTS, event.getList(REQUESTS)).set(N_REQUESTS, event.getLong(N_REQUESTS))
 				.build();
 	}
@@ -233,7 +274,8 @@ public class DB_Event {
 
 		String geohash = GeoHashUtil.convertCoordsToGeoHashHighPrecision(data.location[0], data.location[1]);
 		
-		String confirm_presence_code = generatePresenceCode();
+		String confirm_presence_code = generateCode(data.id);
+		String confirm_leave_code = generateCode(data.id);
 		ListValue.Builder presences = ListValue.newBuilder();
 		
 		entities.add(Entity.newBuilder(eventKey).set(NAME, data.name).set(ID, event_id).set(LOCATION, event_location)
@@ -246,7 +288,7 @@ public class DB_Event {
 				.set(INSTAGRAM, data.instagram).set(TWITTER, data.twitter).set(GEOHASH, geohash)
 				.set(DIFFICULTY, data.difficulty)
 				.set(PICTURES, pictures.build()).set(PRESENCE_CODE, confirm_presence_code)
-				.set(PRESENCES, presences.build())
+				.set(LEAVE_CODE, confirm_leave_code).set(PRESENCES, presences.build())
 				.set(PICTURES, pictures.build()).set(REQUESTS, requests.build())
 				.set(N_REQUESTS, 0).build());
 
@@ -268,7 +310,8 @@ public class DB_Event {
 				.set(WEBSITE, event.getString(WEBSITE)).set(FACEBOOK, event.getString(FACEBOOK))
 				.set(INSTAGRAM, event.getString(INSTAGRAM)).set(TWITTER, event.getString(TWITTER))
 				.set(GEOHASH, event.getString(GEOHASH)).set(DIFFICULTY, event.getLong(DIFFICULTY)).set(PICTURES, newPictures)
-				.set(PRESENCE_CODE, event.getString(PRESENCE_CODE)).set(PRESENCES, event.getList(PRESENCES))
+				.set(PRESENCE_CODE, event.getString(PRESENCE_CODE)).set(LEAVE_CODE, event.getString(LEAVE_CODE))
+				.set(PRESENCES, event.getList(PRESENCES))
 				.set(REQUESTS, event.getList(REQUESTS)).set(N_REQUESTS, event.getLong(N_REQUESTS)).build();
 	}
 	
@@ -285,7 +328,7 @@ public class DB_Event {
 				.set(WEBSITE, event.getString(WEBSITE)).set(FACEBOOK, event.getString(FACEBOOK))
 				.set(INSTAGRAM, event.getString(INSTAGRAM)).set(TWITTER, event.getString(TWITTER))
 				.set(GEOHASH, event.getString(GEOHASH)).set(DIFFICULTY, event.getLong(DIFFICULTY)).set(PICTURES, event.getList(PICTURES))
-				.set(PRESENCE_CODE, event.getString(PRESENCE_CODE))
+				.set(PRESENCE_CODE, event.getString(PRESENCE_CODE)).set(LEAVE_CODE, event.getString(LEAVE_CODE))
 				.set(PRESENCES, presences).set(REQUESTS, event.getList(REQUESTS)).set(N_REQUESTS, event.getLong(N_REQUESTS)).build();
 	}
 
@@ -383,7 +426,8 @@ public class DB_Event {
 				.set(FACEBOOK, event.getString(FACEBOOK)).set(INSTAGRAM, event.getString(INSTAGRAM))
 				.set(TWITTER, event.getString(TWITTER)).set(GEOHASH, event.getString(GEOHASH)).set(DIFFICULTY, event.getLong(DIFFICULTY))
 				.set(PICTURES, event.getList(PICTURES)).set(REQUESTS, event.getList(REQUESTS)).set(N_REQUESTS, event.getLong(N_REQUESTS))
-				.set(PRESENCE_CODE, event.getString(PRESENCE_CODE)).set(PRESENCES, event.getList(PRESENCES))
+				.set(PRESENCE_CODE, event.getString(PRESENCE_CODE)).set(LEAVE_CODE, event.getString(LEAVE_CODE))
+				.set(PRESENCES, event.getList(PRESENCES))
 				.build();
 	}
 
@@ -408,7 +452,7 @@ public class DB_Event {
 				.set(TWITTER, event.getString(TWITTER)).set(GEOHASH, event.getString(GEOHASH))
 				.set(DIFFICULTY, event.getLong(DIFFICULTY)).set(PICTURES, event.getList(PICTURES))
 				.set(REQUESTS, newRequests).set(PRESENCE_CODE, event.getString(PRESENCE_CODE))
-				.set(PRESENCES, event.getList(PRESENCES)).build();
+				.set(LEAVE_CODE, event.getString(LEAVE_CODE)).set(PRESENCES, event.getList(PRESENCES)).build();
 	}
 
 	public static boolean belongsToList (Entity event, String email, boolean participant) throws InexistentEventException {
@@ -737,21 +781,55 @@ public class DB_Event {
 		return event.getString(PRESENCE_CODE);
 	}
 	
-	public static Entity confirmPresence(String event_id, String user_email)
-			throws InexistentEventException, InexistentParticipantException, ImpossibleActionException {
+	public static String getLeaveConfirmationCode (String event_id, String req_email) 
+			throws ImpossibleActionException, InexistentEventException{
 		
+		Entity event = getEvent(event_id);
+		checkIsOwner(event, req_email);
+		
+		return event.getString(LEAVE_CODE);
+	}
+	
+	private static Entity genericConfirm (String user_email, String qrCode) 
+			throws InexistentParticipantException, ImpossibleActionException, InexistentEventException {
+		
+		String event_id = getEventIdFromQRCode(qrCode);
 		Entity event = getEvent(event_id);
 		checkIsParticipant(event, user_email);
 		checkNotOwner(event, user_email); // owners should not need to confirm their own presence
 		checkHasStarted(event);
-
-		List<Value<?>> confirmed_presences = event.getList(PRESENCES);
+		
+		checkQRCode(event, qrCode);
+		
+		return event;
+	}
+	
+	private static String getEventIdFromQRCode (String qrCode) {
+		return qrCode.split(SEPARATOR)[1];
+	}
+	
+	public static Entity confirmPresence(String user_email, String qrCode)
+			throws InexistentEventException, InexistentParticipantException, ImpossibleActionException {
+		
+		Entity event = genericConfirm (user_email, qrCode);
+		
+		/*List<Value<?>> confirmed_presences = event.getList(PRESENCES);
 		if(confirmed_presences.contains(StringValue.of(user_email)))
 			return event;
 
 		ListValue.Builder newList = ListValue.newBuilder().set(confirmed_presences);
 		newList.addValue(user_email);
-		return updatePresenceList(event, newList.build());
+		return updatePresenceList(event, newList.build());*/
+		
+		return util.addStringToList(event, PRESENCES, user_email);
+	}
+	
+	public static Entity confirmLeave(String user_email, String qrCode)
+			throws InexistentEventException, InexistentParticipantException, ImpossibleActionException, InexistentElementException {
+		
+		Entity event = genericConfirm (user_email, qrCode);
+
+		return util.removeStringFromList(event, PRESENCES, user_email);
 	}
 	
 	private static String generateNewPictureID(Entity event, String event_id) {
@@ -773,11 +851,11 @@ public class DB_Event {
 		return id + "-" + number;
 	}
 	
-	private static String generatePresenceCode() {
+	private static String generateCode(String event_id) {
 		Random rand = new Random();
-		return UUID.randomUUID().toString() + Math.abs(rand.nextInt());
+		return UUID.randomUUID().toString() + Math.abs(rand.nextInt()) + "||" + event_id;
 	}
-
+	
 	public static void checkIsParticipant(Entity event, String email) throws InexistentParticipantException {
 		List<String> participants = getListEmails(event, true);
 		if (!participants.contains(email))
@@ -817,6 +895,12 @@ public class DB_Event {
 	public static void checkHasStarted(Entity event) throws ImpossibleActionException {
 		if (!hasStarted(event))
 			throw new ImpossibleActionException("8: Event has not yet started: " + event.getString(ID));
+	}
+	
+	private static void checkQRCode (Entity event, String qrCode) throws ImpossibleActionException {
+		String dbCode = event.getString(PRESENCE_CODE);
+		if (!dbCode.equals(qrCode))
+			throw new ImpossibleActionException("13: QR Code is not the right one");
 	}
 
 	public static boolean isOwner(Entity event, String owner_email) {

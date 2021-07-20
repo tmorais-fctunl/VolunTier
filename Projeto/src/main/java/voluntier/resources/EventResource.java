@@ -35,7 +35,7 @@ import voluntier.exceptions.InvalidTokenException;
 import voluntier.exceptions.MaximumSizeReachedException;
 import voluntier.util.GoogleStorageUtil;
 import voluntier.util.JsonUtil;
-import voluntier.util.consumes.event.ConfirmPresenceData;
+import voluntier.util.consumes.event.QRCodeData;
 import voluntier.util.consumes.event.CreateEventData;
 import voluntier.util.consumes.event.DeleteEventPictureData;
 import voluntier.util.consumes.event.EventData;
@@ -49,7 +49,7 @@ import voluntier.util.produces.DownloadEventPictureReturn;
 import voluntier.util.produces.EventDataReturn;
 import voluntier.util.produces.ParticipantsReturn;
 import voluntier.util.produces.PicturesReturn;
-import voluntier.util.produces.PresenceCodeReturn;
+import voluntier.util.produces.QRCodeReturn;
 import voluntier.util.produces.SearchEventReturn;
 import voluntier.util.produces.UploadPictureReturn;
 import voluntier.util.produces.UserEventsReturn;
@@ -448,7 +448,32 @@ public class EventResource {
 
 			String code = DB_Event.getPresenceConfirmationCode(data.event_id, data.email);
 
-			return Response.ok(JsonUtil.json.toJson(new PresenceCodeReturn(code))).build();
+			return Response.ok(JsonUtil.json.toJson(new QRCodeReturn(code))).build();
+
+		} catch (InvalidTokenException | InexistentEventException | ImpossibleActionException e) {
+			LOG.severe(e.getMessage());
+			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
+
+		} catch (Exception e) {
+			LOG.severe(e.getMessage());
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
+	}
+	
+	@POST
+	@Path("/event/leaveCode")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response requestLeaveCode(EventData data) {
+		if (!data.isValid())
+			return Response.status(Status.BAD_REQUEST).build();
+
+		try {
+			TokensResource.checkIsValidAccess(data.token, data.email);
+
+			String code = DB_Event.getLeaveConfirmationCode(data.event_id, data.email);
+
+			return Response.ok(JsonUtil.json.toJson(new QRCodeReturn(code))).build();
 
 		} catch (InvalidTokenException | InexistentEventException | ImpossibleActionException e) {
 			LOG.severe(e.getMessage());
@@ -464,7 +489,7 @@ public class EventResource {
 	@Path("/event/confirmPresence")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response confirmPresence(ConfirmPresenceData data) {
+	public Response confirmPresence(QRCodeData data) {
 		if (!data.isValid())
 			return Response.status(Status.BAD_REQUEST).build();
 
@@ -472,7 +497,45 @@ public class EventResource {
 		try {
 			TokensResource.checkIsValidAccess(data.token, data.email);
 
-			Entity updated_event = DB_Event.confirmPresence(data.event_id, data.email);
+			Entity updated_event = DB_Event.confirmPresence(data.email, data.code);
+
+			txn.put(updated_event);
+			txn.commit();
+
+			return Response.status(Status.NO_CONTENT).build();
+
+		} catch (InvalidTokenException | InexistentEventException | 
+				ImpossibleActionException | InexistentParticipantException e) {
+			txn.rollback();
+			LOG.severe(e.getMessage());
+			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
+
+		} catch (Exception e) {
+			LOG.severe(e.getMessage());
+			txn.rollback();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+
+		} finally {
+			if (txn.isActive()) {
+				txn.rollback();
+				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+			}
+		}
+	}
+	
+	@POST
+	@Path("/event/confirmLeave")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response confirmLeave(QRCodeData data) {
+		if (!data.isValid())
+			return Response.status(Status.BAD_REQUEST).build();
+
+		Transaction txn = datastore.newTransaction();
+		try {
+			TokensResource.checkIsValidAccess(data.token, data.email);
+
+			Entity updated_event = DB_Event.confirmLeave(data.email, data.code);
 
 			txn.put(updated_event);
 			txn.commit();
