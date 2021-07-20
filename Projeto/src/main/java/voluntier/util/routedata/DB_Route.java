@@ -15,6 +15,7 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.LatLng;
 import com.google.cloud.datastore.ListValue;
+import com.google.cloud.datastore.LongValue;
 import com.google.cloud.datastore.Value;
 import com.google.datastore.v1.QueryResultBatch.MoreResultsType;
 
@@ -249,15 +250,19 @@ public class DB_Route {
 			for (Entity event : events) {
 				List<Entity> updated_event_and_user = DB_Event.participateInEvent(event.getString(DB_Event.ID),
 						user_email, false);
-				Entity updated_event = updated_event_and_user.get(0);
-				Entity updated_user = updated_event_and_user.get(1);
-				updated_user = DB_User.participateRoute(updated_user.getKey(), updated_user, route_id);
-				ents.add(updated_event);
+				Entity updated_user = null;
+				if(updated_event_and_user.size() > 1) {
+					Entity updated_event = updated_event_and_user.get(0);
+					updated_user = updated_event_and_user.get(1);
+					ents.add(updated_event);
+				} // else, user already is in event
+				Entity user = DB_User.getUser(user_email);
+				updated_user = DB_User.participateRoute(user.getKey(), updated_user == null ? user : updated_user, route_id);
 				ents.add(updated_user);
 			}
 
 			route = util.addUniqueStringToList(route, PARTICIPANTS, user_email);
-
+			route = util.updateProperty(route, NUM_PARTICIPANTS, LongValue.of(route.getLong(NUM_PARTICIPANTS) + 1));
 			ents.add(route);
 			return ents;
 

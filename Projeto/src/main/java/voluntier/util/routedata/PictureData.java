@@ -8,5 +8,6 @@ public class PictureData {
 	public PictureData(String picture_id, String author, String timestamp) {
 		this.picture_id = picture_id;
 		this.author = author;
+		this.timestamp = timestamp;
 	}
 }
