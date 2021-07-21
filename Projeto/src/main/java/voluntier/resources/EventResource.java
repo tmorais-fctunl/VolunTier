@@ -90,10 +90,10 @@ public class EventResource {
 				return Response.status(Status.FORBIDDEN).build();
 			}
 
-			Triplet<List<Entity>, String, String> ents = DB_Event.createNew(data);
+			Pair<List<Entity>, String> ents = DB_Event.createNew(data);
 			String event_id = ents.getValue1();
-			String filename = ents.getValue2();
-			URL upload_url = GoogleStorageUtil.signURLForUpload(filename);
+			//String filename = ents.getValue2();
+			//URL upload_url = GoogleStorageUtil.signURLForUpload(filename);
 			Entity updated_user = DB_User.addEvent(userKey, user, event_id);
 
 			ents.getValue0().forEach(ent -> txn.put(ent));
@@ -101,7 +101,7 @@ public class EventResource {
 			txn.commit();
 
 			LOG.fine("Event: " + data.event_name + " inserted correctly.");
-			return Response.ok(JsonUtil.json.toJson(new CreateEventReturn(event_id, upload_url))).build();
+			return Response.ok(JsonUtil.json.toJson(new CreateEventReturn(event_id, null))).build();
 
 		} catch (InvalidTokenException | IllegalCoordinatesException e) {
 			txn.rollback();

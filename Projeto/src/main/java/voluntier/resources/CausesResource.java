@@ -30,6 +30,7 @@ import voluntier.util.consumes.causes.CreateCauseData;
 import voluntier.util.consumes.causes.DonationDataConsume;
 import voluntier.util.consumes.causes.DonatorsDataConsumes;
 import voluntier.util.produces.AllCausesDataReturn;
+import voluntier.util.produces.CauseIDReturn;
 import voluntier.util.produces.DonatorsDataReturn;
 import voluntier.util.produces.DownloadPictureReturn;
 import voluntier.util.produces.PicturesReturn;
@@ -68,13 +69,13 @@ public class CausesResource {
 			txn.put(cause.getValue0());
 			txn.commit();
 
-			return Response.ok().entity(cause.getValue(1)).build();
+			return Response.ok().entity(JsonUtil.json.toJson(new CauseIDReturn(cause.getValue1()))).build();
 
 		} catch (InvalidTokenException | InexistentUserException e) {
 			txn.rollback();
 			LOG.severe(e.getMessage());
 			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
-
+			
 		} catch (Exception e) {
 			txn.rollback();
 			LOG.severe(e.getMessage());

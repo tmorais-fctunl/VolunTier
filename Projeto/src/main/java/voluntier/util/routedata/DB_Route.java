@@ -321,6 +321,9 @@ public class DB_Route {
 
 		pictures.forEach(picture -> {
 			Pair<URL, Long> url = GoogleStorageUtil.signURLForDownload(picture.picture_id);
+			if(url.getValue1() == 0)
+				return;
+			
 			DownloadSignedURLReturn dwld_url = new DownloadSignedURLReturn(url.getValue0(), url.getValue1());
 			download_urls.add(new DownloadPictureReturn(dwld_url, picture.picture_id, picture.timestamp, picture.author));
 		});

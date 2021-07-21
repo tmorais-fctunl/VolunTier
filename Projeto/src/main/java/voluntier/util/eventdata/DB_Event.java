@@ -256,7 +256,7 @@ public class DB_Event {
 				.build();
 	}
 
-	public static Triplet<List<Entity>, String, String> createNew (CreateEventData create_event_data) throws IllegalCoordinatesException {
+	public static Pair<List<Entity>, String> createNew (CreateEventData create_event_data) throws IllegalCoordinatesException {
 		ListValue.Builder participants = ListValue.newBuilder();
 		participants.addValue(create_event_data.email);
 
@@ -269,8 +269,8 @@ public class DB_Event {
 		String event_id = eventKey.getName();
 
 		ListValue.Builder pictures = ListValue.newBuilder();
-		String picture_id = generateNewPictureID(null, event_id);
-		pictures.addValue(picture_id);
+		//String picture_id = generateNewPictureID(null, event_id);
+		//pictures.addValue(picture_id);
 
 		EventData_Minimal data = new EventData_Minimal(create_event_data);
 		LatLng event_location = LatLng.of(data.location[0], data.location[1]);
@@ -295,7 +295,7 @@ public class DB_Event {
 				.set(PICTURES, pictures.build()).set(REQUESTS, requests.build())
 				.set(N_REQUESTS, 0).build());
 
-		return new Triplet<>(entities, event_id, picture_id);
+		return new Pair<>(entities, event_id);
 	}
 	
 	private static Entity updatePictures(Entity event, ListValue newPictures) {
@@ -389,6 +389,10 @@ public class DB_Event {
 
 		filenames.forEach(file -> {
 			Pair<URL, Long> url = GoogleStorageUtil.signURLForDownload(file);
+			
+			if(url.getValue1() == 0)
+				return;
+			
 			DownloadSignedURLReturn dwld_url = new DownloadSignedURLReturn(url.getValue0(), url.getValue1());
 			download_urls.add(new DownloadPictureReturn(dwld_url, file, null, null));
 		});
