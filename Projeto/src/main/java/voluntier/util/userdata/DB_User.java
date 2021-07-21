@@ -664,6 +664,13 @@ public class DB_User {
 		return updateParticipatingEventList(userKey, user, events_list.build());
 	}
 	
+	public static Entity earnCurrency (String user_email, double amount, int difficulty) throws InexistentUserException {
+		Entity user = getUser(user_email);
+		
+		return updateCurrency(user.getKey(), user, DoubleValue.of(user.getDouble(TOTAL_CURRENCY)+ amount*difficulty), 
+				DoubleValue.of(user.getDouble(CURRENT_CURRENCY) + amount*difficulty) );
+	}
+	
 	public static Entity donate(Entity user, float amount, String cause_id, String cause_name) throws NotEnoughCurrencyException {
 		if(user.getDouble(CURRENT_CURRENCY) < amount)
 			throw new NotEnoughCurrencyException("User: " + user.getString(EMAIL) + " does not have enough currency to make this donation");

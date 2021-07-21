@@ -533,11 +533,15 @@ public class EventResource {
 
 		Transaction txn = datastore.newTransaction();
 		try {
+			
 			TokensResource.checkIsValidAccess(data.token, data.email);
 
-			Entity updated_event = DB_Event.confirmLeave(data.email, data.code);
-
-			txn.put(updated_event);
+			Pair<Entity, Entity> updates = DB_Event.confirmLeave(data.email, data.code);
+			
+			Entity event = updates.getValue0();
+			Entity user = updates.getValue1();
+			
+			txn.put(event, user);
 			txn.commit();
 
 			return Response.status(Status.NO_CONTENT).build();

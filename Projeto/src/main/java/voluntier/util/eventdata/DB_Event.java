@@ -1,6 +1,7 @@
 package voluntier.util.eventdata;
 
 import java.net.URL;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -21,6 +22,7 @@ import com.google.cloud.datastore.StringValue;
 import com.google.cloud.datastore.Value;
 import com.google.datastore.v1.QueryResultBatch.MoreResultsType;
 
+import voluntier.exceptions.AlreadyExistsException;
 import voluntier.exceptions.IllegalCoordinatesException;
 import voluntier.exceptions.ImpossibleActionException;
 import voluntier.exceptions.InexistentChatIdException;
@@ -275,8 +277,8 @@ public class DB_Event {
 
 		String geohash = GeoHashUtil.convertCoordsToGeoHashHighPrecision(data.location[0], data.location[1]);
 		
-		String confirm_presence_code = generateCode(data.id);
-		String confirm_leave_code = generateCode(data.id);
+		String confirm_presence_code = generateCode(event_id);
+		String confirm_leave_code = generateCode(event_id);
 		ListValue.Builder presences = ListValue.newBuilder();
 		
 		entities.add(Entity.newBuilder(eventKey).set(NAME, data.name).set(ID, event_id).set(LOCATION, event_location)
@@ -314,7 +316,7 @@ public class DB_Event {
 				.set(REQUESTS, event.getList(REQUESTS)).set(N_REQUESTS, event.getLong(N_REQUESTS)).build();
 	}
 	
-	private static Entity updatePresenceList(Entity event, ListValue presences) {
+	/*private static Entity updatePresenceList(Entity event, ListValue presences) {
 
 		return Entity.newBuilder(event.getKey()).set(NAME, event.getString(NAME)).set(ID, event.getString(ID))
 				.set(LOCATION, event.getLatLng(LOCATION)).set(START_DATE, event.getString(START_DATE))
@@ -329,7 +331,7 @@ public class DB_Event {
 				.set(GEOHASH, event.getString(GEOHASH)).set(DIFFICULTY, event.getLong(DIFFICULTY)).set(PICTURES, event.getList(PICTURES))
 				.set(PRESENCE_CODE, event.getString(PRESENCE_CODE)).set(LEAVE_CODE, event.getString(LEAVE_CODE))
 				.set(PRESENCES, presences).set(REQUESTS, event.getList(REQUESTS)).set(N_REQUESTS, event.getLong(N_REQUESTS)).build();
-	}
+	}*/
 
 	public static Pair<Entity, String> addPicture(String event_id, String req_email)
 			throws InexistentEventException, ImpossibleActionException, MaximumSizeReachedException {
@@ -794,6 +796,7 @@ public class DB_Event {
 		
 		String event_id = getEventIdFromQRCode(qrCode);
 		Entity event = getEvent(event_id);
+		
 		checkIsParticipant(event, user_email);
 		checkNotOwner(event, user_email); // owners should not need to confirm their own presence
 		checkHasStarted(event);
@@ -804,13 +807,16 @@ public class DB_Event {
 	}
 	
 	private static String getEventIdFromQRCode (String qrCode) {
-		return qrCode.split(SEPARATOR)[1];
+		return qrCode.substring(qrCode.lastIndexOf(SEPARATOR) + 1);
 	}
 	
 	public static Entity confirmPresence(String user_email, String qrCode)
-			throws InexistentEventException, InexistentParticipantException, ImpossibleActionException {
+			throws InexistentEventException, InexistentParticipantException, ImpossibleActionException, AlreadyExistsException {
 		
 		Entity event = genericConfirm (user_email, qrCode);
+		
+		if (DB_Util.existsInJsonList(event, PRESENCES, (p -> p.email.equals(user_email)), ConfirmationCodeData.class))
+			throw new ImpossibleActionException("14: User already in presence list");
 		
 		/*List<Value<?>> confirmed_presences = event.getList(PRESENCES);
 		if(confirmed_presences.contains(StringValue.of(user_email)))
@@ -820,15 +826,28 @@ public class DB_Event {
 		newList.addValue(user_email);
 		return updatePresenceList(event, newList.build());*/
 		
-		return util.addStringToList(event, PRESENCES, user_email);
+		return util.addJsonToList(event, PRESENCES, new ConfirmationCodeData(user_email, Timestamp.now().toString()));
 	}
 	
-	public static Entity confirmLeave(String user_email, String qrCode)
-			throws InexistentEventException, InexistentParticipantException, ImpossibleActionException, InexistentElementException {
+	public static Pair<Entity, Entity> confirmLeave(String user_email, String qrCode)
+			throws InexistentEventException, InexistentParticipantException, ImpossibleActionException,
+			InexistentElementException, InexistentUserException {
 		
 		Entity event = genericConfirm (user_email, qrCode);
-
-		return util.removeStringFromList(event, PRESENCES, user_email);
+		
+		ConfirmationCodeData presence = DB_Util.findInJsonList(event, PRESENCES, (p -> p.email.equals(user_email)), ConfirmationCodeData.class);
+		
+		if (presence == null)
+			throw new InexistentElementException("The user does not belong in the presence list");
+		
+		Date presence_date = Timestamp.parseTimestamp(presence.start_date).toDate();
+		
+		Date now = Timestamp.now().toDate();
+		
+		double diff = now.getTime() - presence_date.getTime();
+		
+		return new Pair<>(util.removeJsonFromList(event, PRESENCES, (p -> p.email.equals(user_email)), ConfirmationCodeData.class), 
+				DB_User.earnCurrency(user_email, diff, getDifficulty(event)));
 	}
 	
 	private static String generateNewPictureID(Entity event, String event_id) {
@@ -853,6 +872,10 @@ public class DB_Event {
 	private static String generateCode(String event_id) {
 		Random rand = new Random();
 		return UUID.randomUUID().toString() + Math.abs(rand.nextInt()) + "||" + event_id;
+	}
+	
+	private static int getDifficulty (Entity event) {
+		return (int) event.getLong(DIFFICULTY);
 	}
 	
 	public static void checkIsParticipant(Entity event, String email) throws InexistentParticipantException {

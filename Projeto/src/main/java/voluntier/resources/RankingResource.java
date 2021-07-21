@@ -28,6 +28,7 @@ import com.google.datastore.v1.QueryResultBatch.MoreResultsType;
 import voluntier.exceptions.InvalidTokenException;
 import voluntier.util.JsonUtil;
 import voluntier.util.consumes.CursorData;
+import voluntier.util.eventdata.RankingType;
 import voluntier.util.produces.RankingData;
 import voluntier.util.userdata.DB_User;
 
@@ -59,7 +60,7 @@ public class RankingResource {
 
 			TokensResource.checkIsValidAccess(data.token, data.email);
 
-			RankingData ranking = new RankingData( rankingTotalPoints(data.cursor) );
+			RankingData ranking = new RankingData( rankingTotalPoints(data.cursor), RankingType.TOTAL_CURRENCY.toString() );
 
 			LOG.fine("Ranking obtained by user : " + data.email);
 			return Response.ok(JsonUtil.json.toJson(ranking)).build();
@@ -87,7 +88,7 @@ public class RankingResource {
 
 			TokensResource.checkIsValidAccess(data.token, data.email);
 
-			RankingData ranking = new RankingData( rankingEventsParticipated(data.cursor) );
+			RankingData ranking = new RankingData( rankingEventsParticipated(data.cursor), RankingType.N_EVENTS.toString() );
 
 			LOG.fine("Ranking obtained by user : " + data.email);
 			return Response.ok(JsonUtil.json.toJson(ranking)).build();
