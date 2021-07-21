@@ -1,6 +1,7 @@
 indexes:
 
-- kind: Route
+- kind: Cause
   properties:
-  - name: route_state
-  - name: route_geohash
+  - name: cause_id
+  - name: cause_status
+  - name: cause_last_update

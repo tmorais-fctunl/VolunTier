@@ -679,7 +679,7 @@ public class DB_User {
 		donations_list.addValue(JsonUtil.json.toJson(new DonationData(cause_name, cause_id, amount, Timestamp.now().toString())));
 		
 		user = updateDonationsList(user.getKey(), user, donations_list.build());
-		user = updateCurrency(user.getKey(), user, DoubleValue.of(user.getDouble(TOTAL_CURRENCY) - amount), 
+		user = updateCurrency(user.getKey(), user, DoubleValue.of(user.getDouble(TOTAL_CURRENCY)), 
 				DoubleValue.of(user.getDouble(CURRENT_CURRENCY) - amount));
 		
 		return user;

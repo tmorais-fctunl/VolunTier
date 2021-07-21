@@ -20,7 +20,6 @@ import com.google.cloud.datastore.LongValue;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.StructuredQuery.Builder;
-import com.google.cloud.datastore.StructuredQuery.CompositeFilter;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.datastore.v1.QueryResultBatch.MoreResultsType;
 
@@ -40,7 +39,6 @@ import voluntier.util.produces.DownloadSignedURLReturn;
 import voluntier.util.routedata.PictureData;
 import voluntier.util.userdata.Account;
 import voluntier.util.userdata.DB_User;
-import voluntier.util.userdata.State;
 
 public class DB_Cause {
 	public static final String ID = "cause_id";
@@ -206,9 +204,11 @@ public class DB_Cause {
 		return new AllCausesDataReturn(causes);
 	}
 	
-	public static boolean checkUpdates(String cause_id, long check_time_millis) throws InexistentCauseException{
-		getCause(cause_id);
-		return queryUpdates(cause_id, check_time_millis);
+	public static boolean checkUpdates(String cause_id, long check_time_millis) throws InexistentCauseException {
+		Entity cause = getCause(cause_id);
+		System.out.println(cause.getLong(LAST_UPDATE));
+		System.out.println(check_time_millis);
+		return cause.getLong(LAST_UPDATE) > check_time_millis;
 	}
 
 	private static List<Entity> queryAllCauses() {
@@ -225,24 +225,6 @@ public class DB_Cause {
 		});
 
 		return causes;
-	}
-	
-	private static boolean queryUpdates(String cause_id, Long check_time_millis) {
-		Builder<Key> b = Query.newKeyQueryBuilder().setKind("Cause")
-				.setFilter(CompositeFilter.and(PropertyFilter.ge(LAST_UPDATE, check_time_millis),
-						PropertyFilter.eq(STATUS, State.ENABLED.toString()),
-						PropertyFilter.eq(ID, cause_id)));
-
-		Query<Key> query = b.build();
-
-		QueryResults<Key> res = datastore.run(query);
-
-		List<Key> causes = new LinkedList<>();
-		res.forEachRemaining(e -> {
-			causes.add(e);
-		});
-
-		return causes.size() > 0;
 	}
 	
 	public static Entity getCause(String cause_id) throws InexistentCauseException {

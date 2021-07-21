@@ -51,7 +51,7 @@ public class RankingResource {
 
 	public RankingResource() {
 	}
-
+	
 	@POST
 	@Path("/totalCurrencyRank")
 	@Consumes(MediaType.APPLICATION_JSON)
