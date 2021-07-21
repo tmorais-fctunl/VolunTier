@@ -159,9 +159,8 @@ public class DB_Cause {
 		
 		Triplet<List<DonatorDataReturn>, Integer, MoreResultsType> res = getDonators(cause, cursor);
 		List<DonatorDataReturn> donators = res.getValue0();
-		int new_cursor = res.getValue1();
+		Integer new_cursor = res.getValue1();
 		MoreResultsType more_results = res.getValue2();
-		
 		return new DonatorsDataReturn(donators, new_cursor, more_results);
 	}
 	
@@ -186,7 +185,6 @@ public class DB_Cause {
 			donators_data_return
 					.add(new DonatorDataReturn(encodedPicture, username, donator.email, donator.donation, donator.timestamp));
 		}
-
 		int new_cursor = i;
 		boolean more_results = new_cursor < donators_data.size();
 		return new Triplet<>(donators_data_return, more_results ? new_cursor : null,

@@ -20,6 +20,7 @@ import com.google.cloud.datastore.Transaction;
 import voluntier.exceptions.InexistentCauseException;
 import voluntier.exceptions.InexistentUserException;
 import voluntier.exceptions.InvalidTokenException;
+import voluntier.exceptions.NotEnoughCurrencyException;
 import voluntier.util.JsonUtil;
 import voluntier.util.causesdata.DB_Cause;
 import voluntier.util.consumes.RequestData;
@@ -179,11 +180,13 @@ public class CausesResource {
 			
 			return Response.status(Status.NO_CONTENT).build();
 
-		} catch (InvalidTokenException | InexistentCauseException e) {
-			LOG.severe(e.getMessage());
+		} catch (InvalidTokenException | InexistentCauseException | InexistentUserException | NotEnoughCurrencyException e) {
+			txn.rollback();
+			LOG.warning(e.getMessage());
 			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
 
 		} catch (Exception e) {
+			txn.rollback();
 			LOG.severe(e.getMessage());
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		} finally {
