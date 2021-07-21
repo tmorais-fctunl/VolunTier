@@ -166,7 +166,7 @@ public class CausesResource {
 	@Path("/causes/donate")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response checkUpdates(DonationDataConsume data) {
+	public Response donate(DonationDataConsume data) {
 		if (!data.isValid())
 			return Response.status(Status.BAD_REQUEST).build();
 		

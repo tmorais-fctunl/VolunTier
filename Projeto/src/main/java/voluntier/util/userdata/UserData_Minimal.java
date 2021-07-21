@@ -33,7 +33,7 @@ public class UserData_Minimal {
 	List<String> events_participating;
 	List<String> events_created;
 	
-	public int currentCurrency;
+	public float currentCurrency;
 
 	public UserData_Minimal() {
 	}
@@ -95,7 +95,7 @@ public class UserData_Minimal {
 		this.region = user.getString(DB_User.REGION);
 		this.pc = user.getString(DB_User.POSTAL_CODE);
 		this.description = user.getString(DB_User.DESCRIPTION);
-		this.currentCurrency = (int) user.getLong(DB_User.CURRENT_CURRENCY);
+		this.currentCurrency = (float) user.getDouble(DB_User.CURRENT_CURRENCY);
 
 		this.website = user.getString(DB_User.WEBSITE);
 		this.facebook = user.getString(DB_User.FACEBOOK);

@@ -11,10 +11,12 @@ import org.javatuples.Triplet;
 import com.google.cloud.Timestamp;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
+import com.google.cloud.datastore.DoubleValue;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.ListValue;
+import com.google.cloud.datastore.LongValue;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.StructuredQuery.Builder;
@@ -65,7 +67,7 @@ public class DB_Cause {
 		util.builder = Entity.newBuilder(cause.getKey())
 				.set(ID, cause.getString(ID))
 				.set(NAME, cause.getString(NAME))
-				.set(GOAL, cause.getDouble(GOAL))
+				.set(GOAL, cause.getLong(GOAL))
 				.set(IMAGES, cause.getList(IMAGES))
 				.set(WEBSITE, cause.getString(WEBSITE))
 				.set(DESCRIPTION, cause.getString(DESCRIPTION))
@@ -73,7 +75,7 @@ public class DB_Cause {
 				.set(RAISED, cause.getDouble(RAISED))
 				.set(WITH, cause.getString(WITH))
 				.set(CREATOR, cause.getString(CREATOR))
-				.set(CREATION_DATE, cause.getString(CREATION_DATE))
+				.set(CREATION_DATE, cause.getTimestamp(CREATION_DATE))
 				.set(LAST_UPDATE, cause.getLong(LAST_UPDATE))
 				.set(STATUS, cause.getString(STATUS));
 	}
@@ -149,7 +151,11 @@ public class DB_Cause {
 		
 		List<Entity> ents = new LinkedList<>();
 		ents.add(DB_User.donate(user, amount, cause_id, cause.getString(NAME)));
-		ents.add(util.addJsonToList(cause, DONATORS, new DonatorsData(user.getString(DB_User.EMAIL), amount, Timestamp.now().toString())));
+		DonatorsData data = new DonatorsData(user.getString(DB_User.EMAIL), amount, Timestamp.now().toString());
+		cause = util.addJsonToList(cause, DONATORS, data);
+		cause = util.updateProperty(cause, RAISED, DoubleValue.of(cause.getDouble(RAISED) + amount));
+		cause = util.updateProperty(cause, LAST_UPDATE, LongValue.of(System.currentTimeMillis()));
+		ents.add(cause);
 		
 		return ents;
 	}

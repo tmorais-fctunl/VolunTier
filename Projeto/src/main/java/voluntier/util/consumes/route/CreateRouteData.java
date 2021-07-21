@@ -32,7 +32,7 @@ public class CreateRouteData extends RequestData {
 	}
 	
 	public boolean isValid () {
-			return super.isValid() && nameValid() && descriptionValid() && event_ids != null && event_ids.size() >= 2;
+			return super.isValid() && nameValid() && descriptionValid() && event_ids != null && event_ids.size() >= 2 && event_ids.size() < 10;
 	}
 
 }

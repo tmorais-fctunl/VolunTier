@@ -6,6 +6,7 @@ import java.util.List;
 import com.google.cloud.Timestamp;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
+import com.google.cloud.datastore.DoubleValue;
 import com.google.cloud.datastore.Entity;
 
 import com.google.cloud.datastore.Key;
@@ -541,6 +542,41 @@ public class DB_User {
 				.build();
 	}
 	
+	private static Entity updateCurrency(Key userKey, Entity user, DoubleValue total, DoubleValue current) {
+		return Entity.newBuilder(userKey)
+				.set(USERNAME, user.getString(USERNAME))
+				.set(EMAIL, user.getString(EMAIL))
+				.set(PASSWORD, user.getString(PASSWORD))
+				.set(FULL_NAME, user.getString(FULL_NAME))
+				.set(LANDLINE, user.getString(LANDLINE))
+				.set(MOBILE, user.getString(MOBILE))
+				.set(ADDRESS, user.getString(ADDRESS))
+				.set(ADDRESS2, user.getString(ADDRESS2))
+				.set(REGION, user.getString(REGION))
+				.set(POSTAL_CODE, user.getString(POSTAL_CODE))
+				.set(ACCOUNT, user.getString(ACCOUNT))
+				.set(ROLE, user.getString(ROLE))
+				.set(STATE, user.getString(STATE))
+				.set(PROFILE, user.getString(PROFILE))
+				.set(DESCRIPTION, user.getString(DESCRIPTION))
+				.set(WEBSITE, user.getString(WEBSITE))
+				.set(FACEBOOK, user.getString(FACEBOOK))
+				.set(INSTAGRAM, user.getString(INSTAGRAM))
+				.set(TWITTER, user.getString(TWITTER))
+				.set(N_EVENTS_PARTICIPATED, user.getLong(N_EVENTS_PARTICIPATED))
+				.set(TOTAL_CURRENCY, total)
+				.set(CURRENT_CURRENCY, current)
+				.set(DONATIONS, user.getList(DONATIONS))
+				.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(user.getString(PROFILE_PICTURE_MINIATURE))
+						.setExcludeFromIndexes(true)
+						.build())
+				.set(EVENTS, user.getList(EVENTS))
+				.set(EVENTS_PARTICIPATING, user.getList(EVENTS_PARTICIPATING))
+				.set(ROUTES, user.getList(ROUTES))
+				.set(ROUTES_PARTICIPATING, user.getList(ROUTES_PARTICIPATING))
+				.build();
+	}
+	
 	public static Entity addEvent(Key userKey, Entity user, String event_id) {
 		
 		List<String> events = getEventIds(user);
@@ -629,13 +665,17 @@ public class DB_User {
 	}
 	
 	public static Entity donate(Entity user, float amount, String cause_id, String cause_name) throws NotEnoughCurrencyException {
-		if(user.getLong(CURRENT_CURRENCY) < amount)
+		if(user.getDouble(CURRENT_CURRENCY) < amount)
 			throw new NotEnoughCurrencyException("User: " + user.getString(EMAIL) + " does not have enough currency to make this donation");
 		
 		ListValue.Builder donations_list = ListValue.newBuilder().set(user.getList(DONATIONS));
 		donations_list.addValue(JsonUtil.json.toJson(new DonationData(cause_name, cause_id, amount, Timestamp.now().toString())));
 		
-		return updateDonationsList(user.getKey(), user, donations_list.build());
+		user = updateDonationsList(user.getKey(), user, donations_list.build());
+		user = updateCurrency(user.getKey(), user, DoubleValue.of(user.getDouble(TOTAL_CURRENCY) - amount), 
+				DoubleValue.of(user.getDouble(CURRENT_CURRENCY) - amount));
+		
+		return user;
 	}
 	
 	public static List<DonationData> getDonations(Entity user) {
@@ -673,8 +713,8 @@ public class DB_User {
 				.set(FACEBOOK, data.facebook)
 				.set(INSTAGRAM, data.instagram)
 				.set(TWITTER, data.twitter)
-				.set(TOTAL_CURRENCY, 0)
-				.set(CURRENT_CURRENCY, 0)
+				.set(TOTAL_CURRENCY, 0.0)
+				.set(CURRENT_CURRENCY, 0.0)
 				.set(N_EVENTS_PARTICIPATED, 0)
 				.set(DONATIONS, empty_list)
 				.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(data.profile_pic)
