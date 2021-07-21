@@ -12,19 +12,26 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.javatuples.Pair;
 import org.javatuples.Triplet;
 
+import com.google.appengine.repackaged.com.google.common.collect.Iterators;
 import com.google.cloud.datastore.Cursor;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.StructuredQuery.Builder;
+import com.google.cloud.datastore.StructuredQuery.CompositeFilter;
+import com.google.cloud.datastore.StructuredQuery.Filter;
 import com.google.cloud.datastore.StructuredQuery.OrderBy;
+import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.datastore.v1.QueryResultBatch;
 import com.google.datastore.v1.QueryResultBatch.MoreResultsType;
 
+import voluntier.exceptions.InexistentUserException;
 import voluntier.exceptions.InvalidTokenException;
 import voluntier.util.JsonUtil;
 import voluntier.util.consumes.CursorData;
@@ -41,7 +48,6 @@ public class RankingResource {
 	private static final Logger LOG = Logger.getLogger(EventResource.class.getName());
 
 	private static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
-	//private static KeyFactory usersFactory = datastore.newKeyFactory().setKind("User");
 
 	public RankingResource() {
 	}
@@ -50,7 +56,7 @@ public class RankingResource {
 	@Path("/totalCurrencyRank")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response allTimeRank (CursorData data) {
+	public Response currencyRank(CursorData data) {
 		LOG.fine("Attempt to get ranking by: " + data.email);
 
 		if (!data.isValid())
@@ -60,12 +66,25 @@ public class RankingResource {
 
 			TokensResource.checkIsValidAccess(data.token, data.email);
 
-			RankingData ranking = new RankingData( rankingTotalPoints(data.cursor), RankingType.TOTAL_CURRENCY.toString() );
+			Triplet<List<Entity>, Cursor, QueryResultBatch.MoreResultsType> users_page = rankingTotalPoints(
+					data.cursor);
+
+			RankingData.UserSearchData current_user_data = null;
+			if (data.cursor == null) {
+				Pair<Entity, Integer> current_user_rank = getCurrencyRank(data.email);
+
+				current_user_data = new RankingData.UserSearchData(current_user_rank.getValue0(),
+						current_user_rank.getValue0().getDouble(DB_User.TOTAL_CURRENCY),
+						current_user_rank.getValue1());
+			}
+
+			RankingData ranking = new RankingData(users_page, RankingType.TOTAL_CURRENCY.toString(), current_user_data);
 
 			LOG.fine("Ranking obtained by user : " + data.email);
 			return Response.ok(JsonUtil.json.toJson(ranking)).build();
 
-		} catch (InvalidTokenException e) {
+		} catch (InvalidTokenException | InexistentUserException e) {
+			LOG.warning(e.getMessage());
 			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
 
 		} catch (Exception e) {
@@ -73,12 +92,12 @@ public class RankingResource {
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 	}
-	
+
 	@POST
 	@Path("/presencesRank")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response eventsParticipatedRank (CursorData data) {
+	public Response eventsParticipatedRank(CursorData data) {
 		LOG.fine("Attempt to get ranking by: " + data.email);
 
 		if (!data.isValid())
@@ -88,12 +107,25 @@ public class RankingResource {
 
 			TokensResource.checkIsValidAccess(data.token, data.email);
 
-			RankingData ranking = new RankingData( rankingEventsParticipated(data.cursor), RankingType.N_EVENTS.toString() );
+			Triplet<List<Entity>, Cursor, QueryResultBatch.MoreResultsType> users_page = rankingEventsParticipated(
+					data.cursor);
+
+			RankingData.UserSearchData current_user_data = null;
+			if (data.cursor == null) {
+				Pair<Entity, Integer> current_user_rank = getEventsRank(data.email);
+
+				current_user_data = new RankingData.UserSearchData(current_user_rank.getValue0(),
+						current_user_rank.getValue0().getLong(DB_User.N_EVENTS_PARTICIPATED),
+						current_user_rank.getValue1());
+			}
+
+			RankingData ranking = new RankingData(users_page, RankingType.N_EVENTS.toString(), current_user_data);
 
 			LOG.fine("Ranking obtained by user : " + data.email);
 			return Response.ok(JsonUtil.json.toJson(ranking)).build();
 
-		} catch (InvalidTokenException e) {
+		} catch (InvalidTokenException | InexistentUserException e) {
+			LOG.warning(e.getMessage());
 			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
 
 		} catch (Exception e) {
@@ -102,23 +134,25 @@ public class RankingResource {
 		}
 	}
 
-	public static Triplet<List<Entity>, Cursor, QueryResultBatch.MoreResultsType> rankingTotalPoints (String cursor){
+	public static Triplet<List<Entity>, Cursor, QueryResultBatch.MoreResultsType> rankingTotalPoints(String cursor) {
 
-		Builder<Entity> builder = Query.newEntityQueryBuilder().setKind("User").setOrderBy(OrderBy.desc(DB_User.TOTAL_CURRENCY))
-				.setLimit(SEARCH_RESULTS_LIMIT);
+		Builder<Entity> builder = Query.newEntityQueryBuilder().setKind("User")
+				.setOrderBy(OrderBy.desc(DB_User.TOTAL_CURRENCY)).setLimit(SEARCH_RESULTS_LIMIT);
 
-		return rankingQuery (builder, cursor);
-	}
-	
-	public static Triplet<List<Entity>, Cursor, QueryResultBatch.MoreResultsType> rankingEventsParticipated (String cursor){
-
-		Builder<Entity> builder = Query.newEntityQueryBuilder().setKind("User").setOrderBy(OrderBy.desc(DB_User.N_EVENTS_PARTICIPATED))
-				.setLimit(SEARCH_RESULTS_LIMIT);
-
-		return rankingQuery (builder, cursor);
+		return rankingQuery(builder, cursor);
 	}
 
-	public static Triplet<List<Entity>, Cursor, QueryResultBatch.MoreResultsType> rankingQuery (Builder<Entity> builder, String cursor){
+	public static Triplet<List<Entity>, Cursor, QueryResultBatch.MoreResultsType> rankingEventsParticipated(
+			String cursor) {
+
+		Builder<Entity> builder = Query.newEntityQueryBuilder().setKind("User")
+				.setOrderBy(OrderBy.desc(DB_User.N_EVENTS_PARTICIPATED)).setLimit(SEARCH_RESULTS_LIMIT);
+
+		return rankingQuery(builder, cursor);
+	}
+
+	public static Triplet<List<Entity>, Cursor, QueryResultBatch.MoreResultsType> rankingQuery(Builder<Entity> builder,
+			String cursor) {
 
 		if (cursor != null)
 			builder.setStartCursor(Cursor.fromUrlSafe(cursor));
@@ -134,9 +168,35 @@ public class RankingResource {
 			return new Triplet<List<Entity>, Cursor, QueryResultBatch.MoreResultsType>(ranking,
 					results.getCursorAfter(), MoreResultsType.NO_MORE_RESULTS);
 
-		return new Triplet<List<Entity>, Cursor, QueryResultBatch.MoreResultsType>(ranking,
-				results.getCursorAfter(), MoreResultsType.MORE_RESULTS_AFTER_LIMIT);
+		return new Triplet<List<Entity>, Cursor, QueryResultBatch.MoreResultsType>(ranking, results.getCursorAfter(),
+				MoreResultsType.MORE_RESULTS_AFTER_LIMIT);
 	}
 
+	public static Pair<Entity, Integer> getCurrencyRank(String user_email) throws InexistentUserException {
+
+		Entity user = DB_User.getUser(user_email);
+
+		int rank = getRankQuery(PropertyFilter.ge(DB_User.TOTAL_CURRENCY, user.getDouble(DB_User.TOTAL_CURRENCY)));
+		return new Pair<>(user, rank);
+	}
+
+	public static Pair<Entity, Integer> getEventsRank(String user_email) throws InexistentUserException {
+
+		Entity user = DB_User.getUser(user_email);
+
+		int rank = getRankQuery(
+				PropertyFilter.ge(DB_User.N_EVENTS_PARTICIPATED, user.getLong(DB_User.N_EVENTS_PARTICIPATED)));
+		return new Pair<>(user, rank);
+	}
+
+	public static int getRankQuery(Filter filter) {
+		Builder<Key> builder = Query.newKeyQueryBuilder().setKind("User").setFilter(CompositeFilter.and(filter));
+
+		QueryResults<Key> results = datastore.run(builder.build());
+
+		int size = Iterators.size(results);
+
+		return size;
+	}
 
 }
