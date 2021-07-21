@@ -95,7 +95,7 @@ public class DB_Event {
 	public static final long MAX_PARTICIPANTS_RETURN = 5;
 	public static final long MAX_NUM_PICTURES = 10;
 	
-	public static final String SEPARATOR = "||";
+	public static final String SEPARATOR = "|";
 
 	private static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	private static KeyFactory eventFactory = datastore.newKeyFactory().setKind("Event");
@@ -791,7 +791,7 @@ public class DB_Event {
 		return event.getString(LEAVE_CODE);
 	}
 	
-	private static Entity genericConfirm (String user_email, String qrCode) 
+	private static Entity genericConfirm (String user_email, String qrCode, boolean presence) 
 			throws InexistentParticipantException, ImpossibleActionException, InexistentEventException {
 		
 		String event_id = getEventIdFromQRCode(qrCode);
@@ -801,7 +801,7 @@ public class DB_Event {
 		checkNotOwner(event, user_email); // owners should not need to confirm their own presence
 		checkHasStarted(event);
 		
-		checkQRCode(event, qrCode);
+		checkQRCode(event, qrCode, presence);
 		
 		return event;
 	}
@@ -813,7 +813,7 @@ public class DB_Event {
 	public static Entity confirmPresence(String user_email, String qrCode)
 			throws InexistentEventException, InexistentParticipantException, ImpossibleActionException, AlreadyExistsException {
 		
-		Entity event = genericConfirm (user_email, qrCode);
+		Entity event = genericConfirm (user_email, qrCode, true);
 		
 		if (DB_Util.existsInJsonList(event, PRESENCES, (p -> p.email.equals(user_email)), ConfirmationCodeData.class))
 			throw new ImpossibleActionException("14: User already in presence list");
@@ -833,7 +833,7 @@ public class DB_Event {
 			throws InexistentEventException, InexistentParticipantException, ImpossibleActionException,
 			InexistentElementException, InexistentUserException {
 		
-		Entity event = genericConfirm (user_email, qrCode);
+		Entity event = genericConfirm (user_email, qrCode, false);
 		
 		ConfirmationCodeData presence = DB_Util.findInJsonList(event, PRESENCES, (p -> p.email.equals(user_email)), ConfirmationCodeData.class);
 		
@@ -844,7 +844,7 @@ public class DB_Event {
 		
 		Date now = Timestamp.now().toDate();
 		
-		double diff = now.getTime() - presence_date.getTime();
+		double diff = (now.getTime() - presence_date.getTime()) / 60000;
 		
 		return new Pair<>(util.removeJsonFromList(event, PRESENCES, (p -> p.email.equals(user_email)), ConfirmationCodeData.class), 
 				DB_User.earnCurrency(user_email, diff, getDifficulty(event)));
@@ -871,7 +871,7 @@ public class DB_Event {
 	
 	private static String generateCode(String event_id) {
 		Random rand = new Random();
-		return UUID.randomUUID().toString() + Math.abs(rand.nextInt()) + "||" + event_id;
+		return UUID.randomUUID().toString() + Math.abs(rand.nextInt()) + "|" + event_id;
 	}
 	
 	private static int getDifficulty (Entity event) {
@@ -919,8 +919,8 @@ public class DB_Event {
 			throw new ImpossibleActionException("8: Event has not yet started: " + event.getString(ID));
 	}
 	
-	private static void checkQRCode (Entity event, String qrCode) throws ImpossibleActionException {
-		String dbCode = event.getString(PRESENCE_CODE);
+	private static void checkQRCode (Entity event, String qrCode, boolean presence) throws ImpossibleActionException {
+		String dbCode = presence ? event.getString(PRESENCE_CODE) : event.getString(LEAVE_CODE);
 		if (!dbCode.equals(qrCode))
 			throw new ImpossibleActionException("13: QR Code is not the right one");
 	}
@@ -948,7 +948,7 @@ public class DB_Event {
 	
 	public static boolean hasStarted(Entity event) {
 		Timestamp t = Timestamp.parseTimestamp(event.getString(START_DATE));
-		return Timestamp.now().compareTo(t) >= 0;
+		return Timestamp.now().compareTo(t) <= 0;
 	}
 
 }
