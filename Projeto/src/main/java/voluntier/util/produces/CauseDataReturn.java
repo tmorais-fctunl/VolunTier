@@ -23,7 +23,7 @@ public class CauseDataReturn extends PicturesReturn {
 		this.id = cause.getString(DB_Cause.ID);
 		this.name = cause.getString(DB_Cause.NAME);
 		this.goal = (int) cause.getLong(DB_Cause.GOAL);
-		this.raised = (int) cause.getLong(DB_Cause.RAISED);
+		this.raised = (int) cause.getDouble(DB_Cause.RAISED);
 		this.description = cause.getString(DB_Cause.DESCRIPTION);
 		this.description = cause.getString(DB_Cause.WEBSITE);
 		this.company_name = cause.getString(DB_Cause.WITH);

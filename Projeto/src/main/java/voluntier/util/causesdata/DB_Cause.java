@@ -120,8 +120,12 @@ public class DB_Cause {
 		return new Pair<>(cause, id);
 	}
 	
+	public static List<DownloadPictureReturn> getImagesDownloadURLs(String cause_id) throws InexistentCauseException {
+		Entity cause = getCause(cause_id);
+		return getImagesDownloadURLs(cause);
+	}
+	
 	public static List<DownloadPictureReturn> getImagesDownloadURLs(Entity cause) {
-		
 		List<PictureData> images = DB_Util.getJsonList(cause, IMAGES, PictureData.class);
 		List<DownloadPictureReturn> download_urls = new LinkedList<>();
 
@@ -138,19 +142,19 @@ public class DB_Cause {
 		return id + "-" + (count + 1);
 	}
 	
-	public List<Entity> donate(String cause_id, String user_email, float amount) 
+	public static List<Entity> donate(String cause_id, String user_email, float amount) 
 			throws InexistentCauseException, InexistentUserException, NotEnoughCurrencyException {
 		Entity cause = getCause(cause_id);
 		Entity user = DB_User.getUser(user_email);
 		
 		List<Entity> ents = new LinkedList<>();
 		ents.add(DB_User.donate(user, amount, cause_id, cause.getString(NAME)));
-		ents.add(util.addJsonToList(cause, DONATORS, new DonatorData(user.getString(DB_User.EMAIL), amount, Timestamp.now().toString())));
+		ents.add(util.addJsonToList(cause, DONATORS, new DonatorsData(user.getString(DB_User.EMAIL), amount, Timestamp.now().toString())));
 		
 		return ents;
 	}
 	
-	public DonatorsDataReturn getDonators(String cause_id, int cursor) throws InexistentCauseException, InexistentUserException {
+	public static DonatorsDataReturn getDonators(String cause_id, int cursor) throws InexistentCauseException, InexistentUserException {
 		Entity cause = getCause(cause_id);
 		
 		Triplet<List<DonatorDataReturn>, Integer, MoreResultsType> res = getDonators(cause, cursor);
@@ -161,13 +165,13 @@ public class DB_Cause {
 		return new DonatorsDataReturn(donators, new_cursor, more_results);
 	}
 	
-	private Triplet<List<DonatorDataReturn>, Integer, MoreResultsType> getDonators(Entity cause, int cursor) throws InexistentUserException {
-		List<DonatorData> donators_data = DB_Util.getJsonList(cause, DONATORS, DonatorData.class);
+	private static Triplet<List<DonatorDataReturn>, Integer, MoreResultsType> getDonators(Entity cause, int cursor) throws InexistentUserException {
+		List<DonatorsData> donators_data = DB_Util.getJsonList(cause, DONATORS, DonatorsData.class);
 		List<DonatorDataReturn> donators_data_return = new LinkedList<>();
 		
 		int i = 0;
 		int counter = 0;
-		for (DonatorData donator : donators_data) {
+		for (DonatorsData donator : donators_data) {
 			if (counter + 1 > MAX_DONATORS_RETURN)
 				break;
 			if (++i <= cursor)
@@ -198,7 +202,8 @@ public class DB_Cause {
 		return new AllCausesDataReturn(causes);
 	}
 	
-	public static boolean checkUpdates(String cause_id, long check_time_millis){
+	public static boolean checkUpdates(String cause_id, long check_time_millis) throws InexistentCauseException{
+		getCause(cause_id);
 		return queryUpdates(cause_id, check_time_millis);
 	}
 
@@ -221,7 +226,8 @@ public class DB_Cause {
 	private static boolean queryUpdates(String cause_id, Long check_time_millis) {
 		Builder<Key> b = Query.newKeyQueryBuilder().setKind("Cause")
 				.setFilter(CompositeFilter.and(PropertyFilter.ge(LAST_UPDATE, check_time_millis),
-						PropertyFilter.eq(STATUS, State.ENABLED.toString())));
+						PropertyFilter.eq(STATUS, State.ENABLED.toString()),
+						PropertyFilter.eq(ID, cause_id)));
 
 		Query<Key> query = b.build();
 

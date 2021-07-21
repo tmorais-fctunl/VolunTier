@@ -11,6 +11,8 @@ import voluntier.util.produces.PicturesReturn;
 import voluntier.util.produces.SearchEventReturn;
 
 public class RouteDataReturn extends PicturesReturn {
+	public String route_name;
+	public String description;
 	public String route_id;
 	public List<SearchEventReturn> events;
 	public String creation_date;
@@ -21,6 +23,8 @@ public class RouteDataReturn extends PicturesReturn {
 	
 	public RouteDataReturn(Entity route, String user_email) {
 		super(DB_Route.getPicturesDownloadURLs(route));
+		this.route_name = route.getString(DB_Route.NAME);
+		this.description = route.getString(DB_Route.DESCRIPTION);
 		this.route_id = route.getString(DB_Route.ID);
 		this.creator = route.getString(DB_Route.CREATOR);
 		this.creation_date = route.getTimestamp(DB_Route.CREATION_DATE).toString();
