@@ -32,11 +32,9 @@ import voluntier.exceptions.InexistentLogIdException;
 import voluntier.exceptions.InexistentMessageIdException;
 import voluntier.exceptions.InexistentModeratorException;
 import voluntier.exceptions.InexistentParticipantException;
-import voluntier.exceptions.InexistentPictureException;
 import voluntier.exceptions.InexistentRatingException;
 import voluntier.exceptions.InexistentUserException;
 import voluntier.exceptions.InvalidCursorException;
-import voluntier.exceptions.MaximumSizeReachedException;
 import voluntier.exceptions.SomethingWrongException;
 import voluntier.util.DB_Util;
 import voluntier.util.GeoHashUtil;
@@ -45,7 +43,7 @@ import voluntier.util.chatdata.DB_Chat;
 import voluntier.util.consumes.event.CreateEventData;
 import voluntier.util.consumes.event.UpdateEventData;
 import voluntier.util.produces.ChatReturn;
-import voluntier.util.produces.DownloadPictureReturn;
+import voluntier.util.produces.DownloadEventPictureReturn;
 import voluntier.util.produces.DownloadSignedURLReturn;
 import voluntier.util.userdata.DB_User;
 import voluntier.util.userdata.Profile;
@@ -298,7 +296,7 @@ public class DB_Event {
 		return new Pair<>(entities, event_id);
 	}
 	
-	private static Entity updatePictures(Entity event, ListValue newPictures) {
+	/*private static Entity updatePictures(Entity event, ListValue newPictures) {
 
 		return Entity.newBuilder(event.getKey()).set(NAME, event.getString(NAME)).set(ID, event.getString(ID))
 				.set(LOCATION, event.getLatLng(LOCATION)).set(START_DATE, event.getString(START_DATE))
@@ -316,7 +314,7 @@ public class DB_Event {
 				.set(REQUESTS, event.getList(REQUESTS)).set(N_REQUESTS, event.getLong(N_REQUESTS)).build();
 	}
 	
-	/*private static Entity updatePresenceList(Entity event, ListValue presences) {
+	private static Entity updatePresenceList(Entity event, ListValue presences) {
 
 		return Entity.newBuilder(event.getKey()).set(NAME, event.getString(NAME)).set(ID, event.getString(ID))
 				.set(LOCATION, event.getLatLng(LOCATION)).set(START_DATE, event.getString(START_DATE))
@@ -333,7 +331,7 @@ public class DB_Event {
 				.set(PRESENCES, presences).set(REQUESTS, event.getList(REQUESTS)).set(N_REQUESTS, event.getLong(N_REQUESTS)).build();
 	}*/
 
-	public static Pair<Entity, String> addPicture(String event_id, String req_email)
+	/*public static Pair<Entity, String> addPicture(String event_id, String req_email)
 			throws InexistentEventException, ImpossibleActionException, MaximumSizeReachedException {
 		Entity event = getEvent(event_id);
 		checkIsOwner(event, req_email);
@@ -397,6 +395,22 @@ public class DB_Event {
 			download_urls.add(new DownloadPictureReturn(dwld_url, file, null, null));
 		});
 
+		return download_urls;
+	}*/
+	
+	public static List<DownloadEventPictureReturn> getPicturesDownloadURLs(String event_id) throws InexistentEventException {
+		getEvent(event_id);
+		List<DownloadEventPictureReturn> download_urls = new LinkedList<>();
+		for(int i = 0; i < 6; ++i) {
+			String filename = generateNewPictureID(event_id, i);
+			Pair<URL, Long> url = GoogleStorageUtil.signURLForDownload(filename);
+			
+			if(url.getValue1() == 0)
+				continue;
+			
+			DownloadSignedURLReturn dwld_url = new DownloadSignedURLReturn(url.getValue0(), url.getValue1());
+			download_urls.add(new DownloadEventPictureReturn(dwld_url, i));
+		}
 		return download_urls;
 	}
 
@@ -854,23 +868,8 @@ public class DB_Event {
 				DB_User.earnCurrency(user_email, diff, getDifficulty(event)));
 	}
 	
-	private static String generateNewPictureID(Entity event, String event_id) {
-		String id;
-		int number;
-
-		if (event != null) {
-			id = event.getString(ID);
-			List<Value<?>> pictures = event.getList(PICTURES);
-			if (pictures.size() > 0)
-				number = (Integer.parseInt(((String) pictures.get(pictures.size() - 1).get()).split(id + "-")[1]) + 1);
-			else
-				number = 1;
-		} else {
-			id = event_id;
-			number = 1;
-		}
-
-		return id + "-" + number;
+	public static String generateNewPictureID(String event_id, int pic_id) {
+		return event_id + "-" + pic_id;
 	}
 	
 	private static String generateCode(String event_id) {

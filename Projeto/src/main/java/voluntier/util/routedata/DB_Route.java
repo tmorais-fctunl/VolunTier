@@ -166,7 +166,7 @@ public class DB_Route {
 			DB_Event.checkIsActive(event);
 			DB_Event.checkIsPublic(event);
 			
-			events.addValue(JsonUtil.json.toJson(new SearchEventReturn(event)));
+			events.addValue(JsonUtil.json.toJson(e));
 		}
 
 		ListValue.Builder participants = ListValue.newBuilder();
@@ -224,12 +224,16 @@ public class DB_Route {
 		return route;
 	}
 
-	private static List<Entity> getEventsInRoute(Entity route) throws InexistentEventException {
-		List<SearchEventReturn> event_ids = DB_Util.getJsonList(route, EVENTS, SearchEventReturn.class);
+	private static List<Entity> getEventsInRoute (Entity route) throws InexistentEventException {
+		List<String> event_ids = DB_Util.getStringList(route, EVENTS);
+		
 		List<Entity> event_entities = new LinkedList<>();
 
-		for (SearchEventReturn e : event_ids)
-			event_entities.add(DB_Event.getEvent(e.event_id));
+		event_ids.forEach(id-> {
+			try {
+				event_entities.add(DB_Event.getEvent(id));
+			} catch (InexistentEventException e) {}
+		});
 
 		return event_entities;
 	}

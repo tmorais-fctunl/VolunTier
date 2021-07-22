@@ -12,8 +12,6 @@ import com.google.cloud.storage.HttpMethod;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
 
-import voluntier.exceptions.InexistentFileException;
-
 //import com.google.cloud.storage.Bucket;
 //import com.google.cloud.storage.Cors;
 //import com.google.common.collect.ImmutableList;
@@ -73,14 +71,8 @@ public class GoogleStorageUtil {
 		return common(filename, HttpMethod.GET);
 	}
 	
-	// not used
-	public static void removeFile(String filename) throws InexistentFileException {
-		BlobInfo blobInfo = getBlobInfo(filename);
-		
-		Blob obj = storage.get(blobInfo.getBlobId());
-		if(obj == null)
-			throw new InexistentFileException();
-		
-		storage.delete(blobInfo.getBlobId());
+	public static boolean removeFile(String filename) {
+		BlobInfo blobInfo = getBlobInfo(filename);		
+		return storage.delete(blobInfo.getBlobId());
 	}
 }

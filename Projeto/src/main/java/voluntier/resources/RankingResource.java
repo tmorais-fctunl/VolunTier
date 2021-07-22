@@ -51,7 +51,7 @@ public class RankingResource {
 
 	public RankingResource() {
 	}
-	
+
 	@POST
 	@Path("/totalCurrencyRank")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -74,7 +74,7 @@ public class RankingResource {
 				Pair<Entity, Integer> current_user_rank = getCurrencyRank(data.email);
 
 				current_user_data = new RankingData.UserSearchData(current_user_rank.getValue0(),
-						current_user_rank.getValue0().getDouble(DB_User.TOTAL_CURRENCY),
+						(int) current_user_rank.getValue0().getDouble(DB_User.TOTAL_CURRENCY),
 						current_user_rank.getValue1());
 			}
 
@@ -115,7 +115,7 @@ public class RankingResource {
 				Pair<Entity, Integer> current_user_rank = getEventsRank(data.email);
 
 				current_user_data = new RankingData.UserSearchData(current_user_rank.getValue0(),
-						current_user_rank.getValue0().getLong(DB_User.N_EVENTS_PARTICIPATED),
+						(int) current_user_rank.getValue0().getLong(DB_User.N_EVENTS_PARTICIPATED),
 						current_user_rank.getValue1());
 			}
 
@@ -137,7 +137,7 @@ public class RankingResource {
 	public static Triplet<List<Entity>, Cursor, QueryResultBatch.MoreResultsType> rankingTotalPoints(String cursor) {
 
 		Builder<Entity> builder = Query.newEntityQueryBuilder().setKind("User")
-				.setOrderBy(OrderBy.desc(DB_User.TOTAL_CURRENCY)).setLimit(SEARCH_RESULTS_LIMIT);
+				.setOrderBy(OrderBy.desc(DB_User.TOTAL_CURRENCY), OrderBy.asc(DB_User.USERNAME)).setLimit(SEARCH_RESULTS_LIMIT);
 
 		return rankingQuery(builder, cursor);
 	}
@@ -146,7 +146,7 @@ public class RankingResource {
 			String cursor) {
 
 		Builder<Entity> builder = Query.newEntityQueryBuilder().setKind("User")
-				.setOrderBy(OrderBy.desc(DB_User.N_EVENTS_PARTICIPATED)).setLimit(SEARCH_RESULTS_LIMIT);
+				.setOrderBy(OrderBy.desc(DB_User.N_EVENTS_PARTICIPATED), OrderBy.asc(DB_User.USERNAME)).setLimit(SEARCH_RESULTS_LIMIT);
 
 		return rankingQuery(builder, cursor);
 	}
@@ -175,9 +175,10 @@ public class RankingResource {
 	public static Pair<Entity, Integer> getCurrencyRank(String user_email) throws InexistentUserException {
 
 		Entity user = DB_User.getUser(user_email);
-
 		int rank = getRankQuery(PropertyFilter.ge(DB_User.TOTAL_CURRENCY, user.getDouble(DB_User.TOTAL_CURRENCY)));
-		return new Pair<>(user, rank);
+		int same_rank_string_order = getSameRankQuery(
+				PropertyFilter.eq(DB_User.TOTAL_CURRENCY, user.getDouble(DB_User.TOTAL_CURRENCY)), user);
+		return new Pair<>(user, rank - same_rank_string_order);
 	}
 
 	public static Pair<Entity, Integer> getEventsRank(String user_email) throws InexistentUserException {
@@ -186,7 +187,9 @@ public class RankingResource {
 
 		int rank = getRankQuery(
 				PropertyFilter.ge(DB_User.N_EVENTS_PARTICIPATED, user.getLong(DB_User.N_EVENTS_PARTICIPATED)));
-		return new Pair<>(user, rank);
+		int same_rank_string_order = getSameRankQuery(
+				PropertyFilter.eq(DB_User.N_EVENTS_PARTICIPATED, user.getLong(DB_User.N_EVENTS_PARTICIPATED)), user);
+		return new Pair<>(user, rank - same_rank_string_order);
 	}
 
 	public static int getRankQuery(Filter filter) {
@@ -199,4 +202,14 @@ public class RankingResource {
 		return size;
 	}
 
+	public static int getSameRankQuery(Filter filter, Entity user) {
+		Builder<Key> builder = Query.newKeyQueryBuilder().setKind("User").setFilter(
+				CompositeFilter.and(filter, PropertyFilter.gt(DB_User.USERNAME, user.getString(DB_User.USERNAME))));
+
+		QueryResults<Key> results = datastore.run(builder.build());
+
+		int size = Iterators.size(results);
+
+		return size;
+	}
 }

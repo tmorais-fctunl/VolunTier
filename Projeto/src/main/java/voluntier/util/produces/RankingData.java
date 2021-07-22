@@ -22,17 +22,17 @@ public class RankingData {
 		public String username;
 		public String full_name;
 		public String email;
-		public float score;
+		public int score;
 		public Integer rank;
 		public String pic_64;
 
-		public UserSearchData(Entity user, double score, Integer rank) {
+		public UserSearchData(Entity user, int score, Integer rank) {
 			this.username = user.getString(DB_User.USERNAME);
 			this.full_name = user.getString(DB_User.FULL_NAME);
 			this.email = user.getString(DB_User.EMAIL);
 			String pic = user.getString(DB_User.PROFILE_PICTURE_MINIATURE);
 			this.pic_64 = pic.equals("") ? null : pic;
-			this.score = (float) score;
+			this.score = score;
 			this.rank = rank;
 		}
 	}
@@ -48,8 +48,8 @@ public class RankingData {
 		entities.forEach(entity -> {
 			users.add(new UserSearchData(entity,
 					rank_type.equals(RankingType.TOTAL_CURRENCY.toString())
-							? (float) entity.getDouble(DB_User.TOTAL_CURRENCY)
-							: entity.getLong(DB_User.N_EVENTS_PARTICIPATED),
+							? (int) entity.getDouble(DB_User.TOTAL_CURRENCY)
+							: (int) entity.getLong(DB_User.N_EVENTS_PARTICIPATED),
 					null));
 		});
 

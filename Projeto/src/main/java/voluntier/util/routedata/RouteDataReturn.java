@@ -1,12 +1,15 @@
 package voluntier.util.routedata;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import com.google.cloud.datastore.Entity;
 
 import voluntier.exceptions.InexistentChatIdException;
+import voluntier.exceptions.InexistentEventException;
 import voluntier.exceptions.InexistentRatingException;
 import voluntier.util.DB_Util;
+import voluntier.util.eventdata.DB_Event;
 import voluntier.util.produces.PicturesReturn;
 import voluntier.util.produces.SearchEventReturn;
 
@@ -37,6 +40,12 @@ public class RouteDataReturn extends PicturesReturn {
 		this.num_participants = (int) route.getLong(DB_Route.NUM_PARTICIPANTS);
 
 		
-		events = DB_Util.getJsonList(route, DB_Route.EVENTS, SearchEventReturn.class);
+		List<String> event_ids = DB_Util.getStringList(route, DB_Route.EVENTS);
+		events = new LinkedList<>();
+		event_ids.forEach(id-> {
+			try {
+				events.add(new SearchEventReturn(DB_Event.getEvent(id)));
+			} catch (InexistentEventException e) {}
+		});
 	}
 }

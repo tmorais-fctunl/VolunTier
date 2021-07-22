@@ -1,7 +1,7 @@
 indexes:
 
-- kind: Cause
+- kind: User
   properties:
-  - name: cause_id
-  - name: cause_status
-  - name: cause_last_update
+  - name: total_currency
+    direction: desc
+  - name: username

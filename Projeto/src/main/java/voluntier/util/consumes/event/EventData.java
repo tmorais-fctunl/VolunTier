@@ -2,7 +2,7 @@ package voluntier.util.consumes.event;
 
 import voluntier.util.consumes.RequestData;
 
-public class EventData extends RequestData{
+public class EventData extends RequestData {
 
 	public String event_id;
 	
