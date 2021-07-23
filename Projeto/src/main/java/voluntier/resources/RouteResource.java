@@ -32,6 +32,7 @@ import voluntier.exceptions.MaximumSizeReachedException;
 import voluntier.exceptions.RouteAlreadyExistsException;
 import voluntier.exceptions.SomethingWrongException;
 import voluntier.exceptions.InexistentEventException;
+import voluntier.exceptions.InexistentModeratorException;
 import voluntier.exceptions.InexistentParticipantException;
 import voluntier.exceptions.InexistentRatingException;
 import voluntier.exceptions.InexistentRouteException;
@@ -44,6 +45,7 @@ import voluntier.util.consumes.route.CreateRouteData;
 import voluntier.util.consumes.route.DeleteRoutePictureData;
 import voluntier.util.consumes.route.RateData;
 import voluntier.util.consumes.route.RouteData;
+import voluntier.util.consumes.route.RouteParticipantData;
 import voluntier.util.eventdata.ParticipantDataReturn;
 import voluntier.util.produces.CreateRouteReturn;
 import voluntier.util.produces.DownloadPictureReturn;
@@ -54,6 +56,7 @@ import voluntier.util.produces.UserRoutesReturn;
 import voluntier.util.routedata.DB_Route;
 import voluntier.util.routedata.RouteDataReturn;
 import voluntier.util.userdata.DB_User;
+import voluntier.util.userdata.State;
 
 @Path("/")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
@@ -412,5 +415,97 @@ public class RouteResource {
 			}
 		}
 	}
+	
+	@POST
+	@Path("/route/remove")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response removeRoute(RouteData data) {
+		LOG.fine("Trying to delete route " + data.route_id);
 
+		if (!data.isValid())
+			return Response.status(Status.BAD_REQUEST).build();
+
+		Transaction txn = datastore.newTransaction();
+
+		try {
+			TokensResource.checkIsValidAccess(data.token, data.email);
+
+			Entity user = DB_User.getUser(data.email);
+
+			Entity route = DB_Route.updateState(data.route_id, data.email, State.BANNED.toString());
+			Entity updated_user = DB_User.removeRoute(user.getKey(), user, data.route_id);
+			
+			txn.put(route, updated_user);
+			txn.commit();
+
+			LOG.fine("User " + data.email + " deleted route " + data.route_id);
+			return Response.status(Status.NO_CONTENT).build();
+
+		} catch (InvalidTokenException | ImpossibleActionException | InexistentRouteException e) {
+			txn.rollback();
+			LOG.severe(e.getMessage());
+			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
+
+		} catch (Exception e) {
+			txn.rollback();
+			LOG.severe(e.getMessage());
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+
+		} finally {
+			if (txn.isActive()) {
+				txn.rollback();
+				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+			}
+		}
+	}
+
+	@POST
+	@Path("/route/removeParticipant")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response removeParticipant(RouteParticipantData data) {
+		LOG.fine("Trying to make chat moderator in route: " + data.route_id);
+
+		if (!data.isValid())
+			return Response.status(Status.BAD_REQUEST).build();
+
+		Transaction txn = datastore.newTransaction();
+
+		try {
+			TokensResource.checkIsValidAccess(data.token, data.email);
+
+			String req_email = data.email;
+
+			List<Entity> ents = DB_Route.removeParticipant(data.route_id, data.participant, req_email);
+
+			Entity user = DB_User.getUser(data.email);
+			
+			if (data.email.equals(data.participant)) {
+				Entity updated_user = DB_User.leaveRoute(user.getKey(), user, data.route_id);
+				txn.put(updated_user);
+			}
+
+			ents.forEach(ent -> txn.put(ent));
+			txn.commit();
+
+			LOG.fine("Removed " + data.participant + "from route: " + data.route_id);
+			return Response.status(Status.NO_CONTENT).build();
+
+		} catch (InvalidTokenException | InexistentChatIdException | ImpossibleActionException
+				| InexistentModeratorException | InexistentRouteException e) {
+			txn.rollback();
+			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
+
+		} catch (Exception e) {
+			txn.rollback();
+			LOG.severe(e.getMessage());
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+
+		} finally {
+			if (txn.isActive()) {
+				txn.rollback();
+				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+			}
+		}
+	}
+	
 }

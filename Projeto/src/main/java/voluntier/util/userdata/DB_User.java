@@ -743,6 +743,19 @@ public class DB_User {
 
 		return updateParticipatingRouteList(userKey, user, routes_list.build());
 	}
+	
+	public static Entity leaveRoute(Key userKey, Entity user, String route_id) throws InexistentRouteException  {
+		List<String> routes = getParticipatingRouteIds(user);
+		if(!routes.contains(route_id))
+			throw new InexistentRouteException();
+
+		ListValue.Builder routes_list = ListValue.newBuilder();
+
+		routes.remove(route_id);
+		routes.forEach(route -> routes_list.addValue(route));
+
+		return updateParticipatingRouteList(userKey, user, routes_list.build());
+	}
 
 	public static Entity leaveEvent(Key userKey, Entity user, String event_id) throws InexistentEventException {
 		List<String> events = getParticipatingEventIds(user);

@@ -16,6 +16,7 @@ import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.LatLng;
 import com.google.cloud.datastore.ListValue;
 import com.google.cloud.datastore.LongValue;
+import com.google.cloud.datastore.StringValue;
 import com.google.cloud.datastore.Value;
 import com.google.datastore.v1.QueryResultBatch.MoreResultsType;
 
@@ -213,6 +214,15 @@ public class DB_Route {
 		
 		return new Pair<>(entities, route_id);
 	}
+	
+	public static Entity updateState(String route_id, String email, String state)
+			throws ImpossibleActionException, InexistentRouteException {
+		Entity route = getRoute(route_id);
+		checkIsCreator(route, email);
+		checkIsActive(route);
+
+		return util.updateProperty(route, STATE, StringValue.of(state));
+	}
 
 	public static Entity getRoute(String route_id) throws InexistentRouteException {
 		Key routeKey = routesFactory.newKey(route_id);
@@ -367,6 +377,33 @@ public class DB_Route {
 		boolean more_results = new_cursor < user_emails.size();
 		return new Triplet<>(participant_roles, more_results ? new_cursor : null,
 				more_results ? MoreResultsType.MORE_RESULTS_AFTER_LIMIT : MoreResultsType.NO_MORE_RESULTS);
+	}
+	
+	public static List<Entity> removeParticipant(String route_id, String target_email, String req_email)
+			throws ImpossibleActionException, InexistentChatIdException, InexistentModeratorException,
+			InexistentRouteException, InexistentElementException {
+
+		Entity route = getRoute(route_id);
+		checkIsActive(route);
+
+		List<String> participants = DB_Util.getStringList(route, PARTICIPANTS);
+		List<String> moderators = DB_Chat.getModerators(route.getString(CHAT_ID));
+
+		String creator = route.getString(CREATOR);
+
+		if (participants.contains(target_email) && !target_email.equals(creator)
+				&& (creator.equals(req_email) || (moderators.contains(req_email) && !moderators.contains(target_email))
+						|| target_email.equals(req_email))) {
+
+			List<Entity> ents = new LinkedList<>();
+			ents.add(util.removeStringFromList(route, PARTICIPANTS, target_email));
+			
+			if (moderators.contains(target_email))
+				ents.add(DB_Chat.removeModerator(route.getString(CHAT_ID), target_email, req_email));
+
+			return ents;
+		}
+		throw new ImpossibleActionException();
 	}
 
 	public static Pair<List<Entity>, Integer> postComment(String route_id, String email, String username,
