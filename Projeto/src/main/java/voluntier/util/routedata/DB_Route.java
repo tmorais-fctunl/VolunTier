@@ -166,7 +166,7 @@ public class DB_Route {
 			DB_Event.checkIsActive(event);
 			DB_Event.checkIsPublic(event);
 			
-			events.addValue(JsonUtil.json.toJson(e));
+			events.addValue(e);
 		}
 
 		ListValue.Builder participants = ListValue.newBuilder();
