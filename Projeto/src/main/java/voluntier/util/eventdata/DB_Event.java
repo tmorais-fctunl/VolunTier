@@ -953,7 +953,10 @@ public class DB_Event {
 	}
 	
 	public static boolean hasEnded(Entity event) {
-		Timestamp t = Timestamp.parseTimestamp(event.getString(END_DATE));
+		String date = event.getString(END_DATE);
+		if (date.equals("undefined"))
+			return false;
+		Timestamp t = Timestamp.parseTimestamp(date);
 		return Timestamp.now().compareTo(t) > 0;
 	}
 	
