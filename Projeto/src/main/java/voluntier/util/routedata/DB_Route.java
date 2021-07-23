@@ -151,7 +151,7 @@ public class DB_Route {
 
 	public static Pair<List<Entity>, String> createNew(CreateRouteData create_route_data)
 			throws IllegalCoordinatesException, RouteAlreadyExistsException, InexistentEventException,
-			ImpossibleActionException, InexistentUserException {
+			ImpossibleActionException, InexistentUserException, AlreadyExistsException {
 
 		String first_event_id = create_route_data.event_ids.get(0);
 		Entity first_event = DB_Event.getEvent(first_event_id);
@@ -396,6 +396,7 @@ public class DB_Route {
 						|| target_email.equals(req_email))) {
 
 			List<Entity> ents = new LinkedList<>();
+			route = util.updateProperty(route, NUM_PARTICIPANTS, LongValue.of(route.getLong(NUM_PARTICIPANTS) - 1));
 			ents.add(util.removeStringFromList(route, PARTICIPANTS, target_email));
 			
 			if (moderators.contains(target_email))
@@ -403,7 +404,7 @@ public class DB_Route {
 
 			return ents;
 		}
-		throw new ImpossibleActionException();
+		throw new ImpossibleActionException("Error in remove participant from route");
 	}
 
 	public static Pair<List<Entity>, Integer> postComment(String route_id, String email, String username,

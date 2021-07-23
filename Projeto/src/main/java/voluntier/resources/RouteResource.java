@@ -463,7 +463,7 @@ public class RouteResource {
 	@Path("/route/removeParticipant")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response removeParticipant(RouteParticipantData data) {
-		LOG.fine("Trying to make chat moderator in route: " + data.route_id);
+		LOG.fine("Trying to remove from route: " + data.route_id);
 
 		if (!data.isValid())
 			return Response.status(Status.BAD_REQUEST).build();

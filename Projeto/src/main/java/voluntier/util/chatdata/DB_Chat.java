@@ -96,7 +96,7 @@ public class DB_Chat {
 		try {
 			return util.removeStringFromList(chat, MODS, email);
 		} catch (InexistentElementException e) {
-			throw new InexistentModeratorException();
+			throw new InexistentModeratorException("No moderator with the given email");
 		}
 	}
 
@@ -261,7 +261,7 @@ public class DB_Chat {
 		Entity chat = getChat(chat_id);
 
 		if (!req_email.equals(chat.getString(ADMIN)))
-			throw new ImpossibleActionException();
+			throw new ImpossibleActionException("This user cannot remove a moderator");
 
 		return removeModerator(chat.getKey(), chat, target_email);
 	}

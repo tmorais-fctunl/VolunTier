@@ -12,18 +12,22 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.ListValue;
+import com.google.cloud.datastore.LongValue;
 import com.google.cloud.datastore.StringValue;
-import com.google.cloud.datastore.Value;
 
+import voluntier.exceptions.AlreadyExistsException;
 import voluntier.exceptions.CannotCreateMoreEventsException;
 import voluntier.exceptions.ImpossibleActionException;
+import voluntier.exceptions.InexistentElementException;
 import voluntier.exceptions.InexistentEventException;
 import voluntier.exceptions.InexistentRouteException;
 import voluntier.exceptions.InexistentUserException;
 import voluntier.exceptions.NotEnoughCurrencyException;
+import voluntier.util.DB_Util;
 import voluntier.util.JsonUtil;
 import voluntier.util.consumes.RegisterData;
 import voluntier.util.consumes.UpdateProfileData;
+
 import voluntier.util.eventdata.MaxEventsData;
 
 public class DB_User {
@@ -76,6 +80,43 @@ public class DB_User {
 
 	private static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	private static KeyFactory usersFactory = datastore.newKeyFactory().setKind("User");
+	
+	private static DB_Util util = new DB_Util(DB_User::defaultBuilder);
+	
+	private static void defaultBuilder(Entity user) {
+		util.builder = Entity.newBuilder(user.getKey())
+				.set(USERNAME, user.getString(USERNAME))
+				.set(EMAIL, user.getString(EMAIL))
+				.set(PASSWORD, user.getString(PASSWORD))
+				.set(FULL_NAME, user.getString(FULL_NAME))
+				.set(LANDLINE, user.getString(LANDLINE))
+				.set(MOBILE, user.getString(MOBILE))
+				.set(ADDRESS, user.getString(ADDRESS))
+				.set(ADDRESS2, user.getString(ADDRESS2))
+				.set(REGION, user.getString(REGION))
+				.set(POSTAL_CODE, user.getString(POSTAL_CODE))
+				.set(ACCOUNT, user.getString(ACCOUNT))
+				.set(ROLE, user.getString(ROLE))
+				.set(STATE, user.getString(STATE))
+				.set(PROFILE, user.getString(PROFILE))
+				.set(DESCRIPTION, user.getString(DESCRIPTION))
+				.set(WEBSITE, user.getString(WEBSITE))
+				.set(FACEBOOK, user.getString(FACEBOOK))
+				.set(INSTAGRAM, user.getString(INSTAGRAM))
+				.set(TWITTER, user.getString(TWITTER))
+				.set(N_EVENTS_PARTICIPATED, user.getLong(N_EVENTS_PARTICIPATED))
+				.set(MAX_EVENTS_PER_DAY, user.getString(MAX_EVENTS_PER_DAY))
+				.set(TOTAL_CURRENCY, user.getDouble(TOTAL_CURRENCY))
+				.set(CURRENT_CURRENCY, user.getDouble(CURRENT_CURRENCY))
+				.set(DONATIONS, user.getList(DONATIONS))
+				.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(user.getString(PROFILE_PICTURE_MINIATURE))
+						.setExcludeFromIndexes(true)
+						.build())
+				.set(EVENTS, user.getList(EVENTS))
+				.set(EVENTS_PARTICIPATING, user.getList(EVENTS_PARTICIPATING))
+				.set(ROUTES, user.getList(ROUTES))
+				.set(ROUTES_PARTICIPATING, user.getList(ROUTES_PARTICIPATING));
+	}
 
 	public static Entity REWRITE(Entity user) {		
 		return Entity.newBuilder(user.getKey())
@@ -114,7 +155,9 @@ public class DB_User {
 	}
 
 	public static Entity changePassword(String new_password, Key userKey, Entity user) {
-		return Entity.newBuilder(userKey)
+		
+		return util.updateProperty(user, PASSWORD, StringValue.of(UserData_Modifiable.hashPassword(new_password)));
+		/*return Entity.newBuilder(userKey)
 				.set(USERNAME, user.getString(USERNAME))
 				.set(EMAIL, user.getString(EMAIL))
 				.set(PASSWORD, UserData_Modifiable.hashPassword(new_password))
@@ -146,11 +189,12 @@ public class DB_User {
 				.set(EVENTS_PARTICIPATING, user.getList(EVENTS_PARTICIPATING))
 				.set(ROUTES, user.getList(ROUTES))
 				.set(ROUTES_PARTICIPATING, user.getList(ROUTES_PARTICIPATING))
-				.build();
+				.build();*/
 	}
 
 	public static Entity remove(Key userKey, Entity user) {
-		return Entity.newBuilder(userKey)
+		return util.updateProperty(user, ACCOUNT, StringValue.of(Account.REMOVED.toString()));
+		/*return Entity.newBuilder(userKey)
 				.set(USERNAME, user.getString(USERNAME))
 				.set(EMAIL, user.getString(EMAIL))
 				.set(PASSWORD, user.getString(PASSWORD))
@@ -182,11 +226,12 @@ public class DB_User {
 				.set(EVENTS_PARTICIPATING, user.getList(EVENTS_PARTICIPATING))
 				.set(ROUTES, user.getList(ROUTES))
 				.set(ROUTES_PARTICIPATING, user.getList(ROUTES_PARTICIPATING))
-				.build();
+				.build();*/
 	}
 
 	public static Entity setState(String state, Key userKey, Entity user) {
-		return Entity.newBuilder(userKey)
+		return util.updateProperty(user, STATE, StringValue.of(state));
+		/*return Entity.newBuilder(userKey)
 				.set(USERNAME, user.getString(USERNAME))
 				.set(EMAIL, user.getString(EMAIL))
 				.set(PASSWORD, user.getString(PASSWORD))
@@ -218,7 +263,7 @@ public class DB_User {
 				.set(EVENTS_PARTICIPATING, user.getList(EVENTS_PARTICIPATING))
 				.set(ROUTES, user.getList(ROUTES))
 				.set(ROUTES_PARTICIPATING, user.getList(ROUTES_PARTICIPATING))
-				.build();
+				.build();*/
 	}
 
 	public static Entity changeProperty(UpdateProfileData data, Key userKey, Entity user) {
@@ -258,7 +303,8 @@ public class DB_User {
 	}
 
 	public static Entity changeRole(String role, Key userKey, Entity user) {
-		return Entity.newBuilder(userKey)
+		return util.updateProperty(user, ROLE, StringValue.of(role));
+		/*return Entity.newBuilder(userKey)
 				.set(USERNAME, user.getString(USERNAME))
 				.set(EMAIL, user.getString(EMAIL))
 				.set(PASSWORD, user.getString(PASSWORD))
@@ -290,11 +336,12 @@ public class DB_User {
 				.set(EVENTS_PARTICIPATING, user.getList(EVENTS_PARTICIPATING))
 				.set(ROUTES, user.getList(ROUTES))
 				.set(ROUTES_PARTICIPATING, user.getList(ROUTES_PARTICIPATING))
-				.build();
+				.build();*/
 	}
 
 	public static Entity changeProfilePicture(String data, Key userKey, Entity user) {
-		return Entity.newBuilder(userKey)
+		return util.updateProperty(user, PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(data).setExcludeFromIndexes(true).build());
+		/*return Entity.newBuilder(userKey)
 				.set(USERNAME, user.getString(USERNAME))
 				.set(EMAIL, user.getString(EMAIL))
 				.set(PASSWORD, user.getString(PASSWORD))
@@ -326,7 +373,7 @@ public class DB_User {
 				.set(EVENTS_PARTICIPATING, user.getList(EVENTS_PARTICIPATING))
 				.set(ROUTES, user.getList(ROUTES))
 				.set(ROUTES_PARTICIPATING, user.getList(ROUTES_PARTICIPATING))
-				.build();
+				.build();*/
 	}
 
 	public static Entity createID(String username, String email, Key usernameKey) {
@@ -337,50 +384,55 @@ public class DB_User {
 	}
 
 	public static List<String> getEventIds(Entity user) {
-		List<String> events = new LinkedList<>();
+		return DB_Util.getStringList(user, EVENTS);
+		/*List<String> events = new LinkedList<>();
 		List<Value<?>> event_list = user.getList(EVENTS);
 		event_list.forEach(event -> {
 			String event_id = (String) event.get();
 			events.add(event_id);
 		});
 
-		return events;
+		return events;*/
 	}
 
 	public static List<String> getRouteIds(Entity user) {
-		List<String> routes = new LinkedList<>();
+		return DB_Util.getStringList(user, ROUTES);
+		/*List<String> routes = new LinkedList<>();
 		List<Value<?>> route_list = user.getList(ROUTES);
 		route_list.forEach(route -> {
 			String route_id = (String) route.get();
 			routes.add(route_id);
 		});
 
-		return routes;
+		return routes;*/
 	}
 
 	public static List<String> getParticipatingEventIds(Entity user) {
-		List<String> participating_events = new LinkedList<>();
+		return DB_Util.getStringList(user, EVENTS_PARTICIPATING);
+		/*List<String> participating_events = new LinkedList<>();
 		List<Value<?>> event_list = user.getList(EVENTS_PARTICIPATING);
 		event_list.forEach(event -> {
 			String event_id = (String) event.get();
 			participating_events.add(event_id);
 		});
 
-		return participating_events;
+		return participating_events;*/
 	}
 
 	public static List<String> getParticipatingRouteIds(Entity user) {
-		List<String> participating_routes = new LinkedList<>();
+		return DB_Util.getStringList(user, ROUTES_PARTICIPATING);
+		/*List<String> participating_routes = new LinkedList<>();
 		List<Value<?>> routes_list = user.getList(ROUTES_PARTICIPATING);
 		routes_list.forEach(route -> {
 			String route_id = (String) route.get();
 			participating_routes.add(route_id);
 		});
 
-		return participating_routes;
+		return participating_routes;*/
 	}
 
-	private static Entity updateEventList(Key userKey, Entity user, ListValue events_list) {
+	/*private static Entity updateEventList(Key userKey, Entity user, ListValue events_list) {
+		return util.updateProperty(user, EVENTS, events_list);
 		return Entity.newBuilder(userKey)
 				.set(USERNAME, user.getString(USERNAME))
 				.set(EMAIL, user.getString(EMAIL))
@@ -414,9 +466,9 @@ public class DB_User {
 				.set(ROUTES, user.getList(ROUTES))
 				.set(ROUTES_PARTICIPATING, user.getList(ROUTES_PARTICIPATING))
 				.build();
-	}
+	}*/
 
-	private static Entity updateParticipatingEventList(Key userKey, Entity user, ListValue participating_list) {
+	/*private static Entity updateParticipatingEventList(Key userKey, Entity user, ListValue participating_list) {
 		return Entity.newBuilder(userKey)
 				.set(USERNAME, user.getString(USERNAME))
 				.set(EMAIL, user.getString(EMAIL))
@@ -450,9 +502,9 @@ public class DB_User {
 				.set(ROUTES, user.getList(ROUTES))
 				.set(ROUTES_PARTICIPATING, user.getList(ROUTES_PARTICIPATING))
 				.build();
-	}
+	}*/
 
-	private static Entity updateRouteList(Key userKey, Entity user, ListValue routes_list) {
+	/*private static Entity updateRouteList(Key userKey, Entity user, ListValue routes_list) {
 		return Entity.newBuilder(userKey)
 				.set(USERNAME, user.getString(USERNAME))
 				.set(EMAIL, user.getString(EMAIL))
@@ -666,7 +718,7 @@ public class DB_User {
 				.set(ROUTES, user.getList(ROUTES))
 				.set(ROUTES_PARTICIPATING, user.getList(ROUTES_PARTICIPATING))
 				.build();
-	}
+	}*/
 
 	public static Entity addEvent(Key userKey, Entity user, String event_id) throws InexistentUserException, CannotCreateMoreEventsException {
 		
@@ -676,107 +728,130 @@ public class DB_User {
 		if(events.contains(event_id))
 			return user;
 
-		ListValue.Builder events_list = ListValue.newBuilder().set(user.getList(EVENTS));
-		events_list.addValue(event_id);
+		/*ListValue.Builder events_list = ListValue.newBuilder().set(user.getList(EVENTS));
+		events_list.addValue(event_id);*/
+		
+		return util.addStringToList(user, EVENTS, event_id);
 
-		return updateEventList(userKey, user, events_list.build());
+		//return updateEventList(userKey, user, events_list.build());
+		//return util.updateProperty(user, EVENTS_PARTICIPATING, events_list.build());
 	}
 
-	public static Entity removeEvent(Key userKey, Entity user, String event_id) throws InexistentEventException {
-		List<String> events = getEventIds(user);
-		if(!events.contains(event_id))
-			throw new InexistentEventException();
+	public static Entity removeEvent(Key userKey, Entity user, String event_id) throws InexistentEventException, InexistentElementException {
+		/*List<String> events = getEventIds(user);
+		if(!events.contains(event_id))*/
+		if (DB_Util.existsInStringList(user, EVENTS, event_id))
+			throw new InexistentEventException("There is no event with the given event id");
 
-		ListValue.Builder events_list = ListValue.newBuilder();
+		/*ListValue.Builder events_list = ListValue.newBuilder();
 
 		events.remove(event_id);
-		events.forEach(event -> events_list.addValue(event));
+		events.forEach(event -> events_list.addValue(event));*/
+		
+		return util.removeStringFromList(user, EVENTS, event_id);
 
-		return updateEventList(userKey, user, events_list.build());
+		//return updateEventList(userKey, user, events_list.build());
+		//return util.updateProperty(user, EVENTS, events_list.build());
 	}
 
-	public static Entity participateEvent(Key userKey, Entity user, String event_id) throws ImpossibleActionException {
+	public static Entity participateEvent(Key userKey, Entity user, String event_id) throws ImpossibleActionException, AlreadyExistsException {
 
-		List<String> events = getParticipatingEventIds(user);
-		if(events.contains(event_id))
-			throw new ImpossibleActionException("User already participating in event: " + event_id);
+		/*List<String> events = getParticipatingEventIds(user);
+		if(events.contains(event_id))*/
+		/*if (DB_Util.existsInStringList(user, EVENTS_PARTICIPATING, event_id))
+			throw new ImpossibleActionException("User already participating in event: " + event_id);*/
 
-		ListValue.Builder events_list = ListValue.newBuilder().set(user.getList(EVENTS_PARTICIPATING));
+		/*ListValue.Builder events_list = ListValue.newBuilder().set(user.getList(EVENTS_PARTICIPATING));
 		events_list.addValue(event_id);
 
-		return updateParticipatingEventList(userKey, user, events_list.build());
+		//return updateParticipatingEventList(userKey, user, events_list.build());
+		return util.updateProperty(user, EVENTS_PARTICIPATING, events_list.build());*/
+		return util.addUniqueStringToList(user, EVENTS, event_id);
 	}
 
-	public static Entity addRoute(Key userKey, Entity user, String route_id) {
+	public static Entity addRoute(Key userKey, Entity user, String route_id) throws AlreadyExistsException {
 
-		List<String> routes = getRouteIds(user);
+		/*List<String> routes = getRouteIds(user);
 		if(routes.contains(route_id))
 			return user;
 
 		ListValue.Builder routes_list = ListValue.newBuilder().set(user.getList(ROUTES));
 		routes_list.addValue(route_id);
 
-		return updateRouteList(userKey, user, routes_list.build());
+		return updateRouteList(userKey, user, routes_list.build());*/
+		return util.addUniqueStringToList(user, ROUTES, route_id);
 	}
 
-	public static Entity removeRoute(Key userKey, Entity user, String route_id) throws InexistentRouteException {
-		List<String> routes = getRouteIds(user);
-		if(!routes.contains(route_id))
-			throw new InexistentRouteException();
+	public static Entity removeRoute(Key userKey, Entity user, String route_id) throws InexistentRouteException, InexistentElementException {
+		/*List<String> routes = getRouteIds(user);
+		if(!routes.contains(route_id))*/
+		if (DB_Util.existsInStringList(user, ROUTES, route_id))
+			throw new InexistentRouteException("There is no route with the given route id");
 
-		ListValue.Builder routes_list = ListValue.newBuilder();
+		/*ListValue.Builder routes_list = ListValue.newBuilder();
 
 		routes.remove(route_id);
 		routes.forEach(route -> routes_list.addValue(route));
 
-		return updateRouteList(userKey, user, routes_list.build());
+		return updateRouteList(userKey, user, routes_list.build());*/
+		return util.removeStringFromList(user, ROUTES, route_id);
 	}
 
-	public static Entity participateRoute(Key userKey, Entity user, String route_id) throws ImpossibleActionException {
+	public static Entity participateRoute(Key userKey, Entity user, String route_id) throws AlreadyExistsException {
 
-		List<String> route_ids = getParticipatingRouteIds(user);
+	/*	List<String> route_ids = getParticipatingRouteIds(user);
 		if(route_ids.contains(route_id))
 			throw new ImpossibleActionException("User already participating in route: " + route_id);
 
 		ListValue.Builder routes_list = ListValue.newBuilder().set(user.getList(ROUTES_PARTICIPATING));
 		routes_list.addValue(route_id);
 
-		return updateParticipatingRouteList(userKey, user, routes_list.build());
+		return updateParticipatingRouteList(userKey, user, routes_list.build());*/
+		return util.addUniqueJsonToList(user, ROUTES_PARTICIPATING, route_id);
 	}
 	
-	public static Entity leaveRoute(Key userKey, Entity user, String route_id) throws InexistentRouteException  {
-		List<String> routes = getParticipatingRouteIds(user);
-		if(!routes.contains(route_id))
-			throw new InexistentRouteException();
+	public static Entity leaveRoute(Key userKey, Entity user, String route_id) throws InexistentRouteException, InexistentElementException  {
+		/*List<String> routes = getParticipatingRouteIds(user);
+		if(!routes.contains(route_id))*/
+		if (DB_Util.existsInStringList(user, ROUTES_PARTICIPATING, route_id))
+			throw new InexistentRouteException("User does not belong to that route");
 
-		ListValue.Builder routes_list = ListValue.newBuilder();
+		/*ListValue.Builder routes_list = ListValue.newBuilder();
 
 		routes.remove(route_id);
 		routes.forEach(route -> routes_list.addValue(route));
 
-		return updateParticipatingRouteList(userKey, user, routes_list.build());
+		return updateParticipatingRouteList(userKey, user, routes_list.build());*/
+		return util.removeStringFromList(user, ROUTES_PARTICIPATING, route_id);
 	}
 
-	public static Entity leaveEvent(Key userKey, Entity user, String event_id) throws InexistentEventException {
-		List<String> events = getParticipatingEventIds(user);
-		if(!events.contains(event_id))
-			throw new InexistentEventException();
+	public static Entity leaveEvent(Key userKey, Entity user, String event_id) throws InexistentEventException, InexistentElementException {
+		/*List<String> events = getParticipatingEventIds(user);
+		if(!events.contains(event_id))*/
+		if (DB_Util.existsInStringList(user, EVENTS_PARTICIPATING, event_id))
+			throw new InexistentEventException("There is no event with the given event idS");
 
-		ListValue.Builder events_list = ListValue.newBuilder();
+		/*ListValue.Builder events_list = ListValue.newBuilder();
 
 		events.remove(event_id);
 		events.forEach(event -> events_list.addValue(event));
 
-		return updateParticipatingEventList(userKey, user, events_list.build());
+		//return updateParticipatingEventList(userKey, user, events_list.build());
+		return util.updateProperty(user, EVENTS_PARTICIPATING, events_list.build());*/
+		return util.removeStringFromList(user, EVENTS_PARTICIPATING, event_id);
 	}
 
 	public static Entity leaveEvent (String user_email, double amount, int difficulty) throws InexistentUserException{
 		Entity user = getUser(user_email);
 		
-		updateNEventsParticipated (user.getKey(), user);
+		//updateNEventsParticipated (user.getKey(), user);
+		
+		user = util.updateProperty(user, N_EVENTS_PARTICIPATED, LongValue.of(user.getLong(N_EVENTS_PARTICIPATED) - 1));
 
-		return updateCurrency(user.getKey(), user, DoubleValue.of(user.getDouble(TOTAL_CURRENCY)+ amount*difficulty), 
-				DoubleValue.of(user.getDouble(CURRENT_CURRENCY) + amount*difficulty) );
+		/*return updateCurrency(user.getKey(), user, DoubleValue.of(user.getDouble(TOTAL_CURRENCY)+ amount*difficulty), 
+				DoubleValue.of(user.getDouble(CURRENT_CURRENCY) + amount*difficulty) );*/
+		user = util.updateProperty(user, TOTAL_CURRENCY, DoubleValue.of(user.getDouble(TOTAL_CURRENCY)+ amount*difficulty));
+		return util.updateProperty(user, CURRENT_CURRENCY, DoubleValue.of(user.getDouble(CURRENT_CURRENCY)+ amount*difficulty));
 	}
 
 	/*public static Entity earnCurrency (String user_email, double amount, int difficulty) throws InexistentUserException {
@@ -787,25 +862,30 @@ public class DB_User {
 		if(user.getDouble(CURRENT_CURRENCY) < amount)
 			throw new NotEnoughCurrencyException("User: " + user.getString(EMAIL) + " does not have enough currency to make this donation");
 
-		ListValue.Builder donations_list = ListValue.newBuilder().set(user.getList(DONATIONS));
+		/*ListValue.Builder donations_list = ListValue.newBuilder().set(user.getList(DONATIONS));
 		donations_list.addValue(JsonUtil.json.toJson(new DonationData(cause_name, cause_id, amount, Timestamp.now().toString())));
-
+		
 		user = updateDonationsList(user.getKey(), user, donations_list.build());
 		user = updateCurrency(user.getKey(), user, DoubleValue.of(user.getDouble(TOTAL_CURRENCY)), 
-				DoubleValue.of(user.getDouble(CURRENT_CURRENCY) - amount));
+				DoubleValue.of(user.getDouble(CURRENT_CURRENCY) - amount));*/
+		
+		user = util.updateProperty(user, TOTAL_CURRENCY, DoubleValue.of(user.getDouble(TOTAL_CURRENCY) - amount));
+		user = util.updateProperty(user, CURRENT_CURRENCY, DoubleValue.of(user.getDouble(CURRENT_CURRENCY) + amount));
 
-		return user;
+		//return user;
+		return util.addJsonToList(user, DONATIONS, new DonationData(cause_name, cause_id, amount, Timestamp.now().toString()));
 	}
 
 	public static List<DonationData> getDonations(Entity user) {
-		List<DonationData> donations = new LinkedList<>();
+		/*List<DonationData> donations = new LinkedList<>();
 		List<Value<?>> donation_list = user.getList(DONATIONS);
 		donation_list.forEach(donation -> {
 			String donation_data = (String) donation.get();
 			donations.add(JsonUtil.json.fromJson(donation_data, DonationData.class));
 		});
 
-		return donations;
+		return donations;*/
+		return DB_Util.getJsonList(user, DONATIONS, DonationData.class);
 	}
 
 	public static Entity createNew(String email, String username, String password, Key userKey) {
@@ -896,7 +976,8 @@ public class DB_User {
 		String now_string = now + "";
 		
 		if (data.last_event_dates.size() < MAX_EVENTS)
-			return updateCreationEventLimit(user.getKey(), user, getNewLimitString(now_string, data));
+			//return updateCreationEventLimit(user.getKey(), user, getNewLimitString(now_string, data));
+			return util.updateProperty(user, MAX_EVENTS_PER_DAY, StringValue.of(getNewLimitString(now_string, data)));
 
 		String firstDate = data.last_event_dates.remove(0);
 		
@@ -906,7 +987,7 @@ public class DB_User {
 		if (nowMillis - firstDateMillis < MILISSECONDS_IN_DAY)
 			throw new CannotCreateMoreEventsException("The user cannot create more than " + MAX_EVENTS + " events in less than 24 hours.");
 		
-		return updateCreationEventLimit(user.getKey(), user, getNewLimitString(now_string, data));
+		return util.updateProperty(user, MAX_EVENTS_PER_DAY, StringValue.of(getNewLimitString(now_string, data)));
 	}
 	
 	private static String getNewLimitString (String now, MaxEventsData data) {
