@@ -8,6 +8,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -35,15 +36,17 @@ import voluntier.exceptions.InexistentUserException;
 import voluntier.exceptions.InvalidTokenException;
 import voluntier.util.JsonUtil;
 import voluntier.util.consumes.CursorData;
+import voluntier.util.eventdata.DB_Event;
 import voluntier.util.eventdata.RankingType;
 import voluntier.util.produces.RankingData;
+import voluntier.util.produces.SearchEventData;
 import voluntier.util.userdata.DB_User;
 
 @Path("/")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class RankingResource {
 
-	private static final int SEARCH_RESULTS_LIMIT = 5;
+	private static final int SEARCH_RESULTS_LIMIT = 20;
 
 	private static final Logger LOG = Logger.getLogger(EventResource.class.getName());
 
@@ -134,6 +137,37 @@ public class RankingResource {
 		}
 	}
 
+	@POST
+	@Path("/event/searchByCategory")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response searchEventsByCategory (@QueryParam("c") String category, CursorData data) {
+		LOG.fine("Attempt to get events by category from user: " + data.email);
+
+		if (!data.isValid() || category == null)
+			return Response.status(Status.BAD_REQUEST).build();
+
+		LOG.warning(category);
+
+		try {
+
+			TokensResource.checkIsValidAccess(data.token, data.email);
+
+			SearchEventData events = new SearchEventData( getEventsByCategory(data.cursor, category) );
+
+			LOG.fine("Events by category obtained by user : " + data.email);
+			return Response.ok(JsonUtil.json.toJson(events)).build();
+
+		} catch (InvalidTokenException e) {
+			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
+
+		} catch (Exception e) {
+			LOG.severe(e.getMessage());
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
+	}
+
+
 	public static Triplet<List<Entity>, Cursor, QueryResultBatch.MoreResultsType> rankingTotalPoints(String cursor) {
 
 		Builder<Entity> builder = Query.newEntityQueryBuilder().setKind("User")
@@ -149,6 +183,16 @@ public class RankingResource {
 				.setOrderBy(OrderBy.desc(DB_User.N_EVENTS_PARTICIPATED), OrderBy.asc(DB_User.USERNAME)).setLimit(SEARCH_RESULTS_LIMIT);
 
 		return rankingQuery(builder, cursor);
+	}
+
+
+	public static Triplet<List<Entity>, Cursor, QueryResultBatch.MoreResultsType> getEventsByCategory (String cursor, String category){
+
+		Builder<Entity> builder = Query.newEntityQueryBuilder().setKind("Event")
+				.setFilter(PropertyFilter.eq(DB_Event.CATEGORY, category))
+				.setLimit(SEARCH_RESULTS_LIMIT);
+
+		return rankingQuery (builder, cursor);
 	}
 
 	public static Triplet<List<Entity>, Cursor, QueryResultBatch.MoreResultsType> rankingQuery(Builder<Entity> builder,

@@ -48,7 +48,6 @@ import voluntier.util.eventdata.ParticipantDataReturn;
 import voluntier.util.produces.ChatReturn;
 import voluntier.util.produces.DownloadPictureReturn;
 import voluntier.util.produces.DownloadSignedURLReturn;
-import voluntier.util.produces.SearchEventReturn;
 import voluntier.util.rating.DB_Rating;
 import voluntier.util.userdata.DB_User;
 import voluntier.util.userdata.State;

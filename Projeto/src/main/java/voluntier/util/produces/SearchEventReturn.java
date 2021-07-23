@@ -30,4 +30,14 @@ public class SearchEventReturn {
 
 		this.num_participants = (int) event.getLong(DB_Event.N_PARTICIPANTS);
 	}
+	
+	public SearchEventReturn (String name, String event_id, String start_date, 
+			String end_date, int num_participants, String visibility) {
+		this.name = name;
+		this.event_id = event_id;
+		this.start_date = start_date;
+		this.end_date = end_date;
+		this.num_participants = num_participants;
+		this.visibility = visibility;
+	}
 }

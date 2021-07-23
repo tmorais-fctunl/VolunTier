@@ -15,6 +15,7 @@ import com.google.cloud.datastore.ListValue;
 import com.google.cloud.datastore.StringValue;
 import com.google.cloud.datastore.Value;
 
+import voluntier.exceptions.CannotCreateMoreEventsException;
 import voluntier.exceptions.ImpossibleActionException;
 import voluntier.exceptions.InexistentEventException;
 import voluntier.exceptions.InexistentRouteException;
@@ -23,14 +24,15 @@ import voluntier.exceptions.NotEnoughCurrencyException;
 import voluntier.util.JsonUtil;
 import voluntier.util.consumes.RegisterData;
 import voluntier.util.consumes.UpdateProfileData;
+import voluntier.util.eventdata.MaxEventsData;
 
 public class DB_User {
 
 	public static final String USERNAME = "username";
 	public static final String EMAIL = "user_email";
-	
+
 	public static final String PASSWORD = "user_pwd";
-	
+
 	public static final String FULL_NAME = "user_full_name";
 	public static final String LANDLINE = "user_landline";
 	public static final String MOBILE = "user_mobile";
@@ -38,7 +40,7 @@ public class DB_User {
 	public static final String ADDRESS2 = "user_address2";
 	public static final String REGION = "user_region";
 	public static final String POSTAL_CODE = "user_pc";
-	
+
 	public static final String ACCOUNT = "user_account";
 	public static final String ROLE = "user_role";
 	public static final String STATE = "user_state";
@@ -55,23 +57,32 @@ public class DB_User {
 	public static final String EVENTS = "user_events";
 	public static final String EVENTS_PARTICIPATING = "user_events_participating";
 	public static final String N_EVENTS_PARTICIPATED = "n_user_events_participated";
+	public static final String MAX_EVENTS_PER_DAY = "max_user_events_day";
 	public static final String TOTAL_CURRENCY = "total_currency";
 	public static final String CURRENT_CURRENCY = "current_currency";
 	public static final String DONATIONS = "donations";
-	
+
 	public static final String ROUTES = "user_routes";
 	public static final String ROUTES_PARTICIPATING = "user_routes_participating";
-	
+
 	public static final String EMAIL_REGEX = ".+@.+[.].+";
 	public static final String POSTAL_CODE_REGEX = "[0-9]{4}-[0-9]{3}";
 	public static final String MOBILE_REGEX = "([+][0-9]{2,3}\\s)?[2789][0-9]{8}";
 	public static final String USERNAME_REGEX = "[a-zA-Z][a-zA-Z0-9]*([.][a-zA-Z0-9]+|[a-zA-Z0-9]*)";
 	
+	public static final int MAX_EVENTS = 100;
+	public static final String SEPARATOR = "|";
+	public static final int MILISSECONDS_IN_DAY = 86400000;
+
 	private static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	private static KeyFactory usersFactory = datastore.newKeyFactory().setKind("User");
-	
+
 	public static Entity REWRITE(Entity user) {
-		//ListValue emptyList = ListValue.newBuilder().build();
+
+		MaxEventsData obj = new MaxEventsData();
+
+		String maxEventsString = JsonUtil.json.toJson(obj);
+		
 		return Entity.newBuilder(user.getKey())
 				.set(USERNAME, user.getString(USERNAME))
 				.set(EMAIL, user.getString(EMAIL))
@@ -93,8 +104,9 @@ public class DB_User {
 				.set(INSTAGRAM, user.getString(INSTAGRAM))
 				.set(TWITTER, user.getString(TWITTER))
 				.set(N_EVENTS_PARTICIPATED, user.getLong(N_EVENTS_PARTICIPATED))
-				.set(TOTAL_CURRENCY, 0.0)
-				.set(CURRENT_CURRENCY, 0.0)
+				.set(MAX_EVENTS_PER_DAY, maxEventsString)
+				.set(TOTAL_CURRENCY, user.getDouble(TOTAL_CURRENCY))
+				.set(CURRENT_CURRENCY, user.getDouble(CURRENT_CURRENCY))
 				.set(DONATIONS, user.getList(DONATIONS))
 				.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(user.getString(PROFILE_PICTURE_MINIATURE))
 						.setExcludeFromIndexes(true)
@@ -105,7 +117,7 @@ public class DB_User {
 				.set(ROUTES_PARTICIPATING, user.getList(ROUTES_PARTICIPATING))
 				.build();
 	}
-		
+
 	public static Entity changePassword(String new_password, Key userKey, Entity user) {
 		return Entity.newBuilder(userKey)
 				.set(USERNAME, user.getString(USERNAME))
@@ -128,6 +140,7 @@ public class DB_User {
 				.set(INSTAGRAM, user.getString(INSTAGRAM))
 				.set(TWITTER, user.getString(TWITTER))
 				.set(N_EVENTS_PARTICIPATED, user.getLong(N_EVENTS_PARTICIPATED))
+				.set(MAX_EVENTS_PER_DAY, user.getString(MAX_EVENTS_PER_DAY))
 				.set(TOTAL_CURRENCY, user.getDouble(TOTAL_CURRENCY))
 				.set(CURRENT_CURRENCY, user.getDouble(CURRENT_CURRENCY))
 				.set(DONATIONS, user.getList(DONATIONS))
@@ -140,7 +153,7 @@ public class DB_User {
 				.set(ROUTES_PARTICIPATING, user.getList(ROUTES_PARTICIPATING))
 				.build();
 	}
-	
+
 	public static Entity remove(Key userKey, Entity user) {
 		return Entity.newBuilder(userKey)
 				.set(USERNAME, user.getString(USERNAME))
@@ -163,6 +176,7 @@ public class DB_User {
 				.set(INSTAGRAM, user.getString(INSTAGRAM))
 				.set(TWITTER, user.getString(TWITTER))
 				.set(N_EVENTS_PARTICIPATED, user.getLong(N_EVENTS_PARTICIPATED))
+				.set(MAX_EVENTS_PER_DAY, user.getString(MAX_EVENTS_PER_DAY))
 				.set(TOTAL_CURRENCY, user.getDouble(TOTAL_CURRENCY))
 				.set(CURRENT_CURRENCY, user.getDouble(CURRENT_CURRENCY))
 				.set(DONATIONS, user.getList(DONATIONS))
@@ -175,7 +189,7 @@ public class DB_User {
 				.set(ROUTES_PARTICIPATING, user.getList(ROUTES_PARTICIPATING))
 				.build();
 	}
-	
+
 	public static Entity setState(String state, Key userKey, Entity user) {
 		return Entity.newBuilder(userKey)
 				.set(USERNAME, user.getString(USERNAME))
@@ -198,6 +212,7 @@ public class DB_User {
 				.set(INSTAGRAM, user.getString(INSTAGRAM))
 				.set(TWITTER, user.getString(TWITTER))
 				.set(N_EVENTS_PARTICIPATED, user.getLong(N_EVENTS_PARTICIPATED))
+				.set(MAX_EVENTS_PER_DAY, user.getString(MAX_EVENTS_PER_DAY))
 				.set(TOTAL_CURRENCY, user.getDouble(TOTAL_CURRENCY))
 				.set(CURRENT_CURRENCY, user.getDouble(CURRENT_CURRENCY))
 				.set(DONATIONS, user.getList(DONATIONS))
@@ -210,7 +225,7 @@ public class DB_User {
 				.set(ROUTES_PARTICIPATING, user.getList(ROUTES_PARTICIPATING))
 				.build();
 	}
-	
+
 	public static Entity changeProperty(UpdateProfileData data, Key userKey, Entity user) {
 		return Entity.newBuilder(userKey)
 				.set(USERNAME, user.getString(USERNAME))
@@ -233,6 +248,7 @@ public class DB_User {
 				.set(INSTAGRAM, data.getInstagram(user.getString(INSTAGRAM)))
 				.set(TWITTER, data.getTwitter(user.getString(TWITTER)))
 				.set(N_EVENTS_PARTICIPATED, user.getLong(N_EVENTS_PARTICIPATED))
+				.set(MAX_EVENTS_PER_DAY, user.getString(MAX_EVENTS_PER_DAY))
 				.set(TOTAL_CURRENCY, user.getDouble(TOTAL_CURRENCY))
 				.set(CURRENT_CURRENCY, user.getDouble(CURRENT_CURRENCY))
 				.set(DONATIONS, user.getList(DONATIONS))
@@ -245,7 +261,7 @@ public class DB_User {
 				.set(ROUTES_PARTICIPATING, user.getList(ROUTES_PARTICIPATING))
 				.build();
 	}
-	
+
 	public static Entity changeRole(String role, Key userKey, Entity user) {
 		return Entity.newBuilder(userKey)
 				.set(USERNAME, user.getString(USERNAME))
@@ -268,6 +284,7 @@ public class DB_User {
 				.set(INSTAGRAM, user.getString(INSTAGRAM))
 				.set(TWITTER, user.getString(TWITTER))
 				.set(N_EVENTS_PARTICIPATED, user.getLong(N_EVENTS_PARTICIPATED))
+				.set(MAX_EVENTS_PER_DAY, user.getString(MAX_EVENTS_PER_DAY))
 				.set(TOTAL_CURRENCY, user.getDouble(TOTAL_CURRENCY))
 				.set(CURRENT_CURRENCY, user.getDouble(CURRENT_CURRENCY))
 				.set(DONATIONS, user.getList(DONATIONS))
@@ -280,7 +297,7 @@ public class DB_User {
 				.set(ROUTES_PARTICIPATING, user.getList(ROUTES_PARTICIPATING))
 				.build();
 	}
-	
+
 	public static Entity changeProfilePicture(String data, Key userKey, Entity user) {
 		return Entity.newBuilder(userKey)
 				.set(USERNAME, user.getString(USERNAME))
@@ -303,6 +320,7 @@ public class DB_User {
 				.set(INSTAGRAM, user.getString(INSTAGRAM))
 				.set(TWITTER, user.getString(TWITTER))
 				.set(N_EVENTS_PARTICIPATED, user.getLong(N_EVENTS_PARTICIPATED))
+				.set(MAX_EVENTS_PER_DAY, user.getString(MAX_EVENTS_PER_DAY))
 				.set(TOTAL_CURRENCY, user.getDouble(TOTAL_CURRENCY))
 				.set(CURRENT_CURRENCY, user.getDouble(CURRENT_CURRENCY))
 				.set(DONATIONS, user.getList(DONATIONS))
@@ -315,14 +333,14 @@ public class DB_User {
 				.set(ROUTES_PARTICIPATING, user.getList(ROUTES_PARTICIPATING))
 				.build();
 	}
-	
+
 	public static Entity createID(String username, String email, Key usernameKey) {
 		return Entity.newBuilder(usernameKey)
 				.set(USERNAME, username)
 				.set(EMAIL, email)
 				.build();
 	}
-	
+
 	public static List<String> getEventIds(Entity user) {
 		List<String> events = new LinkedList<>();
 		List<Value<?>> event_list = user.getList(EVENTS);
@@ -330,10 +348,10 @@ public class DB_User {
 			String event_id = (String) event.get();
 			events.add(event_id);
 		});
-		
+
 		return events;
 	}
-	
+
 	public static List<String> getRouteIds(Entity user) {
 		List<String> routes = new LinkedList<>();
 		List<Value<?>> route_list = user.getList(ROUTES);
@@ -341,10 +359,10 @@ public class DB_User {
 			String route_id = (String) route.get();
 			routes.add(route_id);
 		});
-		
+
 		return routes;
 	}
-	
+
 	public static List<String> getParticipatingEventIds(Entity user) {
 		List<String> participating_events = new LinkedList<>();
 		List<Value<?>> event_list = user.getList(EVENTS_PARTICIPATING);
@@ -352,10 +370,10 @@ public class DB_User {
 			String event_id = (String) event.get();
 			participating_events.add(event_id);
 		});
-		
+
 		return participating_events;
 	}
-	
+
 	public static List<String> getParticipatingRouteIds(Entity user) {
 		List<String> participating_routes = new LinkedList<>();
 		List<Value<?>> routes_list = user.getList(ROUTES_PARTICIPATING);
@@ -363,10 +381,10 @@ public class DB_User {
 			String route_id = (String) route.get();
 			participating_routes.add(route_id);
 		});
-		
+
 		return participating_routes;
 	}
-	
+
 	private static Entity updateEventList(Key userKey, Entity user, ListValue events_list) {
 		return Entity.newBuilder(userKey)
 				.set(USERNAME, user.getString(USERNAME))
@@ -389,6 +407,7 @@ public class DB_User {
 				.set(INSTAGRAM, user.getString(INSTAGRAM))
 				.set(TWITTER, user.getString(TWITTER))
 				.set(N_EVENTS_PARTICIPATED, user.getLong(N_EVENTS_PARTICIPATED))
+				.set(MAX_EVENTS_PER_DAY, user.getString(MAX_EVENTS_PER_DAY))
 				.set(TOTAL_CURRENCY, user.getDouble(TOTAL_CURRENCY))
 				.set(CURRENT_CURRENCY, user.getDouble(CURRENT_CURRENCY))
 				.set(DONATIONS, user.getList(DONATIONS))
@@ -401,7 +420,7 @@ public class DB_User {
 				.set(ROUTES_PARTICIPATING, user.getList(ROUTES_PARTICIPATING))
 				.build();
 	}
-	
+
 	private static Entity updateParticipatingEventList(Key userKey, Entity user, ListValue participating_list) {
 		return Entity.newBuilder(userKey)
 				.set(USERNAME, user.getString(USERNAME))
@@ -424,6 +443,7 @@ public class DB_User {
 				.set(INSTAGRAM, user.getString(INSTAGRAM))
 				.set(TWITTER, user.getString(TWITTER))
 				.set(N_EVENTS_PARTICIPATED, user.getLong(N_EVENTS_PARTICIPATED))
+				.set(MAX_EVENTS_PER_DAY, user.getString(MAX_EVENTS_PER_DAY))
 				.set(TOTAL_CURRENCY, user.getDouble(TOTAL_CURRENCY))
 				.set(CURRENT_CURRENCY, user.getDouble(CURRENT_CURRENCY))
 				.set(DONATIONS, user.getList(DONATIONS))
@@ -436,7 +456,7 @@ public class DB_User {
 				.set(ROUTES_PARTICIPATING, user.getList(ROUTES_PARTICIPATING))
 				.build();
 	}
-	
+
 	private static Entity updateRouteList(Key userKey, Entity user, ListValue routes_list) {
 		return Entity.newBuilder(userKey)
 				.set(USERNAME, user.getString(USERNAME))
@@ -462,6 +482,7 @@ public class DB_User {
 						.setExcludeFromIndexes(true)
 						.build())
 				.set(N_EVENTS_PARTICIPATED, user.getLong(N_EVENTS_PARTICIPATED))
+				.set(MAX_EVENTS_PER_DAY, user.getString(MAX_EVENTS_PER_DAY))
 				.set(TOTAL_CURRENCY, user.getDouble(TOTAL_CURRENCY))
 				.set(CURRENT_CURRENCY, user.getDouble(CURRENT_CURRENCY))
 				.set(DONATIONS, user.getList(DONATIONS))
@@ -471,7 +492,7 @@ public class DB_User {
 				.set(ROUTES_PARTICIPATING, user.getList(ROUTES_PARTICIPATING))
 				.build();
 	}
-	
+
 	private static Entity updateParticipatingRouteList(Key userKey, Entity user, ListValue participating_list) {
 		return Entity.newBuilder(userKey)
 				.set(USERNAME, user.getString(USERNAME))
@@ -494,6 +515,7 @@ public class DB_User {
 				.set(INSTAGRAM, user.getString(INSTAGRAM))
 				.set(TWITTER, user.getString(TWITTER))
 				.set(N_EVENTS_PARTICIPATED, user.getLong(N_EVENTS_PARTICIPATED))
+				.set(MAX_EVENTS_PER_DAY, user.getString(MAX_EVENTS_PER_DAY))
 				.set(TOTAL_CURRENCY, user.getDouble(TOTAL_CURRENCY))
 				.set(CURRENT_CURRENCY, user.getDouble(CURRENT_CURRENCY))
 				.set(DONATIONS, user.getList(DONATIONS))
@@ -506,7 +528,7 @@ public class DB_User {
 				.set(ROUTES_PARTICIPATING, participating_list)
 				.build();
 	}
-	
+
 	private static Entity updateDonationsList(Key userKey, Entity user, ListValue donations) {
 		return Entity.newBuilder(userKey)
 				.set(USERNAME, user.getString(USERNAME))
@@ -529,6 +551,7 @@ public class DB_User {
 				.set(INSTAGRAM, user.getString(INSTAGRAM))
 				.set(TWITTER, user.getString(TWITTER))
 				.set(N_EVENTS_PARTICIPATED, user.getLong(N_EVENTS_PARTICIPATED))
+				.set(MAX_EVENTS_PER_DAY, user.getString(MAX_EVENTS_PER_DAY))
 				.set(TOTAL_CURRENCY, user.getDouble(TOTAL_CURRENCY))
 				.set(CURRENT_CURRENCY, user.getDouble(CURRENT_CURRENCY))
 				.set(DONATIONS, donations)
@@ -541,7 +564,7 @@ public class DB_User {
 				.set(ROUTES_PARTICIPATING, user.getList(ROUTES_PARTICIPATING))
 				.build();
 	}
-	
+
 	private static Entity updateCurrency(Key userKey, Entity user, DoubleValue total, DoubleValue current) {
 		return Entity.newBuilder(userKey)
 				.set(USERNAME, user.getString(USERNAME))
@@ -564,6 +587,7 @@ public class DB_User {
 				.set(INSTAGRAM, user.getString(INSTAGRAM))
 				.set(TWITTER, user.getString(TWITTER))
 				.set(N_EVENTS_PARTICIPATED, user.getLong(N_EVENTS_PARTICIPATED))
+				.set(MAX_EVENTS_PER_DAY, user.getString(MAX_EVENTS_PER_DAY))
 				.set(TOTAL_CURRENCY, total)
 				.set(CURRENT_CURRENCY, current)
 				.set(DONATIONS, user.getList(DONATIONS))
@@ -577,114 +601,194 @@ public class DB_User {
 				.build();
 	}
 	
-	public static Entity addEvent(Key userKey, Entity user, String event_id) {
+	private static Entity updateNEventsParticipated (Key userKey, Entity user) {
+		return Entity.newBuilder(userKey)
+				.set(USERNAME, user.getString(USERNAME))
+				.set(EMAIL, user.getString(EMAIL))
+				.set(PASSWORD, user.getString(PASSWORD))
+				.set(FULL_NAME, user.getString(FULL_NAME))
+				.set(LANDLINE, user.getString(LANDLINE))
+				.set(MOBILE, user.getString(MOBILE))
+				.set(ADDRESS, user.getString(ADDRESS))
+				.set(ADDRESS2, user.getString(ADDRESS2))
+				.set(REGION, user.getString(REGION))
+				.set(POSTAL_CODE, user.getString(POSTAL_CODE))
+				.set(ACCOUNT, user.getString(ACCOUNT))
+				.set(ROLE, user.getString(ROLE))
+				.set(STATE, user.getString(STATE))
+				.set(PROFILE, user.getString(PROFILE))
+				.set(DESCRIPTION, user.getString(DESCRIPTION))
+				.set(WEBSITE, user.getString(WEBSITE))
+				.set(FACEBOOK, user.getString(FACEBOOK))
+				.set(INSTAGRAM, user.getString(INSTAGRAM))
+				.set(TWITTER, user.getString(TWITTER))
+				.set(N_EVENTS_PARTICIPATED, user.getLong(N_EVENTS_PARTICIPATED) + 1)
+				.set(MAX_EVENTS_PER_DAY, user.getString(MAX_EVENTS_PER_DAY))
+				.set(TOTAL_CURRENCY, user.getDouble(TOTAL_CURRENCY))
+				.set(CURRENT_CURRENCY, user.getDouble(CURRENT_CURRENCY))
+				.set(DONATIONS, user.getList(DONATIONS))
+				.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(user.getString(PROFILE_PICTURE_MINIATURE))
+						.setExcludeFromIndexes(true)
+						.build())
+				.set(EVENTS, user.getList(EVENTS))
+				.set(EVENTS_PARTICIPATING, user.getList(EVENTS_PARTICIPATING))
+				.set(ROUTES, user.getList(ROUTES))
+				.set(ROUTES_PARTICIPATING, user.getList(ROUTES_PARTICIPATING))
+				.build();
+	}
+	
+	private static Entity updateCreationEventLimit (Key userKey, Entity user, String newString) {
+		return Entity.newBuilder(userKey)
+				.set(USERNAME, user.getString(USERNAME))
+				.set(EMAIL, user.getString(EMAIL))
+				.set(PASSWORD, user.getString(PASSWORD))
+				.set(FULL_NAME, user.getString(FULL_NAME))
+				.set(LANDLINE, user.getString(LANDLINE))
+				.set(MOBILE, user.getString(MOBILE))
+				.set(ADDRESS, user.getString(ADDRESS))
+				.set(ADDRESS2, user.getString(ADDRESS2))
+				.set(REGION, user.getString(REGION))
+				.set(POSTAL_CODE, user.getString(POSTAL_CODE))
+				.set(ACCOUNT, user.getString(ACCOUNT))
+				.set(ROLE, user.getString(ROLE))
+				.set(STATE, user.getString(STATE))
+				.set(PROFILE, user.getString(PROFILE))
+				.set(DESCRIPTION, user.getString(DESCRIPTION))
+				.set(WEBSITE, user.getString(WEBSITE))
+				.set(FACEBOOK, user.getString(FACEBOOK))
+				.set(INSTAGRAM, user.getString(INSTAGRAM))
+				.set(TWITTER, user.getString(TWITTER))
+				.set(N_EVENTS_PARTICIPATED, user.getLong(N_EVENTS_PARTICIPATED))
+				.set(MAX_EVENTS_PER_DAY, newString)
+				.set(TOTAL_CURRENCY, user.getDouble(TOTAL_CURRENCY))
+				.set(CURRENT_CURRENCY, user.getDouble(CURRENT_CURRENCY))
+				.set(DONATIONS, user.getList(DONATIONS))
+				.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(user.getString(PROFILE_PICTURE_MINIATURE))
+						.setExcludeFromIndexes(true)
+						.build())
+				.set(EVENTS, user.getList(EVENTS))
+				.set(EVENTS_PARTICIPATING, user.getList(EVENTS_PARTICIPATING))
+				.set(ROUTES, user.getList(ROUTES))
+				.set(ROUTES_PARTICIPATING, user.getList(ROUTES_PARTICIPATING))
+				.build();
+	}
+
+	public static Entity addEvent(Key userKey, Entity user, String event_id) throws InexistentUserException, CannotCreateMoreEventsException {
 		
+		user = eventCreationLimit(user);
+
 		List<String> events = getEventIds(user);
 		if(events.contains(event_id))
 			return user;
 
 		ListValue.Builder events_list = ListValue.newBuilder().set(user.getList(EVENTS));
 		events_list.addValue(event_id);
-		
+
 		return updateEventList(userKey, user, events_list.build());
 	}
-	
+
 	public static Entity removeEvent(Key userKey, Entity user, String event_id) throws InexistentEventException {
 		List<String> events = getEventIds(user);
 		if(!events.contains(event_id))
 			throw new InexistentEventException();
-		
+
 		ListValue.Builder events_list = ListValue.newBuilder();
-		
+
 		events.remove(event_id);
 		events.forEach(event -> events_list.addValue(event));
 
 		return updateEventList(userKey, user, events_list.build());
 	}
-	
+
 	public static Entity participateEvent(Key userKey, Entity user, String event_id) throws ImpossibleActionException {
-		
+
 		List<String> events = getParticipatingEventIds(user);
 		if(events.contains(event_id))
 			throw new ImpossibleActionException("User already participating in event: " + event_id);
 
 		ListValue.Builder events_list = ListValue.newBuilder().set(user.getList(EVENTS_PARTICIPATING));
 		events_list.addValue(event_id);
-		
+
 		return updateParticipatingEventList(userKey, user, events_list.build());
 	}
-	
+
 	public static Entity addRoute(Key userKey, Entity user, String route_id) {
-		
+
 		List<String> routes = getRouteIds(user);
 		if(routes.contains(route_id))
 			return user;
 
 		ListValue.Builder routes_list = ListValue.newBuilder().set(user.getList(ROUTES));
 		routes_list.addValue(route_id);
-		
+
 		return updateRouteList(userKey, user, routes_list.build());
 	}
-	
+
 	public static Entity removeRoute(Key userKey, Entity user, String route_id) throws InexistentRouteException {
 		List<String> routes = getRouteIds(user);
 		if(!routes.contains(route_id))
 			throw new InexistentRouteException();
-		
+
 		ListValue.Builder routes_list = ListValue.newBuilder();
-		
+
 		routes.remove(route_id);
 		routes.forEach(route -> routes_list.addValue(route));
 
 		return updateRouteList(userKey, user, routes_list.build());
 	}
-	
+
 	public static Entity participateRoute(Key userKey, Entity user, String route_id) throws ImpossibleActionException {
-		
+
 		List<String> route_ids = getParticipatingRouteIds(user);
 		if(route_ids.contains(route_id))
 			throw new ImpossibleActionException("User already participating in route: " + route_id);
 
 		ListValue.Builder routes_list = ListValue.newBuilder().set(user.getList(ROUTES_PARTICIPATING));
 		routes_list.addValue(route_id);
-		
+
 		return updateParticipatingRouteList(userKey, user, routes_list.build());
 	}
-	
+
 	public static Entity leaveEvent(Key userKey, Entity user, String event_id) throws InexistentEventException {
 		List<String> events = getParticipatingEventIds(user);
 		if(!events.contains(event_id))
 			throw new InexistentEventException();
-		
+
 		ListValue.Builder events_list = ListValue.newBuilder();
-		
+
 		events.remove(event_id);
 		events.forEach(event -> events_list.addValue(event));
 
 		return updateParticipatingEventList(userKey, user, events_list.build());
 	}
-	
-	public static Entity earnCurrency (String user_email, double amount, int difficulty) throws InexistentUserException {
+
+	public static Entity leaveEvent (String user_email, double amount, int difficulty) throws InexistentUserException{
 		Entity user = getUser(user_email);
 		
+		updateNEventsParticipated (user.getKey(), user);
+
 		return updateCurrency(user.getKey(), user, DoubleValue.of(user.getDouble(TOTAL_CURRENCY)+ amount*difficulty), 
 				DoubleValue.of(user.getDouble(CURRENT_CURRENCY) + amount*difficulty) );
 	}
-	
+
+	/*public static Entity earnCurrency (String user_email, double amount, int difficulty) throws InexistentUserException {
+
+	}*/
+
 	public static Entity donate(Entity user, float amount, String cause_id, String cause_name) throws NotEnoughCurrencyException {
 		if(user.getDouble(CURRENT_CURRENCY) < amount)
 			throw new NotEnoughCurrencyException("User: " + user.getString(EMAIL) + " does not have enough currency to make this donation");
-		
+
 		ListValue.Builder donations_list = ListValue.newBuilder().set(user.getList(DONATIONS));
 		donations_list.addValue(JsonUtil.json.toJson(new DonationData(cause_name, cause_id, amount, Timestamp.now().toString())));
-		
+
 		user = updateDonationsList(user.getKey(), user, donations_list.build());
 		user = updateCurrency(user.getKey(), user, DoubleValue.of(user.getDouble(TOTAL_CURRENCY)), 
 				DoubleValue.of(user.getDouble(CURRENT_CURRENCY) - amount));
-		
+
 		return user;
 	}
-	
+
 	public static List<DonationData> getDonations(Entity user) {
 		List<DonationData> donations = new LinkedList<>();
 		List<Value<?>> donation_list = user.getList(DONATIONS);
@@ -692,14 +796,18 @@ public class DB_User {
 			String donation_data = (String) donation.get();
 			donations.add(JsonUtil.json.fromJson(donation_data, DonationData.class));
 		});
-		
+
 		return donations;
 	}
-	
+
 	public static Entity createNew(String email, String username, String password, Key userKey) {
 		UserData_AllProperties data = new UserData_AllProperties(new RegisterData(email, username, password));
 		ListValue empty_list = ListValue.newBuilder().build();
-		
+
+		MaxEventsData obj = new MaxEventsData();
+
+		String maxEventsString = JsonUtil.json.toJson(obj);
+
 		return Entity.newBuilder(userKey)
 				.set(USERNAME, data.username)
 				.set(PASSWORD, data.password)
@@ -723,13 +831,12 @@ public class DB_User {
 				.set(TOTAL_CURRENCY, 0.0)
 				.set(CURRENT_CURRENCY, 0.0)
 				.set(N_EVENTS_PARTICIPATED, 0)
+				.set(MAX_EVENTS_PER_DAY, maxEventsString)
 				.set(DONATIONS, empty_list)
 				.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(data.profile_pic)
 						.setExcludeFromIndexes(true)
 						.build())
 				.set(N_EVENTS_PARTICIPATED, 0)
-				.set(TOTAL_CURRENCY, 0.0)
-				.set(CURRENT_CURRENCY, 0.0)
 				.set(DONATIONS, empty_list)
 				.set(EVENTS, empty_list)
 				.set(EVENTS_PARTICIPATING, empty_list)
@@ -737,38 +844,66 @@ public class DB_User {
 				.set(ROUTES_PARTICIPATING, empty_list)
 				.build();
 	}
-		
+
 	public static Entity getUser(String user_email) 
-	throws InexistentUserException {
+			throws InexistentUserException {
 		Key userKey = usersFactory.newKey(user_email);
 		Entity user = datastore.get(userKey);
-		
+
 		if(user == null)
 			throw new InexistentUserException("Inexistent user: " + user_email);
-		
+
 		return user;
 	}
-	
+
 	public static String getProfilePictureFilename(String username, String ext) {
 		return username + "_profile_picture." + ext;
 	}
-	
+
 	public static String getName (String user_email) {
 		Key userKey = usersFactory.newKey(user_email);
 		Entity user = datastore.get(userKey);
-		
+
 		return user.getString(FULL_NAME);
 	}
-	
+
 	public static boolean isPublicProfile (Entity user) {
 		return user.getString(PROFILE).equals(Profile.PUBLIC.toString());
 	}
-	
+
 	public static List<String> getPrivateProfileInfo (Entity user){
 		List<String> info = new LinkedList<>();
 		info.add(user.getString(USERNAME));
 		info.add(user.getString(EMAIL));
 		info.add(user.getString(PROFILE_PICTURE_MINIATURE));
 		return info;
+	}
+	
+	public static Entity eventCreationLimit (Entity user) throws CannotCreateMoreEventsException {
+		String maxEvents = user.getString(MAX_EVENTS_PER_DAY);
+				
+		MaxEventsData data = JsonUtil.json.fromJson(maxEvents, MaxEventsData.class);
+
+		Timestamp now = Timestamp.now();
+		String now_string = now + "";
+		
+		if (data.last_event_dates.size() < MAX_EVENTS)
+			return updateCreationEventLimit(user.getKey(), user, getNewLimitString(now_string, data));
+
+		String firstDate = data.last_event_dates.remove(0);
+		
+		double nowMillis = now.toDate().getTime();
+		double firstDateMillis = Timestamp.parseTimestamp(firstDate).toDate().getTime();
+		
+		if (nowMillis - firstDateMillis < MILISSECONDS_IN_DAY)
+			throw new CannotCreateMoreEventsException("The user cannot create more than " + MAX_EVENTS + " events in less than 24 hours.");
+		
+		return updateCreationEventLimit(user.getKey(), user, getNewLimitString(now_string, data));
+	}
+	
+	private static String getNewLimitString (String now, MaxEventsData data) {
+
+		data.last_event_dates.add(now);
+		return JsonUtil.json.toJson( data );
 	}
 }

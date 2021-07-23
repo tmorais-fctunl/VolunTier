@@ -26,6 +26,7 @@ import com.google.datastore.v1.QueryResultBatch.MoreResultsType;
 
 import voluntier.exceptions.ImpossibleActionException;
 import voluntier.exceptions.InexistentChatIdException;
+import voluntier.exceptions.CannotCreateMoreEventsException;
 import voluntier.exceptions.IllegalCoordinatesException;
 import voluntier.exceptions.InexistentModeratorException;
 import voluntier.exceptions.InexistentParticipantException;
@@ -102,7 +103,7 @@ public class EventResource {
 			LOG.fine("Event: " + data.event_name + " inserted correctly.");
 			return Response.ok(JsonUtil.json.toJson(new CreateEventReturn(event_id, null))).build();
 
-		} catch (InvalidTokenException | IllegalCoordinatesException e) {
+		} catch (InvalidTokenException | IllegalCoordinatesException | CannotCreateMoreEventsException e) {
 			txn.rollback();
 			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
 
@@ -596,7 +597,7 @@ public class EventResource {
 
 			TokensResource.checkIsValidAccess(data.token, data.email);
 
-			Pair<Entity, Entity> updates = DB_Event.confirmLeave(data.email, data.code);
+			Triplet<Entity, Entity, Integer> updates = DB_Event.confirmLeave(data.email, data.code);
 
 			Entity event = updates.getValue0();
 			Entity user = updates.getValue1();
@@ -604,7 +605,7 @@ public class EventResource {
 			txn.put(event, user);
 			txn.commit();
 
-			return Response.status(Status.NO_CONTENT).build();
+			return Response.ok(updates.getValue2()).build();
 
 		} catch (InvalidTokenException | InexistentEventException | ImpossibleActionException
 				| InexistentParticipantException e) {

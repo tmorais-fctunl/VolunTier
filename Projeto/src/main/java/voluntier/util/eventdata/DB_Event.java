@@ -89,6 +89,8 @@ public class DB_Event {
 	public static final int MAX_NAME_SIZE = 100;
 	public static final int MAX_DESCRIPTION_SIZE = 500;
 	public static final long DEFAULT_CAPACITY = 100;
+	
+	public static final int CURRENCY_PER_MINUTE = 60000;
 
 	public static final long MAX_PARTICIPANTS_RETURN = 5;
 	public static final long MAX_NUM_PICTURES = 10;
@@ -847,7 +849,7 @@ public class DB_Event {
 		return util.addJsonToList(event, PRESENCES, new ConfirmationCodeData(user_email, Timestamp.now().toString()));
 	}
 	
-	public static Pair<Entity, Entity> confirmLeave(String user_email, String qrCode)
+	public static Triplet<Entity, Entity, Integer> confirmLeave(String user_email, String qrCode)
 			throws InexistentEventException, InexistentParticipantException, ImpossibleActionException,
 			InexistentElementException, InexistentUserException {
 		
@@ -862,10 +864,12 @@ public class DB_Event {
 		
 		Date now = Timestamp.now().toDate();
 		
-		double diff = (now.getTime() - presence_date.getTime()) / 60000;
+		double diff = (now.getTime() - presence_date.getTime()) / CURRENCY_PER_MINUTE;
 		
-		return new Pair<>(util.removeJsonFromList(event, PRESENCES, (p -> p.email.equals(user_email)), ConfirmationCodeData.class), 
-				DB_User.earnCurrency(user_email, diff, getDifficulty(event)));
+		int difficulty = getDifficulty(event);
+		
+		return new Triplet<>(util.removeJsonFromList(event, PRESENCES, (p -> p.email.equals(user_email)), ConfirmationCodeData.class), 
+				DB_User.leaveEvent(user_email, diff, difficulty), (int) diff*difficulty );
 	}
 	
 	public static String generateNewPictureID(String event_id, int pic_id) {
@@ -921,6 +925,10 @@ public class DB_Event {
 		if (!hasStarted(event))
 			throw new ImpossibleActionException("8: Event has not yet started: " + event.getString(ID));
 	}
+	
+	/*public static void checkNumEvents (Entity event) throws ImpossibleActionException{
+		
+	}*/
 	
 	private static void checkQRCode (Entity event, String qrCode, boolean presence) throws ImpossibleActionException {
 		String dbCode = presence ? event.getString(PRESENCE_CODE) : event.getString(LEAVE_CODE);
