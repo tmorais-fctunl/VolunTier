@@ -54,13 +54,13 @@ public class UpdateResource {
 
 		Transaction txn = datastore.newTransaction();
 		try {
-			Entity token = TokensResource.checkIsValidAccess(data.token, data.email);
+			TokensResource.checkIsValidAccess(data.token, data.email);
 			// user being removed (attempted)
 			Key tg_userKey = usersFactory.newKey(data.target);
 			Entity tg_user = txn.get(tg_userKey);
 
 			// user requesting removal
-			Key rq_userKey = usersFactory.newKey(token.getString(TokensResource.ACCESS_EMAIL));
+			Key rq_userKey = usersFactory.newKey(data.email);
 			Entity rq_user = txn.get(rq_userKey);
 
 			// check if user being removed exists and is not already removed
@@ -119,13 +119,13 @@ public class UpdateResource {
 
 		Transaction txn = datastore.newTransaction();
 		try {
-			Entity token = TokensResource.checkIsValidAccess(data.token, data.email);
+			TokensResource.checkIsValidAccess(data.token, data.email);
 			// target user
 			Key tg_userKey = usersFactory.newKey(data.target);
 			Entity tg_user = txn.get(tg_userKey);
 
 			// user requesting change
-			Key rq_userKey = usersFactory.newKey(token.getString(TokensResource.ACCESS_EMAIL));
+			Key rq_userKey = usersFactory.newKey(data.email);
 			Entity rq_user = txn.get(rq_userKey);
 
 			// check if target user exists and is not removed
@@ -185,13 +185,13 @@ public class UpdateResource {
 
 		Transaction txn = datastore.newTransaction();
 		try {
-			Entity token = TokensResource.checkIsValidAccess(data.token, data.email);
+			TokensResource.checkIsValidAccess(data.token, data.email);
 			// target user
 			Key tg_userKey = usersFactory.newKey(data.target);
 			Entity tg_user = txn.get(tg_userKey);
 
 			// user requesting update
-			Key rq_userKey = usersFactory.newKey(token.getString(TokensResource.ACCESS_EMAIL));
+			Key rq_userKey = usersFactory.newKey(data.email);
 			Entity rq_user = txn.get(rq_userKey);
 
 			// check if target user exists and is not removed
@@ -259,13 +259,13 @@ public class UpdateResource {
 
 		Transaction txn = datastore.newTransaction();
 		try {
-			Entity token = TokensResource.checkIsValidAccess(data.token, data.email);
+			TokensResource.checkIsValidAccess(data.token, data.email);
 			// target user
 			Key tg_userKey = usersFactory.newKey(data.target);
 			Entity tg_user = txn.get(tg_userKey);
 
 			// user requesting change
-			Key rq_userKey = usersFactory.newKey(token.getString(TokensResource.ACCESS_EMAIL));
+			Key rq_userKey = usersFactory.newKey(data.email);
 			Entity rq_user = txn.get(rq_userKey);
 
 			// check if target user exists and is not removed

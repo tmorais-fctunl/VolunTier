@@ -15,6 +15,6 @@ public class EventData extends RequestData {
 	}
 	
 	public boolean isValid () {
-		return super.isValid() && event_id != null;
+		return super.isValid() && event_id != null && !event_id.equals("");
 	}
 }

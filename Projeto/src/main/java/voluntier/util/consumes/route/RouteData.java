@@ -15,6 +15,6 @@ public class RouteData extends RequestData{
 	}
 	
 	public boolean isValid () {
-		return super.isValid() && route_id != null;
+		return super.isValid() && route_id != null && !route_id.equals("");
 	}
 }

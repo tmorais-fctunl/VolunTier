@@ -20,7 +20,6 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Transaction;
 
-import voluntier.util.Argon2Util;
 import voluntier.util.consumes.ChangePassData;
 import voluntier.util.consumes.ForgotPassData;
 import voluntier.util.email.ChangePasswordEmail;
@@ -37,25 +36,6 @@ public class ForgotPassResource {
 	private static KeyFactory confirmationFactory = datastore.newKeyFactory().setKind("Confirmation");
 
 	public ForgotPassResource() {
-	}
-
-	@GET
-	@Path("/hash")
-	// @Produces(MediaType)
-	public Response hash() {
-		String password = "Hello World!";
-
-		return Response.ok(Argon2Util.hashPassword(password)).build();
-	}
-
-	@GET
-	@Path("/verify")
-	// @Produces(MediaType)
-	public Response verify() {
-		String password = "Hello World!";
-		String hash = "$argon2id$v=19$m=16384,t=3,p=1$6hfHL5P7T6U$JlQdJK+ePnVyhWiLOIZgQKwuJL5SpVUKp7XuQb4w8L0";
-		Argon2Util.verify(hash, password);
-		return Response.ok().build();
 	}
 
 	@POST

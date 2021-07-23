@@ -12,6 +12,8 @@ import voluntier.util.DB_Util;
 import voluntier.util.eventdata.DB_Event;
 import voluntier.util.produces.PicturesReturn;
 import voluntier.util.produces.SearchEventReturn;
+import voluntier.util.rating.DB_Rating;
+import voluntier.util.rating.UserRatingData;
 
 public class RouteDataReturn extends PicturesReturn {
 	public String route_name;
@@ -22,6 +24,7 @@ public class RouteDataReturn extends PicturesReturn {
 	public String creator;
 	public String status;
 	public double avg_rating;
+	public double my_rating;
 	public int num_participants;
 	
 	public RouteDataReturn(Entity route, String user_email) {
@@ -35,10 +38,13 @@ public class RouteDataReturn extends PicturesReturn {
 		try {
 			this.avg_rating = DB_Route.getAverageRating(route);
 			this.status = DB_Route.getStatus(route, user_email).toString();
-		} catch (InexistentRatingException | InexistentChatIdException e) {}
+			
+			UserRatingData rating = DB_Rating.getUserRating(route.getString(DB_Route.RATING_ID), user_email);
+			this.my_rating = rating == null ? 0 : rating.rating;
+			
+		} catch (InexistentChatIdException | InexistentRatingException e) {}
 		
 		this.num_participants = (int) route.getLong(DB_Route.NUM_PARTICIPANTS);
-
 		
 		List<String> event_ids = DB_Util.getStringList(route, DB_Route.EVENTS);
 		events = new LinkedList<>();

@@ -77,12 +77,7 @@ public class DB_User {
 	private static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	private static KeyFactory usersFactory = datastore.newKeyFactory().setKind("User");
 
-	public static Entity REWRITE(Entity user) {
-
-		MaxEventsData obj = new MaxEventsData();
-
-		String maxEventsString = JsonUtil.json.toJson(obj);
-		
+	public static Entity REWRITE(Entity user) {		
 		return Entity.newBuilder(user.getKey())
 				.set(USERNAME, user.getString(USERNAME))
 				.set(EMAIL, user.getString(EMAIL))
@@ -104,7 +99,7 @@ public class DB_User {
 				.set(INSTAGRAM, user.getString(INSTAGRAM))
 				.set(TWITTER, user.getString(TWITTER))
 				.set(N_EVENTS_PARTICIPATED, user.getLong(N_EVENTS_PARTICIPATED))
-				.set(MAX_EVENTS_PER_DAY, maxEventsString)
+				.set(MAX_EVENTS_PER_DAY, user.getString(MAX_EVENTS_PER_DAY))
 				.set(TOTAL_CURRENCY, user.getDouble(TOTAL_CURRENCY))
 				.set(CURRENT_CURRENCY, user.getDouble(CURRENT_CURRENCY))
 				.set(DONATIONS, user.getList(DONATIONS))

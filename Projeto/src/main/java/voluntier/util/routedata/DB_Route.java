@@ -95,8 +95,9 @@ public class DB_Route {
 				.set(STATE, e.getString(STATE));
 	}
 	
-	public static List<Entity> REWRITE(Entity route) {
+	public static List<Entity> REWRITE(Entity route) {		
 		List<Entity> entities = new LinkedList<>();
+		
 		entities.add(Entity.newBuilder(route.getKey())
 		.set(ID, route.getString(ID))
 		.set(EVENTS, route.getList(EVENTS))

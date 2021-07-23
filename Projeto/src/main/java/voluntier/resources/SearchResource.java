@@ -65,18 +65,18 @@ public class SearchResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response doLookUp(LookUpData data) {
-
+		System.out.println(1);
 		if (!data.isValid())
 			return Response.status(Status.BAD_REQUEST).entity("Invalid").build();
 
 		Transaction txn = datastore.newTransaction();
 		try {
-			Entity token = TokensResource.checkIsValidAccess(data.token, data.email);
+			TokensResource.checkIsValidAccess(data.token, data.email);
 
 			Key tg_userKey = usersFactory.newKey(data.target);
 			Entity tg_user = txn.get(tg_userKey);
 
-			Key rq_userKey = usersFactory.newKey(token.getString(TokensResource.ACCESS_EMAIL));
+			Key rq_userKey = usersFactory.newKey(data.email);
 			Entity rq_user = txn.get(rq_userKey);
 
 			if (tg_user == null) {

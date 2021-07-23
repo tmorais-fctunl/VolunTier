@@ -84,7 +84,6 @@ public class SearchByLocationResource {
 			TokensResource.checkIsValidAccess(data.token, data.email);
 
 			Pair<List<Entity>, String> events = queryRoutesByArea(data.location);
-
 			return Response.ok(JsonUtil.json.toJson(new SearchRoutesReturn(events.getValue0(), events.getValue1(), data.email)))
 					.build();
 
@@ -166,7 +165,7 @@ public class SearchByLocationResource {
 	}
 
 	private List<Entity> getAllRoutes() {
-		return getAll("Routes");
+		return getAll("Route");
 	}
 
 	private List<Entity> getAll(String type) {

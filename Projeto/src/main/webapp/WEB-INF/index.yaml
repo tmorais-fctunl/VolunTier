@@ -2,6 +2,6 @@ indexes:
 
 - kind: User
   properties:
-  - name: total_currency
+  - name: n_user_events_participated
     direction: desc
   - name: username

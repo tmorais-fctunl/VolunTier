@@ -14,6 +14,6 @@ public class CauseData extends RequestData {
 	}
 	
 	public boolean isValid() {
-		return super.isValid() && cause_id != null;
+		return super.isValid() && cause_id != null && !cause_id.equals("");
 	}
 }

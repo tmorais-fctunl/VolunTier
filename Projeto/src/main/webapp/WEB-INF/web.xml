@@ -34,7 +34,7 @@
 		</init-param>
 		<init-param>
 			<param-name>jersey.config.server.provider.classnames</param-name>
-			<param-value>voluntier.filters.AdditionalResponseHeadersFilter</param-value>
+			<param-value>voluntier.filters.AdditionalResponseHeadersFilter;voluntier.filters.AuthRequestFilter</param-value>
 		</init-param>
 		<init-param>
 			<param-name>jersey.config.servlet.filter.contextPath</param-name>
