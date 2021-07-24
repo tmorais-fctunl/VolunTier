@@ -26,7 +26,7 @@ import com.google.datastore.v1.QueryResultBatch.MoreResultsType;
 
 import voluntier.exceptions.ImpossibleActionException;
 import voluntier.exceptions.InexistentChatIdException;
-import voluntier.exceptions.CannotCreateMoreEventsException;
+import voluntier.exceptions.CannotCreateMoreException;
 import voluntier.exceptions.IllegalCoordinatesException;
 import voluntier.exceptions.InexistentModeratorException;
 import voluntier.exceptions.InexistentParticipantException;
@@ -103,7 +103,7 @@ public class EventResource {
 			LOG.fine("Event: " + data.event_name + " inserted correctly.");
 			return Response.ok(JsonUtil.json.toJson(new CreateEventReturn(event_id, null))).build();
 
-		} catch (InvalidTokenException | IllegalCoordinatesException | CannotCreateMoreEventsException e) {
+		} catch (InvalidTokenException | IllegalCoordinatesException | CannotCreateMoreException e) {
 			txn.rollback();
 			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
 

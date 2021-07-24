@@ -16,7 +16,7 @@ import com.google.cloud.datastore.LongValue;
 import com.google.cloud.datastore.StringValue;
 
 import voluntier.exceptions.AlreadyExistsException;
-import voluntier.exceptions.CannotCreateMoreEventsException;
+import voluntier.exceptions.CannotCreateMoreException;
 import voluntier.exceptions.ImpossibleActionException;
 import voluntier.exceptions.InexistentElementException;
 import voluntier.exceptions.InexistentEventException;
@@ -28,7 +28,7 @@ import voluntier.util.JsonUtil;
 import voluntier.util.consumes.RegisterData;
 import voluntier.util.consumes.UpdateProfileData;
 
-import voluntier.util.eventdata.MaxEventsData;
+import voluntier.util.eventdata.MaxCreationData;
 
 public class DB_User {
 
@@ -68,6 +68,7 @@ public class DB_User {
 
 	public static final String ROUTES = "user_routes";
 	public static final String ROUTES_PARTICIPATING = "user_routes_participating";
+	public static final String MAX_ROUTES_PER_DAY = "max_user_routes_day";
 
 	public static final String EMAIL_REGEX = ".+@.+[.].+";
 	public static final String POSTAL_CODE_REGEX = "[0-9]{4}-[0-9]{3}";
@@ -75,6 +76,8 @@ public class DB_User {
 	public static final String USERNAME_REGEX = "[a-zA-Z][a-zA-Z0-9]*([.][a-zA-Z0-9]+|[a-zA-Z0-9]*)";
 	
 	public static final int MAX_EVENTS = 100;
+	public static final int MAX_ROUTES = 100;
+	
 	public static final String SEPARATOR = "|";
 	public static final int MILISSECONDS_IN_DAY = 86400000;
 
@@ -115,7 +118,8 @@ public class DB_User {
 				.set(EVENTS, user.getList(EVENTS))
 				.set(EVENTS_PARTICIPATING, user.getList(EVENTS_PARTICIPATING))
 				.set(ROUTES, user.getList(ROUTES))
-				.set(ROUTES_PARTICIPATING, user.getList(ROUTES_PARTICIPATING));
+				.set(ROUTES_PARTICIPATING, user.getList(ROUTES_PARTICIPATING))
+				.set(MAX_ROUTES_PER_DAY, user.getString(MAX_ROUTES_PER_DAY));
 	}
 
 	public static Entity REWRITE(Entity user) {		
@@ -151,6 +155,53 @@ public class DB_User {
 				.set(EVENTS_PARTICIPATING, user.getList(EVENTS_PARTICIPATING))
 				.set(ROUTES, user.getList(ROUTES))
 				.set(ROUTES_PARTICIPATING, user.getList(ROUTES_PARTICIPATING))
+				.set(MAX_ROUTES_PER_DAY, user.getString(MAX_ROUTES_PER_DAY))
+				.build();
+	}
+	
+	public static Entity createNew(String email, String username, String password, Key userKey) {
+		UserData_AllProperties data = new UserData_AllProperties(new RegisterData(email, username, password));
+		ListValue empty_list = ListValue.newBuilder().build();
+
+		MaxCreationData obj = new MaxCreationData();
+
+		String maxString = JsonUtil.json.toJson(obj);
+
+		return Entity.newBuilder(userKey)
+				.set(USERNAME, data.username)
+				.set(PASSWORD, data.password)
+				.set(FULL_NAME, data.full_name)
+				.set(EMAIL, data.email)
+				.set(ROLE, data.getRole().toString())
+				.set(STATE, data.getState().toString())
+				.set(PROFILE, data.profile)
+				.set(LANDLINE, data.landline)
+				.set(MOBILE, data.mobile)
+				.set(ADDRESS, data.address)
+				.set(ADDRESS2, data.address2)
+				.set(REGION, data.region)
+				.set(POSTAL_CODE, data.pc)
+				.set(ACCOUNT, data.getAccount().toString())
+				.set(DESCRIPTION, data.description)
+				.set(WEBSITE, data.website)
+				.set(FACEBOOK, data.facebook)
+				.set(INSTAGRAM, data.instagram)
+				.set(TWITTER, data.twitter)
+				.set(TOTAL_CURRENCY, 0.0)
+				.set(CURRENT_CURRENCY, 0.0)
+				.set(N_EVENTS_PARTICIPATED, 0)
+				.set(MAX_EVENTS_PER_DAY, maxString)
+				.set(DONATIONS, empty_list)
+				.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(data.profile_pic)
+						.setExcludeFromIndexes(true)
+						.build())
+				.set(N_EVENTS_PARTICIPATED, 0)
+				.set(DONATIONS, empty_list)
+				.set(EVENTS, empty_list)
+				.set(EVENTS_PARTICIPATING, empty_list)
+				.set(ROUTES, empty_list)
+				.set(ROUTES_PARTICIPATING, empty_list)
+				.set(MAX_ROUTES_PER_DAY, maxString)
 				.build();
 	}
 
@@ -299,6 +350,7 @@ public class DB_User {
 				.set(EVENTS_PARTICIPATING, user.getList(EVENTS_PARTICIPATING))
 				.set(ROUTES, user.getList(ROUTES))
 				.set(ROUTES_PARTICIPATING, user.getList(ROUTES_PARTICIPATING))
+				.set(MAX_ROUTES_PER_DAY, user.getString(MAX_ROUTES_PER_DAY))
 				.build();
 	}
 
@@ -720,18 +772,18 @@ public class DB_User {
 				.build();
 	}*/
 
-	public static Entity addEvent(Key userKey, Entity user, String event_id) throws InexistentUserException, CannotCreateMoreEventsException {
+	public static Entity addEvent(Key userKey, Entity user, String event_id) throws AlreadyExistsException, CannotCreateMoreException {
 		
 		user = eventCreationLimit(user);
 
-		List<String> events = getEventIds(user);
+		/*List<String> events = getEventIds(user);
 		if(events.contains(event_id))
-			return user;
+			return user;*/
 
 		/*ListValue.Builder events_list = ListValue.newBuilder().set(user.getList(EVENTS));
 		events_list.addValue(event_id);*/
 		
-		return util.addStringToList(user, EVENTS, event_id);
+		return util.addUniqueStringToList(user, EVENTS, event_id);
 
 		//return updateEventList(userKey, user, events_list.build());
 		//return util.updateProperty(user, EVENTS_PARTICIPATING, events_list.build());
@@ -769,7 +821,9 @@ public class DB_User {
 		return util.addUniqueStringToList(user, EVENTS, event_id);
 	}
 
-	public static Entity addRoute(Key userKey, Entity user, String route_id) throws AlreadyExistsException {
+	public static Entity addRoute(Key userKey, Entity user, String route_id) throws AlreadyExistsException, CannotCreateMoreException {
+		
+		user = routeCreationLimit (user);
 
 		/*List<String> routes = getRouteIds(user);
 		if(routes.contains(route_id))
@@ -888,51 +942,6 @@ public class DB_User {
 		return DB_Util.getJsonList(user, DONATIONS, DonationData.class);
 	}
 
-	public static Entity createNew(String email, String username, String password, Key userKey) {
-		UserData_AllProperties data = new UserData_AllProperties(new RegisterData(email, username, password));
-		ListValue empty_list = ListValue.newBuilder().build();
-
-		MaxEventsData obj = new MaxEventsData();
-
-		String maxEventsString = JsonUtil.json.toJson(obj);
-
-		return Entity.newBuilder(userKey)
-				.set(USERNAME, data.username)
-				.set(PASSWORD, data.password)
-				.set(FULL_NAME, data.full_name)
-				.set(EMAIL, data.email)
-				.set(ROLE, data.getRole().toString())
-				.set(STATE, data.getState().toString())
-				.set(PROFILE, data.profile)
-				.set(LANDLINE, data.landline)
-				.set(MOBILE, data.mobile)
-				.set(ADDRESS, data.address)
-				.set(ADDRESS2, data.address2)
-				.set(REGION, data.region)
-				.set(POSTAL_CODE, data.pc)
-				.set(ACCOUNT, data.getAccount().toString())
-				.set(DESCRIPTION, data.description)
-				.set(WEBSITE, data.website)
-				.set(FACEBOOK, data.facebook)
-				.set(INSTAGRAM, data.instagram)
-				.set(TWITTER, data.twitter)
-				.set(TOTAL_CURRENCY, 0.0)
-				.set(CURRENT_CURRENCY, 0.0)
-				.set(N_EVENTS_PARTICIPATED, 0)
-				.set(MAX_EVENTS_PER_DAY, maxEventsString)
-				.set(DONATIONS, empty_list)
-				.set(PROFILE_PICTURE_MINIATURE, StringValue.newBuilder(data.profile_pic)
-						.setExcludeFromIndexes(true)
-						.build())
-				.set(N_EVENTS_PARTICIPATED, 0)
-				.set(DONATIONS, empty_list)
-				.set(EVENTS, empty_list)
-				.set(EVENTS_PARTICIPATING, empty_list)
-				.set(ROUTES, empty_list)
-				.set(ROUTES_PARTICIPATING, empty_list)
-				.build();
-	}
-
 	public static Entity getUser(String user_email) 
 			throws InexistentUserException {
 		Key userKey = usersFactory.newKey(user_email);
@@ -967,17 +976,25 @@ public class DB_User {
 		return info;
 	}
 	
-	public static Entity eventCreationLimit (Entity user) throws CannotCreateMoreEventsException {
-		String maxEvents = user.getString(MAX_EVENTS_PER_DAY);
+	private static Entity routeCreationLimit (Entity user) throws CannotCreateMoreException {
+		return creationLimit (user, MAX_ROUTES_PER_DAY, MAX_ROUTES);
+	}
+	
+	private static Entity eventCreationLimit (Entity user) throws CannotCreateMoreException {
+		return creationLimit (user, MAX_EVENTS_PER_DAY, MAX_EVENTS);
+	}
+	
+	private static Entity creationLimit (Entity user, String property, int limit) throws CannotCreateMoreException {
+		String maxEvents = user.getString(property);
 				
-		MaxEventsData data = JsonUtil.json.fromJson(maxEvents, MaxEventsData.class);
+		MaxCreationData data = JsonUtil.json.fromJson(maxEvents, MaxCreationData.class);
 
 		Timestamp now = Timestamp.now();
 		String now_string = now + "";
 		
-		if (data.last_event_dates.size() < MAX_EVENTS)
+		if (data.last_event_dates.size() < limit)
 			//return updateCreationEventLimit(user.getKey(), user, getNewLimitString(now_string, data));
-			return util.updateProperty(user, MAX_EVENTS_PER_DAY, StringValue.of(getNewLimitString(now_string, data)));
+			return util.updateProperty(user, property, StringValue.of(getNewLimitString(now_string, data)));
 
 		String firstDate = data.last_event_dates.remove(0);
 		
@@ -985,12 +1002,12 @@ public class DB_User {
 		double firstDateMillis = Timestamp.parseTimestamp(firstDate).toDate().getTime();
 		
 		if (nowMillis - firstDateMillis < MILISSECONDS_IN_DAY)
-			throw new CannotCreateMoreEventsException("The user cannot create more than " + MAX_EVENTS + " events in less than 24 hours.");
+			throw new CannotCreateMoreException("The user cannot create more than " + limit + " in less than 24 hours.");
 		
-		return util.updateProperty(user, MAX_EVENTS_PER_DAY, StringValue.of(getNewLimitString(now_string, data)));
+		return util.updateProperty(user, property, StringValue.of(getNewLimitString(now_string, data)));
 	}
 	
-	private static String getNewLimitString (String now, MaxEventsData data) {
+	private static String getNewLimitString (String now, MaxCreationData data) {
 
 		data.last_event_dates.add(now);
 		return JsonUtil.json.toJson( data );

@@ -3,11 +3,11 @@ package voluntier.util.eventdata;
 import java.util.LinkedList;
 import java.util.List;
 
-public class MaxEventsData {
+public class MaxCreationData {
 	
 	public List<String> last_event_dates;
 	
-	public MaxEventsData() {
+	public MaxCreationData() {
 		last_event_dates = new LinkedList<>();
 	}
 	

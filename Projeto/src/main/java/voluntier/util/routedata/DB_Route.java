@@ -21,6 +21,7 @@ import com.google.cloud.datastore.Value;
 import com.google.datastore.v1.QueryResultBatch.MoreResultsType;
 
 import voluntier.exceptions.AlreadyExistsException;
+import voluntier.exceptions.CannotCreateMoreException;
 import voluntier.exceptions.CannotParticipateInSomeEventsException;
 import voluntier.exceptions.IllegalCoordinatesException;
 import voluntier.exceptions.ImpossibleActionException;
@@ -151,7 +152,7 @@ public class DB_Route {
 
 	public static Pair<List<Entity>, String> createNew(CreateRouteData create_route_data)
 			throws IllegalCoordinatesException, RouteAlreadyExistsException, InexistentEventException,
-			ImpossibleActionException, InexistentUserException, AlreadyExistsException {
+			ImpossibleActionException, InexistentUserException, AlreadyExistsException, CannotCreateMoreException {
 
 		String first_event_id = create_route_data.event_ids.get(0);
 		Entity first_event = DB_Event.getEvent(first_event_id);
