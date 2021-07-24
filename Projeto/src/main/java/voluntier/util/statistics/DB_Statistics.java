@@ -157,13 +157,13 @@ public class DB_Statistics {
 	
 	public static void updateTotalNumParticipations () {
 		Entity stat = getStatistics();
-		util.updateProperty(stat, TOTAL_NUM_PARTICIPATIONS_EVENT, LongValue.of(stat.getLong(TOTAL_NUM_PARTICIPATIONS_EVENT) + 1));
+		stat = util.updateProperty(stat, TOTAL_NUM_PARTICIPATIONS_EVENT, LongValue.of(stat.getLong(TOTAL_NUM_PARTICIPATIONS_EVENT) + 1));
 		putStatistics(stat);
 	}
 	
 	public static void updateNumPresences () {
 		Entity stat = getStatistics();
-		util.updateProperty(stat, TOTAL_NUM_PRESENCES, LongValue.of(stat.getLong(TOTAL_NUM_PRESENCES) + 1));
+		stat = util.updateProperty(stat, TOTAL_NUM_PRESENCES, LongValue.of(stat.getLong(TOTAL_NUM_PRESENCES) + 1));
 		putStatistics(stat);
 	}
 	
@@ -190,7 +190,7 @@ public class DB_Statistics {
 	
 	public static void updateTotalTimePresences (long time) {
 		Entity stat = getStatistics();
-		util.updateProperty(stat, TOTAL_TIME_PRESENCES, LongValue.of(stat.getLong(TOTAL_TIME_PRESENCES) + time));
+		stat = util.updateProperty(stat, TOTAL_TIME_PRESENCES, LongValue.of(stat.getLong(TOTAL_TIME_PRESENCES) + time));
 		putStatistics(stat);
 	}
 	
@@ -203,19 +203,19 @@ public class DB_Statistics {
 	
 	public static void updateTotalCurrency (boolean add, int amount) {
 		Entity stat = getStatistics();
-		util.updateProperty(stat, TOTAL_ALLTIME_CURRENCY, LongValue.of(stat.getLong(TOTAL_ALLTIME_CURRENCY) + amount));
+		stat = util.updateProperty(stat, TOTAL_ALLTIME_CURRENCY, LongValue.of(stat.getLong(TOTAL_ALLTIME_CURRENCY) + amount));
 		putStatistics(stat);
 	}
 	
 	public static void updateTotalDonated (float amount) {
 		Entity stat = getStatistics();
-		util.updateProperty(stat, TOTAL_DONATED, DoubleValue.of(stat.getDouble(TOTAL_DONATED) + amount));
+		stat = util.updateProperty(stat, TOTAL_DONATED, DoubleValue.of(stat.getDouble(TOTAL_DONATED) + amount));
 		putStatistics(stat);
 	}
 	
 	public static void updateTotalDonations () {
 		Entity stat = getStatistics();
-		util.updateProperty(stat, TOTAL_DONATIONS, DoubleValue.of(stat.getDouble(TOTAL_DONATIONS) + 1));
+		stat = util.updateProperty(stat, TOTAL_DONATIONS, LongValue.of(stat.getLong(TOTAL_DONATIONS) + 1));
 		putStatistics(stat);
 	}
 	

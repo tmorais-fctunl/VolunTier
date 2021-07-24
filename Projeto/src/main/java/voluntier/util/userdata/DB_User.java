@@ -169,6 +169,9 @@ public class DB_User {
 		
 		DB_Statistics.updateNumUsers(true);
 		double initial_currency = DB_Variables.getInitialCurrency();
+		
+		DB_Statistics.updateTotalCurrency(true, (int) initial_currency);
+		DB_Statistics.updateTotalCurrentCurrency(true, (float) initial_currency);
 
 		return Entity.newBuilder(userKey)
 				.set(USERNAME, data.username)
