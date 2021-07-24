@@ -123,10 +123,6 @@ public class DB_User {
 
 	public static Entity REWRITE(Entity user) {	
 
-		MaxCreationData obj = new MaxCreationData();
-
-		String maxString = JsonUtil.json.toJson(obj);
-		
 		return Entity.newBuilder(user.getKey())
 				.set(USERNAME, user.getString(USERNAME))
 				.set(EMAIL, user.getString(EMAIL))
@@ -159,7 +155,7 @@ public class DB_User {
 				.set(EVENTS_PARTICIPATING, user.getList(EVENTS_PARTICIPATING))
 				.set(ROUTES, user.getList(ROUTES))
 				.set(ROUTES_PARTICIPATING, user.getList(ROUTES_PARTICIPATING))
-				.set(MAX_ROUTES_PER_DAY, maxString)
+				.set(MAX_ROUTES_PER_DAY, user.getString(MAX_ROUTES_PER_DAY))
 				.build();
 	}
 	

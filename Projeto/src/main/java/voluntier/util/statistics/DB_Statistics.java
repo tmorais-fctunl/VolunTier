@@ -193,8 +193,8 @@ public class DB_Statistics {
 	
 	public static void updateTotalCurrentCurrency (boolean add, float amount) {
 		Entity stat = getStatistics();
-		stat = add ? util.updateProperty(stat, TOTAL_CURRENT_CURRENCY, DoubleValue.of(stat.getLong(TOTAL_CURRENT_CURRENCY) + amount))
-				: util.updateProperty(stat, TOTAL_CURRENT_CURRENCY, DoubleValue.of(stat.getLong(TOTAL_CURRENT_CURRENCY) - amount));
+		stat = add ? util.updateProperty(stat, TOTAL_CURRENT_CURRENCY, DoubleValue.of(stat.getDouble(TOTAL_CURRENT_CURRENCY) + amount))
+				: util.updateProperty(stat, TOTAL_CURRENT_CURRENCY, DoubleValue.of(stat.getDouble(TOTAL_CURRENT_CURRENCY) - amount));
 		putStatistics(stat);
 	}
 	
