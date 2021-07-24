@@ -1026,7 +1026,7 @@ public class DB_User {
 	}
 	
 	private static Entity eventCreationLimit (Entity user) throws CannotCreateMoreException {
-		return creationLimit (user, MAX_EVENTS_PER_DAY, (int) DB_Variables.getMaxRoutesPerDay());
+		return creationLimit (user, MAX_EVENTS_PER_DAY, (int) DB_Variables.getMaxEventsPerDay());
 	}
 	
 	private static Entity creationLimit (Entity user, String property, int limit) throws CannotCreateMoreException {

@@ -23,6 +23,7 @@ import com.google.cloud.datastore.Transaction;
 import com.google.datastore.v1.QueryResultBatch.MoreResultsType;
 
 import voluntier.exceptions.AlreadyExistsException;
+import voluntier.exceptions.CannotCreateMoreException;
 import voluntier.exceptions.CannotParticipateInSomeEventsException;
 import voluntier.exceptions.IllegalCoordinatesException;
 import voluntier.exceptions.ImpossibleActionException;
@@ -95,7 +96,11 @@ public class RouteResource {
 			txn.rollback();
 			LOG.severe(e.getMessage());
 			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
-
+		} catch (CannotCreateMoreException e) {
+			txn.rollback();
+			LOG.severe(e.getMessage());
+			return Response.status(Status.TOO_MANY_REQUESTS).build();
+		
 		} catch (Exception e) {
 			LOG.severe(e.getMessage());
 			txn.rollback();

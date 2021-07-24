@@ -103,10 +103,12 @@ public class EventResource {
 			LOG.fine("Event: " + data.event_name + " inserted correctly.");
 			return Response.ok(JsonUtil.json.toJson(new CreateEventReturn(event_id, null))).build();
 
-		} catch (InvalidTokenException | IllegalCoordinatesException | CannotCreateMoreException e) {
+		} catch (InvalidTokenException | IllegalCoordinatesException e) {
 			txn.rollback();
 			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
-
+		} catch (CannotCreateMoreException e) {
+			txn.rollback();
+			return Response.status(Status.TOO_MANY_REQUESTS).build();
 		} catch (Exception e) {
 			txn.rollback();
 			LOG.severe(e.getMessage());
