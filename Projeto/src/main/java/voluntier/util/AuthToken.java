@@ -1,10 +1,11 @@
 package voluntier.util;
 
 import java.util.UUID;
+
 public class AuthToken {
 
-	public static final long EXPIRATION_TIME = 1000*60*60; //1h
-	public static final long REFRESH_TOKEN_EXPIRATION_TIME = 1000*60*60*24*10; //10days
+	//public static final long EXPIRATION_TIME = 1000*60*60; //1h
+	//public static final long REFRESH_TOKEN_EXPIRATION_TIME = 1000*60*60*24*10; //10days
 	
 	public String email;
 	public String accessToken;
@@ -29,7 +30,7 @@ public class AuthToken {
 		this.accessToken = UUID.randomUUID().toString();
 		this.refreshToken = UUID.randomUUID().toString();
 		this.creationDate = System.currentTimeMillis();
-		this.expirationDate = this.creationDate + AuthToken.EXPIRATION_TIME;
-		this.refresh_expirationDate = this.creationDate + AuthToken.REFRESH_TOKEN_EXPIRATION_TIME;
+		this.expirationDate = this.creationDate + DB_Variables.getAccessExpiration();
+		this.refresh_expirationDate = this.creationDate + DB_Variables.getRefreshExpiration();
 	}
 }

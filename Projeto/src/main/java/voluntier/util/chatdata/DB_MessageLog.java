@@ -21,6 +21,7 @@ import voluntier.exceptions.InexistentMessageIdException;
 import voluntier.exceptions.InexistentRatingException;
 import voluntier.exceptions.MaximumSizeReachedException;
 import voluntier.util.DB_Util;
+import voluntier.util.DB_Variables;
 import voluntier.util.eventdata.MessageData;
 import voluntier.util.eventdata.MessageDataReturn;
 import voluntier.util.rating.DB_Rating;
@@ -31,8 +32,6 @@ public class DB_MessageLog {
 	public static final String CHAT_ID = "chat_id";
 	public static final String ID = "id";
 	public static final String START_INDEX = "start_index";
-
-	public static final int MAX_LOG_SIZE = 1000;
 
 	private static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	private static KeyFactory logFactory = datastore.newKeyFactory().setKind("MessageLog");
@@ -116,7 +115,7 @@ public class DB_MessageLog {
 			throws InexistentLogIdException, MaximumSizeReachedException {
 		Entity log = getLog(log_id);
 		
-		if (Entity.calculateSerializedSize(log) + message.length() > MAX_LOG_SIZE)
+		if (Entity.calculateSerializedSize(log) + message.length() > DB_Variables.getMaxMessageLogSize())
 			throw new MaximumSizeReachedException();
 
 		return addMessage(log, email, username, message);

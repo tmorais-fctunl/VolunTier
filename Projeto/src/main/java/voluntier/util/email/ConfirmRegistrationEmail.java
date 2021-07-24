@@ -10,7 +10,16 @@ public class ConfirmRegistrationEmail {
 		
 		String url = "https://voluntier-317915.ew.r.appspot.com/rest/register/" + confirmation.code + "/confirm";
 		String subject = "Please confirm your email";
-		String content = "<a href=\"" + url + "\">" + url + "</a>";
+		String body = "Please click here to confirm your email";
+		//String content = "<a href=\"" + url + "\">" + url + "</a>";
+		String content = "<div style=\"outline:none;" +
+			    " border-style: solid;" + 
+			    " border-color: white;" +
+			    " border-width: 1px;" +
+			    " border-radius: 12px;" +
+			    " background-color: lightgray\">" +
+			    " <a href=\"" + url +"\" style=\"text-align: center; font-size:140%;\">" + body + "</a>" +
+			    " </div>";
 		
 		GmailUtil.sendEmail(From, data.email, subject, content);
 		return confirmation;

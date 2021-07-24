@@ -37,6 +37,7 @@ import voluntier.exceptions.InexistentUserException;
 import voluntier.exceptions.InvalidCursorException;
 import voluntier.exceptions.SomethingWrongException;
 import voluntier.util.DB_Util;
+import voluntier.util.DB_Variables;
 import voluntier.util.GeoHashUtil;
 import voluntier.util.GoogleStorageUtil;
 import voluntier.util.chatdata.DB_Chat;
@@ -90,8 +91,6 @@ public class DB_Event {
 	public static final int MAX_NAME_SIZE = 100;
 	public static final int MAX_DESCRIPTION_SIZE = 500;
 	public static final long DEFAULT_CAPACITY = 100;
-	
-	public static final int CURRENCY_PER_MINUTE = 60000;
 
 	public static final long MAX_PARTICIPANTS_RETURN = 5;
 	public static final long MAX_NUM_PICTURES = 10;
@@ -928,7 +927,7 @@ public class DB_Event {
 		Date presence_date = Timestamp.parseTimestamp(presence.start_date).toDate();
 		Date now = Timestamp.now().toDate();
 		
-		long diff = (now.getTime() - presence_date.getTime()) / CURRENCY_PER_MINUTE;
+		long diff = ((now.getTime() - presence_date.getTime()) / (1000 * 60)) * DB_Variables.getCurrencyPerMinute();
 		
 		int difficulty = getDifficulty(event);
 		
@@ -1028,5 +1027,4 @@ public class DB_Event {
 		Timestamp t = Timestamp.parseTimestamp(event.getString(START_DATE));
 		return Timestamp.now().compareTo(t) <= 0;
 	}
-
 }

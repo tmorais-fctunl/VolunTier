@@ -89,7 +89,7 @@ public class DB_Chat {
 	}
 
 	private static Entity addModerator(Key key, Entity chat, String email) throws AlreadyExistsException {
-		return util.addUniqueStringToList(chat, MLs, email);
+		return util.addUniqueStringToList(chat, MODS, email);
 	}
 
 	private static Entity removeModerator(Key key, Entity chat, String email) throws InexistentModeratorException {

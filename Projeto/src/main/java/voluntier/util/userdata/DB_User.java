@@ -24,6 +24,7 @@ import voluntier.exceptions.InexistentRouteException;
 import voluntier.exceptions.InexistentUserException;
 import voluntier.exceptions.NotEnoughCurrencyException;
 import voluntier.util.DB_Util;
+import voluntier.util.DB_Variables;
 import voluntier.util.JsonUtil;
 import voluntier.util.consumes.RegisterData;
 import voluntier.util.consumes.UpdateProfileData;
@@ -75,17 +76,13 @@ public class DB_User {
 	public static final String POSTAL_CODE_REGEX = "[0-9]{4}-[0-9]{3}";
 	public static final String MOBILE_REGEX = "([+][0-9]{2,3}\\s)?[2789][0-9]{8}";
 	public static final String USERNAME_REGEX = "[a-zA-Z][a-zA-Z0-9]*([.][a-zA-Z0-9]+|[a-zA-Z0-9]*)";
-	
-	public static final int MAX_EVENTS = 100;
-	public static final int MAX_ROUTES = 100;
-	public static final double INITIAL_CURRENCY = 50.0;
-	
+		
 	public static final String SEPARATOR = "|";
 	public static final int MILISSECONDS_IN_DAY = 86400000;
 
 	private static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	private static KeyFactory usersFactory = datastore.newKeyFactory().setKind("User");
-	
+
 	private static DB_Util util = new DB_Util(DB_User::defaultBuilder);
 	
 	private static void defaultBuilder(Entity user) {
@@ -175,6 +172,7 @@ public class DB_User {
 		String maxString = JsonUtil.json.toJson(obj);
 		
 		DB_Statistics.updateNumUsers(true);
+		double initial_currency = DB_Variables.getInitialCurrency();
 
 		return Entity.newBuilder(userKey)
 				.set(USERNAME, data.username)
@@ -196,8 +194,8 @@ public class DB_User {
 				.set(FACEBOOK, data.facebook)
 				.set(INSTAGRAM, data.instagram)
 				.set(TWITTER, data.twitter)
-				.set(TOTAL_CURRENCY, INITIAL_CURRENCY)
-				.set(CURRENT_CURRENCY, INITIAL_CURRENCY)
+				.set(TOTAL_CURRENCY, initial_currency)
+				.set(CURRENT_CURRENCY, initial_currency)
 				.set(N_EVENTS_PARTICIPATED, 0)
 				.set(MAX_EVENTS_PER_DAY, maxString)
 				.set(DONATIONS, empty_list)
@@ -916,7 +914,7 @@ public class DB_User {
 		/*List<String> events = getParticipatingEventIds(user);
 		if(!events.contains(event_id))*/
 		if (!DB_Util.existsInStringList(user, EVENTS_PARTICIPATING, event_id))
-			throw new InexistentEventException("There is no event with the given event ids");
+			throw new InexistentEventException("There is no event with the given event id");
 
 		/*ListValue.Builder events_list = ListValue.newBuilder();
 
@@ -1024,11 +1022,11 @@ public class DB_User {
 	}
 	
 	private static Entity routeCreationLimit (Entity user) throws CannotCreateMoreException {
-		return creationLimit (user, MAX_ROUTES_PER_DAY, MAX_ROUTES);
+		return creationLimit (user, MAX_ROUTES_PER_DAY, (int) DB_Variables.getMaxRoutesPerDay());
 	}
 	
 	private static Entity eventCreationLimit (Entity user) throws CannotCreateMoreException {
-		return creationLimit (user, MAX_EVENTS_PER_DAY, MAX_EVENTS);
+		return creationLimit (user, MAX_EVENTS_PER_DAY, (int) DB_Variables.getMaxRoutesPerDay());
 	}
 	
 	private static Entity creationLimit (Entity user, String property, int limit) throws CannotCreateMoreException {
@@ -1040,7 +1038,6 @@ public class DB_User {
 		String now_string = now + "";
 		
 		if (data.last_event_dates.size() < limit)
-			//return updateCreationEventLimit(user.getKey(), user, getNewLimitString(now_string, data));
 			return util.updateProperty(user, property, StringValue.of(getNewLimitString(now_string, data)));
 
 		String firstDate = data.last_event_dates.remove(0);
@@ -1055,7 +1052,6 @@ public class DB_User {
 	}
 	
 	private static String getNewLimitString (String now, MaxCreationData data) {
-
 		data.last_event_dates.add(now);
 		return JsonUtil.json.toJson( data );
 	}

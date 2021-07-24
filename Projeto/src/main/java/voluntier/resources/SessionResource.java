@@ -2,6 +2,7 @@ package voluntier.resources;
 
 import java.util.logging.Logger;
 
+import javax.mail.MessagingException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -64,8 +65,7 @@ public class SessionResource {
 	@Path("/login")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response doLogin(LoginData data) {
-
+	public Response doLogin(LoginData data) throws MessagingException {
 		if (!data.isValid())
 			return Response.status(Status.BAD_REQUEST).build();
 

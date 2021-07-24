@@ -1,9 +1,11 @@
 package voluntier.util.eventdata;
 
 import java.time.format.DateTimeParseException;
+import java.util.List;
 
 import com.google.cloud.Timestamp;
 
+import voluntier.util.DB_Variables;
 import voluntier.util.GeoHashUtil;
 import voluntier.util.consumes.event.CreateEventData;
 import voluntier.util.userdata.Profile;
@@ -132,9 +134,9 @@ public class EventData_Minimal {
 	public static boolean categoryValid (String category) {
 		if (category == null)
 			return false;
-		Category[] all = Category.values();
-		for (Category enum_category: all)
-			if (category.equals(enum_category.toString()))
+		List<String> categories = DB_Variables.getCategoriesList();
+		for (String c : categories)
+			if (category.equals(c))
 				return true;
 		return false;
 	}

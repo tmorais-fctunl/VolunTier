@@ -57,7 +57,6 @@ public class TokensResource {
 				.set(REFESH_EMAIL, authToken.email)
 				.set(REFRESH_CREATION, authToken.creationDate)
 				.build();
-
 		Key tokenKey = sessionFactory.newKey(authToken.accessToken);
 		Entity token = Entity.newBuilder(tokenKey)
 				.set(ACCESS_TOKEN, authToken.accessToken)
@@ -86,6 +85,7 @@ public class TokensResource {
 	}
 	
 	public static Entity checkIsValidAccess(Entity token, String email)  throws InvalidTokenException{
+		
 		if(token != null && token.getLong(ACCESS_EXPIRATION) > System.currentTimeMillis() 
 				&& token.getString(ACCESS_EMAIL).equals(email))
 			return token;
@@ -94,6 +94,7 @@ public class TokensResource {
 	}
 	
 	public static Entity checkIsValidAccess(String tokenString, String email) throws InvalidTokenException {
+		
 		Key tokenKey = sessionFactory.newKey(tokenString);
 		Entity token = datastore.get(tokenKey);
 		
