@@ -33,7 +33,7 @@ public class StatisticsReturn {
 		this.total_num_routes =	 (int)statistics.getLong(DB_Statistics.TOTAL_NUM_ROUTES);
 		this.total_num_causes =  (int)statistics.getLong(DB_Statistics.TOTAL_NUM_CAUSES);
 		this.num_participations_event = (int)statistics.getLong(DB_Statistics.NUM_PARTICIPATIONS_EVENT);
-		this.total_num_participations_event =	 (int)statistics.getLong(DB_Statistics.TOTAL_NUM_PARTICIPATIONS_EVENT);
+		this.total_num_participations_event = (int)statistics.getLong(DB_Statistics.TOTAL_NUM_PARTICIPATIONS_EVENT);
 		this.total_num_presences = (int)statistics.getLong(DB_Statistics.TOTAL_NUM_PRESENCES);
 		this.total_commments = (int)statistics.getLong(DB_Statistics.TOTAL_COMMENTS);
 		/*this.total_comments_events = (int)statistics.getLong(DB_Statistics.TOTAL_COMMENTS_EVENTS);

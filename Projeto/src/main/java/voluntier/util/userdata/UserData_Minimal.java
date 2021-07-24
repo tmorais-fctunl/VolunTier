@@ -34,6 +34,7 @@ public class UserData_Minimal {
 	List<String> events_created;
 	
 	public float currentCurrency;
+	public String role;
 
 	public UserData_Minimal() {
 	}
@@ -96,6 +97,7 @@ public class UserData_Minimal {
 		this.pc = user.getString(DB_User.POSTAL_CODE);
 		this.description = user.getString(DB_User.DESCRIPTION);
 		this.currentCurrency = (float) user.getDouble(DB_User.CURRENT_CURRENCY);
+		this.role = user.getString(DB_User.ROLE);
 
 		this.website = user.getString(DB_User.WEBSITE);
 		this.facebook = user.getString(DB_User.FACEBOOK);
