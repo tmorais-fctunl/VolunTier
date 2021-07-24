@@ -208,8 +208,11 @@ public class DB_Event {
 				.set(PRESENCES, event.getList(PRESENCES))
 				.set(GEOHASH, data.getGeohash(event.getString(GEOHASH)))
 				.set(PICTURES, event.getList(PICTURES))
-				.set(REQUESTS, event.getList(REQUESTS))
-				.set(N_REQUESTS, event.getLong(N_REQUESTS)).build();
+				.set(REQUESTS, (data.profile != null && data.profile.equals(Profile.PUBLIC.toString())) ? 
+						DB_Util.emptyList().build() : ListValue.of(event.getList(REQUESTS)))
+				.set(N_REQUESTS, (data.profile != null && data.profile.equals(Profile.PUBLIC.toString())) ? 
+						0 : event.getLong(N_REQUESTS))
+				.build();
 	}
 
 	public static Entity updateState(String event_id, String email, String state)

@@ -90,7 +90,7 @@ public class TokensResource {
 				&& token.getString(ACCESS_EMAIL).equals(email))
 			return token;
 		
-		throw new InvalidTokenException("Token expired or invalid: " + email);		
+		throw new InvalidTokenException("15: Token expired or invalid: " + email);		
 	}
 	
 	public static Entity checkIsValidAccess(String tokenString, String email) throws InvalidTokenException {
