@@ -1,0 +1,106 @@
+<!-- Fazer algo que permita fechar este form e carregar o feed normal -->
+<style>
+  ::placeholder {
+    font-size: 80%;
+  }
+</style>
+<script>
+  $(function () {
+    $('span#disableCreate').bind('click', function (e) {
+      // "this" points to the <span> element
+      // "e" points to the event object
+      this.parentElement.style.display='none';
+
+      map.setOptions({ draggableCursor:''});
+     
+      document.getElementById("sidebar_content_event_list").style.display = '';
+      document.getElementById("sidebar_content_route_list").style.display = '';
+      document.getElementById("EventsTitle").style.display = '';
+      document.getElementById("RoutesTitle").style.display = '';
+
+      $("#createRouteForm #events a").each(function () {
+          let marker = markers.find(el => el.event_id == $(this).html()).marker;
+                       
+          marker.setLabel(null);
+      });
+        labelIndex = 0;
+        markers.forEach(function (el) {
+            if (el.visibility == "PRIVATE")
+                el.marker.setVisible(true);
+        });
+    });
+  });
+
+    function updateRouteFormEvents() {
+        labelIndex = 0;
+        $("#createRouteForm #events a").each(function () {
+            let marker = markers.find(el => el.event_id == $(this).html()).marker;
+            marker.setLabel(labels[labelIndex % labels.length]);
+            labelIndex++;
+        });
+
+    }
+</script>
+
+<script>
+    function updateRouteFormInputs() {
+        $(document).ready(function () {
+            $('body').on("keyup change DOMSubtreeModified", '#createRouteForm input, textarea, #events', function () {
+                if (allFormInputsValid()) $('#submitFormBtn').removeAttr('disabled');
+                else $('#submitFormBtn').prop("disabled", true);
+            });
+        });
+    }
+
+    function allFormInputsValid() {
+        var createEventErrMsg = document.getElementById("createEventErrMsg");
+        createEventErrMsg.style.display = "block";
+        if ($("#routeName").val().length > 100) {
+            createEventErrMsg.innerHTML = "Route name must not excede 100 characters";
+            return false;
+        }
+        if ($("#routeName").val().length == 0) {
+            createEventErrMsg.innerHTML = "Route Name must not be empty";
+            return false;
+        }
+        console.log($("#routeDesc").val());
+        if ($("#routeDesc").val().length > 500) {
+            createEventErrMsg.innerHTML = "Route description must not excede 500 characters";
+            return false;
+        }
+        if ($("#routeDesc").val().length == 0) {
+            createEventErrMsg.innerHTML = "Route description must not be empty";
+            return false;
+        }
+        if ($("#createRouteForm #events a").length == 0) {
+            createEventErrMsg.innerHTML = "Route events must not be empty";
+            return false;
+        }
+        //Everything ok
+        createEventErrMsg.style.display = "none";
+        return true;
+    }
+
+</script>
+
+
+<div id="createRouteForm" style="background-color: #FDFDFD">
+    <span id="disableCreate" class="topright">&times</span>
+    <label style="width: 100%; font-size: 110%; text-align: center">Route name</label>
+    <br>
+    <input type="text" style="max-width:100%; min-width:100%" id="routeName" class="createEventFormInput" name="Route Name" placeholder="Something neat">
+    <br>
+    <br>
+    <label style="width: 100%; font-size: 110%; text-align: center">Description</label>
+    <br>
+    <textarea onkeyup="countChar(this, 'charNum')" style="vertical-align: top; max-width:100%; min-width:100%" id="routeDesc" name="Route Description" placeholder="Tell us all about it" rows="4" cols="50" class="createEventFormInput"></textarea>
+    <div id="charNum" style="margin-left: 95%; font-size: 80%">500</div>
+    <br>
+    <label style="width: 100%; font-size: 110%; text-align: center">Route Events (Maximum 9 - Click the event markers to route them together)</label>
+    <br>
+    <div readonly class="createEventFormInput" id="events"></div>
+    <br>
+    <br />
+    <button id="submitFormBtn" style="width: 100%; font-size: 110%; text-align: center" type="button" class="btn btn-primary" onclick="return createRouteRequest()" disabled="disabled">Submit</button>
+    <p id="createEventErrMsg" style="display: none; color: red; font-size: 90%; width: 100%; text-align: center"></p>
+</div>

@@ -14,6 +14,8 @@ function loadUser(user_id) {
         if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200)) {
             alert("Could not load user info, message: " + xmlhttp.status);
             $("body").css("cursor", "default");
+            if (tryAuthentication())
+                loadUser(user_id);
             return false;
         }
         //Success:
@@ -93,6 +95,11 @@ function requestOtherUserPicture(username) {
     xmlhttp.onload = function (oEvent) {
         if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200)) {
             console.log("Couldn't load user image, message: " + xmlhttp.status);
+            var userpic = document.getElementById("user_userImg");
+            userpic.src = "";
+
+            //if (tryAuthentication())
+               // requestOtherUserPicture(username);
             return false;
         }
         //Other wise...
@@ -153,12 +160,13 @@ function getUserParticipatingEvents(username, callback) {
 function loadUserEvents(username) {
     getUserEvents(username, function (obj) {
         let event_section = $("#user_events");
+        event_section.empty();
         let events = obj.events;
         var event, content;
         for (i = 0; i < events.length; i++) {
             event = events[i];
             content = '<div class="row">' +
-                '<a href="" id="user_event_' + event + '" onclick="return loadEvent(\'' + event + '\', false)">' + event + '</a></div>';
+                '<a href="" id="user_event_' + event.event_id + '" onclick="return loadEvent(\'' + event.event_id + '\', false)">' + event.name + '</a></div>';
             event_section.append(content);
         }
 
@@ -169,12 +177,13 @@ function loadUserEvents(username) {
 function loadUserParticipatingEvents(username) {
     getUserParticipatingEvents(username, function (obj) {
         let event_section = $("#user_participating_events");
+        event_section.empty();
         let events = obj.events;
         var event, content;
         for (i = 0; i < events.length; i++) {
             event = events[i];
             content = '<div class="row">' +
-                '<a href="" id="user_participating_event_' + event + '" onclick="return loadEvent(\'' + event + '\', false)">' + event + '</a></div>';
+                '<a href="" id="user_participating_event_' + event.event_id + '" onclick="return loadEvent(\'' + event.event_id + '\', false)">' + event.name + '</a></div>';
             event_section.append(content);
         }
 

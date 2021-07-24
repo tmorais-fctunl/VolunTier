@@ -27,7 +27,7 @@
         <label class="form-check-label" for="rememberMe">Remember me</label>
         <p> <!--Make sure the check mark makes the password visible--> <input type="checkbox" class="form-check-input" id="exampleCheck1" onclick="showPassword()"/> <label class="form-check-label" for="exampleCheck1">Show Password</label> </p>
     </div>
-    <button type="submit" id="loginButton" class="btn btn-block btn-primary font-weight-bold pb-2 pl-3 pr-3 pt-2" onclick="return SignIn()" disabled="disabled">Sign In</button>
+    <button id="loginButton" class="btn btn-block btn-primary font-weight-bold pb-2 pl-3 pr-3 pt-2" onclick="return SignIn()" disabled="disabled">Sign In</button>
     <!--Remember to do the forgot password form and password change page for the server to send-->
     <p style="text-align: center; margin-top: 10px;"><a href="/pages/forgotpwd.html" id="forgotpwdLink" data-target="forgotpw-box">Forgot password?</a></p>
     <p style="text-align: center; color: #4f859c;" id="result"></p>

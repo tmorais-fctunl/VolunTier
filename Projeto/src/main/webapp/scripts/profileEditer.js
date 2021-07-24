@@ -13,7 +13,7 @@ var phonesRegex = new RegExp("([+][0-9]{2,3}\s)?[2789][0-9]{8}");
 //Check validity of the attributes:
 function updateEditInputs() {
     $(document).ready(function () {
-        $('body').on("keyup", '.info', function () {
+        $('#profileContainer').on("keyup", '.info', function () {
             console.log("I hit it");
             if (allInputsValid()) $('#saveBtn').removeAttr('disabled');
             else $('#saveBtn').prop("disabled", true);
@@ -55,10 +55,16 @@ function allInputsValid() {
 //Image upload scripts begining:
 //Script to redirect button click to file explorer input
 function uploadImg() {
-    $('#imgupload').trigger('click');
+    $('#profileContainer #imgupload').trigger('click');
 }
 //Script to load the photo to the user image
 var loadFile = function (event) { 
+    if (event.target.files[0].size > 5000000) {
+        alert("File is too big! 5MB Maximum");
+        this.value = "";
+        return false;
+    };
+
     var image = document.getElementById('userImg');
     imgfile = event.target.files[0];
     imgext = event.target.value.split('.')[1];

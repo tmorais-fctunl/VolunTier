@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="../css/blocks.css">
     <link rel="stylesheet" href="../blocks.css">
+    <link rel="stylesheet" href="../5-star-rating-with-css-and-html/src/style.css">
     <!-- Custom styles for this template -->
     <link href="../css/style.css" rel="stylesheet">
     <link rel="stylesheet" href="../css/lock.css">
@@ -39,12 +40,17 @@
         <a style="font-family: 'Alice', serif; font-size: 15px; color: #000000; letter-spacing: 1px; text-align: center;" id="user_tag"></a>
         <!--Ver se o user tem imagem, se nao tiver mete com display none-->
         <img id="user64img" src="" class="rounded-circle" width="30" height="30" style="margin-left: 10px">
+        <span id="user_currency" style="display: inline-block; margin-left:10px; color:yellow; text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black; font-size:110%"><i style="        color: green;
+        text-shadow: none;
+        margin-right: 5px
+" class="fa fa-money" aria-hidden="true"> </i></span>
     </nav>
     <div class="tab">
         <button class="tablinks" onclick="openTab(event, 'Map')" id="defaultOpen">Map</button>
         <button class="tablinks" onclick="openTab(event, 'Profile')">Profile</button>
         <button class="tablinks" onclick="openTab(event, 'Leaderboard')">Leaderboard</button>
-        <button class="tablinks" onclick="openTab(event, 'Store')">Store</button>
+        <button class="tablinks" onclick="openTab(event, 'Donations')">Donations</button>
+        <button class="tablinks" onclick="openTab(event, 'Notifications')">Requests</button>
     </div>
 
     <!-- Tab contents-->
@@ -52,11 +58,18 @@
         <!--  <span onclick="this.parentElement.style.display='none'" class="topright">&times</span>-->
         <main class="app">
             <aside class="sidebar" style="background-color: white;">
+                <h3 style="text-align:center" id="EventsTitle">Events</h3>
+                <div id="sidebar_content_event_list" style="max-height:70%; overflow:auto; border: 1px solid lightgray; box-shadow: 1px gray">
 
-                <div id="sidebar_content_event_list">
-                    <h3 style="text-align:center">Events</h3>
                     <!--<button class="btn btn-info" style="margin: auto; width:100%" id="loadEventWithIDBtn" onclick="return loadEventWithID()">Load Event</button>-->
                 </div>
+                <br>
+                <h3 style="text-align:center" id="RoutesTitle">Routes</h3>
+                <div id="sidebar_content_route_list" style="max-height:70%; overflow:auto; border: 1px solid lightgray; box-shadow: 1px gray">
+
+                    <!--<button class="btn btn-info" style="margin: auto; width:100%" id="loadEventWithIDBtn" onclick="return loadEventWithID()">Load Event</button>-->
+                </div>
+
 
                 <div id="sidebar_content">
                     <!--For event form display-->
@@ -78,13 +91,56 @@
     </div>
     <div id="Leaderboard" class="tabcontent">
         <!--  <span onclick="this.parentElement.style.display='none'" class="topright">&times</span>-->
-        <h3>Leaderboard</h3>
-        <p>The leaderboard is empty at the moment because our developer hasn't implemented it.</p>
+        <h3 style="text-align:center">Leaderboard</h3>
+        <!--<p>The leaderboard is empty at the moment because our developer hasn't implemented it.</p>-->
+        <div class="container" id="leaderboard_container">
+            <div class="row">
+                <div class="col-sm-6">
+                    <h4 style="text-align:center">Currency</h4>
+                    <div id="leaderboard_currency" class="row">
+                        <div id="self" class="col-sm-6 comments">
+                            <h5 style="text-align:center">Self</h5>
+
+                        </div>
+                        <div id="global" class="col-sm-6 comments" style="max-height:800px">
+                            <h5 style="text-align:center">Global</h5>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <h4 style="text-align:center">Participations</h4>
+                    <div id="leaderboard_participations" class="row">
+                        <div id="self" class="col-sm-6 comments">
+                            <h5 style="text-align:center">Self</h5>
+
+
+                        </div>
+                        <div id="global" class="col-sm-6 comments" style="max-height:800px">
+                            <h5 style="text-align:center">Global</h5>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div id="Store" class="tabcontent">
+    <div id="Donations" class="tabcontent">
         <!--  <span onclick="this.parentElement.style.display='none'" class="topright">&times</span>-->
-        <h3>Store</h3>
-        <p>There's nothing here to buy, because of, yet again, our developer. (Our higher-ups are really pissed about all the missed profit)</p>
+        <h3 style="text-align:center">Donations</h3>
+        <div class="container" id="donations_container">
+
+        </div>
+
+    </div>
+    <div id="Notifications" class="tabcontent">
+        <!--  <span onclick="this.parentElement.style.display='none'" class="topright">&times</span>-->
+        <h3 style="text-align:center">Requests</h3>
+        <br>
+        <div class="container comments" id="notifications_container" style="max-height: 800px">
+
+        </div>
     </div>
     <div id="Event" class="tabcontent">
         <div>
@@ -96,12 +152,15 @@
                             <div class="card">
                                 <div class="card-body">
                                     <div class="d-flex flex-column align-items-center text-center">
-                                        <img id="EventImage" src="https://bootdey.com/img/Content/avatar/avatar7.png" width="200" height="200">
+                                        <img id="event_image_0" src="https://bootdey.com/img/Content/avatar/avatar7.png" class="rounded-circle" width="200" height="200">
+                                        <input type="file" id="imgupload0" style="display:none" accept="image/png, image/jpeg" onchange="loadFileEvent(event, '0')">
+                                        <label for='imgupload'> <button onclick="return uploadEventImg('0')" class="btn btn-info" id="OpenImgUpload0" style="display:none">Image Upload</button></label>
                                         <div class="mt-3">
 
                                             <p id="event_id" style="display:none"></p>
-                                            <h4 id="event_name">Event Name</h4>
-
+                                            <h4 class="editable info" id="event_name" name="event_name">Event Name</h4>
+                                            <p style="display:none" class="info" name="category" id="event_categoryRaw"></p>
+                                            <div id="event_category_div"><p class="text-secondary mb-1" id="event_category" name="category"></p></div>
                                             <p class="text-secondary mb-1 container_lock info" id="event_profile" name="profile">Public</p>
                                             <!--Should be Join when its public, and ask to join when its private-->
                                             <button style="margin:auto;" id="joinBtn" class="btn btn-primary">Join/Ask to join</button>
@@ -124,58 +183,61 @@
                                         <section class="map-area " id="mapPreview" style="margin-top:10px"></section>
                                     </li>
                                     <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap" style="text-align:center">
-                                        <h6 id="event_created" style="width:100%" class="mb-0">Start-Time - End-Time</h6>
-                                        <h6 id="event_start" style="width:100%" class="mb-0">Start-Time - End-Time</h6>
-                                        <h6 id="event_end" style="width:100%" class="mb-0">Start-Time - End-Time</h6>
+                                        <h6 id="event_created" style="width:100%" class="mb-0"></h6>
+                                        <p style="display:none" name="start_date" class="info" id="event_start_raw"></p>
+                                        <div id="event_start_div" style="width:100%"><h6 id="event_start" style="width:100%" class="mb-0" name="start_date"></h6></div>
+                                        <p style="display:none" name="end_date" class="info" id="event_end_raw"></p>
+                                        <div id="event_end_div" style="width:100%"><h6 id="event_end" style="width:100%" class="mb-0" name="end_date"></h6></div>
+
                                     </li>
                                     <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap" style="text-align:center">
                                         <h6 style="width:100%" class="mb-0">Contact</h6>
-                                        <h6 id="event_contact" style="width:100%" class="mb-0"></h6>
+                                        <h6 id="event_contact" style="width:100%" class="mb-0 editable info" name="contact"></h6>
                                     </li>
                                     <li class="list-group-item justify-content-between align-items-center flex-wrap">
                                         <div class="container">
                                             <div class="row">
-                                                <div class="col">
+                                                <div class="col-sm-3">
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-globe mr-2 icon-inline">
                                                         <circle cx="12" cy="12" r="10"></circle>
                                                         <line x1="2" y1="12" x2="22" y2="12"></line>
                                                         <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
                                                     </svg>
                                                 </div>
-                                                <div class="col" style="text-align: center">
-                                                    <a href="" target="_blank" style="margin-left: 5%; margin-right: 5%; min-width: 80%;" class="text-secondary editable info url" id="event_website" name="website" data-text="Your website link">Website</a>
+                                                <div class="col-sm-9" style="text-align: center">
+                                                    <a href="" target="_blank" style="width: 100%;" class="text-secondary editable info url" id="event_website" name="website" data-text="Your website link">Website</a>
                                                 </div>
                                             </div>
                                             <div class="row" style="margin-top: 4px">
-                                                <div class="col">
+                                                <div class="col-sm-3">
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-twitter mr-2 icon-inline text-info">
                                                         <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
                                                     </svg>
                                                 </div>
-                                                <div class="col" style="text-align: center">
-                                                    <a href="" target="_blank" style="margin-left: 5%; min-width: 100px; display: inline-block;" class="text-secondary editable info url" id="event_twitter" name="twitter" data-text="Your twitter link">Twitter</a>
+                                                <div class="col-sm-9" style="text-align: center">
+                                                    <a href="" target="_blank" sstyle="width: 100%;" class="text-secondary editable info url" id="event_twitter" name="twitter" data-text="Your twitter link">Twitter</a>
                                                 </div>
                                             </div>
                                             <div class="row" style="margin-top: 4px">
-                                                <div class="col">
+                                                <div class="col-sm-3">
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-instagram mr-2 icon-inline text-danger">
                                                         <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
                                                         <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
                                                         <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
                                                     </svg>
                                                 </div>
-                                                <div class="col" style="text-align: center">
-                                                    <a href="" target="_blank" style="margin-left: 5%; min-width: 100px;" class="text-secondary editable info url" id="event_instagram" name="instagram" data-text="Your instagram link">Insta</a>
+                                                <div class="col-sm-9" style="text-align: center">
+                                                    <a href="" target="_blank" style="width: 100%;" class="text-secondary editable info url" id="event_instagram" name="instagram" data-text="Your instagram link">Insta</a>
                                                 </div>
                                             </div>
                                             <div class="row" style="margin-top: 4px">
-                                                <div class="col">
+                                                <div class="col-sm-3">
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-facebook mr-2 icon-inline text-primary">
                                                         <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
                                                     </svg>
                                                 </div>
-                                                <div class="col" style="text-align: center">
-                                                    <a href="" target="_blank" style="margin-left: 5%; min-width: 100px;" class="text-secondary editable info url" id="event_facebook" name="facebook" data-text="Your facebook link">Face</a>
+                                                <div class="col-sm-9" style="text-align: center">
+                                                    <a href="" target="_blank" style="width: 100%;" class="text-secondary editable info url" id="event_facebook" name="facebook" data-text="Your facebook link">Face</a>
                                                 </div>
                                             </div>
                                         </div>
@@ -191,11 +253,15 @@
                                         <h6 class="mb-0" style="width:100%; font-size: 120%">Event Description</h6>
 
                                         <!--Description goes here-->
-                                        <p style="margin-top: 10px; margin-bottom: 1px; width: 100%" id="event_description"></p>
+                                        <p style="margin-top: 10px; margin-bottom: 1px; width: 100%" id="event_description" class="editable info" name="description"></p>
                                     </div>
                                     <hr>
                                     <div class="row" style="text-align:center">
                                         <!--What would we have here?-->
+                                        <!--Category-->
+                                        <h6 class="mb-0" style="width:100%; font-size: 120%">Event Dificulty</h6>
+                                        <div id="event_dificulty_div" style="text-align:center; width:100%"><h6 name="difficulty" id="event_dificulty" class="mb-0 info" style="-webkit-text-stroke-width: 1px; -webkit-text-stroke-color: black; width: 100%; font-size: 150%"></h6></div>
+
                                     </div>
                                     <hr>
                                     <div class="row" style="text-align:center">
@@ -234,29 +300,107 @@
 
                                         </div>
                                         <!---- <div style="margin:auto"> <!--Talvez mude isto para um scroll...
-            <button onclick="roamComments(false)" class="btn btn-secondary" style="display: inline-flex; align-items: center; justify-content: center; height:8px; padding-bottom:11%" id="events_previousBtn"><span><i style="font-size: 0.7em; vertical-align:auto" class="fa fa-caret-left" aria-hidden="true"></i></span></button>
-            <button onclick="roamComments(true)" class="btn btn-secondary" style="display: inline-flex; align-items: center; justify-content: center; height:8px; padding-bottom:11%" id="events_nextBtn"><span><i style="font-size: 0.7em; vertical-align:auto" class="fa fa-caret-right" aria-hidden="true"></i></span></button>
-        </div> -->
+                                            <button onclick="roamComments(false)" class="btn btn-secondary" style="display: inline-flex; align-items: center; justify-content: center; height:8px; padding-bottom:11%" id="events_previousBtn"><span><i style="font-size: 0.7em; vertical-align:auto" class="fa fa-caret-left" aria-hidden="true"></i></span></button>
+                                            <button onclick="roamComments(true)" class="btn btn-secondary" style="display: inline-flex; align-items: center; justify-content: center; height:8px; padding-bottom:11%" id="events_nextBtn"><span><i style="font-size: 0.7em; vertical-align:auto" class="fa fa-caret-right" aria-hidden="true"></i></span></button>
+                                        </div> -->
                                         <!--Lets have this row for comments or something. Maybe later add another row for photos idk-->
                                         <!---- <ul>
-            <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap" style="text-align:center">
-                <p style="width:100%; font-size:90%; color: darkgray">Wow really cool stuff mate</p>
-            </li>
-            <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap" style="text-align:center">
-                <p style="width:100%; font-size:90%; color: darkgray">This will be all over the news!</p>
-            </li>
-            <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap" style="text-align:center">
-                <p style="width:100%; font-size:90%; color: darkgray">Really like the idea!</p>
-            </li>
-        </ul>-->
+                                            <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap" style="text-align:center">
+                                                <p style="width:100%; font-size:90%; color: darkgray">Wow really cool stuff mate</p>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap" style="text-align:center">
+                                                <p style="width:100%; font-size:90%; color: darkgray">This will be all over the news!</p>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap" style="text-align:center">
+                                                <p style="width:100%; font-size:90%; color: darkgray">Really like the idea!</p>
+                                            </li>
+                                        </ul>-->
 
 
                                     </div>
+                                    <hr>
 
-                                    <button id="editEventBtn" onclick="editEvent()" style="margin:auto; width:100%; display: none" class="btn btn-primary">Edit Event</button>
-                                    <button id="saveEventBtn" onclick="saveEvent()" style="margin:auto; width:100%; display: none" class="btn btn-primary">Save</button>
+                                    <!-- Container for the image gallery -->
+                                    <div class="GaleryContainer">
 
+                                        <!-- Full-width images with number text -->
+                                        <div class="mySlides">
+                                            <div class="numbertext">1 / 6</div>
+                                            <img id="event_image_1" src="https://bootdey.com/img/Content/avatar/avatar7.png" style="display:block; height:500px;width:100%; margin-left: auto; margin-right: auto;">
+                                        </div>
+
+                                        <div class="mySlides">
+                                            <div class="numbertext">2 / 6</div>
+                                            <img id="event_image_2" src="https://bootdey.com/img/Content/avatar/avatar7.png" style="display:block; height:500px;width:100%; margin-left: auto; margin-right: auto;">
+                                        </div>
+
+                                        <div class="mySlides">
+                                            <div class="numbertext">3 / 6</div>
+                                            <img id="event_image_3" src="https://bootdey.com/img/Content/avatar/avatar7.png" style="display:block; height:500px;width:100%; margin-left: auto; margin-right: auto;">
+                                        </div>
+
+                                        <div class="mySlides">
+                                            <div class="numbertext">4 / 6</div>
+                                            <img id="event_image_4" src="https://bootdey.com/img/Content/avatar/avatar7.png" style="display:block; height:500px;width:100%; margin-left: auto; margin-right: auto;">
+                                        </div>
+
+                                        <div class="mySlides">
+                                            <div class="numbertext">5 / 6</div>
+                                            <img id="event_image_5" src="https://bootdey.com/img/Content/avatar/avatar7.png" style="display:block; height:500px;width:100%; margin-left: auto; margin-right: auto;">
+                                        </div>
+                                        <div class="mySlides">
+                                            <div class="numbertext">6 / 6</div>
+                                            <img id="event_image_6" src="https://bootdey.com/img/Content/avatar/avatar7.png" style="display:block; height:500px; width:100%; margin-left: auto; margin-right: auto;">
+                                        </div>
+                                        <!-- Next and previous buttons -->
+                                        <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
+                                        <a class="next" onclick="plusSlides(1)">&#10095;</a>
+
+                                        <!-- Image text -->
+                                        <div class="caption-container">
+                                            <p id="caption"></p>
+                                        </div>
+
+                                        <!-- Thumbnail images -->
+                                        <div class="row">
+                                            <div class="column">
+                                                <img id="event_image_1_preview" class="demo cursor" src="https://bootdey.com/img/Content/avatar/avatar7.png" style="width:100%; height:80px" onclick="currentSlide(1)" alt="Event Image 1">
+                                                <input type="file" id="imgupload1" style="display:none" accept="image/png, image/jpeg" onchange="loadFileEvent(event, '1')">
+                                                <label for='imgupload1'> <button onclick="return uploadEventImg('1')" class="btn btn-info" id="OpenImgUpload1" style="display:none">Image Upload</button></label>
+                                            </div>
+                                            <div class="column">
+                                                <img id="event_image_2_preview" class="demo cursor" src="https://bootdey.com/img/Content/avatar/avatar7.png" style="width:100%; height:80px" " onclick="currentSlide(2)" alt="Event Image 2">
+                                                <input type="file" id="imgupload2" style="display:none" accept="image/png, image/jpeg" onchange="loadFileEvent(event, '2')">
+                                                <label for='imgupload2'> <button onclick="return uploadEventImg('2')" class="btn btn-info" id="OpenImgUpload2" style="display:none">Image Upload</button></label>
+                                            </div>
+                                            <div class="column">
+                                                <img id="event_image_3_preview" class="demo cursor" src="https://bootdey.com/img/Content/avatar/avatar7.png" style="width:100%; height:80px" " onclick="currentSlide(3)" alt="Event Image 3">
+                                                <input type="file" id="imgupload3" style="display:none" accept="image/png, image/jpeg" onchange="loadFileEvent(event, '3')">
+                                                <label for='imgupload3'> <button onclick="return uploadEventImg('3')" class="btn btn-info" id="OpenImgUpload3" style="display:none">Image Upload</button></label>
+                                            </div>
+                                            <div class="column">
+                                                <img id="event_image_4_preview" class="demo cursor" src="https://bootdey.com/img/Content/avatar/avatar7.png" style="width:100%; height:80px" " onclick="currentSlide(4)" alt="Event Image 4">
+                                                <input type="file" id="imgupload4" style="display:none" accept="image/png, image/jpeg" onchange="loadFileEvent(event, '4')">
+                                                <label for='imgupload4'> <button onclick="return uploadEventImg('4')" class="btn btn-info" id="OpenImgUpload4" style="display:none">Image Upload</button></label>
+                                            </div>
+                                            <div class="column">
+                                                <img id="event_image_5_preview" class="demo cursor" src="https://bootdey.com/img/Content/avatar/avatar7.png" style="width:100%; height:80px" " onclick="currentSlide(5)" alt="Event Image 5">
+                                                <input type="file" id="imgupload5" style="display:none" accept="image/png, image/jpeg" onchange="loadFileEvent(event, '5')">
+                                                <label for='imgupload5'> <button onclick="return uploadEventImg('5')" class="btn btn-info" id="OpenImgUpload5" style="display:none">Image Upload</button></label>
+                                            </div>
+                                            <div class="column">
+                                                <img id="event_image_6_preview" class="demo cursor" src="https://bootdey.com/img/Content/avatar/avatar7.png" style="width:100%; height:80px" " onclick="currentSlide(6)" alt="Event Image 6">
+                                                <input type="file" id="imgupload6" style="display:none" accept="image/png, image/jpeg" onchange="loadFileEvent(event, '6')">
+                                                <label for='imgupload6'> <button onclick="return uploadEventImg('6')" class="btn btn-info" id="OpenImgUpload6" style="display:none">Image Upload</button></label>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
+                                <hr>
+                                <button id="editEventBtn" onclick="editEvent()" style="margin:auto; width:100%; display: none" class="btn btn-primary">Edit Event</button>
+                                <button id="saveEventBtn" onclick="saveEvent()" style="margin:auto; width:100%; display: none" class="btn btn-primary">Save</button>
+
+
                             </div>
                         </div>
                     </div>
@@ -399,6 +543,134 @@
 
 
     </div>
+    <div id="Route" class="tabcontent">
+        <div>
+            <span onclick="closeRouteTab()" class="topright">&times</span>
+            <div id="routeContainer" class="container">
+                <div class="main-body">
+                    <div class="row gutters-sm">
+                        <div class="col-md-4 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex flex-column align-items-center text-center">
+                                        <img id="RouteImage" src="https://bootdey.com/img/Content/avatar/avatar7.png" width="200" height="200">
+                                        <div class="mt-3">
+
+                                            <p id="route_id" style="display:none"></p>
+                                            <h4 class="editable info" id="route_name" name="route_name">Route Name</h4>
+                                            <button style="margin:auto;" id="joinBtn" class="btn btn-primary">Join/Ask to join</button>
+                                            <br>
+                                            <i style="margin-top:10px" class="fa fa-user-o"></i><p id="route_joined_capacity" style="display:inline-block; margin-left:10px">0/10</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card mt-3">
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap" style="text-align:center">
+                                        <!-- METE AQUI ONCLICK DE FORMA A CARREGAR UMA PAGINA DE PERFIL DE USER-->
+                                        <b style="width:100%"><h6 class="mb-0" style="width:100%; font-size:110%">Creator: </h6><a id="route_creator" href=""></a></b>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap" style="text-align:center">
+                                        <!--Map Preview Zone-->
+                                        <section class="map-area " id="mapRoutePreview" style="margin-top:10px"></section>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap" style="text-align:center">
+                                        <h6 id="route_created" style="width:100%" class="mb-0"></h6>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <div class="row" style="text-align:center">
+                                        <!-- Maybe the "route Description" header should be centered-->
+                                        <h6 class="mb-0" style="width:100%; font-size: 120%">Route Description</h6>
+
+                                        <!--Description goes here-->
+                                        <p style="margin-top: 10px; margin-bottom: 1px; width: 100%" id="route_description" class="editable info" name="description"></p>
+                                    </div>
+                                    <hr>
+                                    <div class="row" style="text-align:center">
+                                        <!--What would we have here?-->
+                                        <!--Category-->
+                                        <h6 class="mb-0" style="width:100%; font-size: 120%">Route rating</h6>
+                                        <div id="route_rating_div" style="text-align:center; width:100%">
+                                            <h6 name="rating" id="route_rating" class="mb-0 info" style="-webkit-text-stroke-width: 1px; -webkit-text-stroke-color: black; width: 100%; font-size: 150%"></h6>
+                                        </div>
+                                        <br>
+                                        <br>
+                                        <br>
+                                        <h6 class="mb-0" style="width:100%; font-size: 120%">Your rating</h6>
+
+                                        <div class="rate" style="margin:0 auto">
+                                            <input type="radio" id="star5" name="rate" value="5.0" />
+                                            <label for="star5" title="text">5 stars</label>
+                                            <input type="radio" id="star4" name="rate" value="4.0" />
+                                            <label for="star4" title="text">4 stars</label>
+                                            <input type="radio" id="star3" name="rate" value="3.0" />
+                                            <label for="star3" title="text">3 stars</label>
+                                            <input type="radio" id="star2" name="rate" value="2.0" />
+                                            <label for="star2" title="text">2 stars</label>
+                                            <input type="radio" id="star1" name="rate" value="1.0" />
+                                            <label for="star1" title="text">1 star</label>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div class="row" style="text-align:center">
+                                        <!--What would we have here?-->
+                                    </div>
+                                    <hr>
+                                    <div class="row" style="text-align:center">
+                                        <!--Having the number of participants is cool along with the users-->
+                                        <h6 class="mb-0" style="width:100%">Participants</h6>
+                                        <div id="route_participants" style="width: 94%; margin-left: 3%; margin-right: 3%; text-align: center">
+
+                                        </div>
+                                        <div style="margin:auto">
+                                            <button onclick="roamParticipantsRoute(false)" class="btn btn-secondary" style="display: inline-flex; align-items: center; justify-content: center; height:8px; padding-bottom:11%" id="participants_previousBtnRoute"><span><i style="font-size: 0.7em; vertical-align:auto" class="fa fa-caret-left" aria-hidden="true"></i></span></button>
+                                            <button onclick="roamParticipantsRoute(true)" class="btn btn-secondary" style="display: inline-flex; align-items: center; justify-content: center; height:8px; padding-bottom:11%" id="participants_nextBtnRoute"><span><i style="font-size: 0.7em; vertical-align:auto" class="fa fa-caret-right" aria-hidden="true"></i></span></button>
+                                        </div>
+
+                                    </div>
+                                    <hr style="margin-top: 2px">
+                                    <!--Only display this if the user is in the route-->
+                                    <div id="route_new_comment_section" class="row" style="text-align:center">
+                                        <!--What would we have here?-->
+                                        <h6 class="mb-0" style="width:100%; text-align:center">Write a Comment</h6>
+                                        <textarea onkeyup="countChar(this, 'charNumCommentRoute')" style="vertical-align: top; max-width:94%; min-width:94%; margin-left:3%; margin-right:3%; margin-top:4px;" id="newRouteComment" name="Your comment" placeholder="Remember all comments are subject to review" rows="4" cols="50" class="createEventFormInput"></textarea>
+                                        <div id="charNumCommentRoute" style="margin-left: 95%; font-size: 80%">500</div>
+                                        <button style="display:inline-flex; vertical-align:auto; margin:auto; height:auto; width:auto; font-size: 0.7em" id="submitCommentBtn" onclick="route_submitComment()" disabled="disabled" class="btn btn-primary">Submit</button>
+
+
+                                    </div>
+                                    <hr>
+                                    <div class="row" style="">
+                                        <h6 class="mb-0" style="width:100%; text-align:center">Comments</h6>
+                                        <br>
+                                        <div class="comments" id="route_comments" style="width: 94%; margin-left: 3%; margin-right: 3%;"></div>
+                                    </div>
+
+                                    <hr>
+
+                                    <div class="row" style="">
+                                        <h6 class="mb-0" style="width:100%; text-align:center">Events</h6>
+                                        <br>
+                                        <div class="comments" id="route_events" style="width: 94%; margin-left: 3%; margin-right: 3%; text-align:center"></div>
+                                    </div>
+
+                                    <button id="editRouteBtn" onclick="editRoute()" style="margin:auto; width:100%; display: none" class="btn btn-primary">Edit Route</button>
+                                    <button id="saveRouteBtn" onclick="saveRoute()" style="margin:auto; width:100%; display: none" class="btn btn-primary">Save</button>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!--Footer-->
     <div class="bg-dark pt-5 text-white-50" style="width: 100%; height:auto">
@@ -420,6 +692,8 @@
     <!--  <script src="../scripts/register.js"></script>-->
     <!--  <script src="../scripts/login_ok_fields.js"></script>-->
     <!--  <script src="../scripts/register_ok_fields.js"></script>-->
+    <script src="../scripts/slideshows.js"></script>
+    <script src="../scripts/routes.js"></script>
     <script src="../scripts/loadUser.js"></script>
     <script src="../scripts/authenticate.js"></script>
     <script src="../scripts/logout.js"></script>

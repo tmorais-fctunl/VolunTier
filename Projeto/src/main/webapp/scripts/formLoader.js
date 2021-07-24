@@ -11,7 +11,7 @@ function formLoader () {
                     target = $this.data('target');
 
                     //load target page into the container
-                    container.load("../pages/contents/"+target + '.php');
+                    container.load("../pages/contents/"+target + '.html');
 
                     $.ajax({
                         complete: function () {

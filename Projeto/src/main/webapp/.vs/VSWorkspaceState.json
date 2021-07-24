@@ -1,8 +1,15 @@
 {
   "ExpandedNodes": [
     "",
+    "\\css",
+    "\\pages",
     "\\pages\\contents",
-    "\\scripts"
+    "\\scripts",
+    "\\VolunTier",
+    "\\VolunTier\\Projeto",
+    "\\VolunTier\\Projeto\\src",
+    "\\VolunTier\\Projeto\\src\\main",
+    "\\VolunTier\\Projeto\\src\\main\\webapp"
   ],
   "SelectedNode": "\\scripts\\AppLoading.js",
   "PreviewInSolutionExplorer": false

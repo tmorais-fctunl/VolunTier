@@ -22,6 +22,32 @@ function openTab(evt, tab) {
 // Get the element with id="defaultOpen" and click on it
 document.getElementById("defaultOpen").click();
 
+function loadRouteTab(id) {
+    openedTab.style.display = "none";
+    document.getElementById(tabPrev).style.display = "none";
+    document.getElementById("Route").style.display = "block";
+    tabStack.push({ Tab: "Route", id: id });
+    tabPrev = "Route";
+}
+
+function closeRouteTab() {
+    document.getElementById("Route").style.display = "none";
+    tabStack.pop();
+    let openPrev;
+    if (tabStack.length == 0)
+        openedTab.style.display = "block";
+    else {
+        openPrev = tabStack.pop();
+        let tab = openPrev.Tab;
+        document.getElementById(openPrev.Tab).style.display = "block";
+        if (tab == "Event")
+            loadEvent(openPrev.id);
+        else if (tab == "User")
+            loadUser(openPrev.id);
+        else if (tab == "Route")
+            loadRoute(openPrev.id);
+    }
+}
 
 function loadEventTab(id) {
     openedTab.style.display = "none";
@@ -45,6 +71,8 @@ function closeEventTab() {
             loadEvent(openPrev.id);
         else if (tab == "User")
             loadUser(openPrev.id);
+        else if (tab == "Route")
+            loadRoute(openPrev.id);
     }
 }
 
@@ -71,6 +99,8 @@ function closeUserTab() {
             loadEvent(openPrev.id);
         else if (tab == "User")
             loadUser(openPrev.id);
+        else if (tab == "Route")
+            loadRoute(openPrev.id);
     }
 }
 

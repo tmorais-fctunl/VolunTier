@@ -91,7 +91,7 @@
                 else {
                     loadContent("indexTab", "../pages/contents/logoutTab.html");
                     jQuery.ajax({
-                        url: "./contents/login-box.php",
+                        url: "./contents/login-box.html",
                         success: function (data) {
                             $('#login-register-box').html(data);
                         },
@@ -114,6 +114,7 @@
             function SignIn() {
                 isRememberMe();
                 login();
+                return false;
             }
         </script>
 
