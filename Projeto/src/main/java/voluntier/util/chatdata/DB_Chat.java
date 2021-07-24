@@ -32,6 +32,7 @@ import voluntier.util.JsonUtil;
 import voluntier.util.eventdata.MessageData;
 import voluntier.util.eventdata.MessageDataReturn;
 import voluntier.util.produces.ChatReturn;
+import voluntier.util.statistics.DB_Statistics;
 
 public class DB_Chat {
 	public static final String MLs = "chat_message_logs";
@@ -157,6 +158,8 @@ public class DB_Chat {
 			List<Entity> logs_ratings = new_message_log.getValue0();
 			logs_ratings.forEach(r -> ents.add(r));
 		}
+		
+		DB_Statistics.updateNumComments(true);
 
 		return new Pair<>(ents, message_id);
 	}
@@ -177,6 +180,8 @@ public class DB_Chat {
 			throw new ImpossibleActionException("no permission");
 
 		Entity newMessageLog = DB_MessageLog.deleteMessage(log_data.id, message_id);
+		
+		DB_Statistics.updateNumComments(false);
 
 		return newMessageLog;
 	}

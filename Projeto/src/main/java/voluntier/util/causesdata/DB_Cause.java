@@ -158,7 +158,8 @@ public class DB_Cause {
 		cause = util.updateProperty(cause, LAST_UPDATE, LongValue.of(System.currentTimeMillis()));
 		ents.add(cause);
 		
-		DB_Statistics.updateTotalDonations(amount);
+		DB_Statistics.updateTotalDonations();
+		DB_Statistics.updateTotalDonated(amount);
 		DB_Statistics.updateTotalCurrentCurrency(false, amount);
 		
 		return ents;

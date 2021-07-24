@@ -32,7 +32,8 @@ public class DB_Statistics {
 	public static final String TOTAL_TIME_PRESENCES = "total_time_presences";
 	public static final String TOTAL_CURRENT_CURRENCY = "total_current_currency";
 	public static final String TOTAL_ALLTIME_CURRENCY = "total_alltime_currency";
-	public static final String TOTAL_DONATIONS = "total_dontations";
+	public static final String TOTAL_DONATIONS = "total_donations";
+	public static final String TOTAL_DONATED = "total_donated";
 
 	private static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	private static KeyFactory statisticsFactory = datastore.newKeyFactory().setKind("Statistics");
@@ -52,7 +53,8 @@ public class DB_Statistics {
 				.set(TOTAL_TIME_PRESENCES, statistics.getLong(TOTAL_TIME_PRESENCES))
 				.set(TOTAL_CURRENT_CURRENCY, statistics.getDouble(TOTAL_CURRENT_CURRENCY))
 				.set(TOTAL_ALLTIME_CURRENCY, statistics.getLong(TOTAL_ALLTIME_CURRENCY))
-				.set(TOTAL_DONATIONS, statistics.getDouble(TOTAL_DONATIONS));
+				.set(TOTAL_DONATIONS, statistics.getLong(TOTAL_DONATIONS))
+				.set(TOTAL_DONATED, statistics.getDouble(TOTAL_DONATED));
 	}
 	
 	public static Response createStatistics () {
@@ -71,7 +73,8 @@ public class DB_Statistics {
 				.set(TOTAL_TIME_PRESENCES, 0)
 				.set(TOTAL_CURRENT_CURRENCY, 0.0)
 				.set(TOTAL_ALLTIME_CURRENCY, 0)
-				.set(TOTAL_DONATIONS, 0.0)
+				.set(TOTAL_DONATIONS, 0)
+				.set(TOTAL_DONATED, 0.0)
 				.build();
 		
 		try {
@@ -204,9 +207,15 @@ public class DB_Statistics {
 		putStatistics(stat);
 	}
 	
-	public static void updateTotalDonations (float amount) {
+	public static void updateTotalDonated (float amount) {
 		Entity stat = getStatistics();
-		util.updateProperty(stat, TOTAL_DONATIONS, DoubleValue.of(stat.getDouble(TOTAL_DONATIONS) + amount));
+		util.updateProperty(stat, TOTAL_DONATED, DoubleValue.of(stat.getDouble(TOTAL_DONATED) + amount));
+		putStatistics(stat);
+	}
+	
+	public static void updateTotalDonations () {
+		Entity stat = getStatistics();
+		util.updateProperty(stat, TOTAL_DONATIONS, DoubleValue.of(stat.getDouble(TOTAL_DONATIONS) + 1));
 		putStatistics(stat);
 	}
 	

@@ -68,10 +68,10 @@ public class StatisticsResource {
 	}
 
 	@POST
-	@Path("/getStats")
+	@Path("/getStatsNumbers")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getStatistics(RequestData data) {
+	public Response getStatisticNumbers(RequestData data) {
 		LOG.fine("Trying to obtain statistics by user: " + data.email);
 
 		if (!data.isValid())
@@ -86,7 +86,7 @@ public class StatisticsResource {
 			if (!ActionsResource.hasEventPermission(user))
 				return Response.status(Status.FORBIDDEN).entity("User has not enough permissions to check app statistics").build();
 			
-			StatisticsReturn stats = new StatisticsReturn (DB_Statistics.getStatistics());
+			StatisticsReturn stats = new StatisticsReturn (DB_Statistics.getStatistics()/*, StatisticsModes.NUMBERS*/);
 
 			return Response.ok(JsonUtil.json.toJson(stats)).build();
 		}
@@ -94,4 +94,33 @@ public class StatisticsResource {
 			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
 		}
 	}
+	/*
+	@POST
+	@Path("/getStatsPercentages")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getStatisticPercentages(RequestData data) {
+		LOG.fine("Trying to obtain statistics by user: " + data.email);
+
+		if (!data.isValid())
+			return Response.status(Status.BAD_REQUEST).build();
+
+		try {
+			TokensResource.checkIsValidAccess(data.token, data.email);
+			
+			Key userKey = usersFactory.newKey(data.email);
+			Entity user = datastore.get(userKey);
+			
+			if (!ActionsResource.hasEventPermission(user))
+				return Response.status(Status.FORBIDDEN).entity("User has not enough permissions to check app statistics").build();
+			
+			StatisticsReturn stats = new StatisticsReturn (DB_Statistics.getStatistics(), StatisticsModes.PERCENTAGES);
+
+			return Response.ok(JsonUtil.json.toJson(stats)).build();
+		}
+		catch (InvalidTokenException e) {
+			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
+		}
+	}
+	*/
 }
