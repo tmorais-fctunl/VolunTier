@@ -77,6 +77,7 @@ public class DB_User {
 	
 	public static final int MAX_EVENTS = 100;
 	public static final int MAX_ROUTES = 100;
+	public static final double INITIAL_CURRENCY = 50.0;
 	
 	public static final String SEPARATOR = "|";
 	public static final int MILISSECONDS_IN_DAY = 86400000;
@@ -122,7 +123,12 @@ public class DB_User {
 				.set(MAX_ROUTES_PER_DAY, user.getString(MAX_ROUTES_PER_DAY));
 	}
 
-	public static Entity REWRITE(Entity user) {		
+	public static Entity REWRITE(Entity user) {	
+
+		MaxCreationData obj = new MaxCreationData();
+
+		String maxString = JsonUtil.json.toJson(obj);
+		
 		return Entity.newBuilder(user.getKey())
 				.set(USERNAME, user.getString(USERNAME))
 				.set(EMAIL, user.getString(EMAIL))
@@ -155,7 +161,7 @@ public class DB_User {
 				.set(EVENTS_PARTICIPATING, user.getList(EVENTS_PARTICIPATING))
 				.set(ROUTES, user.getList(ROUTES))
 				.set(ROUTES_PARTICIPATING, user.getList(ROUTES_PARTICIPATING))
-				.set(MAX_ROUTES_PER_DAY, user.getString(MAX_ROUTES_PER_DAY))
+				.set(MAX_ROUTES_PER_DAY, maxString)
 				.build();
 	}
 	
@@ -187,8 +193,8 @@ public class DB_User {
 				.set(FACEBOOK, data.facebook)
 				.set(INSTAGRAM, data.instagram)
 				.set(TWITTER, data.twitter)
-				.set(TOTAL_CURRENCY, 0.0)
-				.set(CURRENT_CURRENCY, 0.0)
+				.set(TOTAL_CURRENCY, INITIAL_CURRENCY)
+				.set(CURRENT_CURRENCY, INITIAL_CURRENCY)
 				.set(N_EVENTS_PARTICIPATED, 0)
 				.set(MAX_EVENTS_PER_DAY, maxString)
 				.set(DONATIONS, empty_list)
@@ -923,8 +929,8 @@ public class DB_User {
 		user = updateCurrency(user.getKey(), user, DoubleValue.of(user.getDouble(TOTAL_CURRENCY)), 
 				DoubleValue.of(user.getDouble(CURRENT_CURRENCY) - amount));*/
 		
-		user = util.updateProperty(user, TOTAL_CURRENCY, DoubleValue.of(user.getDouble(TOTAL_CURRENCY) - amount));
-		user = util.updateProperty(user, CURRENT_CURRENCY, DoubleValue.of(user.getDouble(CURRENT_CURRENCY) + amount));
+		user = util.updateProperty(user, TOTAL_CURRENCY, DoubleValue.of(user.getDouble(TOTAL_CURRENCY)));
+		user = util.updateProperty(user, CURRENT_CURRENCY, DoubleValue.of(user.getDouble(CURRENT_CURRENCY) - amount));
 
 		//return user;
 		return util.addJsonToList(user, DONATIONS, new DonationData(cause_name, cause_id, amount, Timestamp.now().toString()));

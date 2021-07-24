@@ -189,13 +189,14 @@ public class DB_Cause {
 			donators_data_return
 					.add(new DonatorDataReturn(encodedPicture, username, donator.email, donator.donation, donator.timestamp));
 		}
+		
 		int new_cursor = i;
 		boolean more_results = new_cursor < donators_data.size();
 		return new Triplet<>(donators_data_return, more_results ? new_cursor : null,
 				more_results ? MoreResultsType.MORE_RESULTS_AFTER_LIMIT : MoreResultsType.NO_MORE_RESULTS);
 	}
 
-	public static AllCausesDataReturn getCauses(){
+	public static AllCausesDataReturn getCauses() {
 		List<CauseDataReturn> causes = new LinkedList<>();
 		List<Entity> queried_causes = queryAllCauses();
 		

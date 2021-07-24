@@ -10,6 +10,7 @@ public class CauseDataReturn extends PicturesReturn {
 	public String name;
 	public Integer goal;
 	public Integer raised;
+	public Integer num_donations;
 	public String website;
 	public String description;
 	public String company_name;
@@ -27,5 +28,6 @@ public class CauseDataReturn extends PicturesReturn {
 		this.description = cause.getString(DB_Cause.DESCRIPTION);
 		this.description = cause.getString(DB_Cause.WEBSITE);
 		this.company_name = cause.getString(DB_Cause.WITH);
+		this.num_donations = cause.getList(DB_Cause.DONATORS).size();
 	}
 }
