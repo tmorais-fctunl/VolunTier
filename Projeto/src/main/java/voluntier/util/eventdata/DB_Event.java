@@ -45,6 +45,7 @@ import voluntier.util.consumes.event.UpdateEventData;
 import voluntier.util.produces.ChatReturn;
 import voluntier.util.produces.DownloadEventPictureReturn;
 import voluntier.util.produces.DownloadSignedURLReturn;
+import voluntier.util.statistics.DB_Statistics;
 import voluntier.util.userdata.DB_User;
 import voluntier.util.userdata.Profile;
 import voluntier.util.userdata.State;
@@ -218,6 +219,16 @@ public class DB_Event {
 		checkIsOwner(event, email);
 		checkIsActive(event);
 		
+		String actualState = event.getString(STATE);
+		
+		if (actualState.equals(State.ENABLED.toString()) && state.equals(State.BANNED.toString())) {
+			DB_Statistics.updateNumEvents(false);
+			DB_Statistics.updateNumParticipations(false, event.getList(PARTICIPANTS).size());
+		} else if (actualState.equals(State.BANNED.toString()) && state.equals(State.ENABLED.toString())) {
+			DB_Statistics.updateNumEvents(true);
+			DB_Statistics.updateNumParticipations(true, event.getList(PARTICIPANTS).size());
+		} else return event;
+		
 		return util.updateProperty(event, STATE, StringValue.of(state));
 
 		/*return Entity.newBuilder(event.getKey()).set(NAME, event.getString(NAME)).set(ID, event.getString(ID))
@@ -314,6 +325,8 @@ public class DB_Event {
 				.set(PICTURES, pictures.build())
 				.set(REQUESTS, requests.build())
 				.set(N_REQUESTS, 0).build());
+		
+		//DB_Statistics.updateNumEvents(true);
 
 		return new Pair<>(entities, event_id);
 	}
@@ -742,6 +755,9 @@ public class DB_Event {
 		user = DB_User.participateEvent(user.getKey(), user, event_id);
 		ents.add(user);
 		
+		/*DB_Statistics.updateNumParticipations(true);
+		DB_Statistics.updateTotalNumParticipations();*/
+		
 		return ents;
 	}
 
@@ -842,6 +858,8 @@ public class DB_Event {
 			if (moderators.contains(target_email))
 				ents.add(DB_Chat.removeModerator(event.getString(CHAT_ID), target_email, req_email));
 
+			//DB_Statistics.updateNumParticipations(false);
+			
 			return ents;
 		}
 		throw new ImpossibleActionException("Something went wrong while removing participant");
@@ -910,12 +928,16 @@ public class DB_Event {
 		Date presence_date = Timestamp.parseTimestamp(presence.start_date).toDate();
 		Date now = Timestamp.now().toDate();
 		
-		double diff = (now.getTime() - presence_date.getTime()) / CURRENCY_PER_MINUTE;
+		long diff = (now.getTime() - presence_date.getTime()) / CURRENCY_PER_MINUTE;
 		
 		int difficulty = getDifficulty(event);
 		
+		int earnedAmount = (int) diff*difficulty;
+		
+		DB_Statistics.updateTotalTimePresences(diff);
+		
 		return new Triplet<>(util.removeJsonFromList(event, PRESENCES, (p -> p.email.equals(user_email)), ConfirmationCodeData.class), 
-				DB_User.leaveEvent(user_email, diff, difficulty), (int) diff*difficulty );
+				DB_User.leaveEvent(user_email, diff, difficulty), earnedAmount );
 	}
 	
 	public static String generateNewPictureID(String event_id, int pic_id) {

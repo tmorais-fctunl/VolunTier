@@ -37,6 +37,7 @@ import voluntier.util.produces.DonatorsDataReturn;
 import voluntier.util.produces.DownloadPictureReturn;
 import voluntier.util.produces.DownloadSignedURLReturn;
 import voluntier.util.routedata.PictureData;
+import voluntier.util.statistics.DB_Statistics;
 import voluntier.util.userdata.Account;
 import voluntier.util.userdata.DB_User;
 
@@ -116,6 +117,8 @@ public class DB_Cause {
 				.set(LAST_UPDATE, System.currentTimeMillis())
 				.set(STATUS, Account.ACTIVE.toString())
 				.build();
+		
+		DB_Statistics.updateNumCauses(true);
 
 		return new Pair<>(cause, id);
 	}
@@ -154,6 +157,9 @@ public class DB_Cause {
 		cause = util.updateProperty(cause, RAISED, DoubleValue.of(cause.getDouble(RAISED) + amount));
 		cause = util.updateProperty(cause, LAST_UPDATE, LongValue.of(System.currentTimeMillis()));
 		ents.add(cause);
+		
+		DB_Statistics.updateTotalDonations(amount);
+		DB_Statistics.updateTotalCurrentCurrency(false, amount);
 		
 		return ents;
 	}

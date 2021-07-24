@@ -29,6 +29,7 @@ import voluntier.util.consumes.RegisterData;
 import voluntier.util.consumes.UpdateProfileData;
 
 import voluntier.util.eventdata.MaxCreationData;
+import voluntier.util.statistics.DB_Statistics;
 
 public class DB_User {
 
@@ -172,6 +173,8 @@ public class DB_User {
 		MaxCreationData obj = new MaxCreationData();
 
 		String maxString = JsonUtil.json.toJson(obj);
+		
+		DB_Statistics.updateNumUsers(true);
 
 		return Entity.newBuilder(userKey)
 				.set(USERNAME, data.username)
@@ -250,6 +253,9 @@ public class DB_User {
 	}
 
 	public static Entity remove(Key userKey, Entity user) {
+		DB_Statistics.updateNumUsers(false);
+		DB_Statistics.updateNumParticipations(false, user.getList(EVENTS_PARTICIPATING).size());
+		
 		return util.updateProperty(user, ACCOUNT, StringValue.of(Account.REMOVED.toString()));
 		/*return Entity.newBuilder(userKey)
 				.set(USERNAME, user.getString(USERNAME))
@@ -778,7 +784,7 @@ public class DB_User {
 				.build();
 	}*/
 
-	public static Entity addEvent(Key userKey, Entity user, String event_id) throws AlreadyExistsException, CannotCreateMoreException {
+	public static Entity addEvent(Key userKey, Entity user, String event_id) throws AlreadyExistsException, CannotCreateMoreException, ImpossibleActionException {
 		
 		user = eventCreationLimit(user);
 
@@ -789,7 +795,11 @@ public class DB_User {
 		/*ListValue.Builder events_list = ListValue.newBuilder().set(user.getList(EVENTS));
 		events_list.addValue(event_id);*/
 		
-		return util.addUniqueStringToList(user, EVENTS, event_id);
+		user = participateEvent(userKey, user, event_id);
+		
+		DB_Statistics.updateNumEvents(true);
+		
+		return user;
 
 		//return updateEventList(userKey, user, events_list.build());
 		//return util.updateProperty(user, EVENTS_PARTICIPATING, events_list.build());
@@ -805,8 +815,11 @@ public class DB_User {
 
 		events.remove(event_id);
 		events.forEach(event -> events_list.addValue(event));*/
+		user = util.removeStringFromList(user, EVENTS, event_id);
 		
-		return util.removeStringFromList(user, EVENTS, event_id);
+		DB_Statistics.updateNumEvents(false);
+		
+		return user;
 
 		//return updateEventList(userKey, user, events_list.build());
 		//return util.updateProperty(user, EVENTS, events_list.build());
@@ -824,7 +837,13 @@ public class DB_User {
 
 		//return updateParticipatingEventList(userKey, user, events_list.build());
 		return util.updateProperty(user, EVENTS_PARTICIPATING, events_list.build());*/
-		return util.addUniqueStringToList(user, EVENTS, event_id);
+		
+		user =  util.addUniqueStringToList(user, EVENTS, event_id);
+		
+		DB_Statistics.updateNumParticipations(true);
+		DB_Statistics.updateTotalNumParticipations();
+		
+		return user;
 	}
 
 	public static Entity addRoute(Key userKey, Entity user, String route_id) throws AlreadyExistsException, CannotCreateMoreException {
@@ -839,7 +858,11 @@ public class DB_User {
 		routes_list.addValue(route_id);
 
 		return updateRouteList(userKey, user, routes_list.build());*/
-		return util.addUniqueStringToList(user, ROUTES, route_id);
+		user = util.addUniqueStringToList(user, ROUTES, route_id);
+		
+		DB_Statistics.updateNumRoutes(true);
+		
+		return user;
 	}
 
 	public static Entity removeRoute(Key userKey, Entity user, String route_id) throws InexistentRouteException, InexistentElementException {
@@ -854,7 +877,11 @@ public class DB_User {
 		routes.forEach(route -> routes_list.addValue(route));
 
 		return updateRouteList(userKey, user, routes_list.build());*/
-		return util.removeStringFromList(user, ROUTES, route_id);
+		user = util.removeStringFromList(user, ROUTES, route_id);
+		
+		DB_Statistics.updateNumRoutes(false);
+		
+		return user;
 	}
 
 	public static Entity participateRoute(Key userKey, Entity user, String route_id) throws AlreadyExistsException {
@@ -888,8 +915,8 @@ public class DB_User {
 	public static Entity leaveEvent(Key userKey, Entity user, String event_id) throws InexistentEventException, InexistentElementException {
 		/*List<String> events = getParticipatingEventIds(user);
 		if(!events.contains(event_id))*/
-		if (DB_Util.existsInStringList(user, EVENTS_PARTICIPATING, event_id))
-			throw new InexistentEventException("There is no event with the given event idS");
+		if (!DB_Util.existsInStringList(user, EVENTS_PARTICIPATING, event_id))
+			throw new InexistentEventException("There is no event with the given event ids");
 
 		/*ListValue.Builder events_list = ListValue.newBuilder();
 
@@ -898,7 +925,12 @@ public class DB_User {
 
 		//return updateParticipatingEventList(userKey, user, events_list.build());
 		return util.updateProperty(user, EVENTS_PARTICIPATING, events_list.build());*/
-		return util.removeStringFromList(user, EVENTS_PARTICIPATING, event_id);
+		
+		user = util.removeStringFromList(user, EVENTS_PARTICIPATING, event_id);
+		
+		DB_Statistics.updateNumParticipations(false);
+		
+		return user;
 	}
 
 	public static Entity leaveEvent (String user_email, double amount, int difficulty) throws InexistentUserException{
@@ -910,8 +942,16 @@ public class DB_User {
 
 		/*return updateCurrency(user.getKey(), user, DoubleValue.of(user.getDouble(TOTAL_CURRENCY)+ amount*difficulty), 
 				DoubleValue.of(user.getDouble(CURRENT_CURRENCY) + amount*difficulty) );*/
-		user = util.updateProperty(user, TOTAL_CURRENCY, DoubleValue.of(user.getDouble(TOTAL_CURRENCY)+ amount*difficulty));
-		return util.updateProperty(user, CURRENT_CURRENCY, DoubleValue.of(user.getDouble(CURRENT_CURRENCY)+ amount*difficulty));
+		int earnedAmount = (int) amount*difficulty;
+		
+		user = util.updateProperty(user, TOTAL_CURRENCY, DoubleValue.of(user.getDouble(TOTAL_CURRENCY) + amount*difficulty));
+		user = util.updateProperty(user, CURRENT_CURRENCY, DoubleValue.of(user.getDouble(CURRENT_CURRENCY) + amount*difficulty));
+		
+		DB_Statistics.updateNumPresences();
+		DB_Statistics.updateTotalCurrency(true, earnedAmount);
+		DB_Statistics.updateTotalCurrentCurrency(true, earnedAmount);
+		
+		return  user;
 	}
 
 	/*public static Entity earnCurrency (String user_email, double amount, int difficulty) throws InexistentUserException {
@@ -931,9 +971,10 @@ public class DB_User {
 		
 		user = util.updateProperty(user, TOTAL_CURRENCY, DoubleValue.of(user.getDouble(TOTAL_CURRENCY)));
 		user = util.updateProperty(user, CURRENT_CURRENCY, DoubleValue.of(user.getDouble(CURRENT_CURRENCY) - amount));
-
+		user = util.addJsonToList(user, DONATIONS, new DonationData(cause_name, cause_id, amount, Timestamp.now().toString()));
+		
 		//return user;
-		return util.addJsonToList(user, DONATIONS, new DonationData(cause_name, cause_id, amount, Timestamp.now().toString()));
+		return user;
 	}
 
 	public static List<DonationData> getDonations(Entity user) {

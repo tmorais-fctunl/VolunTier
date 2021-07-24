@@ -124,5 +124,9 @@ public class ActionsResource {
 
 		return (int) user_role.getLong(action.toString());
 	}
+	
+	public static boolean isSU (Entity user) {
+		return user.getString(DB_User.ROLE).equals(Roles.SU.toString());
+	}
 
 }

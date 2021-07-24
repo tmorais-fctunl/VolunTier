@@ -24,6 +24,7 @@ import voluntier.util.DB_Util;
 import voluntier.util.eventdata.MessageData;
 import voluntier.util.eventdata.MessageDataReturn;
 import voluntier.util.rating.DB_Rating;
+import voluntier.util.statistics.DB_Statistics;
 
 public class DB_MessageLog {
 	public static final String MESSAGES = "messages";
@@ -105,6 +106,8 @@ public class DB_MessageLog {
 		List<Entity> ents = new LinkedList<>();
 		ents.add(log);
 		ents.add(rating.getValue0());
+		
+		DB_Statistics.updateNumComments(true);
 
 		return new Pair<>(ents, message_id);
 	}
@@ -126,6 +129,7 @@ public class DB_MessageLog {
 		MessageData data = DB_Util.findInJsonList(log, MESSAGES, (m -> message_id == m.comment_id), MessageData.class);
 		if(data != null) {
 			try {
+				DB_Statistics.updateNumComments(false);
 				return util.removeJsonFromList(log, MESSAGES, data);
 			} catch (InexistentElementException e) {}
 		}

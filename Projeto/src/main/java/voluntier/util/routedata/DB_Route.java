@@ -51,6 +51,7 @@ import voluntier.util.produces.ChatReturn;
 import voluntier.util.produces.DownloadPictureReturn;
 import voluntier.util.produces.DownloadSignedURLReturn;
 import voluntier.util.rating.DB_Rating;
+import voluntier.util.statistics.DB_Statistics;
 import voluntier.util.userdata.DB_User;
 import voluntier.util.userdata.State;
 import voluntier.util.userdata.ParticipantStatus;
@@ -213,6 +214,8 @@ public class DB_Route {
 		Entity updated_user = DB_User.addRoute(user.getKey(), user, route_id);
 		entities.add(updated_user);
 		
+		DB_Statistics.updateNumRoutes(true);
+		
 		return new Pair<>(entities, route_id);
 	}
 	
@@ -221,7 +224,7 @@ public class DB_Route {
 		Entity route = getRoute(route_id);
 		checkIsCreator(route, email);
 		checkIsActive(route);
-
+		
 		return util.updateProperty(route, STATE, StringValue.of(state));
 	}
 
@@ -284,6 +287,7 @@ public class DB_Route {
 			route = util.addUniqueStringToList(route, PARTICIPANTS, user_email);
 			route = util.updateProperty(route, NUM_PARTICIPANTS, LongValue.of(route.getLong(NUM_PARTICIPANTS) + 1));
 			ents.add(route);
+			
 			return ents;
 
 		} else
