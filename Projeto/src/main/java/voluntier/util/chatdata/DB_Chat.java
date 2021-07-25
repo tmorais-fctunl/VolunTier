@@ -251,12 +251,12 @@ public class DB_Chat {
 		Entity chat = getChat(chat_id);
 
 		if (!req_email.equals(chat.getString(ADMIN)))
-			throw new ImpossibleActionException();
+			throw new ImpossibleActionException("User is not the admin: " + req_email);
 
 		try {
 			return addModerator(chat.getKey(), chat, target_email);
 		} catch (AlreadyExistsException e) {
-			throw new ImpossibleActionException();
+			throw new ImpossibleActionException(target_email + " already a mod");
 		}
 	}
 

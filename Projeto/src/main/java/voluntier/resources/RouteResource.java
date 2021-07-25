@@ -482,7 +482,7 @@ public class RouteResource {
 
 			List<Entity> ents = DB_Route.removeParticipant(data.route_id, data.participant, req_email);
 
-			Entity user = DB_User.getUser(data.email);
+			Entity user = DB_User.getUser(data.participant);
 			
 			if (data.email.equals(data.participant)) {
 				Entity updated_user = DB_User.leaveRoute(user.getKey(), user, data.route_id);

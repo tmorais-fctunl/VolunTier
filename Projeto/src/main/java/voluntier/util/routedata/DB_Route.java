@@ -395,7 +395,12 @@ public class DB_Route {
 		List<String> moderators = DB_Chat.getModerators(route.getString(CHAT_ID));
 
 		String creator = route.getString(CREATOR);
-
+		System.out.println(participants.contains(target_email));
+		System.out.println(!target_email.equals(creator));
+		System.out.println(creator.equals(req_email));
+		System.out.println((moderators.contains(req_email) && !moderators.contains(target_email)));
+		System.out.println(target_email.equals(req_email));
+		
 		if (participants.contains(target_email) && !target_email.equals(creator)
 				&& (creator.equals(req_email) || (moderators.contains(req_email) && !moderators.contains(target_email))
 						|| target_email.equals(req_email))) {
@@ -406,7 +411,6 @@ public class DB_Route {
 			
 			if (moderators.contains(target_email))
 				ents.add(DB_Chat.removeModerator(route.getString(CHAT_ID), target_email, req_email));
-
 			return ents;
 		}
 		throw new ImpossibleActionException("Error in remove participant from route");

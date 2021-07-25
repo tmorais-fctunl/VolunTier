@@ -891,7 +891,7 @@ public class DB_User {
 		routes_list.addValue(route_id);
 
 		return updateParticipatingRouteList(userKey, user, routes_list.build());*/
-		return util.addUniqueJsonToList(user, ROUTES_PARTICIPATING, route_id);
+		return util.addUniqueStringToList(user, ROUTES_PARTICIPATING, route_id);
 	}
 	
 	public static Entity leaveRoute(Key userKey, Entity user, String route_id) throws InexistentRouteException, InexistentElementException  {
