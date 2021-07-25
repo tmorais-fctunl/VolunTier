@@ -36,6 +36,8 @@ function countChar(val, id) {
 
 //Talvez array com comentarios e participantes para quando o user der previous ou next nao pedir novamente ao server
 function createEventRequest() {
+    if (!tryAuthentication)
+        return false;
 
 //Just check if the date-time are valid
   var now = new Date();
@@ -87,9 +89,8 @@ function createEventRequest() {
         }
         else {
             alert("Create event: UNSUCCESS");
-            if (xmlhttp.status == 403) {
-                if(tryAuthentication())
-                createEventRequest();
+            if (xmlhttp.status == 429) {
+                alert("You have reached your daily limit of 4 events. Wait 24h to create more.");
                 return;
             }
             return false;

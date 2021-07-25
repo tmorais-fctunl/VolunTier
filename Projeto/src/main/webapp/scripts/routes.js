@@ -59,8 +59,8 @@ function createRouteRequest() {
         }
         else {
             alert("Create route: UNSUCCESS");
-            if (xmlhttp.status == 403) {
-                alert(xmlhttp.responseText);
+            if (xmlhttp.status == 429) {
+                alert("You have reached your daily limit of 4 routes. Wait 24h to create more.");
                 return;
             }
             return false;
