@@ -94,8 +94,6 @@ public class EventResource {
 
 			Pair<List<Entity>, String> ents = DB_Event.createNew(data);
 			String event_id = ents.getValue1();
-			// String filename = ents.getValue2();
-			// URL upload_url = GoogleStorageUtil.signURLForUpload(filename);
 			Entity updated_user = DB_User.addEvent(userKey, user, event_id);
 
 			ents.getValue0().forEach(ent -> txn.put(ent));
@@ -338,73 +336,6 @@ public class EventResource {
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 	}
-
-	/*
-	 * @POST
-	 * 
-	 * @Path("/event/addPicture")
-	 * 
-	 * @Produces(MediaType.APPLICATION_JSON)
-	 * 
-	 * @Consumes(MediaType.APPLICATION_JSON) public Response
-	 * addPictureToEvent(EventData data) { if (!data.isValid()) return
-	 * Response.status(Status.BAD_REQUEST).build();
-	 * 
-	 * Transaction txn = datastore.newTransaction();
-	 * 
-	 * try { TokensResource.checkIsValidAccess(data.token, data.email);
-	 * 
-	 * Pair<Entity, String> res = DB_Event.addPicture(data.event_id, data.email);
-	 * Entity event = res.getValue0(); String filename = res.getValue1();
-	 * 
-	 * URL upload_url = GoogleStorageUtil.signURLForUpload(filename);
-	 * 
-	 * txn.put(event); txn.commit();
-	 * 
-	 * return Response.ok(JsonUtil.json.toJson(new UploadPictureReturn(upload_url,
-	 * filename))).build();
-	 * 
-	 * } catch (InvalidTokenException | InexistentEventException |
-	 * ImpossibleActionException | MaximumSizeReachedException e) { txn.rollback();
-	 * return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
-	 * 
-	 * } catch (Exception e) { LOG.severe(e.getMessage()); txn.rollback(); return
-	 * Response.status(Status.INTERNAL_SERVER_ERROR).build();
-	 * 
-	 * } finally { if (txn.isActive()) { txn.rollback(); return
-	 * Response.status(Status.INTERNAL_SERVER_ERROR).build(); } } }
-	 * 
-	 * @POST
-	 * 
-	 * @Path("/event/deletePicture")
-	 * 
-	 * @Produces(MediaType.APPLICATION_JSON)
-	 * 
-	 * @Consumes(MediaType.APPLICATION_JSON) public Response
-	 * deletePictureFromEvent(DeleteEventPictureData data) { if (!data.isValid())
-	 * return Response.status(Status.BAD_REQUEST).build();
-	 * 
-	 * Transaction txn = datastore.newTransaction();
-	 * 
-	 * try { TokensResource.checkIsValidAccess(data.token, data.email);
-	 * 
-	 * Entity updated_event = DB_Event.deletePicture(data.event_id, data.pic_id,
-	 * data.email);
-	 * 
-	 * txn.put(updated_event); txn.commit();
-	 * 
-	 * return Response.status(Status.NO_CONTENT).build();
-	 * 
-	 * } catch (InvalidTokenException | InexistentEventException |
-	 * ImpossibleActionException | InexistentPictureException e) { txn.rollback();
-	 * return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
-	 * 
-	 * } catch (Exception e) { LOG.severe(e.getMessage()); txn.rollback(); return
-	 * Response.status(Status.INTERNAL_SERVER_ERROR).build();
-	 * 
-	 * } finally { if (txn.isActive()) { txn.rollback(); return
-	 * Response.status(Status.INTERNAL_SERVER_ERROR).build(); } } }
-	 */
 
 	@POST
 	@Path("/event/updatePicture")
