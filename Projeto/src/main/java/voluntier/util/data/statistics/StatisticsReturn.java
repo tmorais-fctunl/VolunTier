@@ -73,15 +73,24 @@ public class StatisticsReturn {
 
 	private void definePerTime (Entity statistcs) {
 		try {
-			this.users_per_event = total_num_users / total_num_events;
-			this.presence_time_per_user = total_time_presences / total_num_users;
-			this.presence_time_per_event = total_time_presences / total_num_events;
-			this.donated_per_cause = total_donated / total_num_causes;
-			this.donations_average = total_donated / total_donations;
-			this.comments_per_time = total_commments / total_time_presences;
-			this.comments_per_user = total_commments / total_num_users;
-			this.presences_average = total_num_presences / num_participations_event;
-			this.presences_average_total = total_num_presences / total_num_participations_event;
+			if (total_num_events != 0) {
+				this.users_per_event = total_num_users / total_num_events;
+				this.presence_time_per_event = total_time_presences / total_num_events;
+			}
+			if (total_num_users != 0) {
+				this.presence_time_per_user = total_time_presences / total_num_users;
+				this.comments_per_user = total_commments / total_num_users;
+			}
+			if (total_num_causes != 0)
+				this.donated_per_cause = total_donated / total_num_causes;
+			if (total_donations != 0)
+				this.donations_average = total_donated / total_donations;
+			if (total_time_presences != 0)
+				this.comments_per_time = total_commments / total_time_presences;
+			if (num_participations_event != 0)
+				this.presences_average = total_num_presences / num_participations_event;
+			if (total_num_participations_event != 0)
+				this.presences_average_total = total_num_presences / total_num_participations_event;
 		} catch (ArithmeticException e) {
 			
 		}
