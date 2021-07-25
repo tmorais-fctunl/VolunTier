@@ -100,7 +100,8 @@ function createEventRequest() {
 }
 
 function getEvent(eventID, callback) {
-
+    if (!tryAuthentication())
+        return;
     var urlvariable = "/rest/getEvent";
     var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //GET EVENT REST URL
     var xmlhttp = new XMLHttpRequest();
@@ -115,8 +116,6 @@ function getEvent(eventID, callback) {
         if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200)) {
             alert("Couldn't load event info, message: " + xmlhttp.status);
             if (xmlhttp.status == 403) {
-                if(tryAuthentication())
-                getEvent(eventID, callback);
                 return;
             }
             return false;
