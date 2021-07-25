@@ -661,7 +661,7 @@ function loadDonations() {
                         '<p id="raised" style="font-size: 150%; color: '+colorGoal+'">' + "Our goal: " + causes[i].raised + "/" + causes[i].goal + '</p>' +
                         '<p style="white-space: pre-wrap;">' + causes[i].description + '</p>' +
                         '<p id="num_donations">' + "Number of donations so far: " + causes[i].num_donations + '</p>' +
-                        '<p>' + "Our website: " + causes[i].website + '</p>' +
+                        '<p><a id="cause_site">' + "Visit: " + causes[i].website + '</a></p>' +
                         '<input class="createEventFormInput" id="cause_'+causes[i].id+'_donate_ammount_input" type="number" min=1 max=1000000 value=1 placeholder="How much?" style="width:120px">' +
                         '<button class="btn createEventFormInput" style="margin-left: 5px;background-color: lightgray;color:black; padding:2px; font-size:100%" disabled=false onclick="donateToCause(this,\'' + causes[i].id + '\')" >Donate</button>' +
                         '<br>' +
@@ -673,6 +673,15 @@ function loadDonations() {
                 '</div>' +
                 '<br>';
             donationsSection.append(content);
+
+            let website = $("#donation_" + causes[i].id + "_section #cause_site");
+            let url = causes[i].website;
+            if (url.substring(0, 7) !== 'http://' || url.substring(0, 8) !== 'https://')
+                url = 'http://' + url;
+            website.attr("href",url);
+
+            
+            
             let pics = causes[i].pics;
             for (var j = 0; j < pics.length; j++)
                 loadDonationPhoto(causes[i].id, pics[j].dwld_url.url);

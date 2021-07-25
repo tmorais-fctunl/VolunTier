@@ -919,23 +919,24 @@ function setMarkerLabelNull(event_id) {
 }
 
 function clickMarker(location) {
-  clickmarker.setMap(map);
   if (clickmarker == null) {
     //console.log("null");
-    const icon = {
+      const icon = {
       url: "https://i.pinimg.com/originals/25/62/aa/2562aacd1a4c2af60cce9629b1e05cf2.png",
       scaledSize: new google.maps.Size(35, 35), // scaled size
       origin: new google.maps.Point(0,0), // origin
       anchor: new google.maps.Point(17.5, 35) // anchor
       };
-    clickmarker = new google.maps.Marker({
+      clickmarker = new google.maps.Marker({
           position: location,
           map: map,
           icon: icon
       });
-  } else {
-    clickmarker.setPosition(location);
   }
+  else {
+    clickmarker.setPosition(location);
+   }
+    clickmarker.setMap(map);
 }
 
 function previewMarker(lat, lng) {
