@@ -364,6 +364,9 @@ function loadEventWithID() {
 }
 
 function searchEventsByRange(pos) {
+    if (!tryAuthentication())
+        return;
+
     var urlvariable = "/rest/searchEventsByRange";
     var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //GET EVENTS
     var xmlhttp = new XMLHttpRequest();
@@ -378,10 +381,7 @@ function searchEventsByRange(pos) {
         if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200)) {
             alert("Couldn't load events, message: " + xmlhttp.status);
             if (xmlhttp.status == 403)
-            if (tryAuthentication())
-                searchEventsByRange(pos);
-
-            $("body").css("cursor", "default");
+                $("body").css("cursor", "default");
             return false;
         }
         const attributes = JSON.parse(xmlhttp.responseText);
@@ -392,10 +392,11 @@ function searchEventsByRange(pos) {
         var exp;
         for (var i = 0; i < events.length; i++) {
             obj = events[i];
-
             //Ver se expirou
-            exp = new Date(attributes.end_date);
-            if (exp > now)
+            exp = new Date(events[i].end_date);
+            if (!events[i].end_date)
+                timeOutAddition(obj, i);
+            else if (exp > now)
                 timeOutAddition(obj, i);
         }
         
@@ -404,6 +405,8 @@ function searchEventsByRange(pos) {
 }
 
 function searchRoutesByRange(pos) {
+    if (!tryAuthentication())
+        return;
     var urlvariable = "/rest/searchRoutesByRange";
     var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //GET ROUTES
     var xmlhttp = new XMLHttpRequest();
@@ -418,9 +421,7 @@ function searchRoutesByRange(pos) {
         if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200)) {
             alert("Couldn't load routes, message: " + xmlhttp.status);
             if (xmlhttp.status == 403)
-            if (tryAuthentication())
-                searchRoutesByRange(pos);
-            $("body").css("cursor", "default");
+                $("body").css("cursor", "default");
             return false;
         }
         const attributes = JSON.parse(xmlhttp.responseText);
@@ -431,11 +432,7 @@ function searchRoutesByRange(pos) {
         var exp;
         for (var i = 0; i < routes.length; i++) {
             obj = routes[i];
-
-            //Ver se expirou
-            exp = new Date(attributes.end_date);
-            if (exp > now)
-                timeOutRouteAddition(obj, i);
+            timeOutRouteAddition(obj, i);
         }
     };
     xmlhttp.send(ItemJSON);
