@@ -43,9 +43,9 @@ function getStatistics() {
             '<div class="row">Total presence time: ' + obj.total_time_presences + '</div>' +
             '<div class="row">Total number of comments: ' + obj.total_comments + '</div>' +
             '<div class="row">Total number of current currency: ' + obj.total_current_currency + '</div>' +
-            '<div class="row">Total number of currency held so far' + obj.total_alltime_currency + '</div>' +
-            '<div class="row">Total number of donations ' + obj.total_donations + '</div>' +
-            '<div class="row">Total number of currency donated ' + obj.total_donated + '</div>' +
+            '<div class="row">Total number of currency held so far:' + obj.total_alltime_currency + '</div>' +
+            '<div class="row">Total number of donations: ' + obj.total_donations + '</div>' +
+            '<div class="row">Total number of currency donated: ' + obj.total_donated + '</div>' +
             '<div class="row">Average number of users per event: ' + obj.users_per_event + '</div>' +
             '<div class="row">Average user presence time per user: ' + obj.presence_time_per_user + '</div>' +
             '<div class="row">Average user presence time per event: ' + obj.presence_time_per_event + '</div>' +
@@ -90,8 +90,7 @@ function requestUserInfo() {
                 if (myAppRole != "USER") {
                     //SHOW STATISTICS TAB
                     $("#statisticsBTN").show();
-                    $("#Statistics").show();
-
+                    //$("#Statistics").show();
                     getStatistics();
 
 
@@ -775,6 +774,16 @@ function donateToCause(btn, cause_id) {
         let goal = numRaised.html().split("/")[1];
         numRaised.html("Our goal: " + (parseInt(prevRaised) + parseInt(val)) + "/" + goal);
         alert("Thank you for your donation!");
+        let donators_section = $("#donation_" + cause_id + "_section #event_donators");
+        let previous = donators_section.html();
+        donators_section.empty();
+        let content = '<div style="display:block">';
+        content = content + '<img src="' + $("#user64img").attr("src") + '" class="rounded-circle userImg" height="20" width="20" style="display: inline-block; margin-left: 5px; margin-bottom:5px">';
+        content = content + '<span style="display:inline-block; margin-left:5px"><a style="color: black; margin-left:4px" href="" onclick="return loadUser(\'' + userId + '\')">' + $("#user_tag").html() + '</a></span>' +
+            '<span style="display:inline-block; margin-left:5px; color:lightgray">' + "Just now" + '</span>' +
+            '<span style="display:inline-block; margin-left:5px; color:yellow; text-shadow: -1px 0 1px gray, 0 1px 1px gray, 1px 0 1px gray, 0 -1px 1px gray;">' + val + '</span></div><br>';
+        donators_section.append(content);
+        donators_section.append(previous);
     }
     xmlhttp.send(ItemJSON);
 }
