@@ -937,7 +937,7 @@ public class DB_User {
 		
 		//updateNEventsParticipated (user.getKey(), user);
 		
-		user = util.updateProperty(user, N_EVENTS_PARTICIPATED, LongValue.of(user.getLong(N_EVENTS_PARTICIPATED) - 1));
+		user = util.updateProperty(user, N_EVENTS_PARTICIPATED, LongValue.of(user.getLong(N_EVENTS_PARTICIPATED) + 1));
 
 		/*return updateCurrency(user.getKey(), user, DoubleValue.of(user.getDouble(TOTAL_CURRENCY)+ amount*difficulty), 
 				DoubleValue.of(user.getDouble(CURRENT_CURRENCY) + amount*difficulty) );*/
