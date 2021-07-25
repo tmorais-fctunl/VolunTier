@@ -929,8 +929,7 @@ function likeDislikeComment(id) {
         if (!(xmlhttp.readyState == 4 && xmlhttp.status == 204)) {
             alert("Couldn't toggle comment like, message: " + xmlhttp.status);
             if (xmlhttp.status == 403) {
-                if(tryAuthentication())
-                likeDislikeComment(id);
+                
                 return;
             }
             return false;
@@ -976,8 +975,7 @@ function submitComment() {
         if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200)) {
             alert("Couldn't load event participants, message: " + xmlhttp.status);
             if (xmlhttp.status == 403) {
-                if(tryAuthentication())
-                submitComment();
+                
                 return;
             }
             return false;
@@ -1088,8 +1086,7 @@ function confirmDeleteComment(comment_id, confirm) {
                 alert("Couldn't delete comment, message: " + xmlhttp.status);
                 isDeleting = false;
                 if (xmlhttp.status == 403) {
-                    if(tryAuthentication())
-                    confirmDeleteComment(comment_id, confirm);
+                    
                     return;
                 }
                 return false;
@@ -1156,8 +1153,7 @@ function submitEdit(comment_id) {
         if (!(xmlhttp.readyState == 4 && xmlhttp.status == 204)) {
             alert("Couldn't edit comment, message: " + xmlhttp.status);
             if (xmlhttp.status == 403) {
-                if(tryAuthentication())
-                submitEdit(comment_id);
+                
                 return;
             }
             return false;
