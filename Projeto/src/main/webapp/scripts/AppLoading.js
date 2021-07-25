@@ -659,7 +659,7 @@ function loadDonations() {
                         '<span id="donation_id" style="display:none">' + causes[i].id + '</span>' +
                         '<span style="font-size: 150%; color:yellow; text-shadow: -1px 0 1px gray, 0 1px 1px gray, 1px 0 1px gray, 0 -1px 1px gray;">' + causes[i].name + ' </span><span style="display:inline-block"> ' + 'by </span><span style="font-size: 150%; color: yellow; text-shadow: -1px 0 1px gray, 0 1px 1px gray, 1px 0 1px gray, 0 -1px 1px gray;"> ' + causes[i].company_name + '</span>' +
                         '<p id="raised" style="font-size: 150%; color: '+colorGoal+'">' + "Our goal: " + causes[i].raised + "/" + causes[i].goal + '</p>' +
-                        '<p>' + causes[i].description + '</p>' +
+                        '<p style="white-space: pre-wrap;">' + causes[i].description + '</p>' +
                         '<p id="num_donations">' + "Number of donations so far: " + causes[i].num_donations + '</p>' +
                         '<p>' + "Our website: " + causes[i].website + '</p>' +
                         '<input class="createEventFormInput" id="cause_'+causes[i].id+'_donate_ammount_input" type="number" min=1 max=1000000 value=1 placeholder="How much?" style="width:120px">' +

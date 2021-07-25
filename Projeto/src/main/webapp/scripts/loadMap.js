@@ -260,22 +260,17 @@ function createEventButton() {
       });
 
     //document.getElementById("pac-input").style.display="none";
-    map.setOptions({ draggableCursor: 'default' });
-    clickListener = google.maps.event.addListener(map, "click", function(event) {
-      clickMarker(event.latLng);
-      let latLng = event.latLng.lat()+","+event.latLng.lng();
-      document.getElementById("evLoc").value = latLng;
-      //console.log(latLng);
-      getReverseGeocodingData(event.latLng.lat(), event.latLng.lng(), function(locationData) {
+      map.setOptions({ draggableCursor: 'default' });
+      clickListener = google.maps.event.addListener(map, "click", function(event) {
+        clickMarker(event.latLng);
+        let latLng = event.latLng.lat()+","+event.latLng.lng();
+        document.getElementById("evLoc").value = latLng;
+        //console.log(latLng);
+        getReverseGeocodingData(event.latLng.lat(), event.latLng.lng(), function(locationData) {
         console.log(locationData);
         document.getElementById("evLocName").innerHTML = locationData;
       });
-
-
     });
-
-
-
   });
 }
 
@@ -924,6 +919,7 @@ function setMarkerLabelNull(event_id) {
 }
 
 function clickMarker(location) {
+  clickmarker.setMap(map);
   if (clickmarker == null) {
     //console.log("null");
     const icon = {

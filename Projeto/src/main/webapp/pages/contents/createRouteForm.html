@@ -6,7 +6,7 @@
 </style>
 <script>
   $(function () {
-    $('span#disableCreate').bind('click', function (e) {
+    $('span#disableCreateRoute').bind('click', function (e) {
       // "this" points to the <span> element
       // "e" points to the event object
       this.parentElement.style.display='none';
@@ -85,7 +85,7 @@
 
 
 <div id="createRouteForm" style="background-color: #FDFDFD">
-    <span id="disableCreate" class="topright">&times</span>
+    <span id="disableCreateRoute" class="topright">&times</span>
     <label style="width: 100%; font-size: 110%; text-align: center">Route name</label>
     <br>
     <input type="text" style="max-width:100%; min-width:100%" id="routeName" class="createEventFormInput" name="Route Name" placeholder="Something neat">
