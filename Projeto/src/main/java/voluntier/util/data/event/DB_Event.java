@@ -300,7 +300,7 @@ public class DB_Event {
 	public static List<DownloadEventPictureReturn> getPicturesDownloadURLs(String event_id) throws InexistentEventException {
 		getEvent(event_id);
 		List<DownloadEventPictureReturn> download_urls = new LinkedList<>();
-		for(int i = 0; i < 6; ++i) {
+		for(int i = 0; i < 7; ++i) {
 			String filename = generateNewPictureID(event_id, i);
 			Pair<URL, Long> url = GoogleStorageUtil.signURLForDownload(filename);
 			

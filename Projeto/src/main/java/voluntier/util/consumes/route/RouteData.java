@@ -2,7 +2,7 @@ package voluntier.util.consumes.route;
 
 import voluntier.util.consumes.generic.RequestData;
 
-public class RouteData extends RequestData{
+public class RouteData extends RequestData {
 
 	public String route_id;
 	

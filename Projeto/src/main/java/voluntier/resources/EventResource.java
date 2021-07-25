@@ -33,6 +33,7 @@ import voluntier.exceptions.InexistentParticipantException;
 import voluntier.exceptions.InexistentPictureException;
 import voluntier.exceptions.InexistentEventException;
 import voluntier.exceptions.InvalidTokenException;
+import voluntier.exceptions.AlreadyExistsException;
 import voluntier.util.GoogleStorageUtil;
 import voluntier.util.JsonUtil;
 import voluntier.util.consumes.event.QRCodeData;
@@ -145,7 +146,7 @@ public class EventResource {
 
 			return Response.status(Status.NO_CONTENT).build();
 
-		} catch (InvalidTokenException | ImpossibleActionException | InexistentEventException e) {
+		} catch (InvalidTokenException | ImpossibleActionException | InexistentEventException | AlreadyExistsException e) {
 			txn.rollback();
 			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
 
@@ -183,8 +184,7 @@ public class EventResource {
 			Key userKey = usersFactory.newKey(data.participant);
 			Entity user = txn.get(userKey);
 			Entity updated_user = DB_User.leaveEvent(userKey, user, data.event_id);
-			if (data.email.equals(data.participant))
-				txn.put(updated_user);
+			txn.put(updated_user);
 
 			ents.forEach(ent -> txn.put(ent));
 			txn.commit();

@@ -100,7 +100,7 @@ public class RouteResource {
 			txn.rollback();
 			LOG.severe(e.getMessage());
 			return Response.status(Status.TOO_MANY_REQUESTS).build();
-		
+
 		} catch (Exception e) {
 			LOG.severe(e.getMessage());
 			txn.rollback();
@@ -229,8 +229,10 @@ public class RouteResource {
 			ids.forEach(id -> {
 				try {
 					routes.add(new RouteDataReturn(DB_Route.getRoute(id), data.email));
-				} catch (InexistentRouteException e) {}});
-			
+				} catch (InexistentRouteException e) {
+				}
+			});
+
 			return Response.ok(JsonUtil.json.toJson(new UserRoutesReturn(routes))).build();
 
 		} catch (InvalidTokenException | InexistentUserException e) {
@@ -262,8 +264,10 @@ public class RouteResource {
 			ids.forEach(id -> {
 				try {
 					routes.add(new RouteDataReturn(DB_Route.getRoute(id), data.email));
-				} catch (InexistentRouteException e) {}});
-			
+				} catch (InexistentRouteException e) {
+				}
+			});
+
 			return Response.ok(JsonUtil.json.toJson(new UserRoutesReturn(routes))).build();
 
 		} catch (InvalidTokenException | InexistentUserException e) {
@@ -420,7 +424,7 @@ public class RouteResource {
 			}
 		}
 	}
-	
+
 	@POST
 	@Path("/route/remove")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -439,7 +443,7 @@ public class RouteResource {
 
 			Entity route = DB_Route.updateState(data.route_id, data.email, State.BANNED.toString());
 			Entity updated_user = DB_User.removeRoute(user.getKey(), user, data.route_id);
-			
+
 			txn.put(route, updated_user);
 			txn.commit();
 
@@ -483,11 +487,9 @@ public class RouteResource {
 			List<Entity> ents = DB_Route.removeParticipant(data.route_id, data.participant, req_email);
 
 			Entity user = DB_User.getUser(data.participant);
-			
-			if (data.email.equals(data.participant)) {
-				Entity updated_user = DB_User.leaveRoute(user.getKey(), user, data.route_id);
-				txn.put(updated_user);
-			}
+
+			Entity updated_user = DB_User.leaveRoute(user.getKey(), user, data.route_id);
+			txn.put(updated_user);
 
 			ents.forEach(ent -> txn.put(ent));
 			txn.commit();
@@ -512,5 +514,5 @@ public class RouteResource {
 			}
 		}
 	}
-	
+
 }

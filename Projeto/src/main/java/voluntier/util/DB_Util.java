@@ -55,7 +55,7 @@ public class DB_Util {
 		List<Value<?>> current_list = e.getList(list_property);
 
 		if (current_list.contains(StringValue.of(newElement)))
-			throw new AlreadyExistsException();
+			throw new AlreadyExistsException("Element already exists");
 
 		return addStringToList(e, list_property, newElement);
 	}
