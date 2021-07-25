@@ -464,6 +464,8 @@ function leaveEvent(public) {
 
 function joinEvent(public) {
     //Http request:
+    if (!tryAuthentication())
+        return
 
     let event_id = document.getElementById("event_id").innerHTML;
     var urlvariable = "/rest/participateEvent"
@@ -482,8 +484,6 @@ function joinEvent(public) {
         if (!(xmlhttp.readyState == 4 && xmlhttp.status == 204)) {
             console.log("Couldn't join event")
             if (xmlhttp.status == 403) {
-                if(tryAuthentication())
-                joinEvent(public);
                 return;
             }
             return;
