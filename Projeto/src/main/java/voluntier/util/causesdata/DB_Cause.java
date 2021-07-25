@@ -1,6 +1,7 @@
 package voluntier.util.causesdata;
 
 import java.net.URL;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -178,6 +179,7 @@ public class DB_Cause {
 	private static Triplet<List<DonatorDataReturn>, Integer, MoreResultsType> getDonators(Entity cause, int cursor) throws InexistentUserException {
 		List<DonatorsData> donators_data = DB_Util.getJsonList(cause, DONATORS, DonatorsData.class);
 		List<DonatorDataReturn> donators_data_return = new LinkedList<>();
+		Collections.reverse(donators_data);
 		
 		int i = 0;
 		int counter = 0;
