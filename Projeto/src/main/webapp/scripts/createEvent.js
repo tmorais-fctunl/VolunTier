@@ -168,6 +168,7 @@ function fillEventAttributes(attributes) {
     if (attributes.status == "OWNER") {
         document.getElementById("editEventBtn").style.display = "block";
         $("#presenceEventCode").show();
+        $("#qrcode_section").show();
         $("#leaveEventCode").show();
         fillCodes();
         
@@ -176,6 +177,7 @@ function fillEventAttributes(attributes) {
         document.getElementById("editEventBtn").style.display = "none";
         $("#presenceEventCode").hide();
         $("#leaveEventCode").hide();
+        $("#qrcode_section").hide();
         $("#presenceEventCode").attr("src", "");
         $("#leaveEventCode").attr("src", "");
     }
