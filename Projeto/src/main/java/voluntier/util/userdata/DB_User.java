@@ -1041,8 +1041,17 @@ public class DB_User {
 		if (data.last_event_dates.size() < limit)
 			return util.updateProperty(user, property, StringValue.of(getNewLimitString(now_string, data)));
 
-		String firstDate = data.last_event_dates.remove(0);
+		// when lowering the limit on the database, need to delete extra (old) dates
+		if(data.last_event_dates.size() > limit) {
+			List<String> temp = new LinkedList<>();
+			int i = 0;
+			for(String date : data.last_event_dates)
+				if(i++ >= data.last_event_dates.size() - limit)
+					temp.add(date);
+			data.last_event_dates = temp;
+		}
 		
+		String firstDate = data.last_event_dates.remove(0);
 		double nowMillis = now.toDate().getTime();
 		double firstDateMillis = Timestamp.parseTimestamp(firstDate).toDate().getTime();
 		
