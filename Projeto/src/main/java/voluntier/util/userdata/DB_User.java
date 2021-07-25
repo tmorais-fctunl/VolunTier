@@ -793,6 +793,7 @@ public class DB_User {
 		events_list.addValue(event_id);*/
 		
 		user = participateEvent(userKey, user, event_id);
+		user = util.addUniqueStringToList(user, EVENTS, event_id);
 		
 		DB_Statistics.updateNumEvents(true);
 		
@@ -813,6 +814,7 @@ public class DB_User {
 		events.remove(event_id);
 		events.forEach(event -> events_list.addValue(event));*/
 		user = util.removeStringFromList(user, EVENTS, event_id);
+		//leaveEvent(userKey, user, event_id);
 		
 		DB_Statistics.updateNumEvents(false);
 		
@@ -835,7 +837,7 @@ public class DB_User {
 		//return updateParticipatingEventList(userKey, user, events_list.build());
 		return util.updateProperty(user, EVENTS_PARTICIPATING, events_list.build());*/
 		
-		user =  util.addUniqueStringToList(user, EVENTS, event_id);
+		user =  util.addUniqueStringToList(user, EVENTS_PARTICIPATING, event_id);
 		
 		DB_Statistics.updateNumParticipations(true);
 		DB_Statistics.updateTotalNumParticipations();
