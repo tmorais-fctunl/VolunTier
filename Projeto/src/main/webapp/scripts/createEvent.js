@@ -71,6 +71,7 @@ function createEventRequest() {
         '", "category": "' + $("#eventCategory").val() +
         '", "profile": "' + $("#eventPrivacyLock").val() +
         '", "difficulty": "' + $("#evDificulty").val() +
+        '", "contact": "' + $("#evContactPhone").val() +
   '"}';
   console.log(ItemJSON);
   var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //ADD EVENT REST URL

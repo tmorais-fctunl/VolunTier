@@ -1,8 +1,10 @@
 {
   "ExpandedNodes": [
     "",
+    "\\pages",
+    "\\pages\\contents",
     "\\scripts"
   ],
-  "SelectedNode": "\\scripts\\createEvent.js",
+  "SelectedNode": "\\pages\\App.html",
   "PreviewInSolutionExplorer": false
 }
