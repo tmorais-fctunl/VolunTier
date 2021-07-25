@@ -68,7 +68,7 @@ public class StatisticsResource {
 	}
 
 	@POST
-	@Path("/getStatsNumbers")
+	@Path("/getStats")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getStatisticNumbers(RequestData data) {

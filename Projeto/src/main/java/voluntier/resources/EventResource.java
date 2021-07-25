@@ -46,6 +46,7 @@ import voluntier.util.eventdata.DB_Event;
 import voluntier.util.eventdata.ParticipantDataReturn;
 import voluntier.util.produces.CreateEventReturn;
 import voluntier.util.produces.DownloadEventPictureReturn;
+import voluntier.util.produces.EarnCurrencyReturn;
 import voluntier.util.produces.EventDataReturn;
 import voluntier.util.produces.EventPicturesReturn;
 import voluntier.util.produces.ParticipantsReturn;
@@ -607,7 +608,7 @@ public class EventResource {
 			txn.put(event, user);
 			txn.commit();
 
-			return Response.ok(updates.getValue2()).build();
+			return Response.ok(JsonUtil.json.toJson(new EarnCurrencyReturn(updates.getValue2()))).build();
 
 		} catch (InvalidTokenException | InexistentEventException | ImpossibleActionException
 				| InexistentParticipantException e) {
