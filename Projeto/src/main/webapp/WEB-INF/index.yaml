@@ -1,7 +1,0 @@
-indexes:
-
-- kind: User
-  properties:
-  - name: n_user_events_participated
-    direction: desc
-  - name: username

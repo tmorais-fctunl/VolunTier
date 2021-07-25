@@ -14,6 +14,53 @@ var eventNotificationCursors = [];
 
 var myAppRole = '' ;
 
+function getStatistics() {
+    var urlvariable = "/rest/getStats";
+    var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //STATS REST URL
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.open("POST", URL, true);
+    xmlhttp.setRequestHeader("Content-Type", "application/json");
+    var userId = localStorage.getItem("email"), token = localStorage.getItem("jwt");
+    var ItemJSON = '{"email": "' + userId +
+        '", "token": "' + token + '"}';
+    xmlhttp.onload = function () {
+        if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200)) {
+            console.log("Could not load user info");
+            return false;
+        }
+        //SUCCESS
+        const obj = JSON.parse(xmlhttp.responseText);
+        let statistics = $("#Statistics");
+        var content;
+        content = '<div class="container">' +
+            '<div class="row">Total number of users: ' + obj.total_num_users + '</div>' +
+            '<div class="row">Total number of events: ' + obj.total_num_events + '</div>' +
+            '<div class="row">Total number of routes: ' + obj.total_num_routes + '</div>' +
+            '<div class="row">Total number of causes: ' + obj.total_num_causes + '</div>' +
+            '<div class="row">Total number of current event participations: ' + obj.num_participations_event + '</div>' +
+            '<div class="row">Total number of event participations so far: ' + obj.total_num_participations_event + '</div>' +
+            '<div class="row">Total number of current event presences: ' + obj.num_presences + '</div>' +
+            '<div class="row">Total presence time: ' + obj.total_time_presences + '</div>' +
+            '<div class="row">Total number of comments: ' + obj.total_comments + '</div>' +
+            '<div class="row">Total number of current currency: ' + obj.total_current_currency + '</div>' +
+            '<div class="row">Total number of currency held so far' + obj.total_alltime_currency + '</div>' +
+            '<div class="row">Total number of donations ' + obj.total_donations + '</div>' +
+            '<div class="row">Total number of currency donated ' + obj.total_donated + '</div>' +
+            '<div class="row">Average number of users per event: ' + obj.users_per_event + '</div>' +
+            '<div class="row">Average user presence time per user: ' + obj.presence_time_per_user + '</div>' +
+            '<div class="row">Average user presence time per event: ' + obj.presence_time_per_event + '</div>' +
+            '<div class="row">Average donations per cause: ' + obj.donated_per_cause + '</div>' +
+            '<div class="row">Average donations so far: ' + obj.donations_average + '</div>' +
+            '<div class="row">Average number of comments per presence time: ' + obj.comments_per_time + '</div>' +
+            '<div class="row">Average number of comments per user: ' + obj.comments_per_user + '</div>' +
+            '<div class="row">Average number of user presences over participations: ' + obj.presences_average + '</div>' +
+            '<div class="row">Average number of user presences over participations so far: ' + obj.presences_average_total + '</div>' +
+            '</div>';
+        statistics.append(content);
+    }
+    xmlhttp.send(ItemJSON);
+
+}
 
 //Request user info
 function requestUserInfo() {
@@ -42,6 +89,12 @@ function requestUserInfo() {
                 myAppRole = obj.role;
                 if (myAppRole != "USER") {
                     //SHOW STATISTICS TAB
+                    $("#statisticsBTN").show();
+                    $("#Statistics").show();
+
+                    getStatistics();
+
+
                 }
                 document.getElementById("user_tag").innerHTML = obj.username;
                 $("#user_currency").append(obj.currentCurrency);
@@ -523,9 +576,53 @@ function declineRequest(btn, event, user) {
     xmlhttp.send(ItemJSON);
 }
 
+//FROM USER John Doe @ STACK OVERFLOW 25/07/2021
+//https://stackoverflow.com/questions/12934720/how-to-increment-decrement-hex-color-values-with-javascript-jquery
+function gradient(startColor, endColor, steps) {
+    var start = {
+        'Hex': startColor,
+        'R': parseInt(startColor.slice(1, 3), 16),
+        'G': parseInt(startColor.slice(3, 5), 16),
+        'B': parseInt(startColor.slice(5, 7), 16)
+    }
+    var end = {
+        'Hex': endColor,
+        'R': parseInt(endColor.slice(1, 3), 16),
+        'G': parseInt(endColor.slice(3, 5), 16),
+        'B': parseInt(endColor.slice(5, 7), 16)
+    }
+    diffR = end['R'] - start['R'];
+    diffG = end['G'] - start['G'];
+    diffB = end['B'] - start['B'];
+
+    stepsHex = new Array();
+    stepsR = new Array();
+    stepsG = new Array();
+    stepsB = new Array();
+
+    for (var i = 0; i <= steps; i++) {
+        stepsR[i] = start['R'] + ((diffR / steps) * i);
+        stepsG[i] = start['G'] + ((diffG / steps) * i);
+        stepsB[i] = start['B'] + ((diffB / steps) * i);
+
+        let red = Math.round(stepsR[i]).toString(16);
+        if (red == '0')
+            red = '00';
+        let blue = Math.round(stepsB[i]).toString(16);
+        if (blue == '0')
+            blue = '00';
+        let green = Math.round(stepsG[i]).toString(16);
+        if (green == '0')
+            green = '00';
+        stepsHex[i] = '#' + red + '' + green + '' + blue;
+    }
+    return stepsHex;
+
+}
+
 function loadDonations() {
     let donationsSection = $("#donations_container");
-
+    console.log(donationsSection);
     var urlvariable = "/rest/causes/get/all";
     var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //CURRENCY LB REST URL
     var xmlhttp = new XMLHttpRequest();
@@ -543,21 +640,157 @@ function loadDonations() {
         const attributes = JSON.parse(xmlhttp.responseText);
         var content;
         let causes = attributes.causes;
-        console.log(causes);
+        let gradientvar = gradient("#f00000","#00d000", 5);
+        
+   
 
         for (var i = 0; i < causes.length; i++) {
-            content = '<div class="comments" style="height:30%; width: 100%">' +
-                        '<div class="row' > +
-                            '<div class="col-4">col-8</div>' +
-                            '<div class="col-8">col-4</div>' +
-                        '</div>'
-            '</div>';
+            let goalparts = (causes[i].goal/5);
+            let raisedColorQfc = (causes[i].raised / goalparts);
+            let goalColor = Math.round(raisedColorQfc);
+            let colorGoal = gradientvar[goalColor];
+         
+            content =
+                '<div class="row createEventFormInput" style="max-height:500px; background-color:white;" id="donation_'+ causes[i].id +'_section">' +
+                    '<div class="col-4" style="margin-top:5px; margin-bottom:5px; max-height:490px; overflow:auto;" id="donation_images">' +
+                        
+                    '</div> ' +
+                    '<div class="col-8" style="text-align: center; margin-top:5px; margin-bottom:5px; max-height:490px; overflow:auto">' +
+                        '<span id="donation_id" style="display:none">' + causes[i].id + '</span>' +
+                        '<span style="font-size: 150%; color:yellow; text-shadow: -1px 0 1px gray, 0 1px 1px gray, 1px 0 1px gray, 0 -1px 1px gray;">' + causes[i].name + ' </span><span style="display:inline-block"> ' + 'by </span><span style="font-size: 150%; color: yellow; text-shadow: -1px 0 1px gray, 0 1px 1px gray, 1px 0 1px gray, 0 -1px 1px gray;"> ' + causes[i].company_name + '</span>' +
+                        '<p id="raised" style="font-size: 150%; color: '+colorGoal+'">' + "Our goal: " + causes[i].raised + "/" + causes[i].goal + '</p>' +
+                        '<p>' + causes[i].description + '</p>' +
+                        '<p id="num_donations">' + "Number of donations so far: " + causes[i].num_donations + '</p>' +
+                        '<p>' + "Our website: " + causes[i].website + '</p>' +
+                        '<input class="createEventFormInput" id="cause_'+causes[i].id+'_donate_ammount_input" type="number" min=1 max=1000000 value=1 placeholder="How much?" style="width:120px">' +
+                        '<button class="btn createEventFormInput" style="margin-left: 5px;background-color: lightgray;color:black; padding:2px; font-size:100%" disabled=false onclick="donateToCause(this,\'' + causes[i].id + '\')" >Donate</button>' +
+                        '<br>' +
+                        '<br>' +
+                        '<h6 style="text-aligned" >Recent Donators</h6>' +
+                        '<div id="event_donators" class="createEventFormInput" style="overflow:auto; max-height:150px"></div>' +
+                        '<br>' +
+                    '</div> ' +
+                '</div>' +
+                '<br>';
             donationsSection.append(content);
+            let pics = causes[i].pics;
+            for (var j = 0; j < pics.length; j++)
+                loadDonationPhoto(causes[i].id, pics[j].dwld_url.url);
+            loadDonationDonators(causes[i].id);
         }
     }
     xmlhttp.send(ItemJSON);
 
 }
+
+function loadDonationDonators(causeid) {
+    let section = $("#donation_" + causeid + "_section #event_donators");
+    let nextCursor = 0;
+    let currentCursor = 0;
+    var urlvariable = "/rest/causes/donators";
+    var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //DONATE REST URL
+    var xmlhttp = new XMLHttpRequest();
+    var userId = localStorage.getItem("email"), token = localStorage.getItem("jwt");
+
+    do {
+        xmlhttp.open("POST", URL, false);
+        xmlhttp.setRequestHeader("Content-Type", "application/json");
+        currentCursor = nextCursor;
+        var ItemJSON = '{"email": "' + userId +
+            '", "token": "' + token +
+            '", "cause_id": "' + causeid;
+        if (currentCursor != 0)
+            ItemJSON = ItemJSON + '", "cursor": "' + currentCursor;
+        ItemJSON = ItemJSON + '"}';
+
+        xmlhttp.onload = function () {
+            if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200)) {
+                console.log("Couldn't load donators...");
+                return false;
+            }
+            const attributes = JSON.parse(xmlhttp.responseText);
+            let donators = attributes.donators;
+            if (attributes.results != "NO_MORE_RESULTS")
+                nextCursor = attributes.cursor;
+            var content;
+            for (var i = 0; i < donators.length; i++) {
+                let date = new Date(donators[i].timestamp);
+                let hour = ("0" + date.getHours()).slice(-2);
+                let min = ("0" + date.getMinutes()).slice(-2)
+                date = date.getDate() + "/" + (parseInt(date.getMonth()) + 1) + "/" + date.getFullYear() + " " + hour + ":" + min;
+                content = '<div style="display:block">';
+                if (donators[i].pic_64)
+                    content = content + '<img src="' + donators[i].pic_64 + '" class="rounded-circle userImg" height="20" width="20" style="display: inline-block; margin-left: 5px; margin-bottom:5px">';
+                content = content + '<span style="display:inline-block; margin-left:5px"><a style="color: black; margin-left:4px" href="" onclick="return loadUser(\'' + donators[i].email + '\')">' + donators[i].username + '</a></span>' +
+                    '<span style="display:inline-block; margin-left:5px; color:lightgray">' + date + '</span>' +
+                    '<span style="display:inline-block; margin-left:5px; color:yellow; text-shadow: -1px 0 1px gray, 0 1px 1px gray, 1px 0 1px gray, 0 -1px 1px gray;">' + donators[i].donation + '</span></div><br>';
+                section.append(content);
+            }
+
+        }
+        xmlhttp.send(ItemJSON);
+    }
+    while (currentCursor!=nextCursor)
+}
+
+function donateToCause(btn, cause_id) {
+    let input = $(btn).siblings("input");
+    let val = input.val();
+    var urlvariable = "/rest/causes/donate";
+    var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //DONATE REST URL
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.open("POST", URL, true);
+    xmlhttp.setRequestHeader("Content-Type", "application/json");
+    var userId = localStorage.getItem("email"), token = localStorage.getItem("jwt");
+    var ItemJSON = '{"email": "' + userId +
+        '", "token": "' + token +
+        '", "cause_id": "' + cause_id +
+        '", "amount": "' + val +
+        '"}';
+
+    xmlhttp.onload = function () {
+        if (!(xmlhttp.readyState == 4 && xmlhttp.status == 204)) {
+            alert("Could not donate :( "+xmlhttp.status);
+            return false;
+        }
+        //SUCCESS:
+        let prevCurrency = $("#user_currency").text();
+        let newCurrency = parseInt(prevCurrency) - val;
+        $("#user_currency").text(newCurrency);
+        let numDonations = $(btn).siblings("#num_donations");
+        let prevDonations = numDonations.html().split(": ")[1];
+        numDonations.html(numDonations.html().split(": ")[0] + ": " + (parseInt(prevDonations) + 1));
+
+        let numRaised = $(btn).siblings("#raised");
+        let prevRaised = numRaised.html().split("/")[0].split("Our goal: ")[1];
+        let goal = numRaised.html().split("/")[1];
+        numRaised.html("Our goal: " + (parseInt(prevRaised) + parseInt(val)) + "/" + goal);
+        alert("Thank you for your donation!");
+    }
+    xmlhttp.send(ItemJSON);
+}
+
+function loadDonationPhoto(causeid, url) {
+    let section = $("#donation_" + causeid + "_section #donation_images");
+    let img = $("#donation_" + causeid + "_section img");
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.open("GET", url, true);
+    xmlhttp.responseType = "blob";
+    xmlhttp.onload = function (oEvent) {
+        if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200)) {
+            console.log("Couldn't load donation image from GCS, message: " + xmlhttp.status);
+            return false;
+        }
+        // var blob = new Blob([xmlhttp.response]);
+        var blob = xmlhttp.response;
+        let content = '<img style="margin-top:2.5%; margin-bottom:2.5%; border-style:solid; border-width:3px; box-shadow: 0 0 50px #ccc;" width="95%" src="' + URL.createObjectURL(blob)+'">';
+        section.append(content);
+    };
+    xmlhttp.send();
+
+}
+
+
 
 window.onload = function () {
     // For debugging purposes: loadContents();
@@ -614,9 +847,18 @@ window.onload = function () {
 
 
     $('body').on("keyup", '#newRouteComment', function () {
-        console.log("CRALGO");
         if ($(this).val() != "") $('#Route #submitCommentBtn').removeAttr('disabled');
         else $('#Route #submitCommentBtn').prop("disabled", true);
+    });
+
+    //Donations
+    $('body').ready(function () {
+        $('body #Donations').on("keyup change", 'input', function () {
+            if ($(this).val().length == 0 || $(this).val() > parseInt($("#user_currency").text()))
+                $(this).siblings("button").prop("disabled", true);
+            else
+                $(this).siblings("button").removeAttr('disabled');
+        });
     });
 
 

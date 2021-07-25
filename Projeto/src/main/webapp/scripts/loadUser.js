@@ -19,9 +19,21 @@ function loadUser(user_id) {
             return false;
         }
         //Success:
+
+        
+
         const obj = JSON.parse(xmlhttp.responseText);
+        if (obj.profile == "PRIVATE") {
+            $("#user_website_section").hide();
+            $("#user_information_section").hide();
+        }
+        else {
+            $("#user_website_section").show();
+            $("#user_information_section").show();
+        }
         document.getElementById("user_username").innerHTML = obj.username;
-        document.getElementById("user_fullname").innerHTML = obj.full_name;
+        if (obj.full_name)
+            document.getElementById("user_fullname").innerHTML = obj.full_name;
         document.getElementById("user_visibility").innerHTML = obj.profile;
         document.getElementById("user_email").innerHTML = obj.email;
         if (obj.region)
@@ -68,16 +80,17 @@ function loadUser(user_id) {
 
 function requestOtherUserPictureGCS(url) {
     var xmlhttp = new XMLHttpRequest();
+    var userpic = document.getElementById("user_userImg");
     xmlhttp.open("GET", url, true);
     xmlhttp.responseType = "blob";
     xmlhttp.onload = function (oEvent) {
         if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200)) {
             console.log("Couldn't load user image from GCS, message: " + xmlhttp.status);
+            userpic.src = "";
             return false;
         }
         // var blob = new Blob([xmlhttp.response]);
         var blob = xmlhttp.response;
-        var userpic = document.getElementById("user_userImg");
         userpic.src = URL.createObjectURL(blob);
     };
     xmlhttp.send();

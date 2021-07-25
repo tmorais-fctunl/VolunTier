@@ -255,7 +255,7 @@ function createEventButton() {
           },
           async: true,
           complete: function () {
-              updateRouteFormInputs();
+              updateFormInputs();
           }
       });
 
@@ -283,7 +283,7 @@ function createRouteButton() {
     
     labelIndex = 0;
     const createRouteButton = document.createElement('button');
-    createRouteButton.textContent = "Create new Route";
+    createRouteButton.textContent = "Create new route";
     createRouteButton.classList.add("custom-map-control-button");
     map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(createRouteButton);
     createRouteButton.addEventListener("click", () => {

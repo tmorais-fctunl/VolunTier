@@ -40,10 +40,11 @@
         <a style="font-family: 'Alice', serif; font-size: 15px; color: #000000; letter-spacing: 1px; text-align: center;" id="user_tag"></a>
         <!--Ver se o user tem imagem, se nao tiver mete com display none-->
         <img id="user64img" src="" class="rounded-circle" width="30" height="30" style="margin-left: 10px">
-        <span id="user_currency" style="display: inline-block; margin-left:10px; color:yellow; text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black; font-size:110%"><i style="        color: green;
+        <i style="        color: green;
         text-shadow: none;
-        margin-right: 5px
-" class="fa fa-money" aria-hidden="true"> </i></span>
+        margin-left: 10px
+" class="fa fa-money" aria-hidden="true"></i>
+        <span id="user_currency" style="display: inline-block; margin-left:5px; margin-right:5px; color:yellow; text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black; font-size:110%"></span>
     </nav>
     <div class="tab">
         <button class="tablinks" onclick="openTab(event, 'Map')" id="defaultOpen">Map</button>
@@ -51,6 +52,7 @@
         <button class="tablinks" onclick="openTab(event, 'Leaderboard')">Leaderboard</button>
         <button class="tablinks" onclick="openTab(event, 'Donations')">Donations</button>
         <button class="tablinks" onclick="openTab(event, 'Notifications')">Requests</button>
+        <button id="statisticsBTN" class="tablinks" onclick="openTab(event, 'Statistics')" style="display:none">Statistics</button>
     </div>
 
     <!-- Tab contents-->
@@ -129,7 +131,7 @@
     <div id="Donations" class="tabcontent">
         <!--  <span onclick="this.parentElement.style.display='none'" class="topright">&times</span>-->
         <h3 style="text-align:center">Donations</h3>
-        <div class="container" id="donations_container">
+        <div class="container" style="height:80%; width: 100%;" id="donations_container">
 
         </div>
 
@@ -430,7 +432,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="card mt-3">
+                        <div class="card mt-3" id="user_website_section">
                             <ul class="list-group list-group-flush">
                                 <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap">
                                     <h6 class="mb-0">
@@ -472,7 +474,7 @@
                         </div>
                     </div>
                     <div class="col-md-8">
-                        <div class="card mb-3">
+                        <div class="card mb-3" id="user_information_section">
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-sm-3">
@@ -602,9 +604,10 @@
                                         <br>
                                         <br>
                                         <br>
-                                        <h6 class="mb-0" style="width:100%; font-size: 120%">Your rating</h6>
+                                        
 
-                                        <div class="rate" style="margin:0 auto">
+                                        <div class="rate" style="margin:0 auto" id="route_rating_stars">
+                                            <h6 class="mb-0" style="width:100%; font-size: 120%">Your rating</h6>
                                             <input type="radio" id="star5" name="rate" value="5.0" />
                                             <label for="star5" title="text">5 stars</label>
                                             <input type="radio" id="star4" name="rate" value="4.0" />
@@ -671,7 +674,9 @@
             </div>
         </div>
     </div>
+    <div id="Statistics" class="tabcontent" style="display:none">
 
+    </div>
     <!--Footer-->
     <div class="bg-dark pt-5 text-white-50" style="width: 100%; height:auto">
         <div class="container">

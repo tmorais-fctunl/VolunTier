@@ -249,6 +249,10 @@ function fillRouteAttributes(attributes) {
     //console.log("Are you allowed to comment: " + (attributes.status == "PARTICIPANT" || attributes.status == "OWNER"));
     route_newCommentVerification(attributes.status == "PARTICIPANT" || attributes.status == "CREATOR" || attributes.status == "MOD");
     route_handleComments();
+    if (attributes.status == "NON_PARTICIPANT")
+        $("#route_rating_stars").hide();
+    else
+        $("#route_rating_stars").show();
 
     //Photos:
 
@@ -335,6 +339,7 @@ function leaveRoute() {
         route_handleComments();
         route_newCommentVerification(false);
         document.getElementById("route_joined_capacity").innerHTML = route_num_participants;
+        $("#route_rating_stars").hide();
         return;
     }
     xmlhttp.send(ItemJSON);
@@ -371,6 +376,7 @@ function joinRoute() {
             route_handleComments();
             route_newCommentVerification(true);
             document.getElementById("route_joined_capacity").innerHTML = route_num_participants;
+            $("#route_rating_stars").show();
         return;
     }
     xmlhttp.send(ItemJSON);

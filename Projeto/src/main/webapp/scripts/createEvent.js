@@ -828,7 +828,7 @@ function fillEventComments(event_id, cursor) {
     xmlhttp.setRequestHeader("Content-Type", "application/json");
     xmlhttp.onload = function (oEvent) {
         if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200)) {
-            alert("Couldn't load event comments, message: " + xmlhttp.status);
+            console.log("Couldn't load event comments, message: " + xmlhttp.status);
             return false;
         }
         const attributes = JSON.parse(xmlhttp.responseText);
