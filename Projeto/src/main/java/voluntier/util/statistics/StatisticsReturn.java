@@ -81,7 +81,7 @@ public class StatisticsReturn {
 			this.comments_per_time = total_commments / total_time_presences;
 			this.comments_per_user = total_commments / total_num_users;
 			this.presences_average = total_num_presences / num_participations_event;
-			this.presences_average = total_num_presences / total_num_participations_event;
+			this.presences_average_total = total_num_presences / total_num_participations_event;
 		} catch (ArithmeticException e) {
 			
 		}
