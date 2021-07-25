@@ -395,7 +395,7 @@ function searchEventsByRange(pos) {
 
             //Ver se expirou
             exp = new Date(attributes.end_date);
-            //if (exp > now)
+            if (exp > now)
                 timeOutAddition(obj, i);
         }
         
@@ -434,7 +434,7 @@ function searchRoutesByRange(pos) {
 
             //Ver se expirou
             exp = new Date(attributes.end_date);
-            //if (exp > now)
+            if (exp > now)
                 timeOutRouteAddition(obj, i);
         }
     };
