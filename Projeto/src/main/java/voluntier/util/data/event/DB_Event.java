@@ -52,7 +52,6 @@ import voluntier.util.produces.chat.ChatReturn;
 import voluntier.util.produces.pictures.DownloadEventPictureReturn;
 import voluntier.util.produces.pictures.DownloadSignedURLReturn;
 
-// TODO please refactor me
 public class DB_Event {
 
 	public static final String NAME = "event_name";
@@ -167,7 +166,6 @@ public class DB_Event {
 				.set(REQUESTS, event.getList(REQUESTS))
 				.set(N_REQUESTS, event.getLong(N_REQUESTS))
 				.set(DIFFICULTY, event.getLong(DIFFICULTY))
-				// additional properties here or change above
 				.build());
 		
 		return entities;
@@ -232,21 +230,6 @@ public class DB_Event {
 		} else return event;
 		
 		return util.updateProperty(event, STATE, StringValue.of(state));
-
-		/*return Entity.newBuilder(event.getKey()).set(NAME, event.getString(NAME)).set(ID, event.getString(ID))
-				.set(LOCATION, event.getLatLng(LOCATION)).set(START_DATE, event.getString(START_DATE))
-				.set(END_DATE, event.getString(END_DATE)).set(CREATION_DATE, event.getString(CREATION_DATE))
-				.set(CHAT_ID, event.getString(CHAT_ID)).set(PARTICIPANTS, event.getList(PARTICIPANTS))
-				.set(N_PARTICIPANTS, event.getLong(N_PARTICIPANTS)).set(OWNER_EMAIL, event.getString(OWNER_EMAIL))
-				.set(CONTACT, event.getString(CONTACT)).set(DESCRIPTION, event.getString(DESCRIPTION))
-				.set(CATEGORY, event.getString(CATEGORY)).set(CAPACITY, event.getLong(CAPACITY)).set(STATE, state)
-				.set(PROFILE, event.getString(PROFILE)).set(WEBSITE, event.getString(WEBSITE))
-				.set(FACEBOOK, event.getString(FACEBOOK)).set(INSTAGRAM, event.getString(INSTAGRAM))
-				.set(TWITTER, event.getString(TWITTER)).set(GEOHASH, event.getString(GEOHASH)).set(DIFFICULTY, event.getLong(DIFFICULTY))
-				.set(PICTURES, event.getList(PICTURES)).set(PRESENCE_CODE, event.getString(PRESENCE_CODE))
-				.set(LEAVE_CODE, event.getString(LEAVE_CODE)).set(PRESENCES, event.getList(PRESENCES))
-				.set(TWITTER, event.getString(TWITTER)).set(GEOHASH, event.getString(GEOHASH)).set(PICTURES, event.getList(PICTURES))
-				.set(REQUESTS, event.getList(REQUESTS)).set(N_REQUESTS, event.getLong(N_REQUESTS)).build();*/
 	}
 
 	public static Entity updateProfile(String event_id, String email, String profile)
@@ -256,21 +239,6 @@ public class DB_Event {
 		checkIsActive(event);
 		
 		return util.updateProperty(event, PROFILE, StringValue.of(profile));
-
-		/*return Entity.newBuilder(event.getKey()).set(NAME, event.getString(NAME)).set(ID, event.getString(ID))
-				.set(LOCATION, event.getLatLng(LOCATION)).set(START_DATE, event.getString(START_DATE))
-				.set(END_DATE, event.getString(END_DATE)).set(CREATION_DATE, event.getString(CREATION_DATE))
-				.set(CHAT_ID, event.getString(CHAT_ID)).set(PARTICIPANTS, event.getList(PARTICIPANTS))
-				.set(N_PARTICIPANTS, event.getLong(N_PARTICIPANTS)).set(OWNER_EMAIL, event.getString(OWNER_EMAIL))
-				.set(CONTACT, event.getString(CONTACT)).set(DESCRIPTION, event.getString(DESCRIPTION))
-				.set(CATEGORY, event.getString(CATEGORY)).set(CAPACITY, event.getLong(CAPACITY))
-				.set(STATE, event.getString(STATE)).set(PROFILE, profile).set(WEBSITE, event.getString(WEBSITE))
-				.set(FACEBOOK, event.getString(FACEBOOK)).set(INSTAGRAM, event.getString(INSTAGRAM))
-				.set(TWITTER, event.getString(TWITTER)).set(GEOHASH, event.getString(GEOHASH)).set(DIFFICULTY, event.getLong(DIFFICULTY))
-				.set(PICTURES, event.getList(PICTURES)).set(PRESENCE_CODE, event.getString(PRESENCE_CODE))
-				.set(LEAVE_CODE, event.getString(LEAVE_CODE)).set(PRESENCES, event.getList(PRESENCES))
-				.set(REQUESTS, event.getList(REQUESTS)).set(N_REQUESTS, event.getLong(N_REQUESTS))
-				.build();*/
 	}
 
 	public static Pair<List<Entity>, String> createNew (CreateEventData create_event_data) throws IllegalCoordinatesException {
@@ -286,8 +254,6 @@ public class DB_Event {
 		String event_id = eventKey.getName();
 
 		ListValue.Builder pictures = ListValue.newBuilder();
-		//String picture_id = generateNewPictureID(null, event_id);
-		//pictures.addValue(picture_id);
 
 		EventData_Minimal data = new EventData_Minimal(create_event_data);
 		LatLng event_location = LatLng.of(data.location[0], data.location[1]);
@@ -327,113 +293,9 @@ public class DB_Event {
 				.set(PICTURES, pictures.build())
 				.set(REQUESTS, requests.build())
 				.set(N_REQUESTS, 0).build());
-		
-		//DB_Statistics.updateNumEvents(true);
 
 		return new Pair<>(entities, event_id);
 	}
-	
-	/*private static Entity updatePictures(Entity event, ListValue newPictures) {
-
-		return Entity.newBuilder(event.getKey()).set(NAME, event.getString(NAME)).set(ID, event.getString(ID))
-				.set(LOCATION, event.getLatLng(LOCATION)).set(START_DATE, event.getString(START_DATE))
-				.set(END_DATE, event.getString(END_DATE)).set(CREATION_DATE, event.getString(CREATION_DATE))
-				.set(CHAT_ID, event.getString(CHAT_ID)).set(PARTICIPANTS, event.getList(PARTICIPANTS))
-				.set(N_PARTICIPANTS, event.getLong(N_PARTICIPANTS)).set(OWNER_EMAIL, event.getString(OWNER_EMAIL))
-				.set(CONTACT, event.getString(CONTACT)).set(DESCRIPTION, event.getString(DESCRIPTION))
-				.set(CATEGORY, event.getString(CATEGORY)).set(CAPACITY, event.getLong(CAPACITY))
-				.set(STATE, event.getString(STATE)).set(PROFILE, event.getString(PROFILE))
-				.set(WEBSITE, event.getString(WEBSITE)).set(FACEBOOK, event.getString(FACEBOOK))
-				.set(INSTAGRAM, event.getString(INSTAGRAM)).set(TWITTER, event.getString(TWITTER))
-				.set(GEOHASH, event.getString(GEOHASH)).set(DIFFICULTY, event.getLong(DIFFICULTY)).set(PICTURES, newPictures)
-				.set(PRESENCE_CODE, event.getString(PRESENCE_CODE)).set(LEAVE_CODE, event.getString(LEAVE_CODE))
-				.set(PRESENCES, event.getList(PRESENCES))
-				.set(REQUESTS, event.getList(REQUESTS)).set(N_REQUESTS, event.getLong(N_REQUESTS)).build();
-	}
-	
-	private static Entity updatePresenceList(Entity event, ListValue presences) {
-
-		return Entity.newBuilder(event.getKey()).set(NAME, event.getString(NAME)).set(ID, event.getString(ID))
-				.set(LOCATION, event.getLatLng(LOCATION)).set(START_DATE, event.getString(START_DATE))
-				.set(END_DATE, event.getString(END_DATE)).set(CREATION_DATE, event.getString(CREATION_DATE))
-				.set(CHAT_ID, event.getString(CHAT_ID)).set(PARTICIPANTS, event.getList(PARTICIPANTS))
-				.set(N_PARTICIPANTS, event.getLong(N_PARTICIPANTS)).set(OWNER_EMAIL, event.getString(OWNER_EMAIL))
-				.set(CONTACT, event.getString(CONTACT)).set(DESCRIPTION, event.getString(DESCRIPTION))
-				.set(CATEGORY, event.getString(CATEGORY)).set(CAPACITY, event.getLong(CAPACITY))
-				.set(STATE, event.getString(STATE)).set(PROFILE, event.getString(PROFILE))
-				.set(WEBSITE, event.getString(WEBSITE)).set(FACEBOOK, event.getString(FACEBOOK))
-				.set(INSTAGRAM, event.getString(INSTAGRAM)).set(TWITTER, event.getString(TWITTER))
-				.set(GEOHASH, event.getString(GEOHASH)).set(DIFFICULTY, event.getLong(DIFFICULTY)).set(PICTURES, event.getList(PICTURES))
-				.set(PRESENCE_CODE, event.getString(PRESENCE_CODE)).set(LEAVE_CODE, event.getString(LEAVE_CODE))
-				.set(PRESENCES, presences).set(REQUESTS, event.getList(REQUESTS)).set(N_REQUESTS, event.getLong(N_REQUESTS)).build();
-	}*/
-
-	/*public static Pair<Entity, String> addPicture(String event_id, String req_email)
-			throws InexistentEventException, ImpossibleActionException, MaximumSizeReachedException {
-		Entity event = getEvent(event_id);
-		checkIsOwner(event, req_email);
-		checkIsActive(event);
-
-		String new_pic_id = generateNewPictureID(event, null);
-
-		List<Value<?>> pics = event.getList(PICTURES);
-		if (pics.size() >= MAX_NUM_PICTURES)
-			throw new MaximumSizeReachedException("This event cannot have anymore pictures " + event_id);
-
-		ListValue.Builder newList = ListValue.newBuilder().set(pics);
-		newList.addValue(new_pic_id);
-
-		return new Pair<>(updatePictures(event, newList.build()), new_pic_id);
-	}
-
-	public static Entity deletePicture(String event_id, String pic_id, String req_email)
-			throws ImpossibleActionException, InexistentEventException, InexistentPictureException {
-		Entity event = getEvent(event_id);
-		checkIsOwner(event, req_email);
-		checkIsActive(event);
-
-		List<String> pictures = getPicturesList(event);
-		if (!pictures.contains(pic_id))
-			throw new InexistentPictureException("12: There is no picture with id:" + pic_id + " for this event");
-
-		pictures.remove(pic_id);
-
-		ListValue.Builder newList = ListValue.newBuilder();
-		pictures.forEach(pic -> newList.addValue(pic));
-
-		return updatePictures(event, newList.build());
-	}
-
-	private static List<String> getPicturesList(Entity event) {
-			List<Value<?>> pictures = event.getList(PICTURES);
-			List<String> picture_ids = new LinkedList<>();
-
-			pictures.forEach(pic -> picture_ids.add((String) pic.get()));
-
-			return picture_ids;
-	}
-
-	public static List<DownloadPictureReturn> getPicturesDownloadURLs(String event_id) throws InexistentEventException {
-		Entity event = getEvent(event_id);
-		return getPicturesDownloadURLs(event);
-	}
-
-	public static List<DownloadPictureReturn> getPicturesDownloadURLs(Entity event) throws InexistentEventException {
-		List<String> filenames = getPicturesList(event);
-		List<DownloadPictureReturn> download_urls = new LinkedList<>();
-
-		filenames.forEach(file -> {
-			Pair<URL, Long> url = GoogleStorageUtil.signURLForDownload(file);
-			
-			if(url.getValue1() == 0)
-				return;
-			
-			DownloadSignedURLReturn dwld_url = new DownloadSignedURLReturn(url.getValue0(), url.getValue1());
-			download_urls.add(new DownloadPictureReturn(dwld_url, file, null, null));
-		});
-
-		return download_urls;
-	}*/
 	
 	public static List<DownloadEventPictureReturn> getPicturesDownloadURLs(String event_id) throws InexistentEventException {
 		getEvent(event_id);
@@ -463,58 +325,8 @@ public class DB_Event {
 		return idKey;
 	}
 
-	/*private static Entity updateParticipants(Key eventKey, Entity event, ListValue newParticipants, boolean add) {
-		Entity.Builder builder = Entity.newBuilder(eventKey);
-		long n_participants = event.getLong(N_PARTICIPANTS);
-		if (add)
-			builder.set(N_PARTICIPANTS, n_participants + 1);
-		else
-			builder.set(N_PARTICIPANTS, n_participants - 1);
-
-		return builder.set(NAME, event.getString(NAME)).set(ID, event.getString(ID))
-				.set(LOCATION, event.getLatLng(LOCATION)).set(START_DATE, event.getString(START_DATE))
-				.set(END_DATE, event.getString(END_DATE)).set(CREATION_DATE, event.getString(CREATION_DATE))
-				.set(CHAT_ID, event.getString(CHAT_ID)).set(PARTICIPANTS, newParticipants)
-				.set(OWNER_EMAIL, event.getString(OWNER_EMAIL)).set(CONTACT, event.getString(CONTACT))
-				.set(DESCRIPTION, event.getString(DESCRIPTION)).set(CATEGORY, event.getString(CATEGORY))
-				.set(CAPACITY, event.getLong(CAPACITY)).set(STATE, event.getString(STATE))
-				.set(PROFILE, event.getString(PROFILE)).set(WEBSITE, event.getString(WEBSITE))
-				.set(FACEBOOK, event.getString(FACEBOOK)).set(INSTAGRAM, event.getString(INSTAGRAM))
-				.set(TWITTER, event.getString(TWITTER)).set(GEOHASH, event.getString(GEOHASH)).set(DIFFICULTY, event.getLong(DIFFICULTY))
-				.set(PICTURES, event.getList(PICTURES)).set(REQUESTS, event.getList(REQUESTS)).set(N_REQUESTS, event.getLong(N_REQUESTS))
-				.set(PRESENCE_CODE, event.getString(PRESENCE_CODE)).set(LEAVE_CODE, event.getString(LEAVE_CODE))
-				.set(PRESENCES, event.getList(PRESENCES))
-				.build();
-	}
-
-	private static Entity updateRequests(Key eventKey, Entity event, ListValue newRequests, boolean add) {
-		Entity.Builder builder = Entity.newBuilder(eventKey);
-		long n_requests = event.getLong(N_REQUESTS);
-		if (add)
-			builder.set(N_REQUESTS, n_requests + 1);
-		else
-			builder.set(N_REQUESTS, n_requests - 1);
-
-		return builder.set(NAME, event.getString(NAME)).set(ID, event.getString(ID))
-				.set(LOCATION, event.getLatLng(LOCATION)).set(START_DATE, event.getString(START_DATE))
-				.set(END_DATE, event.getString(END_DATE)).set(CREATION_DATE, event.getString(CREATION_DATE))
-				.set(CHAT_ID, event.getString(CHAT_ID)).set(PARTICIPANTS, event.getList(PARTICIPANTS))
-				.set(N_PARTICIPANTS, event.getLong(N_PARTICIPANTS))
-				.set(OWNER_EMAIL, event.getString(OWNER_EMAIL)).set(CONTACT, event.getString(CONTACT))
-				.set(DESCRIPTION, event.getString(DESCRIPTION)).set(CATEGORY, event.getString(CATEGORY))
-				.set(CAPACITY, event.getLong(CAPACITY)).set(STATE, event.getString(STATE))
-				.set(PROFILE, event.getString(PROFILE)).set(WEBSITE, event.getString(WEBSITE))
-				.set(FACEBOOK, event.getString(FACEBOOK)).set(INSTAGRAM, event.getString(INSTAGRAM))
-				.set(TWITTER, event.getString(TWITTER)).set(GEOHASH, event.getString(GEOHASH))
-				.set(DIFFICULTY, event.getLong(DIFFICULTY)).set(PICTURES, event.getList(PICTURES))
-				.set(REQUESTS, newRequests).set(PRESENCE_CODE, event.getString(PRESENCE_CODE))
-				.set(LEAVE_CODE, event.getString(LEAVE_CODE)).set(PRESENCES, event.getList(PRESENCES)).build();
-	}*/
-
 	public static boolean belongsToList (Entity event, String email, boolean participant) throws InexistentEventException {
-		
-		//return util.existsInStringList(event, email, email)
-		
+
 		List<String> participants = getListEmails(event, participant);
 		
 		if (participants.contains(email))
@@ -649,14 +461,6 @@ public class DB_Event {
 			return DB_Util.getStringList(event, PARTICIPANTS);
 		else
 			return DB_Util.getStringList(event, REQUESTS);
-		/*List<String> emails = new LinkedList<>();
-		List<Value<?>> event_emails = isParticipants ? event.getList(PARTICIPANTS) : event.getList(REQUESTS);
-		event_emails.forEach(email -> {
-			String person_email = (String) email.get();
-			emails.add(person_email);
-		});
-
-		return emails;*/
 	}
 	
 	public static Triplet<List<ParticipantDataReturn>, Integer, MoreResultsType> getRequestsList(String event_id,
@@ -665,7 +469,6 @@ public class DB_Event {
 		Entity event = getEvent(event_id);
 		checkIsOwner(event, user_email);
 		
-		//return null;
 		return getEventLists(event_id, cursor, false, user_email);
 	}
 
@@ -678,7 +481,6 @@ public class DB_Event {
 			checkIsOwner(event, user_email);
 
 		List<String> people_emails = getListEmails(event, isParticipants);
-		//List<String> people_emails = util.getStringList(event, PARTICIPANTS);
 		List<ParticipantDataReturn> participant_roles = new LinkedList<>();
 
 		int i = 0;
@@ -724,7 +526,6 @@ public class DB_Event {
 		checkNotFull(event);
 		checkNotEnded(event);
 
-		//boolean isParticipant = belongsToList(event, user_email, true);	//verifica se e participante
 		boolean isParticipant = DB_Util.existsInStringList(event, PARTICIPANTS, user_email);
 		
 		List<Entity> ents = new LinkedList<>();
@@ -734,32 +535,18 @@ public class DB_Event {
 			return ents;
 		}
 
-		/*List<Value<?>> participants = event.getList(DB_Event.PARTICIPANTS);
-
-		ListValue.Builder newParticipants = ListValue.newBuilder().set(participants);
-
-		if (participants.contains(StringValue.of(user_email))) {
-			ents.add(event);
-			return ents;
-		}
-		newParticipants.addValue(user_email);*/
-		
 		if (DB_Util.existsInStringList(event, PARTICIPANTS, user_email)) {
 			ents.add(event);
 			return ents;
 		}
 
-		//ents.add(updateParticipants(event.getKey(), event, newParticipants.build(), true));
 		Entity updated_event = util.updateProperty(event, N_PARTICIPANTS, LongValue.of(event.getLong(N_PARTICIPANTS) + 1));
 		ents.add(util.addStringToList(updated_event, PARTICIPANTS, user_email));
 		
 		Entity user = DB_User.getUser(user_email);
 		user = DB_User.participateEvent(user.getKey(), user, event_id);
 		ents.add(user);
-		
-		/*DB_Statistics.updateNumParticipations(true);
-		DB_Statistics.updateTotalNumParticipations();*/
-		
+
 		return ents;
 	}
 
@@ -795,17 +582,6 @@ public class DB_Event {
 		
 		Entity updated_event = util.updateProperty(event, N_REQUESTS, LongValue.of(event.getLong(N_REQUESTS) + 1));
 		return util.addStringToList(updated_event, REQUESTS, user_email);
-		
-		/*List<Value<?>> requests = event.getList(REQUESTS);
-
-		ListValue.Builder newRequests = ListValue.newBuilder().set(requests);
-
-		if (requests.contains(StringValue.of(user_email)))
-			return event;
-
-		newRequests.addValue(user_email);
-
-		return updateRequests(event.getKey(), event, newRequests.build(), true);*/
 	}
 
 	private static Entity removeRequest (Entity event, String user_email) throws ImpossibleActionException, InexistentElementException {
@@ -818,17 +594,6 @@ public class DB_Event {
 			throw new ImpossibleActionException("User does not belong to the request list");
 		}
 
-		/*List<String> requests = getListEmails (event, false);		//false significa que retorna lista de requests
-		ListValue.Builder newRequestsList = ListValue.newBuilder();
-
-		if (requests.contains(user_email)) {
-			requests.remove(user_email);
-
-			requests.forEach(request -> newRequestsList.addValue(request));
-
-			return updateRequests(event.getKey(), event, newRequestsList.build(), false);
-		}
-		else throw new ImpossibleActionException("User does not belong to the list");*/
 	}
 
 	public static List<Entity> removeParticipant(String event_id, String target_email, String req_email)
@@ -853,14 +618,11 @@ public class DB_Event {
 			participants.forEach(participant -> newParticipantsList.addValue(participant));
 
 			List<Entity> ents = new LinkedList<>();
-			//ents.add(updateParticipants(event.getKey(), event, newParticipantsList.build(), false));
 			event = util.updateProperty(event, N_PARTICIPANTS, LongValue.of(event.getLong(N_PARTICIPANTS) - 1));
 			ents.add(util.updateProperty(event, PARTICIPANTS, newParticipantsList.build()));
 			
 			if (moderators.contains(target_email))
 				ents.add(DB_Chat.removeModerator(event.getString(CHAT_ID), target_email, req_email));
-
-			//DB_Statistics.updateNumParticipations(false);
 			
 			return ents;
 		}
@@ -893,7 +655,7 @@ public class DB_Event {
 		Entity event = getEvent(event_id);
 		
 		checkIsParticipant(event, user_email);
-		checkNotOwner(event, user_email); // owners should not need to confirm their own presence?
+		checkNotOwner(event, user_email); // owners should not need to confirm their own presence
 		checkHasStarted(event);
 		
 		checkQRCode(event, qrCode, presence);

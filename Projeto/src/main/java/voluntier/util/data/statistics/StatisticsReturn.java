@@ -91,6 +91,7 @@ public class StatisticsReturn {
 				this.presences_average = total_num_presences / num_participations_event;
 			if (total_num_participations_event != 0)
 				this.presences_average_total = total_num_presences / total_num_participations_event;
+			
 		} catch (ArithmeticException e) {
 			
 		}
