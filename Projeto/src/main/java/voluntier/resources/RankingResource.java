@@ -39,6 +39,7 @@ import voluntier.util.consumes.generic.CursorData;
 import voluntier.util.data.event.DB_Event;
 import voluntier.util.data.event.RankingType;
 import voluntier.util.data.user.DB_User;
+import voluntier.util.data.user.State;
 import voluntier.util.produces.event.SearchEventData;
 import voluntier.util.produces.generic.RankingData;
 
@@ -189,7 +190,7 @@ public class RankingResource {
 	public static Triplet<List<Entity>, Cursor, QueryResultBatch.MoreResultsType> getEventsByCategory (String cursor, String category){
 
 		Builder<Entity> builder = Query.newEntityQueryBuilder().setKind("Event")
-				.setFilter(PropertyFilter.eq(DB_Event.CATEGORY, category))
+				.setFilter(CompositeFilter.and(PropertyFilter.eq(DB_Event.CATEGORY, category), PropertyFilter.eq(DB_Event.STATE, State.ENABLED.toString())))
 				.setLimit(SEARCH_RESULTS_LIMIT);
 
 		return rankingQuery (builder, cursor);
