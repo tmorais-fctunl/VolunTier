@@ -1,0 +1,398 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.event.GetEventActivity">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Spinner
+            android:id="@+id/event_page_difficulty"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:ems="10"
+            android:hint="@string/event_page_difficulty"
+            android:inputType="number"
+            app:layout_constraintEnd_toStartOf="@+id/route_delete_button"
+            app:layout_constraintStart_toStartOf="@+id/loginGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/eventDiff" />
+
+        <EditText
+            android:id="@+id/route_page_participants"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="2dp"
+            android:clickable="false"
+            android:ems="10"
+            android:hint="@string/event_page_participants"
+            app:layout_constraintEnd_toStartOf="@+id/loginGuidelineRight"
+            app:layout_constraintStart_toEndOf="@+id/route_page_rating"
+            app:layout_constraintTop_toBottomOf="@+id/eventPar" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/loginGuidelineLeft"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.07" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/loginGuidelineRight"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.93" />
+
+        <Button
+            android:id="@+id/route_page_comments"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/event_page_comments"
+            app:layout_constraintEnd_toStartOf="@+id/loginGuidelineRight"
+            app:layout_constraintStart_toStartOf="@+id/loginGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/event_page_location" />
+
+        <Button
+            android:id="@+id/route_page_cancel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/maps_event_cancel"
+            app:layout_constraintEnd_toStartOf="@+id/loginGuidelineRight"
+            app:layout_constraintTop_toBottomOf="@+id/route_page_comments" />
+
+        <Button
+            android:id="@+id/route_page_save"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/save_changes"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/route_page_cancel"
+            app:layout_constraintStart_toStartOf="@+id/loginGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/route_page_comments"
+            app:layout_constraintVertical_bias="0.0" />
+
+        <EditText
+            android:id="@+id/event_page_instagram"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
+            android:ems="10"
+            android:hint="@string/event_page_instagram"
+            android:inputType="textPersonName"
+            app:layout_constraintEnd_toStartOf="@+id/event_page_twitter"
+            app:layout_constraintStart_toStartOf="@+id/loginGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/event_page_website" />
+
+        <EditText
+            android:id="@+id/event_page_twitter"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
+            android:ems="10"
+            android:hint="@string/event_page_twitter"
+            android:inputType="textPersonName"
+            app:layout_constraintEnd_toStartOf="@+id/loginGuidelineRight"
+            app:layout_constraintStart_toEndOf="@+id/event_page_instagram"
+            app:layout_constraintTop_toBottomOf="@+id/event_page_facebook" />
+
+        <EditText
+            android:id="@+id/event_page_website"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
+            android:ems="10"
+            android:hint="@string/event_page_website"
+            android:inputType="textPersonName"
+            app:layout_constraintEnd_toStartOf="@+id/event_page_facebook"
+            app:layout_constraintStart_toStartOf="@+id/loginGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/event_page_category" />
+
+        <EditText
+            android:id="@+id/event_page_facebook"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
+            android:ems="10"
+            android:hint="@string/event_page_facebook"
+            android:inputType="textPersonName"
+            app:layout_constraintEnd_toStartOf="@+id/loginGuidelineRight"
+            app:layout_constraintStart_toEndOf="@+id/event_page_website"
+            app:layout_constraintTop_toBottomOf="@+id/event_switch_profile" />
+
+
+
+        <EditText
+            android:id="@+id/route_page_creator"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:autofillHints="@string/event_page_owner_email"
+            android:clickable="false"
+            android:ems="10"
+            android:hint="@string/event_page_owner_email"
+            android:inputType="textPersonName"
+            app:layout_constraintEnd_toStartOf="@+id/loginGuidelineRight"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="@+id/loginGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/event_page_endDate" />
+
+        <EditText
+            android:id="@+id/route_page_creation_date"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:autofillHints="@string/event_page_owner_email"
+            android:clickable="false"
+            android:ems="10"
+            android:hint="@string/event_page_owner_name"
+            android:inputType="textPersonName"
+            app:layout_constraintEnd_toStartOf="@+id/loginGuidelineRight"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="@+id/loginGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/route_page_creator" />
+
+        <EditText
+            android:id="@+id/event_page_owner_contact"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:autofillHints="@string/event_page_owner_contact"
+            android:ems="10"
+            android:hint="@string/event_page_owner_contact"
+            android:inputType="textPersonName"
+            app:layout_constraintEnd_toStartOf="@+id/loginGuidelineRight"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="@+id/loginGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/route_page_creation_date" />
+
+        <EditText
+            android:id="@+id/route_page_description"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:autofillHints="@string/event_page_description"
+            android:ems="10"
+            android:hint="@string/event_page_description"
+            android:inputType="textPersonName"
+            app:layout_constraintEnd_toStartOf="@+id/loginGuidelineRight"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/loginGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/event_page_owner_contact" />
+
+        <EditText
+            android:id="@+id/route_page_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:autofillHints="@string/event_page_name"
+            android:clickable="false"
+            android:ems="10"
+            android:hint="@string/event_page_name"
+            android:inputType="textPersonName"
+            app:layout_constraintEnd_toStartOf="@+id/loginGuidelineRight"
+            app:layout_constraintStart_toStartOf="@+id/loginGuidelineLeft"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/event_page_startDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/route_page_name"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="2dp"
+            android:ems="10"
+            android:hint="@string/maps_event_start_date"
+            app:layout_constraintEnd_toStartOf="@+id/event_page_startTime"
+            app:layout_constraintStart_toStartOf="@+id/loginGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/route_page_name" />
+
+        <Button
+            android:id="@+id/event_page_endDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/event_page_startDate"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="2dp"
+            android:ems="10"
+            android:hint="@string/maps_event_end_date"
+            app:layout_constraintEnd_toStartOf="@+id/event_page_endTime"
+            app:layout_constraintStart_toStartOf="@+id/loginGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/event_page_startDate" />
+
+        <Button
+            android:id="@+id/event_page_startTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/route_page_name"
+            android:layout_marginStart="2dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_toEndOf="@+id/event_page_startDate"
+            android:ems="10"
+            android:hint="@string/maps_event_start_time"
+            app:layout_constraintEnd_toStartOf="@+id/loginGuidelineRight"
+            app:layout_constraintStart_toEndOf="@+id/event_page_startDate"
+            app:layout_constraintTop_toBottomOf="@+id/route_page_name" />
+
+        <Button
+            android:id="@+id/event_page_endTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/event_page_startTime"
+            android:layout_marginStart="2dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_toEndOf="@+id/event_page_endDate"
+            android:ems="10"
+            android:hint="@string/maps_event_end_time"
+            app:layout_constraintEnd_toStartOf="@+id/loginGuidelineRight"
+            app:layout_constraintStart_toEndOf="@+id/event_page_endDate"
+            app:layout_constraintTop_toBottomOf="@+id/event_page_startTime" />
+
+        <Switch
+            android:id="@+id/event_switch_profile"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
+            android:text="@string/event_page_profile"
+            android:textSize="20dp"
+            app:layout_constraintEnd_toStartOf="@+id/loginGuidelineRight"
+            app:layout_constraintStart_toEndOf="@+id/event_page_category"
+            app:layout_constraintTop_toBottomOf="@+id/route_page_description" />
+
+        <EditText
+            android:id="@+id/route_page_rating"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:ems="10"
+            android:hint="@string/event_page_capacity"
+            android:inputType="number"
+            app:layout_constraintEnd_toStartOf="@+id/route_page_participants"
+            app:layout_constraintStart_toStartOf="@+id/loginGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/routeRate" />
+
+        <Spinner
+            android:id="@+id/event_page_category"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
+            android:ems="10"
+            android:hint="@string/event_page_category"
+            android:inputType="textPersonName"
+            app:layout_constraintEnd_toStartOf="@+id/event_switch_profile"
+            app:layout_constraintStart_toStartOf="@+id/loginGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/route_page_description" />
+
+
+        <Button
+            android:id="@+id/route_delete_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
+            android:backgroundTint="#F60404"
+            android:text="@string/event_page_delete"
+            app:layout_constraintEnd_toStartOf="@+id/loginGuidelineRight"
+            app:layout_constraintStart_toEndOf="@+id/event_page_difficulty"
+            app:layout_constraintTop_toBottomOf="@+id/route_page_participants" />
+
+        <Button
+            android:id="@+id/event_page_location"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/event_page_change_location"
+            app:layout_constraintEnd_toStartOf="@+id/loginGuidelineRight"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/loginGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/eventGetQRCode" />
+
+        <ProgressBar
+            android:id="@+id/routeProgressBar"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="63dp"
+            android:layout_height="58dp"
+            android:layout_marginTop="3dp"
+            app:layout_constraintEnd_toStartOf="@+id/loginGuidelineRight"
+            app:layout_constraintStart_toStartOf="@+id/loginGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/event_page_endTime" />
+
+        <TextView
+            android:id="@+id/routeRate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:text="@string/event_page_capacity"
+            app:layout_constraintBottom_toTopOf="@+id/route_page_rating"
+            app:layout_constraintStart_toStartOf="@+id/loginGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/event_page_instagram" />
+
+        <TextView
+            android:id="@+id/eventPar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:text="@string/event_page_participants"
+            app:layout_constraintBottom_toTopOf="@+id/route_page_participants"
+            app:layout_constraintEnd_toEndOf="@+id/loginGuidelineRight"
+            app:layout_constraintStart_toStartOf="@+id/route_page_participants"
+            app:layout_constraintTop_toBottomOf="@+id/event_page_twitter" />
+
+        <TextView
+            android:id="@+id/eventDiff"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:text="@string/event_page_difficulty"
+            app:layout_constraintBottom_toTopOf="@+id/event_page_difficulty"
+            app:layout_constraintStart_toStartOf="@+id/loginGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/route_page_rating" />
+
+        <ImageButton
+            android:id="@+id/event_participants_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="@+id/route_page_participants"
+            app:layout_constraintEnd_toStartOf="@+id/loginGuidelineRight"
+            app:layout_constraintTop_toTopOf="@+id/route_page_participants"
+            app:srcCompat="@drawable/ic_baseline_people_alt_24" />
+
+        <Button
+            android:id="@+id/eventGetQRCode"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Get Codes"
+            app:layout_constraintEnd_toStartOf="@+id/loginGuidelineRight"
+            app:layout_constraintStart_toStartOf="@+id/loginGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/route_delete_button" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</ScrollView>

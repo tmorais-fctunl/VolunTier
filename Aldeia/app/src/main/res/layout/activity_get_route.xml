@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.route.GetRouteActivity">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/route_page_participants"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:clickable="false"
+            android:ems="10"
+            android:hint="@string/event_page_participants"
+            app:layout_constraintEnd_toStartOf="@+id/loginGuidelineRight"
+            app:layout_constraintStart_toEndOf="@+id/route_rating_spinner"
+            app:layout_constraintTop_toBottomOf="@+id/eventPar" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/loginGuidelineLeft"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.07" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/loginGuidelineRight"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.93" />
+
+        <Button
+            android:id="@+id/route_page_comments"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/event_page_comments"
+            app:layout_constraintEnd_toStartOf="@+id/loginGuidelineRight"
+            app:layout_constraintStart_toStartOf="@+id/loginGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/route_delete_button" />
+
+        <Button
+            android:id="@+id/route_page_cancel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:text="@string/maps_event_cancel"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/loginGuidelineRight"
+            app:layout_constraintTop_toBottomOf="@+id/route_page_comments" />
+
+        <Button
+            android:id="@+id/route_page_save"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="8dp"
+            android:text="@string/save_changes"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/route_page_cancel"
+            app:layout_constraintStart_toStartOf="@+id/loginGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/route_page_comments"
+            app:layout_constraintVertical_bias="0.0" />
+
+
+        <EditText
+            android:id="@+id/route_page_creator"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:autofillHints="@string/event_page_owner_email"
+            android:clickable="false"
+            android:ems="10"
+            android:hint="@string/route_creator"
+            android:inputType="textPersonName"
+            app:layout_constraintEnd_toStartOf="@+id/loginGuidelineRight"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/loginGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/route_page_description" />
+
+        <EditText
+            android:id="@+id/route_page_creation_date"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:autofillHints="@string/event_page_owner_email"
+            android:clickable="false"
+            android:ems="10"
+            android:hint="@string/route_creation_date"
+            android:inputType="textPersonName"
+            app:layout_constraintEnd_toStartOf="@+id/loginGuidelineRight"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="@+id/loginGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/route_page_creator" />
+
+        <EditText
+            android:id="@+id/route_page_description"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:autofillHints="@string/event_page_description"
+            android:ems="10"
+            android:hint="@string/route_description"
+            android:inputType="textPersonName"
+            app:layout_constraintEnd_toStartOf="@+id/loginGuidelineRight"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/loginGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/route_page_name" />
+
+        <EditText
+            android:id="@+id/route_page_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:autofillHints="@string/event_page_name"
+            android:clickable="false"
+            android:ems="10"
+            android:hint="@string/route_name"
+            android:inputType="textPersonName"
+            app:layout_constraintEnd_toStartOf="@+id/loginGuidelineRight"
+            app:layout_constraintStart_toStartOf="@+id/loginGuidelineLeft"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+        <Button
+            android:id="@+id/route_delete_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:backgroundTint="#F60404"
+            android:text="Delete route"
+            app:layout_constraintEnd_toStartOf="@+id/loginGuidelineRight"
+            app:layout_constraintTop_toBottomOf="@+id/route_page_participants" />
+
+        <ProgressBar
+            android:id="@+id/routeProgressBar"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="63dp"
+            android:layout_height="58dp"
+            android:layout_marginTop="24dp"
+            app:layout_constraintEnd_toStartOf="@+id/loginGuidelineRight"
+            app:layout_constraintStart_toStartOf="@+id/loginGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/route_page_creator" />
+
+        <TextView
+            android:id="@+id/routeRate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:text="Rating"
+            app:layout_constraintStart_toStartOf="@+id/loginGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/route_average_rating" />
+
+        <TextView
+            android:id="@+id/eventPar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:text="@string/event_page_participants"
+            app:layout_constraintBottom_toTopOf="@+id/route_page_participants"
+            app:layout_constraintEnd_toEndOf="@+id/loginGuidelineRight"
+            app:layout_constraintStart_toStartOf="@+id/route_page_participants"
+            app:layout_constraintTop_toBottomOf="@+id/route_page_recycler" />
+
+        <ImageButton
+            android:id="@+id/event_participants_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="@+id/route_page_participants"
+            app:layout_constraintEnd_toStartOf="@+id/loginGuidelineRight"
+            app:layout_constraintTop_toTopOf="@+id/route_page_participants"
+            app:srcCompat="@drawable/ic_baseline_people_alt_24" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/route_page_recycler"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toStartOf="@+id/loginGuidelineRight"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/loginGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/textView27" />
+
+        <TextView
+            android:id="@+id/route_average_rating"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Average Rating:"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toStartOf="@+id/route_page_participants"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/loginGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/route_page_recycler" />
+
+        <Spinner
+            android:id="@+id/route_rating_spinner"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            app:layout_constraintEnd_toStartOf="@+id/route_page_participants"
+            app:layout_constraintStart_toStartOf="@+id/loginGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/routeRate" />
+
+        <TextView
+            android:id="@+id/textView27"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Events:"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="@+id/loginGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/route_page_creation_date" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</ScrollView>

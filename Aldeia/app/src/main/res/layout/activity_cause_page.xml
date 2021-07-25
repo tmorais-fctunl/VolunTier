@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.shop.CausePageActivity">
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guidelineDown"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.97" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guidelineUp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.03" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/profileGuidelineLeft"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.07" />
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/profileGuidelineRight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.93" />
+
+    <ImageView
+        android:id="@+id/causeImage"
+        android:layout_width="200px"
+        android:layout_height="200px"
+        app:layout_constraintStart_toStartOf="@+id/profileGuidelineLeft"
+        app:layout_constraintTop_toTopOf="@+id/guidelineUp"
+        app:srcCompat="@drawable/ic_baseline_local_florist_24" />
+
+    <TextView
+        android:id="@+id/causeName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:maxEms="15"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:text="@string/shop_name"
+        app:layout_constraintEnd_toStartOf="@+id/profileGuidelineRight"
+        app:layout_constraintStart_toEndOf="@+id/causeImage"
+        app:layout_constraintTop_toTopOf="@+id/guidelineUp" />
+
+    <TextView
+        android:id="@+id/causeCompany"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:maxEms="15"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:text="@string/shop_company"
+        app:layout_constraintStart_toStartOf="@+id/causeName"
+        app:layout_constraintTop_toBottomOf="@+id/causeName" />
+
+    <Button
+        android:id="@+id/causeLeave"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:text="@string/maps_event_cancel"
+        app:layout_constraintBottom_toTopOf="@+id/guidelineDown"
+        app:layout_constraintEnd_toStartOf="@+id/causeDonate"
+        app:layout_constraintStart_toStartOf="@+id/profileGuidelineLeft" />
+
+    <TextView
+        android:id="@+id/causeDescription"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:text="@string/event_page_description"
+        app:layout_constraintBottom_toTopOf="@+id/causeAmount"
+        app:layout_constraintEnd_toStartOf="@+id/profileGuidelineRight"
+        app:layout_constraintStart_toStartOf="@+id/profileGuidelineLeft"
+        app:layout_constraintTop_toBottomOf="@+id/causeWebsite" />
+
+    <TextView
+        android:id="@+id/causeGoal"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="16dp"
+        android:text="@string/shop_goal"
+        app:layout_constraintBottom_toTopOf="@+id/causeLeave"
+        app:layout_constraintEnd_toStartOf="@+id/causeAmount"
+        app:layout_constraintStart_toEndOf="@+id/causeReached" />
+
+    <Button
+        android:id="@+id/causeDonate"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="@string/shop_Donate"
+        app:layout_constraintBottom_toTopOf="@+id/guidelineDown"
+        app:layout_constraintEnd_toStartOf="@+id/profileGuidelineRight"
+        app:layout_constraintStart_toEndOf="@+id/causeLeave" />
+
+    <EditText
+        android:id="@+id/causeAmount"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginBottom="8dp"
+        android:ems="10"
+        android:hint="@string/shop_Amount"
+        android:inputType="number"
+        app:layout_constraintBottom_toTopOf="@+id/causeDonate"
+        app:layout_constraintEnd_toStartOf="@+id/profileGuidelineRight"
+        app:layout_constraintStart_toEndOf="@+id/causeGoal" />
+
+    <TextView
+        android:id="@+id/causeReached"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="16dp"
+        android:text="@string/shop_reached"
+        app:layout_constraintBottom_toTopOf="@+id/causeLeave"
+        app:layout_constraintEnd_toStartOf="@+id/causeGoal"
+        app:layout_constraintStart_toStartOf="@+id/profileGuidelineLeft" />
+
+    <TextView
+        android:id="@+id/textView33"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/shop_reached"
+        app:layout_constraintBottom_toTopOf="@+id/causeReached"
+        app:layout_constraintStart_toStartOf="@+id/causeReached" />
+
+    <TextView
+        android:id="@+id/textView34"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/shop_goal"
+        app:layout_constraintBottom_toTopOf="@+id/causeGoal"
+        app:layout_constraintStart_toStartOf="@+id/causeGoal" />
+
+    <TextView
+        android:id="@+id/causeWebsite"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:maxEms="20"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:text="@string/profile_Website"
+        app:layout_constraintStart_toStartOf="@+id/causeCompany"
+        app:layout_constraintTop_toBottomOf="@+id/causeCompany" />
+
+    <ProgressBar
+        android:id="@+id/causeProgress"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@+id/guidelineDown"
+        app:layout_constraintEnd_toStartOf="@+id/profileGuidelineRight"
+        app:layout_constraintStart_toStartOf="@+id/profileGuidelineLeft"
+        app:layout_constraintTop_toTopOf="@+id/guidelineUp" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
