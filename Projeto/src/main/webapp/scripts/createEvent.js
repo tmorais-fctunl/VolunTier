@@ -165,10 +165,20 @@ function fillEventAttributes(attributes) {
         case 5: $("#event_dificulty").css("color", "red"); break;
     }
 
-    if (attributes.status == "OWNER")
+    if (attributes.status == "OWNER") {
         document.getElementById("editEventBtn").style.display = "block";
-    else
+        $("#presenceEventCode").show();
+        $("#leaveEventCode").show();
+        fillCodes();
+        
+    }
+    else {
         document.getElementById("editEventBtn").style.display = "none";
+        $("#presenceEventCode").hide();
+        $("#leaveEventCode").hide();
+        $("#presenceEventCode").attr("src", "");
+        $("#leaveEventCode").attr("src", "");
+    }
 
     event_capacity = attributes.capacity;
     event_num_participants = attributes.num_participants;
@@ -1686,5 +1696,50 @@ function requestEventPictureGCS(url, img_id) {
 
     };
     xmlhttp.send();
+
+}
+
+function htmlEncode(value) {
+    return $('<div/>').text(value)
+        .html();
+}
+
+function fillCodes() {
+    let event_id = document.getElementById("event_id").innerHTML;
+    var urlvariable = "/rest/event/presenceCode";
+    var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //GET COMMENTS EVENT REST URL
+    var xmlhttp = new XMLHttpRequest();
+    var userId = localStorage.getItem("email"), token = localStorage.getItem("jwt");
+    var ItemJSON = '{"email": "' + userId +
+        '", "token": "' + token +
+        '", "event_id": "' + event_id + '"}';
+    xmlhttp.open("POST", URL, true);
+    xmlhttp.setRequestHeader("Content-Type", "application/json");
+    xmlhttp.onload = function (oEvent) {
+        if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200))
+            return false;
+        let string = JSON.parse(xmlhttp.responseText).code;
+        let finalURL = 'https://chart.googleapis.com/chart?cht=qr&chl=' + htmlEncode(string) + '&chs=160x160&chld=L|0';
+        $("#presenceEventCode").attr("src", finalURL);
+    }
+    xmlhttp.send(ItemJSON);
+
+    urlvariable = "/rest/event/leaveCode";
+    URL = "https://voluntier-317915.appspot.com" + urlvariable;  //GET COMMENTS EVENT REST URL
+    var xmlhttp2 = new XMLHttpRequest();
+    var userId = localStorage.getItem("email"), token = localStorage.getItem("jwt");
+    ItemJSON = '{"email": "' + userId +
+        '", "token": "' + token +
+        '", "event_id": "' + event_id + '"}';
+    xmlhttp2.open("POST", URL, true);
+    xmlhttp2.setRequestHeader("Content-Type", "application/json");
+    xmlhttp2.onload = function (oEvent) {
+        if (!(xmlhttp2.readyState == 4 && xmlhttp2.status == 200))
+            return false;
+        let string = JSON.parse(xmlhttp2.responseText).code;
+        let finalURL = 'https://chart.googleapis.com/chart?cht=qr&chl=' + htmlEncode(string) + '&chs=160x160&chld=L|0';
+        $("#leaveEventCode").attr("src", finalURL);
+    }
+    xmlhttp2.send(ItemJSON);
 
 }

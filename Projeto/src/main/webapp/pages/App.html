@@ -302,21 +302,21 @@
 
                                         </div>
                                         <!---- <div style="margin:auto"> <!--Talvez mude isto para um scroll...
-                                            <button onclick="roamComments(false)" class="btn btn-secondary" style="display: inline-flex; align-items: center; justify-content: center; height:8px; padding-bottom:11%" id="events_previousBtn"><span><i style="font-size: 0.7em; vertical-align:auto" class="fa fa-caret-left" aria-hidden="true"></i></span></button>
-                                            <button onclick="roamComments(true)" class="btn btn-secondary" style="display: inline-flex; align-items: center; justify-content: center; height:8px; padding-bottom:11%" id="events_nextBtn"><span><i style="font-size: 0.7em; vertical-align:auto" class="fa fa-caret-right" aria-hidden="true"></i></span></button>
-                                        </div> -->
+                <button onclick="roamComments(false)" class="btn btn-secondary" style="display: inline-flex; align-items: center; justify-content: center; height:8px; padding-bottom:11%" id="events_previousBtn"><span><i style="font-size: 0.7em; vertical-align:auto" class="fa fa-caret-left" aria-hidden="true"></i></span></button>
+                <button onclick="roamComments(true)" class="btn btn-secondary" style="display: inline-flex; align-items: center; justify-content: center; height:8px; padding-bottom:11%" id="events_nextBtn"><span><i style="font-size: 0.7em; vertical-align:auto" class="fa fa-caret-right" aria-hidden="true"></i></span></button>
+            </div> -->
                                         <!--Lets have this row for comments or something. Maybe later add another row for photos idk-->
                                         <!---- <ul>
-                                            <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap" style="text-align:center">
-                                                <p style="width:100%; font-size:90%; color: darkgray">Wow really cool stuff mate</p>
-                                            </li>
-                                            <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap" style="text-align:center">
-                                                <p style="width:100%; font-size:90%; color: darkgray">This will be all over the news!</p>
-                                            </li>
-                                            <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap" style="text-align:center">
-                                                <p style="width:100%; font-size:90%; color: darkgray">Really like the idea!</p>
-                                            </li>
-                                        </ul>-->
+                <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap" style="text-align:center">
+                    <p style="width:100%; font-size:90%; color: darkgray">Wow really cool stuff mate</p>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap" style="text-align:center">
+                    <p style="width:100%; font-size:90%; color: darkgray">This will be all over the news!</p>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap" style="text-align:center">
+                    <p style="width:100%; font-size:90%; color: darkgray">Really like the idea!</p>
+                </li>
+            </ul>-->
 
 
                                     </div>
@@ -398,6 +398,21 @@
                                         </div>
                                     </div>
                                 </div>
+                                <hr>
+                                <h6 style="text-align:center">Print these and display them at your event location so users can confirm presence & leave</h6>
+                                <div class="row">
+                                    <div class="col" style="text-align:center">
+                                        <h6 style="text-align:center">Confirm presence QR code</h6>
+                                        <img id="presenceEventCode" style="display:none;" src="" width=200 height=200 class="qr-code img-thumbnail img-responsive" />
+                                    </div>
+                                    <div class="col" style="text-align:center">
+                                        <h6 style="text-align:center">Leave event QR code</h6>
+                                        <img id="leaveEventCode" style="display:none;" src="" width=200 height=200 class="qr-code img-thumbnail img-responsive" />
+                                    </div>
+                                </div>
+
+
+
                                 <hr>
                                 <button id="editEventBtn" onclick="editEvent()" style="margin:auto; width:100%; display: none" class="btn btn-primary">Edit Event</button>
                                 <button id="saveEventBtn" onclick="saveEvent()" style="margin:auto; width:100%; display: none" class="btn btn-primary">Save</button>
