@@ -20,11 +20,11 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Transaction;
 
-import voluntier.util.consumes.ChangePassData;
-import voluntier.util.consumes.ForgotPassData;
+import voluntier.util.consumes.user.ChangePassData;
+import voluntier.util.consumes.user.ForgotPassData;
+import voluntier.util.data.user.DB_User;
 import voluntier.util.email.ChangePasswordEmail;
 import voluntier.util.email.ForgotData;
-import voluntier.util.userdata.DB_User;
 
 @Path("/forgotpassword")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")

@@ -22,9 +22,9 @@ import voluntier.exceptions.IllegalCoordinatesException;
 import voluntier.util.consumes.event.EventData;
 import voluntier.util.consumes.event.UpdateEventData;
 import voluntier.util.consumes.event.UpdateProfileData;
-import voluntier.util.eventdata.DB_Event;
-import voluntier.util.userdata.DB_User;
-import voluntier.util.userdata.State;
+import voluntier.util.data.event.DB_Event;
+import voluntier.util.data.user.DB_User;
+import voluntier.util.data.user.State;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;

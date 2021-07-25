@@ -17,10 +17,10 @@ import voluntier.exceptions.InvalidTokenException;
 import voluntier.util.Argon2Util;
 import voluntier.util.AuthToken;
 import voluntier.util.JsonUtil;
-import voluntier.util.consumes.LoginData;
-import voluntier.util.consumes.RequestData;
-import voluntier.util.produces.LoginReturn;
-import voluntier.util.userdata.DB_User;
+import voluntier.util.consumes.generic.RequestData;
+import voluntier.util.consumes.user.LoginData;
+import voluntier.util.data.user.DB_User;
+import voluntier.util.produces.user.LoginReturn;
 
 import com.google.cloud.datastore.*;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;

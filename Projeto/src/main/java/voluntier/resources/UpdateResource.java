@@ -22,15 +22,15 @@ import voluntier.exceptions.InvalidTokenException;
 import voluntier.util.Argon2Util;
 import voluntier.util.GoogleStorageUtil;
 import voluntier.util.JsonUtil;
-import voluntier.util.consumes.RemoveUserData;
-import voluntier.util.consumes.UpdateProfileData;
-import voluntier.util.consumes.UpdateRoleData;
-import voluntier.util.consumes.UpdateStateData;
-import voluntier.util.consumes.UploadImageData;
-import voluntier.util.produces.UploadSignedURLReturn;
-import voluntier.util.userdata.DB_User;
-import voluntier.util.userdata.ProfilePicture;
-import voluntier.util.userdata.State;
+import voluntier.util.consumes.generic.UploadImageData;
+import voluntier.util.consumes.user.RemoveUserData;
+import voluntier.util.consumes.user.UpdateProfileData;
+import voluntier.util.consumes.user.UpdateRoleData;
+import voluntier.util.consumes.user.UpdateStateData;
+import voluntier.util.data.user.DB_User;
+import voluntier.util.data.user.ProfilePicture;
+import voluntier.util.data.user.State;
+import voluntier.util.produces.pictures.UploadSignedURLReturn;
 
 @Path("/update")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")

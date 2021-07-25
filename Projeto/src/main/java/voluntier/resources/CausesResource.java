@@ -22,19 +22,19 @@ import voluntier.exceptions.InexistentUserException;
 import voluntier.exceptions.InvalidTokenException;
 import voluntier.exceptions.NotEnoughCurrencyException;
 import voluntier.util.JsonUtil;
-import voluntier.util.causesdata.DB_Cause;
-import voluntier.util.consumes.RequestData;
 import voluntier.util.consumes.causes.CauseData;
 import voluntier.util.consumes.causes.CheckDonationUpdatesData;
 import voluntier.util.consumes.causes.CreateCauseData;
 import voluntier.util.consumes.causes.DonationDataConsume;
 import voluntier.util.consumes.causes.DonatorsDataConsumes;
-import voluntier.util.produces.AllCausesDataReturn;
-import voluntier.util.produces.CauseIDReturn;
-import voluntier.util.produces.DonatorsDataReturn;
-import voluntier.util.produces.DownloadPictureReturn;
-import voluntier.util.produces.PicturesReturn;
-import voluntier.util.userdata.*;
+import voluntier.util.consumes.generic.RequestData;
+import voluntier.util.data.causes.DB_Cause;
+import voluntier.util.data.user.*;
+import voluntier.util.produces.causes.AllCausesDataReturn;
+import voluntier.util.produces.causes.CauseIDReturn;
+import voluntier.util.produces.causes.DonatorsDataReturn;
+import voluntier.util.produces.pictures.DownloadPictureReturn;
+import voluntier.util.produces.pictures.PicturesReturn;
 
 @Path("/")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")

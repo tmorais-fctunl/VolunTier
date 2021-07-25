@@ -2,7 +2,7 @@ package voluntier.util.email;
 
 import javax.mail.MessagingException;
 
-import voluntier.util.consumes.ForgotPassData;
+import voluntier.util.consumes.user.ForgotPassData;
 
 public class ChangePasswordEmail {
 

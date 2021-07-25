@@ -1,6 +1,6 @@
 package voluntier.util.consumes.event;
 
-import voluntier.util.eventdata.EventData_Minimal;
+import voluntier.util.data.event.EventData_Minimal;
 
 public class UpdateProfileData extends EventData {
 

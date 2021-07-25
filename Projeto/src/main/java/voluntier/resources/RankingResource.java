@@ -35,12 +35,12 @@ import com.google.datastore.v1.QueryResultBatch.MoreResultsType;
 import voluntier.exceptions.InexistentUserException;
 import voluntier.exceptions.InvalidTokenException;
 import voluntier.util.JsonUtil;
-import voluntier.util.consumes.CursorData;
-import voluntier.util.eventdata.DB_Event;
-import voluntier.util.eventdata.RankingType;
-import voluntier.util.produces.RankingData;
-import voluntier.util.produces.SearchEventData;
-import voluntier.util.userdata.DB_User;
+import voluntier.util.consumes.generic.CursorData;
+import voluntier.util.data.event.DB_Event;
+import voluntier.util.data.event.RankingType;
+import voluntier.util.data.user.DB_User;
+import voluntier.util.produces.event.SearchEventData;
+import voluntier.util.produces.generic.RankingData;
 
 @Path("/")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")

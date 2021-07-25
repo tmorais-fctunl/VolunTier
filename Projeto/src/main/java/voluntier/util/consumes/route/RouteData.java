@@ -1,6 +1,6 @@
 package voluntier.util.consumes.route;
 
-import voluntier.util.consumes.RequestData;
+import voluntier.util.consumes.generic.RequestData;
 
 public class RouteData extends RequestData{
 

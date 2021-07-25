@@ -37,14 +37,14 @@ import com.google.cloud.datastore.StructuredQuery.Filter;
 import voluntier.exceptions.InvalidTokenException;
 import voluntier.util.GoogleStorageUtil;
 import voluntier.util.JsonUtil;
-import voluntier.util.consumes.LookUpData;
-import voluntier.util.consumes.RequestData;
-import voluntier.util.consumes.SearchUserData;
-import voluntier.util.produces.GetPictureReturn;
-import voluntier.util.produces.SearchData;
-import voluntier.util.userdata.DB_User;
-import voluntier.util.userdata.ProfilePicture;
-import voluntier.util.userdata.UserData_Minimal;
+import voluntier.util.consumes.generic.RequestData;
+import voluntier.util.consumes.user.LookUpData;
+import voluntier.util.consumes.user.SearchUserData;
+import voluntier.util.data.user.DB_User;
+import voluntier.util.data.user.ProfilePicture;
+import voluntier.util.data.user.UserData_Minimal;
+import voluntier.util.produces.generic.SearchData;
+import voluntier.util.produces.pictures.GetPictureReturn;
 
 @Path("/")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")

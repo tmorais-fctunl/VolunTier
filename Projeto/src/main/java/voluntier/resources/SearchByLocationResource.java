@@ -29,11 +29,11 @@ import voluntier.exceptions.InvalidTokenException;
 import voluntier.util.GeoHashUtil;
 import voluntier.util.JsonUtil;
 import voluntier.util.consumes.event.SearchByRange;
-import voluntier.util.eventdata.DB_Event;
-import voluntier.util.produces.SearchEventsReturn;
-import voluntier.util.produces.SearchRoutesReturn;
-import voluntier.util.routedata.DB_Route;
-import voluntier.util.userdata.State;
+import voluntier.util.data.event.DB_Event;
+import voluntier.util.data.route.DB_Route;
+import voluntier.util.data.user.State;
+import voluntier.util.produces.event.SearchEventsReturn;
+import voluntier.util.produces.generic.SearchRoutesReturn;
 
 @Path("/")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")

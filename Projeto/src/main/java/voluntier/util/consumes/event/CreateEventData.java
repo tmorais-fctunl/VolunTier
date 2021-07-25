@@ -1,8 +1,8 @@
 package voluntier.util.consumes.event;
 
-import voluntier.util.consumes.RequestData;
-import voluntier.util.eventdata.DB_Event;
-import voluntier.util.eventdata.EventData_Minimal;
+import voluntier.util.consumes.generic.RequestData;
+import voluntier.util.data.event.DB_Event;
+import voluntier.util.data.event.EventData_Minimal;
 
 public class CreateEventData extends RequestData {
 

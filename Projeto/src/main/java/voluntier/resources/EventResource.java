@@ -42,19 +42,19 @@ import voluntier.util.consumes.event.ParticipantsData;
 import voluntier.util.consumes.event.ParticipantData;
 import voluntier.util.consumes.event.TargetData;
 import voluntier.util.consumes.event.UpdatePictureData;
-import voluntier.util.eventdata.DB_Event;
-import voluntier.util.eventdata.ParticipantDataReturn;
-import voluntier.util.produces.CreateEventReturn;
-import voluntier.util.produces.DownloadEventPictureReturn;
-import voluntier.util.produces.EarnCurrencyReturn;
-import voluntier.util.produces.EventDataReturn;
-import voluntier.util.produces.EventPicturesReturn;
-import voluntier.util.produces.ParticipantsReturn;
-import voluntier.util.produces.QRCodeReturn;
-import voluntier.util.produces.SearchEventReturn;
-import voluntier.util.produces.UpdatePictureReturn;
-import voluntier.util.produces.UserEventsReturn;
-import voluntier.util.userdata.*;
+import voluntier.util.data.event.DB_Event;
+import voluntier.util.data.event.ParticipantDataReturn;
+import voluntier.util.data.user.*;
+import voluntier.util.produces.event.CreateEventReturn;
+import voluntier.util.produces.event.EarnCurrencyReturn;
+import voluntier.util.produces.event.EventDataReturn;
+import voluntier.util.produces.event.EventPicturesReturn;
+import voluntier.util.produces.event.SearchEventReturn;
+import voluntier.util.produces.generic.ParticipantsReturn;
+import voluntier.util.produces.generic.QRCodeReturn;
+import voluntier.util.produces.pictures.DownloadEventPictureReturn;
+import voluntier.util.produces.pictures.UpdatePictureReturn;
+import voluntier.util.produces.user.UserEventsReturn;
 
 @Path("/")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")

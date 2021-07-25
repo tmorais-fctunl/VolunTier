@@ -18,10 +18,10 @@ import com.google.cloud.datastore.KeyFactory;
 
 import voluntier.exceptions.InvalidTokenException;
 import voluntier.util.JsonUtil;
-import voluntier.util.consumes.RequestData;
-import voluntier.util.statistics.DB_Statistics;
-import voluntier.util.statistics.StatisticsReturn;
-import voluntier.util.userdata.DB_User;
+import voluntier.util.consumes.generic.RequestData;
+import voluntier.util.data.statistics.DB_Statistics;
+import voluntier.util.data.statistics.StatisticsReturn;
+import voluntier.util.data.user.DB_User;
 
 
 @Path("/")

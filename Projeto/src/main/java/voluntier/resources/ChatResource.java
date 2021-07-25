@@ -20,8 +20,6 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Transaction;
 
-import voluntier.util.consumes.event.DeleteCommentData;
-import voluntier.util.consumes.event.ChatData;
 import voluntier.exceptions.ImpossibleActionException;
 import voluntier.exceptions.InexistentChatIdException;
 import voluntier.exceptions.InexistentLogIdException;
@@ -35,17 +33,19 @@ import voluntier.exceptions.InexistentRouteException;
 import voluntier.exceptions.InexistentUserException;
 import voluntier.exceptions.SomethingWrongException;
 import voluntier.util.JsonUtil;
+import voluntier.util.consumes.chat.ChatData;
+import voluntier.util.consumes.chat.ChatModeratorData;
+import voluntier.util.consumes.chat.DeleteCommentData;
+import voluntier.util.consumes.chat.LikeCommentData;
+import voluntier.util.consumes.chat.PostCommentData;
+import voluntier.util.consumes.chat.UpdateCommentData;
 import voluntier.util.consumes.event.EventData;
-import voluntier.util.consumes.event.LikeCommentData;
-import voluntier.util.consumes.event.ChatModeratorData;
-import voluntier.util.consumes.event.PostCommentData;
-import voluntier.util.consumes.event.UpdateCommentData;
-import voluntier.util.eventdata.DB_Event;
-import voluntier.util.produces.ChatReturn;
-import voluntier.util.produces.EventModeratorsReturn;
-import voluntier.util.produces.PostCommentReturn;
-import voluntier.util.routedata.DB_Route;
-import voluntier.util.userdata.*;
+import voluntier.util.data.event.DB_Event;
+import voluntier.util.data.route.DB_Route;
+import voluntier.util.data.user.*;
+import voluntier.util.produces.chat.ChatReturn;
+import voluntier.util.produces.chat.PostCommentReturn;
+import voluntier.util.produces.event.EventModeratorsReturn;
 
 @Path("/")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")

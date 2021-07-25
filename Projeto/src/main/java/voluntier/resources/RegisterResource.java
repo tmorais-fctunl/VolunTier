@@ -20,10 +20,10 @@ import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Transaction;
 
-import voluntier.util.consumes.RegisterData;
 import voluntier.util.email.ConfirmationData;
+import voluntier.util.consumes.user.RegisterData;
+import voluntier.util.data.user.DB_User;
 import voluntier.util.email.ConfirmRegistrationEmail;
-import voluntier.util.userdata.DB_User;
 
 @Path("/register")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")

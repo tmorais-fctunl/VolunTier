@@ -7,10 +7,10 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Transaction;
 
-import voluntier.util.userdata.Account;
-import voluntier.util.userdata.DB_User;
-import voluntier.util.userdata.Roles;
-import voluntier.util.userdata.State;
+import voluntier.util.data.user.Account;
+import voluntier.util.data.user.DB_User;
+import voluntier.util.data.user.Roles;
+import voluntier.util.data.user.State;
 
 public class ActionsResource {
 	private static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();

@@ -2,8 +2,8 @@ package voluntier.util.consumes.route;
 
 import java.util.List;
 
-import voluntier.util.consumes.RequestData;
-import voluntier.util.routedata.DB_Route;
+import voluntier.util.consumes.generic.RequestData;
+import voluntier.util.data.route.DB_Route;
 
 public class CreateRouteData extends RequestData {
 

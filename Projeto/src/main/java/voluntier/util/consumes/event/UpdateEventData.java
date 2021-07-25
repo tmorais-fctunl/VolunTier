@@ -4,7 +4,7 @@ import com.google.cloud.datastore.LatLng;
 
 import voluntier.exceptions.IllegalCoordinatesException;
 import voluntier.util.GeoHashUtil;
-import voluntier.util.eventdata.EventData_Minimal;
+import voluntier.util.data.event.EventData_Minimal;
 
 public class UpdateEventData extends EventData {
 	

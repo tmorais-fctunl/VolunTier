@@ -1,6 +1,6 @@
 package voluntier.util.consumes.causes;
 
-import voluntier.util.consumes.RequestData;
+import voluntier.util.consumes.generic.RequestData;
 
 public class CauseData extends RequestData {
 	public String cause_id;

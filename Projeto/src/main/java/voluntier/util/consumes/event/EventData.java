@@ -1,6 +1,6 @@
 package voluntier.util.consumes.event;
 
-import voluntier.util.consumes.RequestData;
+import voluntier.util.consumes.generic.RequestData;
 
 public class EventData extends RequestData {
 

@@ -2,7 +2,7 @@ package voluntier.util.email;
 
 import javax.mail.MessagingException;
 
-import voluntier.util.consumes.RegisterData;
+import voluntier.util.consumes.user.RegisterData;
 
 public class ConfirmRegistrationEmail {
 	public static ConfirmationData sendConfirmationEmail(String From, RegisterData data) throws MessagingException {

@@ -28,11 +28,11 @@ import voluntier.exceptions.InexistentUserException;
 import voluntier.exceptions.InvalidTokenException;
 import voluntier.util.JsonUtil;
 import voluntier.util.consumes.event.ParticipantsData;
+import voluntier.util.data.event.DB_Event;
+import voluntier.util.data.event.ParticipantDataReturn;
+import voluntier.util.data.user.DB_User;
 import voluntier.util.consumes.event.ParticipantData;
-import voluntier.util.eventdata.DB_Event;
-import voluntier.util.eventdata.ParticipantDataReturn;
-import voluntier.util.produces.ParticipantsReturn;
-import voluntier.util.userdata.DB_User;
+import voluntier.util.produces.generic.ParticipantsReturn;
 
 @Path("/")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")

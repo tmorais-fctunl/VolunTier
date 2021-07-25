@@ -47,17 +47,17 @@ import voluntier.util.consumes.route.DeleteRoutePictureData;
 import voluntier.util.consumes.route.RateData;
 import voluntier.util.consumes.route.RouteData;
 import voluntier.util.consumes.route.RouteParticipantData;
-import voluntier.util.eventdata.ParticipantDataReturn;
-import voluntier.util.produces.CreateRouteReturn;
-import voluntier.util.produces.DownloadPictureReturn;
-import voluntier.util.produces.ParticipantsReturn;
-import voluntier.util.produces.PicturesReturn;
-import voluntier.util.produces.UploadPictureReturn;
-import voluntier.util.produces.UserRoutesReturn;
-import voluntier.util.routedata.DB_Route;
-import voluntier.util.routedata.RouteDataReturn;
-import voluntier.util.userdata.DB_User;
-import voluntier.util.userdata.State;
+import voluntier.util.data.event.ParticipantDataReturn;
+import voluntier.util.data.route.DB_Route;
+import voluntier.util.data.route.RouteDataReturn;
+import voluntier.util.data.user.DB_User;
+import voluntier.util.data.user.State;
+import voluntier.util.produces.generic.CreateRouteReturn;
+import voluntier.util.produces.generic.ParticipantsReturn;
+import voluntier.util.produces.pictures.DownloadPictureReturn;
+import voluntier.util.produces.pictures.PicturesReturn;
+import voluntier.util.produces.pictures.UploadPictureReturn;
+import voluntier.util.produces.user.UserRoutesReturn;
 
 @Path("/")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
