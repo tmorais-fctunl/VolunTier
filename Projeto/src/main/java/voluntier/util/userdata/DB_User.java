@@ -805,7 +805,7 @@ public class DB_User {
 	public static Entity removeEvent(Key userKey, Entity user, String event_id) throws InexistentEventException, InexistentElementException {
 		/*List<String> events = getEventIds(user);
 		if(!events.contains(event_id))*/
-		if (DB_Util.existsInStringList(user, EVENTS, event_id))
+		if (!DB_Util.existsInStringList(user, EVENTS, event_id))
 			throw new InexistentEventException("There is no event with the given event id");
 
 		/*ListValue.Builder events_list = ListValue.newBuilder();
