@@ -136,7 +136,8 @@ public class EventResource {
 		try {
 			TokensResource.checkIsValidAccess(data.token, data.email);
 
-			List<Entity> ents = DB_Event.participateInEvent(data.event_id, data.email, false);
+			Entity user = DB_User.getUser(data.email);
+			List<Entity> ents = DB_Event.participateInEvent(data.event_id, user, false);
 
 			ents.forEach(e -> txn.put(e));
 

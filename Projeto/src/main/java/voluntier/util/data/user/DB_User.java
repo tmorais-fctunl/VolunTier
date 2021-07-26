@@ -298,7 +298,7 @@ public class DB_User {
 		
 		user = eventCreationLimit(user);
 
-		user = participateEvent(userKey, user, event_id);
+		//user = participateEvent(userKey, user, event_id);
 		user = util.addUniqueStringToList(user, EVENTS, event_id);
 		
 		DB_Statistics.updateNumEvents(true);
@@ -334,9 +334,7 @@ public class DB_User {
 		user = routeCreationLimit (user);
 
 		user = util.addUniqueStringToList(user, ROUTES, route_id);
-		
-		DB_Statistics.updateNumRoutes(true);
-		
+				
 		return user;
 	}
 

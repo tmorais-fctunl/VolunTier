@@ -270,20 +270,20 @@ public class DB_Route {
 		List<Entity> ents = new LinkedList<>();
 
 		if (canParticipate) {
+			Entity updated_user = DB_User.getUser(user_email);
 			for (Entity event : events) {
 				List<Entity> updated_event_and_user = DB_Event.participateInEvent(event.getString(DB_Event.ID),
-						user_email, false);
-				Entity updated_user = null;
+						updated_user, false);
+				
 				if(updated_event_and_user.size() > 1) {
 					Entity updated_event = updated_event_and_user.get(0);
 					updated_user = updated_event_and_user.get(1);
 					ents.add(updated_event);
 				} // else, user already is in event
-				Entity user = DB_User.getUser(user_email);
-				updated_user = DB_User.participateRoute(user.getKey(), updated_user == null ? user : updated_user, route_id);
-				ents.add(updated_user);
 			}
-
+			updated_user = DB_User.participateRoute(updated_user.getKey(), updated_user, route_id);
+			ents.add(updated_user);
+			
 			route = util.addUniqueStringToList(route, PARTICIPANTS, user_email);
 			route = util.updateProperty(route, NUM_PARTICIPANTS, LongValue.of(route.getLong(NUM_PARTICIPANTS) + 1));
 			ents.add(route);

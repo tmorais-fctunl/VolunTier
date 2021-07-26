@@ -570,13 +570,14 @@ public class MapsFragment extends Fragment {
                         }
                         if(addRouteResult.getSuccess()!=null){
                             RouteID route_id=addRouteResult.getSuccess();
-                            Double lat=markers.get(newRouteEventIds.get(0)).getPosition().latitude;
-                            Double lon=markers.get(newRouteEventIds.get(0)).getPosition().longitude;
+                            List<String> pointsToAdd = viewModel.getNewRouteEvents();
+                            Double lat=markers.get(pointsToAdd.get(0)).getPosition().latitude;
+                            Double lon=markers.get(pointsToAdd.get(0)).getPosition().longitude;
                             String hashed_loc=GeoHashUtil.convertCoordsToGeoHashLowPrecision(lat,lon);
                             List<EventRouteCrossReference> crossoversToAdd= new ArrayList<EventRouteCrossReference>();
                             List<Marker> passagePoints= new ArrayList<Marker>();
                             roomViewModel.insertRoute(new RouteEntity(route_id.getRoute_id(),hashed_loc));
-                            Iterator<String> it=newRouteEventIds.iterator();
+                            Iterator<String> it=pointsToAdd.iterator();
                             while(it.hasNext()){
                                 String event_id=it.next();
                                 passagePoints.add(markers.get(event_id));
@@ -584,6 +585,7 @@ public class MapsFragment extends Fragment {
                             }
                             calculateDirections(passagePoints.remove(0),passagePoints.remove(passagePoints.size()-1),passagePoints, route_id.getRoute_id());
                             roomViewModel.insertCrossovers(crossoversToAdd);
+                            viewModel.setRouteCoordinates(null);
                             newRouteEventIds=new ArrayList<String>();
                             hideEvents();
                             showRoutes();

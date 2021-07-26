@@ -518,13 +518,14 @@ public class DB_Event {
 		return DB_Chat.getModerators(chat_id);
 	}
 
-	public static List<Entity> participateInEvent(String event_id, String user_email, boolean accepted)
+	public static List<Entity> participateInEvent(String event_id, Entity user, boolean accepted)
 			throws ImpossibleActionException, InexistentEventException, InexistentUserException, AlreadyExistsException {
 
 		Entity event = getEvent(event_id);
 		checkIsActive(event);
 		checkNotFull(event);
 		checkNotEnded(event);
+		String user_email = user.getString(DB_User.EMAIL);
 
 		boolean isParticipant = DB_Util.existsInStringList(event, PARTICIPANTS, user_email);
 		
@@ -543,7 +544,6 @@ public class DB_Event {
 		Entity updated_event = util.updateProperty(event, N_PARTICIPANTS, LongValue.of(event.getLong(N_PARTICIPANTS) + 1));
 		ents.add(util.addStringToList(updated_event, PARTICIPANTS, user_email));
 		
-		Entity user = DB_User.getUser(user_email);
 		user = DB_User.participateEvent(user.getKey(), user, event_id);
 		ents.add(user);
 
@@ -557,7 +557,8 @@ public class DB_Event {
 		Entity event = getEvent(event_id);
 		checkIsOwner(event, user_email);
 
-		List<Entity> updated_event = participateInEvent (event_id, target_user, true);
+		Entity target = DB_User.getUser(target_user);
+		List<Entity> updated_event = participateInEvent (event_id, target, true);
 		Entity temp = updated_event.remove(0); //remove o event, para o passar de seguida
 		
 		updated_event.add(removeRequest(temp, target_user));
