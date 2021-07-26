@@ -125,7 +125,8 @@ public class SearchByLocationResource {
 	}
 
 	// FOR DEBUG ONLY, USE THIS TO ADD/CHANGE PROPERTIES TO ALL EXISTENT EVENTS
-	@POST
+	// disabled for release
+	/*@POST
 	@Path("/events/rewrite")
 	public Response rewriteEvents() {
 
@@ -181,5 +182,5 @@ public class SearchByLocationResource {
 		});
 
 		return ents;
-	}
+	}*/
 }

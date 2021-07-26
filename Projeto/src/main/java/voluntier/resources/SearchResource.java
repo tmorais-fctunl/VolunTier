@@ -158,7 +158,8 @@ public class SearchResource {
 	}
 
 	// FOR DEBUG ONLY, USE THIS TO ADD/CHANGE PROPERTIES TO ALL EXISTENT USERS
-	@POST
+	// disabled for release
+	/*@POST
 	@Path("/users/rewrite")
 	public Response rewrite() {
 		Transaction txn = datastore.newTransaction();
@@ -183,7 +184,7 @@ public class SearchResource {
 				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 			}
 		}
-	}
+	}*/
 
 	@POST
 	@Path("/picture/{username}")
