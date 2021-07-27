@@ -20,6 +20,6 @@ public class PostCommentData extends RequestData {
 	}
 	
 	public boolean isValid () {
-		return super.isValid() && (event_id != null || route_id != null) && comment != null && comment.length() < DB_Event.MAX_COMMENT_SIZE;
+		return super.isValid() && (event_id != null || route_id != null) && comment != null && comment.length() > 0 && comment.length() < DB_Event.MAX_COMMENT_SIZE;
 	}
 }
