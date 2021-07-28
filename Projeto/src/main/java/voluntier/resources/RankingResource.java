@@ -47,7 +47,7 @@ import voluntier.util.produces.generic.RankingData;
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class RankingResource {
 
-	private static final int SEARCH_RESULTS_LIMIT = 5;
+	private static final int SEARCH_RESULTS_LIMIT = 7;
 
 	private static final Logger LOG = Logger.getLogger(EventResource.class.getName());
 
