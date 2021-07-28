@@ -364,9 +364,8 @@ function loadEventWithID() {
 }
 
 function searchEventsByRange(pos) {
-    if (!tryAuthentication())
+    if (!checkSession())
         return;
-
     var urlvariable = "/rest/searchEventsByRange";
     var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //GET EVENTS
     var xmlhttp = new XMLHttpRequest();
@@ -380,8 +379,7 @@ function searchEventsByRange(pos) {
     xmlhttp.onload = function (oEvent) {
         if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200)) {
             alert("Couldn't load events, message: " + xmlhttp.status);
-            if (xmlhttp.status == 403)
-                $("body").css("cursor", "default");
+            $("body").css("cursor", "default");
             return false;
         }
         const attributes = JSON.parse(xmlhttp.responseText);
@@ -405,7 +403,7 @@ function searchEventsByRange(pos) {
 }
 
 function searchRoutesByRange(pos) {
-    if (!tryAuthentication())
+    if (!checkSession())
         return;
     var urlvariable = "/rest/searchRoutesByRange";
     var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //GET ROUTES
@@ -420,8 +418,7 @@ function searchRoutesByRange(pos) {
     xmlhttp.onload = function (oEvent) {
         if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200)) {
             alert("Couldn't load routes, message: " + xmlhttp.status);
-            if (xmlhttp.status == 403)
-                $("body").css("cursor", "default");
+            $("body").css("cursor", "default");
             return false;
         }
         const attributes = JSON.parse(xmlhttp.responseText);

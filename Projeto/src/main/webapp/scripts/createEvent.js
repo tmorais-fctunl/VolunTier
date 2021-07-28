@@ -36,9 +36,8 @@ function countChar(val, id) {
 
 //Talvez array com comentarios e participantes para quando o user der previous ou next nao pedir novamente ao server
 function createEventRequest() {
-    if (!tryAuthentication)
-        return false;
-
+    if (!checkSession())
+        return;
 //Just check if the date-time are valid
   var now = new Date();
   now.setTime(now.getTime()-now.getTimezoneOffset()*60*1000);
@@ -101,7 +100,7 @@ function createEventRequest() {
 }
 
 function getEvent(eventID, callback) {
-    if (!tryAuthentication())
+    if (!checkSession())
         return;
     var urlvariable = "/rest/getEvent";
     var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //GET EVENT REST URL
@@ -116,9 +115,6 @@ function getEvent(eventID, callback) {
     xmlhttp.onload = function (oEvent) {
         if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200)) {
             alert("Couldn't load event info, message: " + xmlhttp.status);
-            if (xmlhttp.status == 403) {
-                return;
-            }
             return false;
         }
         const attributes = JSON.parse(xmlhttp.responseText);
@@ -381,6 +377,8 @@ function handleEventMainButton(status, profile, num_participants, capacity) {
 }
 
 function deleteEvent() {
+    if (!checkSession())
+        return;
     let event_id = document.getElementById("event_id").innerHTML;
     var urlvariable = "/rest/updateEvent/remove"
     var userId = localStorage.getItem("email"), token = localStorage.getItem("jwt");  
@@ -396,8 +394,8 @@ function deleteEvent() {
     xmlhttp.setRequestHeader("Content-Type", "application/json");
     xmlhttp.onload = function (oEvent) {
         if (!(xmlhttp.readyState == 4 && xmlhttp.status == 204)) {
+            alert("Sorry, event deletion unsuccessful: " + xmlhttp.status);
             console.log("Couldn't delete event");
-
             return;
         }
         closeEventTab();
@@ -418,6 +416,8 @@ function deleteEvent() {
 }
 //public true means the event is public, false private.
 function leaveEvent(public) {
+    if (!checkSession())
+        return;
     //Http request:
 
     let event_id = document.getElementById("event_id").innerHTML;
@@ -436,6 +436,7 @@ function leaveEvent(public) {
     xmlhttp.setRequestHeader("Content-Type", "application/json");
     xmlhttp.onload = function (oEvent) {
         if (!(xmlhttp.readyState == 4 && xmlhttp.status == 204)) {
+            alert("Sorry, leaving event was unsuccessful: " + xmlhttp.status);
             console.log("Couldn't leave event");
             return;
         }
@@ -464,8 +465,8 @@ function leaveEvent(public) {
 
 function joinEvent(public) {
     //Http request:
-    if (!tryAuthentication())
-        return
+    if (!checkSession())
+        return;
 
     let event_id = document.getElementById("event_id").innerHTML;
     var urlvariable = "/rest/participateEvent"
@@ -482,10 +483,8 @@ function joinEvent(public) {
     xmlhttp.setRequestHeader("Content-Type", "application/json");
     xmlhttp.onload = function (oEvent) {
         if (!(xmlhttp.readyState == 4 && xmlhttp.status == 204)) {
+            alert("Sorry, couldn't join event: " + xmlhttp.status);
             console.log("Couldn't join event")
-            if (xmlhttp.status == 403) {
-                return;
-            }
             return;
         }
         let button = $("#joinBtn");
@@ -523,9 +522,8 @@ function joinEvent(public) {
 }
 
 function cancelEventJoin(public) {
-    
-
-
+    if (!checkSession())
+        return;
     let event_id = document.getElementById("event_id").innerHTML;
     var urlvariable = "/rest/declineRequest"
     var userId = localStorage.getItem("email"), token = localStorage.getItem("jwt");
@@ -542,12 +540,9 @@ function cancelEventJoin(public) {
     xmlhttp.setRequestHeader("Content-Type", "application/json");
     xmlhttp.onload = function (oEvent) {
         if (!(xmlhttp.readyState == 4 && xmlhttp.status == 204)) {
+            alert("Sorry, couldn't cancel join request: " + xmlhttp.status);
             console.log("Couldn't cancel join ask event")
-            if (xmlhttp.status == 403) {
-                if(tryAuthentication())
-                cancelEventJoin(public);
-                return;
-            }
+            return false;
         }
         let button = $("#joinBtn");
         button.css("background-color", "#0aa4ec");
@@ -578,6 +573,8 @@ function cancelEventJoin(public) {
 
 //PARTICIPANTS
 function removeParticipant(username) {
+    if (!checkSession())
+        return;
     let event_id = document.getElementById("event_id").innerHTML;
     var urlvariable = "/rest/removeParticipant"
     var userId = localStorage.getItem("email"), token = localStorage.getItem("jwt");
@@ -598,8 +595,6 @@ function removeParticipant(username) {
             return;
         }
         //Success:
-        
-
     }
     xmlhttp.send(ItemJSON);
 }
@@ -632,7 +627,8 @@ function roamParticipants(next) {
 }
 
 function fillEventParticipants(event_id, cursor) {
-
+    if (!checkSession())
+        return;
    let participantElement = $("#event_participants");
     //participantElement.empty();
 
@@ -661,11 +657,6 @@ function fillEventParticipants(event_id, cursor) {
     xmlhttp.onload = function (oEvent) {
         if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200)) {
             alert("Couldn't load event participants, message: " + xmlhttp.status);
-            if (xmlhttp.status == 403) {
-                if(tryAuthentication())
-                fillEventParticipants(event_id, cursor);
-                return;
-            }
             return false;
         }
         const attributes = JSON.parse(xmlhttp.responseText);
@@ -678,6 +669,9 @@ function fillEventParticipants(event_id, cursor) {
             content = content.concat('<div style="display: inline-block"><span style="display:none">' + participants[i].email + '</span>');
             if (participants[i].pic != '')
                 content = content.concat('<img src="' + participants[i].pic + '" class="rounded-circle userImg" height="20" width="20" style="display: inline-block; margin-left: 5px">');
+            else
+                content = content.concat('<img src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png" class="rounded-circle userImg" height="20" width="20" style="display: inline-block; margin-left: 5px">');
+
             if (participants[i].role == "OWNER") {
                 let creator = $("#event_creator");
                 creator.attr("onclick", "return loadUser(\'" + participants[i].email + "\')")
@@ -718,6 +712,8 @@ function fillEventParticipants(event_id, cursor) {
 }
 
 function makeMod(btn, user) {
+    if (!checkSession())
+        return;
     var urlvariable = "/rest/moderator/add";
     let event_id = document.getElementById("event_id").innerHTML;
     var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //MAKE ADMIN EVENT REST URL
@@ -745,6 +741,8 @@ function makeMod(btn, user) {
 }
 
 function removeMod(btn, user) {
+    if (!checkSession())
+        return;
     var urlvariable = "/rest/moderator/remove";
     let event_id = document.getElementById("event_id").innerHTML;
     var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //REMOVE ADMIN EVENT REST URL
@@ -773,7 +771,6 @@ function removeUser(btn, user) {
     removeParticipant(user);
     $(btn).closest("div").remove()
     handleParticipants();
-
 }
 
 //COMMENTS
@@ -821,6 +818,8 @@ function roamComments(next) {
 }
 
 function fillEventComments(event_id, cursor) {
+    if (!checkSession())
+        return;
     console.log("activated fill with cursor: " + cursor + " 'page' " + comments_cursor);
     let commentElement = $("#event_comments");
     //commentElement.empty();
@@ -914,6 +913,8 @@ function fillEventComments(event_id, cursor) {
 }
 
 function likeDislikeComment(id) {
+    if (!checkSession())
+        return;
     let event_id = document.getElementById("event_id").innerHTML;
     let like = "#Event #comment_" + id + " #event_likes";
     var urlvariable = "/rest/likeComment";
@@ -929,10 +930,6 @@ function likeDislikeComment(id) {
     xmlhttp.onload = function (oEvent) {
         if (!(xmlhttp.readyState == 4 && xmlhttp.status == 204)) {
             alert("Couldn't toggle comment like, message: " + xmlhttp.status);
-            if (xmlhttp.status == 403) {
-                
-                return;
-            }
             return false;
         }
         //Success
@@ -959,6 +956,8 @@ function likeDislikeComment(id) {
 }
 
 function submitComment() {
+    if (!checkSession())
+        return;
     let commentElement = document.getElementById("newEventComment");
     let comment = document.getElementById("newEventComment").value;
     commentElement.value = '';
@@ -975,10 +974,6 @@ function submitComment() {
     xmlhttp.onload = function (oEvent) {
         if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200)) {
             alert("Couldn't load event participants, message: " + xmlhttp.status);
-            if (xmlhttp.status == 403) {
-                
-                return;
-            }
             return false;
         }
         //success, load comment at top of comments:
@@ -1071,6 +1066,8 @@ function confirmDeleteComment(comment_id, confirm) {
     }
     else {
         //delete
+        if (!checkSession())
+            return;
         var urlvariable = "/rest/deleteComment";
         var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //delete comment REST URL
         var xmlhttp = new XMLHttpRequest();
@@ -1086,10 +1083,6 @@ function confirmDeleteComment(comment_id, confirm) {
             if (!(xmlhttp.readyState == 4 && xmlhttp.status == 204)) {
                 alert("Couldn't delete comment, message: " + xmlhttp.status);
                 isDeleting = false;
-                if (xmlhttp.status == 403) {
-                    
-                    return;
-                }
                 return false;
             }
             $(commentId).remove();
@@ -1135,6 +1128,8 @@ function editComment(comment_id) {
 }
 
 function submitEdit(comment_id) {
+    if (!checkSession())
+        return;
     let newComment = $("#Event #comment_" + comment_id + " #editEventComment").val();
     
     let section = $("#Event #comment_" + comment_id + " #event_comment_section");
@@ -1153,10 +1148,6 @@ function submitEdit(comment_id) {
     xmlhttp.onload = function (oEvent) {
         if (!(xmlhttp.readyState == 4 && xmlhttp.status == 204)) {
             alert("Couldn't edit comment, message: " + xmlhttp.status);
-            if (xmlhttp.status == 403) {
-                
-                return;
-            }
             return false;
         }
         let newComment = $("#Event #comment_" + comment_id + " #editEventComment").val();
@@ -1388,6 +1379,8 @@ function turnContentEvent(on) {
 }
 
 function saveEventInfo() {
+    if (!checkSession())
+        return;
     let eventID = $("#Event #event_id").html();
     var urlvariable = "/rest/updateEvent/attributes";
     var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //LookUp REST URL
@@ -1431,13 +1424,8 @@ function saveEventInfo() {
     xmlhttp.onload = function (oEvent) {
         if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200))
             return false;
-        console.log("update request: " + xmlhttp.status);
-        if (xmlhttp.status == 403) {
-            if(tryAuthentication())
-            saveEventInfo();
-            return;
-        }
-        return false;
+        else
+            alert("Event update successful!");
     }
     xmlhttp.send(ItemJSON);
 }
@@ -1597,6 +1585,8 @@ var loadFileEvent = function (event, id) {
 };
 //Script to ask for cloud url to backend
 function getGCSUploadEventURL(i) {
+    if (!checkSession())
+        return;
     let event_id = document.getElementById("event_id").innerHTML;
     var urlvariable = "/rest/event/updatePicture"
     var userId = localStorage.getItem("email"), token = localStorage.getItem("jwt");
@@ -1614,11 +1604,6 @@ function getGCSUploadEventURL(i) {
     xmlhttp.onload = function (oEvent) {
         if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200)) {
             console.log("Couldn't get event upload url");
-            if (xmlhttp.status == 403) {
-                if(tryAuthentication())
-                getGCSUploadEventURL(i);
-                return;
-            }
             return;
         }
         //success
@@ -1671,11 +1656,6 @@ function requestEventPictureGCS(url, img_id) {
     xmlhttp.onload = function (oEvent) {
         if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200)) {
             console.log("Couldn't load user image from GCS, message: " + xmlhttp.status);
-            if (xmlhttp.status == 403) {
-                if(tryAuthentication())
-                requestEventPictureGCS(url, img_id);
-                return;
-            }
             return false;
         }
         // var blob = new Blob([xmlhttp.response]);
@@ -1704,6 +1684,8 @@ function htmlEncode(value) {
 }
 
 function fillCodes() {
+    if (!checkSession())
+        return;
     let event_id = document.getElementById("event_id").innerHTML;
     var urlvariable = "/rest/event/presenceCode";
     var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //GET COMMENTS EVENT REST URL

@@ -15,8 +15,8 @@ var route_num_participants = 0;
 
 //ROUTE GET, LOAD AND FILL
 function createRouteRequest() {
-    if (!tryAuthentication())
-        return false;
+    if (!checkSession())
+        return;
     var urlvariable = "/rest/route/create";
     var userId = localStorage.getItem("email"), token = localStorage.getItem("jwt");
     let events = [];
@@ -88,7 +88,8 @@ function loadRoute(id, createInMap) {
 }
 
 function getRoute(routeID, callback) {
-
+    if (!checkSession())
+        return;
     var urlvariable = "/rest/route/data";
     var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //GET ROUTE REST URL
     var xmlhttp = new XMLHttpRequest();
@@ -102,11 +103,6 @@ function getRoute(routeID, callback) {
     xmlhttp.onload = function (oEvent) {
         if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200)) {
             alert("Couldn't load route info, message: " + xmlhttp.status);
-            if (xmlhttp.status == 403) {
-                if (tryAuthentication())
-                    getRoute(routeID, callback);
-                return;
-            }
             return false;
         }
         const attributes = JSON.parse(xmlhttp.responseText);
@@ -309,7 +305,8 @@ function handleRouteMainButton(status) {
 
 function leaveRoute() {
     //Http request:
-
+    if (!checkSession())
+        return;
     let route_id = document.getElementById("route_id").innerHTML;
     var urlvariable = "/rest/route/removeParticipant";
     var userId = localStorage.getItem("email"), token = localStorage.getItem("jwt");
@@ -326,6 +323,7 @@ function leaveRoute() {
     xmlhttp.setRequestHeader("Content-Type", "application/json");
     xmlhttp.onload = function (oEvent) {
         if (!(xmlhttp.readyState == 4 && xmlhttp.status == 204)) {
+            alert("Couldn't leave route: " + xmlhttp.status);
             console.log("Couldn't leave route");
             return;
         }
@@ -346,6 +344,8 @@ function leaveRoute() {
 }
 
 function joinRoute() {
+    if (!checkSession())
+        return;
     //Http request:
     let route_id = document.getElementById("route_id").innerHTML;
     var urlvariable = "/rest/route/participate"
@@ -363,7 +363,6 @@ function joinRoute() {
             console.log("Couldn't join route")
             if (xmlhttp.status == 403) {
                 alert("You can't join the route as some of it's events are either private (and you don't participante in them) or they're full");
-                return;
             }
             return;
         }
@@ -384,6 +383,8 @@ function joinRoute() {
 
 //ROUTE PARTICIPANTS
 function removeRouteParticipant(username) {
+    if (!checkSession())
+        return;
     let route_id = document.getElementById("route_id").innerHTML;
     var urlvariable = "/rest/removeParticipant"
     var userId = localStorage.getItem("email"), token = localStorage.getItem("jwt");
@@ -439,7 +440,8 @@ function roamParticipantsRoute(next) {
 }
 
 function fillRouteParticipants(route_id, cursor) {
-
+    if (!checkSession())
+        return;
     let participantElement = $("#route_participants");
     //participantElement.empty();
 
@@ -468,11 +470,6 @@ function fillRouteParticipants(route_id, cursor) {
     xmlhttp.onload = function (oEvent) {
         if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200)) {
             alert("Couldn't load route participants, message: " + xmlhttp.status);
-            if (xmlhttp.status == 403) {
-                if (tryAuthentication())
-                    fillRouteParticipants(route_id, cursor);
-                return;
-            }
             return false;
         }
         const attributes = JSON.parse(xmlhttp.responseText);
@@ -555,6 +552,8 @@ function route_roamComments(next) {
 }
 
 function fillRouteComments(route_id, cursor) {
+    if (!checkSession())
+        return;
     console.log("activated fill with cursor: " + cursor + " 'page' " + route_comments_cursor);
     let commentElement = $("#route_comments");
     //commentElement.empty();
@@ -648,6 +647,8 @@ function fillRouteComments(route_id, cursor) {
 }
 
 function route_likeDislikeComment(id) {
+    if (!checkSession())
+        return;
     let route_id = document.getElementById("route_id").innerHTML;
     let like = "#Route #comment_" + id + " #route_likes";
     var urlvariable = "/rest/likeComment";
@@ -663,11 +664,6 @@ function route_likeDislikeComment(id) {
     xmlhttp.onload = function (oEvent) {
         if (!(xmlhttp.readyState == 4 && xmlhttp.status == 204)) {
             alert("Couldn't toggle comment like, message: " + xmlhttp.status);
-            if (xmlhttp.status == 403) {
-                if (tryAuthentication())
-                    likeDislikeComment(id);
-                return;
-            }
             return false;
         }
         //Success
@@ -694,6 +690,8 @@ function route_likeDislikeComment(id) {
 }
 
 function route_submitComment() {
+    if (!checkSession())
+        return;
     let commentElement = document.getElementById("newRouteComment");
     let comment = document.getElementById("newRouteComment").value;
     commentElement.value = '';
@@ -710,11 +708,6 @@ function route_submitComment() {
     xmlhttp.onload = function (oEvent) {
         if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200)) {
             alert("Couldn't load route participants, message: " + xmlhttp.status);
-            if (xmlhttp.status == 403) {
-                if (tryAuthentication())
-                    submitComment();
-                return;
-            }
             return false;
         }
         //success, load comment at top of comments:
@@ -788,10 +781,6 @@ function route_deleteComment(comment_id) {
         '</div>'
     );
 
-
-
-
-
     return false;
 }
 
@@ -803,10 +792,11 @@ function route_confirmDeleteComment(comment_id, confirm) {
         let section = $(commentId + " #route_comment_section");
         section.html(route_prevSectionContent);
 
-
     }
     else {
         //delete
+        if (!checkSession())
+            return;
         var urlvariable = "/rest/deleteComment";
         var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //delete comment REST URL
         var xmlhttp = new XMLHttpRequest();
@@ -822,11 +812,6 @@ function route_confirmDeleteComment(comment_id, confirm) {
             if (!(xmlhttp.readyState == 4 && xmlhttp.status == 204)) {
                 alert("Couldn't delete comment, message: " + xmlhttp.status);
                 route_isDeleting = false;
-                if (xmlhttp.status == 403) {
-                    if (tryAuthentication())
-                        route_confirmDeleteComment(comment_id, confirm);
-                    return;
-                }
                 return false;
             }
             $(commentId).remove();
@@ -872,8 +857,9 @@ function route_editComment(comment_id) {
 }
 
 function route_submitEdit(comment_id) {
+    if (!checkSession())
+        return;
     let newComment = $("#Route #comment_" + comment_id + " #editRouteComment").val();
-
     let section = $("#Route #comment_" + comment_id + " #route_comment_section");
     var urlvariable = "/rest/updateComment";
     var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //Update comment REST URL
@@ -890,11 +876,6 @@ function route_submitEdit(comment_id) {
     xmlhttp.onload = function (oEvent) {
         if (!(xmlhttp.readyState == 4 && xmlhttp.status == 204)) {
             alert("Couldn't edit comment, message: " + xmlhttp.status);
-            if (xmlhttp.status == 403) {
-                if (tryAuthentication())
-                    route_submitEdit(comment_id);
-                return;
-            }
             return false;
         }
         let newComment = $("#Route #comment_" + comment_id + " #editRouteComment").val();
@@ -902,13 +883,14 @@ function route_submitEdit(comment_id) {
         $("#Route #comment_" + comment_id + " #route_comment").html(newComment);
         $("#Route #comment_" + comment_id + " #delEditBtnsDiv").show();
         route_isEditing = false;
-
     };
     xmlhttp.send(ItemJSON);
 }
 
 //RATE:
 function rateRoute(event) {
+    if (!checkSession())
+        return;
     //console.log(event.target.value);
     let routeID = document.getElementById("route_id").innerHTML;
     var urlvariable = "/rest/route/rate";

@@ -1,4 +1,6 @@
 function loadUser(user_id) {
+    if (!checkSession())
+        return;
     $("body").css("cursor", "progress");
     var urlvariable = "/rest/user";
     var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //LookUp REST URL
@@ -14,14 +16,9 @@ function loadUser(user_id) {
         if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200)) {
             alert("Could not load user info, message: " + xmlhttp.status);
             $("body").css("cursor", "default");
-            if (tryAuthentication())
-                loadUser(user_id);
             return false;
         }
-        //Success:
-
-        
-
+        //Success
         const obj = JSON.parse(xmlhttp.responseText);
         if (obj.profile == "PRIVATE") {
             $("#user_website_section").hide();
@@ -86,7 +83,7 @@ function requestOtherUserPictureGCS(url) {
     xmlhttp.onload = function (oEvent) {
         if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200)) {
             console.log("Couldn't load user image from GCS, message: " + xmlhttp.status);
-            userpic.src = "";
+            userpic.src = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png";
             return false;
         }
         // var blob = new Blob([xmlhttp.response]);
@@ -98,6 +95,8 @@ function requestOtherUserPictureGCS(url) {
 }
 
 function requestOtherUserPicture(username) {
+    if (!checkSession())
+        return;
     var urlvariable = "/rest/picture/" + username;
     var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //LookUp REST URL
     var xmlhttp = new XMLHttpRequest();
@@ -109,10 +108,7 @@ function requestOtherUserPicture(username) {
         if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200)) {
             console.log("Couldn't load user image, message: " + xmlhttp.status);
             var userpic = document.getElementById("user_userImg");
-            userpic.src = "";
-
-            //if (tryAuthentication())
-               // requestOtherUserPicture(username);
+            userpic.src = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png";
             return false;
         }
         //Other wise...
@@ -125,6 +121,8 @@ function requestOtherUserPicture(username) {
 }
 
 function getUserEvents(username, callback) {
+    if (!checkSession())
+        return;
     var urlvariable = "/rest/user/events"
     var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //LookUp REST URL
     var xmlhttp = new XMLHttpRequest();
@@ -148,6 +146,8 @@ function getUserEvents(username, callback) {
 }
 
 function getUserParticipatingEvents(username, callback) {
+    if (!checkSession())
+        return;
     var urlvariable = "/rest/user/participatingEvents"
     var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //LookUp REST URL
     var xmlhttp = new XMLHttpRequest();

@@ -41,10 +41,6 @@ function tryAuthentication() {
     }
     console.log("jwrt refreshed and validated");
     return true;
-
-
-
-
 }
 
 //Returns true if it successfuly refreshed token
@@ -92,4 +88,33 @@ function clearLoggedInfo() {
     localStorage.removeItem("jwrt_expiration_date");
     localStorage.removeItem('username');
 
+}
+
+function checkSession() {
+    //ver now >= exp
+    var now = new Date();
+    let exp = localStorage.getItem("jwt_expiration_date");
+    var expDate = new Date(parseInt(exp));
+    let jwrtExp = new Date(parseInt(localStorage.getItem("jwrt_expiration_date")));
+    if ((now >= expDate)) {
+        if (now < jwrtExp) {
+            if (refreshToken(localStorage.getItem("email"), localStorage.getItem("jwrt")))
+                return true;
+            else {
+                //Return to login
+                alert("Session has expired. You will be redirected to the login page.");
+                clearLoggedInfo();
+                window.location = "../pages/index.html";
+                return false;
+            }
+        }
+        else {
+            //Return to login
+            alert("Session has expired. You will be redirected to the login page.");
+            clearLoggedInfo();
+            window.location = "../pages/index.html";
+            return false;
+        }
+    }
+    return true;
 }

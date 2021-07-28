@@ -15,6 +15,8 @@ var eventNotificationCursors = [];
 var myAppRole = '' ;
 
 function getStatistics() {
+    if (!checkSession())
+        return;
     var urlvariable = "/rest/getStats";
     var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //STATS REST URL
     var xmlhttp = new XMLHttpRequest();
@@ -25,7 +27,7 @@ function getStatistics() {
         '", "token": "' + token + '"}';
     xmlhttp.onload = function () {
         if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200)) {
-            console.log("Could not load user info");
+            console.log("Could not load statistics info");
             return false;
         }
         //SUCCESS
@@ -64,6 +66,8 @@ function getStatistics() {
 
 //Request user info
 function requestUserInfo() {
+    if (!checkSession())
+        return;
     var urlvariable = "/rest/user";
     var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //LookUp REST URL
     var xmlhttp = new XMLHttpRequest();
@@ -173,6 +177,8 @@ function requestUserPictureGCS(url) {
 }
 
 function requestUserPicture(username) {
+    if (!checkSession())
+        return;
     var urlvariable = "/rest/picture/" + username;
     var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //LookUp REST URL
     var xmlhttp = new XMLHttpRequest();
@@ -185,8 +191,6 @@ function requestUserPicture(username) {
     xmlhttp.onload = function (oEvent) {
         if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200)) {
             console.log("Couldn't load user image, message: " + xmlhttp.status);
-            if (tryAuthentication())
-                requestUserPicture(username);
             return false;
         }
         //Other wise...
@@ -197,11 +201,6 @@ function requestUserPicture(username) {
 
 
         document.getElementById("user64img").src = obj.pic;
-
-
-
-
-
         console.log(cloudURL);
         //trying to fetch GCS image
         requestUserPictureGCS(cloudURL);
@@ -252,6 +251,8 @@ function loadLeaderboards() {
 }
 
 function loadCurrencyLB(cursor) {
+    if (!checkSession())
+        return;
     var urlvariable = "/rest/totalCurrencyRank";
     var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //CURRENCY LB REST URL
     var xmlhttp = new XMLHttpRequest();
@@ -289,8 +290,11 @@ function loadCurrencyLB(cursor) {
         if (attributes.current_user) {
             myClbRank = attributes.current_user.rank;
             content = '<div class="createEventFormInput" style="background-color: lightgreen; text-align:center; text-overflow:ellipsis; width:250px">' + myClbRank + ' ';
-            if (attributes.current_user.pic_64)
+            if (attributes.current_user.pic_64!=null)
                 content = content + '<img src="' + attributes.current_user.pic_64 + '" class="rounded-circle userImg" height="20" width="20" style="display: inline-block; margin-left: 5px">';
+            else
+                content = content + '<img src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png" class="rounded-circle userImg" height="20" width="20" style="display: inline-block; margin-left: 5px">';
+
             content = content + '<span style="display:inline-block; margin-left:5px"><a style="color: green; margin-left:4px" href="" onclick="return loadUser(\'' + attributes.current_user.email + '\')">' + attributes.current_user.username + '</a></span>' +
                 '<span style="display:inline-block; margin-left:5px; color:yellow; text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;"><i style="color:green; text-shadow:none" class="fa fa-money" aria-hidden="true"></i> ' + attributes.current_user.score + '</span>' +
                 '</div>';
@@ -301,8 +305,10 @@ function loadCurrencyLB(cursor) {
             loadedClbRanks++;
             if (loadedClbRanks == myClbRank) {
                 content = '<div class="createEventFormInput" style="background-color: lightgreen; text-align:center; text-overflow:ellipsis; width:250px"> '+loadedClbRanks+' ';
-                if (attributes.users[i].pic_64)
+                if (attributes.users[i].pic_64!=null)
                     content = content + '<img src="' + attributes.users[i].pic_64 + '" class="rounded-circle userImg" height="20" width="20" style="display: inline-block; margin-left: 5px">';
+                else
+                    content = content + '<img src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png" class="rounded-circle userImg" height="20" width="20" style="display: inline-block; margin-left: 5px">';
                 content = content + '<span style="display:inline-block; margin-left:5px"><a style="color: green; margin-left:4px" href="" onclick="return loadUser(\'' + attributes.users[i].email + '\')">' + attributes.users[i].username + '</a></span>' +
                     '<span style="display:inline-block; margin-left:5px; color:yellow; text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;"><i style="color:green; text-shadow:none" class="fa fa-money" aria-hidden="true"></i> ' + attributes.users[i].score + '</span>' +
                     '</div><br>';
@@ -310,8 +316,10 @@ function loadCurrencyLB(cursor) {
             }
             else {
                 content = '<div class="createEventFormInput" style="text-align:center; text-overflow:ellipsis; width:250px">' + loadedClbRanks + ' ';
-                if (users[i].pic_64)
+                if (users[i].pic_64 !=null)
                     content = content + '<img src="' + users[i].pic_64 + '" class="rounded-circle userImg" height="20" width="20" style="display: inline-block; margin-left: 5px">';
+                else
+                    content = content + '<img src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png" class="rounded-circle userImg" height="20" width="20" style="display: inline-block; margin-left: 5px">';
                 content = content + '<span style="display:inline-block; margin-left:5px"><a style="color: black; margin-left:4px" href="" onclick="return loadUser(\'' + users[i].email + '\')">' + users[i].username + '</a></span>' +
                     '<span style="display:inline-block; margin-left:5px; color:yellow; text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;"><i style="color:green; text-shadow:none" class="fa fa-money" aria-hidden="true"></i> ' + users[i].score + '</span>' +
                     '</div><br>';
@@ -339,6 +347,8 @@ function roamCLB(next) {
 }
 
 function loadParticipationsLB(cursor) {
+    if (!checkSession())
+        return;
     var urlvariable = "/rest/presencesRank";
     var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //CURRENCY LB REST URL
     var xmlhttp = new XMLHttpRequest();
@@ -376,8 +386,11 @@ function loadParticipationsLB(cursor) {
         if (attributes.current_user) {
             myPlbRank = attributes.current_user.rank;
             content = '<div class="createEventFormInput" style="background-color: lightgreen; text-align:center; text-overflow:ellipsis; width:250px">' + myPlbRank + ' ';
-            if (attributes.current_user.pic_64)
+            if (attributes.current_user.pic_64 != null)
                 content = content + '<img src="' + attributes.current_user.pic_64 + '" class="rounded-circle userImg" height="20" width="20" style="display: inline-block; margin-left: 5px">';
+            else
+                content = content + '<img src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png" class="rounded-circle userImg" height="20" width="20" style="display: inline-block; margin-left: 5px">';
+
             content = content + '<span style="display:inline-block; margin-left:5px"><a style="color: green; margin-left:4px" href="" onclick="return loadUser(\'' + attributes.current_user.email + '\')">' + attributes.current_user.username + '</a></span>' +
                 '<span style="display:inline-block; margin-left:5px; color:yellow; text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;"><i style="color:blue; text-shadow:none" class="fa fa-users" aria-hidden="true"></i> ' + attributes.current_user.score + '</span>' +
                 '</div>';
@@ -388,8 +401,11 @@ function loadParticipationsLB(cursor) {
             loadedPlbRanks++;
             if (loadedPlbRanks == myPlbRank) {
                 content = '<div class="createEventFormInput" style="background-color: lightgreen; text-align:center; text-overflow:ellipsis; width:250px"> ' + loadedPlbRanks + ' ';
-                if (attributes.users[i].pic_64)
+                if (attributes.users[i].pic_64 != null)
                     content = content + '<img src="' + attributes.users[i].pic_64 + '" class="rounded-circle userImg" height="20" width="20" style="display: inline-block; margin-left: 5px">';
+                else
+                    content = content + '<img src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png" class="rounded-circle userImg" height="20" width="20" style="display: inline-block; margin-left: 5px">';
+
                 content = content + '<span style="display:inline-block; margin-left:5px"><a style="color: green; margin-left:4px" href="" onclick="return loadUser(\'' + attributes.users[i].email + '\')">' + attributes.users[i].username + '</a></span>' +
                     '<span style="display:inline-block; margin-left:5px; color:yellow; text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;"><i style="color:blue; text-shadow:none" class="fa fa-users" aria-hidden="true"></i> ' + attributes.users[i].score + '</span>' +
                     '</div><br>';
@@ -397,8 +413,11 @@ function loadParticipationsLB(cursor) {
             }
             else {
                 content = '<div class="createEventFormInput" style="text-align:center; text-overflow:ellipsis; width:250px">' + loadedPlbRanks + ' ';
-                if (users[i].pic_64)
+                if (users[i].pic_64 != null)
                     content = content + '<img src="' + users[i].pic_64 + '" class="rounded-circle userImg" height="20" width="20" style="display: inline-block; margin-left: 5px">';
+                else
+                    content = content + '<img src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png" class="rounded-circle userImg" height="20" width="20" style="display: inline-block; margin-left: 5px">';
+
                 content = content + '<span style="display:inline-block; margin-left:5px"><a style="color: black; margin-left:4px" href="" onclick="return loadUser(\'' + users[i].email + '\')">' + users[i].username + '</a></span>' +
                     '<span style="display:inline-block; margin-left:5px; color:yellow; text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;"><i style="color:blue; text-shadow:none" class="fa fa-users" aria-hidden="true"></i> ' + users[i].score + '</span>' +
                     '</div><br>';
@@ -462,6 +481,8 @@ function loadNotifications() {
 }
 
 function loadEventNofication(event, cursor, arrayPosition) {
+    if (!checkSession())
+        return;
     var urlvariable = "/rest/getRequests";
     var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //REQUESTS REST URL
     var xmlhttp = new XMLHttpRequest();
@@ -529,6 +550,8 @@ function roamEventNotifications(next, event, arrayPosition) {
 }
 
 function acceptRequest(btn, event, user) {
+    if (!checkSession())
+        return;
     var urlvariable = "/rest/acceptRequest";
     var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //ACCEPT REST URL
     var xmlhttp = new XMLHttpRequest();
@@ -552,6 +575,8 @@ function acceptRequest(btn, event, user) {
     xmlhttp.send(ItemJSON);
 }
 function declineRequest(btn, event, user) {
+    if (!checkSession())
+        return;
     var urlvariable = "/rest/declineRequest";
     var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //DECLINE REST URL
     var xmlhttp = new XMLHttpRequest();
@@ -620,6 +645,8 @@ function gradient(startColor, endColor, steps) {
 }
 
 function loadDonations() {
+    if (!checkSession())
+        return;
     let donationsSection = $("#donations_container");
     console.log(donationsSection);
     var urlvariable = "/rest/causes/get/all";
@@ -692,6 +719,8 @@ function loadDonations() {
 }
 
 function loadDonationDonators(causeid) {
+    if (!checkSession())
+        return;
     let section = $("#donation_" + causeid + "_section #event_donators");
     let nextCursor = 0;
     let currentCursor = 0;
@@ -742,6 +771,8 @@ function loadDonationDonators(causeid) {
 }
 
 function donateToCause(btn, cause_id) {
+    if (!checkSession())
+        return;
     let input = $(btn).siblings("input");
     let val = input.val();
     var urlvariable = "/rest/causes/donate";
@@ -807,8 +838,6 @@ function loadDonationPhoto(causeid, url) {
     xmlhttp.send();
 
 }
-
-
 
 window.onload = function () {
     // For debugging purposes: loadContents();
