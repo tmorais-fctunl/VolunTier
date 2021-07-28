@@ -12,9 +12,9 @@ public class SearchRoutesReturn {
 	List<RouteDataReturn> routes;
 	public String region_hash;
 	
-	public SearchRoutesReturn(List<Entity> ents, String geohash, String user_email) {
+	public SearchRoutesReturn(List<Entity> ents, String geohash) {
 		routes = new LinkedList<>();
-		ents.forEach(route -> routes.add(new RouteDataReturn(route, user_email)));
+		ents.forEach(route -> routes.add(new RouteDataReturn(route)));
 		this.region_hash = geohash;
 	}
 }

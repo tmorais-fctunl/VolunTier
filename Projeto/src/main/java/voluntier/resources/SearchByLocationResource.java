@@ -22,7 +22,6 @@ import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.StructuredQuery.Builder;
 import com.google.cloud.datastore.StructuredQuery.CompositeFilter;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
-import com.google.cloud.datastore.Transaction;
 
 import voluntier.exceptions.IllegalCoordinatesException;
 import voluntier.exceptions.InvalidTokenException;
@@ -83,8 +82,8 @@ public class SearchByLocationResource {
 		try {
 			TokensResource.checkIsValidAccess(data.token, data.email);
 
-			Pair<List<Entity>, String> events = queryRoutesByArea(data.location);
-			return Response.ok(JsonUtil.json.toJson(new SearchRoutesReturn(events.getValue0(), events.getValue1(), data.email)))
+			Pair<List<Entity>, String> routes = queryRoutesByArea(data.location);
+			return Response.ok(JsonUtil.json.toJson(new SearchRoutesReturn(routes.getValue0(), routes.getValue1())))
 					.build();
 
 		} catch (InvalidTokenException | IllegalCoordinatesException e) {

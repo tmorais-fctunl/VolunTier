@@ -51,7 +51,7 @@ import voluntier.util.produces.pictures.GetPictureReturn;
 public class SearchResource {
 	private static final Logger LOG = Logger.getLogger(RegisterResource.class.getName());
 
-	private static final int SEARCH_RESULTS_LIMIT = 2;
+	private static final int SEARCH_RESULTS_LIMIT = 7;
 
 	private static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	private static KeyFactory usersFactory = datastore.newKeyFactory().setKind("User");
@@ -219,7 +219,7 @@ public class SearchResource {
 
 				return Response
 						.ok(JsonUtil.json.toJson(new GetPictureReturn(downloadData.getValue0(),
-								downloadData.getValue1(), encodedMiniature.equals("") ? null : encodedMiniature)))
+								downloadData.getValue1()/*, encodedMiniature.equals("") ? null : encodedMiniature*/)))
 						.build();
 			}
 

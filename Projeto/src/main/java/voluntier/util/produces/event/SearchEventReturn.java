@@ -8,7 +8,7 @@ import voluntier.util.data.event.DB_Event;
 public class SearchEventReturn {
 	public String name;
 	public String event_id;
-	public double[] location;
+	public Double[] location;
 	int num_participants;
 	public String start_date;
 	public String end_date;
@@ -22,13 +22,17 @@ public class SearchEventReturn {
 		this.name = event.getString(DB_Event.NAME);
 		this.event_id = event.getString(DB_Event.ID);
 		LatLng ll = event.getLatLng(DB_Event.LOCATION);
-		this.location = new double[] { ll.getLatitude(), ll.getLongitude() };
+		this.location = new Double[] { ll.getLatitude(), ll.getLongitude() };
 		this.start_date = event.getString(DB_Event.START_DATE);
 		this.end_date = event.getString(DB_Event.END_DATE);
 		this.category = event.getString(DB_Event.CATEGORY);
 		this.visibility = event.getString(DB_Event.PROFILE);
 
 		this.num_participants = (int) event.getLong(DB_Event.N_PARTICIPANTS);
+	}
+	
+	public SearchEventReturn(String id) {
+		this.event_id = id;
 	}
 	
 	public SearchEventReturn (String name, String event_id, String start_date, 
