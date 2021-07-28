@@ -162,6 +162,8 @@ function requestUserInfo() {
                     getStatistics();
                     if (myAppRole == "SU" || myAppRole == "GA")
                         getServerConfigurations();
+                    else
+                        $("#Configurations").append('<h3 style="text-align:center; color: red">Insufficient role permissions</h3>');
                 }
                 if (myAppRole=="USER")
                     document.getElementById("user_tag").innerHTML = obj.username;

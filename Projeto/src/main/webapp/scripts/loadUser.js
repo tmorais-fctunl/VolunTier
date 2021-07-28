@@ -325,6 +325,7 @@ function confirmban(userid) {
             alert("Couldn't ban user, message: " + xmlhttp.status);
             return false;
         }
+        alert("User successfuly banned!");
         let confirmMsg = $("#confirmMsgSearchUser");
         confirmMsg.empty();
         let userSection = $("#searched_user_" + user).remove();
@@ -358,6 +359,7 @@ function confirmState(userid, enable) {
             alert("Couldn't change state of the user, message: " + xmlhttp.status);
             return false;
         }
+        alert("User state successfuly changed!");
         let confirmMsg = $("#confirmMsgSearchUser");
         confirmMsg.empty();
         let userSection2 = $("#searched_user_" + user + " #user_enable");
@@ -391,7 +393,7 @@ function changeRole(user) {
         confirmMsg.append('Change role to GA <button onclick="return confirmRole(\'' + user + '\',\'USER\')">Change to USER</button>');
     }
     else if (myAppRole == "GBO") {
-        confirmMsg.append('ahahah you can\'t change a damn thing sucks to be you <button onclick="return cancelMsg()">Back :(</button>');
+        confirmMsg.append('ahahah you can\'t change a damn thing sucks to be you <button onclick="return cancelmsg()">Back :(</button>');
     }
 }
 
@@ -413,6 +415,7 @@ function confirmRole(userid, role){
             alert("Couldn't change role of the user, message: " + xmlhttp.status);
             return false;
         }
+        alert("User role successfuly changed!");
         let confirmMsg = $("#confirmMsgSearchUser");
         confirmMsg.empty();
         let userSection2 = $("#searched_user_" + user + " #user_role");
