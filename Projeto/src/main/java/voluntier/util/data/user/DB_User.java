@@ -217,7 +217,6 @@ public class DB_User {
 
 	public static Entity remove(Key userKey, Entity user) {
 		DB_Statistics.updateNumUsers(false);
-		DB_Statistics.updateNumParticipations(false, user.getList(EVENTS_PARTICIPATING).size());
 		
 		return util.updateProperty(user, ACCOUNT, StringValue.of(Account.REMOVED.toString()));
 	}
