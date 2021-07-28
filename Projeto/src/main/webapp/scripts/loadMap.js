@@ -17,6 +17,29 @@ var notRouting = true;
 const labels = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 let labelIndex = 0;
 
+const selectFilter = document.createElement("select");
+selectFilter.style = 'font-size:130%;margin-right: 10px; color: dimgray; border - style: solid; border - color: white; border - width: 1px; border - radius: 12px; box - shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px; text - align: center; border - style: ridge; border - radius: 5px; border - color: lightgray; max - width: 100 %; min - width: 100 %" placeholder="Category" value=""'
+selectFilter.innerHTML = '<option value="ALL" selected="selected">All</option>' +
+    '<option value = "CUIDAR_DE_ANIMAIS" > Animal Caring</option >' +
+    '<option value="ENSINAR_IDIOMAS">Language Teaching</option>' +
+    '<option value="ENSINAR_MUSICA">Music Teaching</option>' +
+    '<option value="INICIATIVAS_AMBIENTAIS">Environmental Initiatives</option>' +
+    '<option value="DESASTRES_AMBIENTAIS">Environmental Disasters</option>' +
+    '<option value="COMUNICACAO_DIGITAL">Digital Comunication</option>' +
+    '<option value="AUXILIO_DE_DOENTES">Aiding The Sick</option>' +
+    '<option value="AJUDAR_PORTADORES_DE_DEFICIENCIA">Aiding the Disabled</option>' +
+    '<option value="AJUDA_DESPORTIVA">Sports Aid</option>' +
+    '<option value="AJUDA_EMPRESARIAL">Business Aid</option>' +
+    '<option value="AJUDA_A_CRIANCAS">Aiding Children</option>' +
+    '<option value="AJUDA_A_IDOSOS">Aiding the Elderly</option>' +
+    '<option value="AJUDA_A_SEM_ABRIGO">Aiding the Homeless</option>' +
+    '<!--< option value = "PROMOCAO" > Promotional</option > -->' +
+    '<option value="INTERNACIONAL">Aiding the Foreign</option>' +
+    '<option value="PROTECAO_CIVIL">Civil Protection</option>' +
+    '<option value="SOCIAL">Social</option>' +
+    '<option value="RECICLAGEM">Recyling</option>' +
+    '<option value="CONSTRUCAO">Construction</option>';
+
 //First style is no POI style, then enable public parks, medical and government places
 var myStyles =[
   {
@@ -68,7 +91,9 @@ function initMap() {
     gestureHandling: "greedy"
   });
 
-  eventRouteToggle();
+    
+    eventRouteToggle();
+    infoButton();
   createEventButton();
   createRouteButton();
   locationButton();
@@ -123,6 +148,20 @@ function initMap() {
     });
   });
    
+
+}
+
+function infoButton() {
+    const infobtn = document.createElement('button');
+    infobtn.classList.add("btn");
+    infobtn.style = "width:25px; height:25px; font-size:150%; margin-right:10px; margin-top:10px; display:inline-block; color:black; background-color:white; border-color:white; border-radius:100%; padding:0px";
+    infobtn.innerHTML = '<i class="fa fa-info-circle" aria-hidden="true"></i>';
+    //infobtn.classList.add("custom-map-control-button");
+    map.controls[google.maps.ControlPosition.RIGHT_TOP].push(infobtn);
+    infobtn.addEventListener("click", () => {
+        let modal = document.getElementById("myModal");
+        modal.style.display = "block";
+    });
 
 }
 
@@ -190,6 +229,39 @@ function eventRouteToggle() {
     toggleEventRouteButton.textContent = "Show only events";
     toggleEventRouteButton.classList.add("custom-map-control-button");
     map.controls[google.maps.ControlPosition.RIGHT_TOP].push(toggleEventRouteButton);
+
+    
+    map.controls[google.maps.ControlPosition.RIGHT_TOP].push(selectFilter);
+
+    selectFilter.addEventListener("change", (event) => {
+        //console.log(event.target.value);
+        if (event.target.value == "ALL") {
+            for (var i = 0; i < markers.length; i++) {
+                let marker = markers[i];
+                let idformated = marker.event_id.replace(/\./g, '\\.');
+                $("#eventsectionid_" + idformated).show();
+                marker.marker.setVisible(true);
+            }
+        }
+        else {
+
+            for (var i = 0; i < markers.length; i++) {
+                let marker = markers[i];
+                let idformated = marker.event_id.replace(/\./g, '\\.');
+                
+                if (marker.category == event.target.value) {
+                    $("#eventsectionid_" + idformated).show();
+                    marker.marker.setVisible(true);
+                }
+                else {
+                    marker.marker.setVisible(false);
+                    $("#eventsectionid_" + idformated).hide();
+                }
+            }
+        }
+    });
+
+
     toggleEventRouteButton.addEventListener("click", () => {
         if (toggleEventRouteButton.textContent == "Show only events") {
             document.getElementById("sidebar_content_event_list").style.display = '';
@@ -204,6 +276,8 @@ function eventRouteToggle() {
             for (var i = 0; i < routes.length; i++) {
                 routes[i].marker.setVisible(false);
             }
+            selectFilter.style.display = "";
+            selectFilter.value = "ALL";
         }
         else if (toggleEventRouteButton.textContent == "Show only routes") {
             document.getElementById("sidebar_content_event_list").style.display = 'none';
@@ -217,6 +291,9 @@ function eventRouteToggle() {
             for (var i = 0; i < routes.length; i++) {
                 routes[i].marker.setVisible(true);
             }
+
+            selectFilter.style.display = "none";
+            selectFilter.value = "ALL";
         }
         else {
             document.getElementById("sidebar_content_event_list").style.display = '';
@@ -230,6 +307,8 @@ function eventRouteToggle() {
             for (var i = 0; i < routes.length; i++) {
                 routes[i].marker.setVisible(true);
             }
+            selectFilter.style.display = "";
+            selectFilter.value = "ALL";
         }
     });
 }
@@ -356,7 +435,7 @@ function loadEventWithID() {
 
         //Get Events and Routes
         searchEventsByRange(geohashes[i].pos);
-        searchRoutesByRange(geohashes[i].pos);
+
         geoHashArray.push(geohashes[i].geohash);
     }
     $("body").css("cursor", "default");
@@ -397,6 +476,7 @@ function searchEventsByRange(pos) {
             else if (exp > now)
                 timeOutAddition(obj, i);
         }
+        setTimeout(searchRoutesByRange(pos), 100);
         
     };
     xmlhttp.send(ItemJSON);
@@ -478,7 +558,7 @@ function loadEventMiniature(attributes) {
 
    
    
-    var sideContentString = "<div id='eventsectionid_" + attributes.event_id+"' style='text-align: center; border-style: solid; border-color: white; border-width: 1px; border-radius: 12px; box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px; background-color: #FDFDFD'>" + contentString;
+    var sideContentString = "<div id='eventsectionid_" + attributes.event_id +"' style='margin-bottom: 10px;margin-top:5px; text-align: center; border-style: solid; border-color: white; border-width: 1px; border-radius: 12px; box-shadow: rgba(100, 100, 111, 0.2) 0px 3px 13px 0px; background-color: #FDFDFD'>" + contentString;
     
     //last touches to info window's content
     contentString = "<div style='text-align: center'>" + contentString + "</div>";
@@ -496,26 +576,34 @@ function loadEventMiniature(attributes) {
             title: attributes.name
         }
     //add user location marker
-    addMarker(props, attributes.event_id, attributes.name, attributes.visibility);
+    addMarker(props, attributes.event_id, attributes.name, attributes.visibility, attributes.category);
     let i = markers.length;
 
     //add the content to the side panel with additional touches
     var goToButton = "<button id=\"gotobutton\" class=\"btn btn-secondary\" style='margin-left:10px; margin-bottom: 10px' type = \"button\" onclick = \"goToEvent(\'" + i + "\')\">Go to</button>";
-    sideContentString = sideContentString + goToButton + "</div><br>";
+    sideContentString = sideContentString + goToButton + "</div>";
     $("#sidebar_content_event_list").append($(sideContentString));
 
 }
 
 function loadRouteMiniature(attributes) {
     //props for the event marker
+    let events = attributes.events;
+    //console.log(events[0].event_id);
+    let marker = markers.find(el => el.event_id == events[0].event_id);
+    var loc;
+    if (!marker)
+        return;
+    else
+        loc = marker.marker.position;
 
     const pos = {
-        lat: attributes.events[0].location[0],
-        lng: attributes.events[0].location[1]
+        lat: loc.lat(),
+        lng: loc.lng()
     };
     //infowindow content
     var avg_rating = attributes.avg_rating + '';
-    let events = attributes.events;
+    
     let eventsString = "[";
     var event;
     for (var j = 0; j < events.length; j++) {
@@ -531,15 +619,6 @@ function loadRouteMiniature(attributes) {
         
    
     avg_rating = parseFloat(avg_rating);
-    var start = new Date(attributes.start_date);
-    var end = new Date(attributes.end_date);
-    var hour, min;
-    hour = ("0" + start.getHours()).slice(-2);
-    min = ("0" + start.getMinutes()).slice(-2)
-    start = "Start: " + start.getDate() + "/" + (parseInt(start.getMonth())+1) + "/" + start.getFullYear() + " " + hour + ":" + min;
-    hour = ("0" + end.getHours()).slice(-2);
-    min = ("0" + end.getMinutes()).slice(-2)
-    end = end.getDate() + "/" + (parseInt(end.getMonth()) + 1) + "/" + end.getFullYear() + " " + hour + ":" + min;
     var contentString =
         "<p style='text-align: center; font-size: 150%; color: #009999'>" + attributes.route_name + "</p>" +
         "<p style=\"display:inline-block; text-align: center; margin-left: 4px; font-size:140%\">" + avg_rating + "/5</p>" +
@@ -552,7 +631,7 @@ function loadRouteMiniature(attributes) {
 
 
 
-    var sideContentString = "<div id='routesectionid_" + attributes.route_id + "' style='text-align: center; border-style: solid; border-color: white; border-width: 1px; border-radius: 12px; box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px; background-color: #FDFDFD'>" + contentString;
+    var sideContentString = "<div id='routesectionid_" + attributes.route_id + "' style='margin-top:5px; margin-bottom:10px; text-align: center; border-style: solid; border-color: white; border-width: 1px; border-radius: 12px; box-shadow: rgba(100, 100, 111, 0.2) 0px 3px 13px 0px; background-color: #FDFDFD'>" + contentString;
 
     //last touches to info window's content
     contentString = "<div style='text-align: center'>" + contentString + "</div>";
@@ -567,7 +646,7 @@ function loadRouteMiniature(attributes) {
     var props = {
         coords: pos,
         content: contentString,
-        title: attributes.event_id,
+        title: attributes.route_id,
         iconImage:RouteIcon 
     }
     //add user location marker
@@ -576,7 +655,7 @@ function loadRouteMiniature(attributes) {
 
     //add the content to the side panel with additional touches
     var goToButton = "<button id=\"gotobutton\" class=\"btn btn-secondary\" style='margin-left:10px; margin-bottom: 10px' type = \"button\" onclick = \"goToRoute(\'" + i + "\')\">Go to</button>";
-    sideContentString = sideContentString + goToButton + "</div><br>";
+    sideContentString = sideContentString + goToButton + "</div>";
     $("#sidebar_content_route_list").append($(sideContentString));
 
 }
@@ -590,19 +669,19 @@ function showRouteDirections(events, hide) {
     
     let origin = markers.find(element => element.event_id == events[0]);
     if (!origin) {
-        loadEvent(events[0], true);
+        loadEvent(events[0], true, false);
         origin = markers.find(element => element.event_id == events[0]);
     }
     let destination = markers.find(element => element.event_id == events[events.length - 1]);
     if (!destination) {
-        loadEvent(events[events.length -1], true);
+        loadEvent(events[events.length -1], true, false);
         origin = markers.find(element => element.event_id == events[events.length - 1]);
     }
     let waypoints = [];
     for (var i = 1; i < events.length - 1; i++) {
         let wp = markers.find(element => element.event_id == events[i]);
         if (!wp) {
-            loadEvent(events[i], true);
+            loadEvent(events[i], true, false);
             wp = markers.find(element => element.event_id == events[i]);
         }
         waypoints.push({
@@ -860,7 +939,7 @@ function addRouteMarker(props, route_id) {
 }
 
 
-function addMarker(props, event_id, event_name, visibility){
+function addMarker(props, event_id, event_name, visibility, category){
   var marker = new google.maps.Marker({
     position:props.coords,
       map: map,
@@ -904,7 +983,7 @@ function addMarker(props, event_id, event_name, visibility){
   if (props.title) {
       marker.setTitle(props.title);
     }
-    markers.push({ marker: marker, event_id: event_id, visibility: visibility });
+    markers.push({ marker: marker, event_id: event_id, visibility: visibility, category:category });
   return marker;
 }
 

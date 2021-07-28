@@ -1,3 +1,6 @@
+var openedLeaderboard = false;
+var openedDonations = false;
+
 var tabStack = [];
 var openedTab;
 var tabPrev;
@@ -11,6 +14,15 @@ function openTab(evt, tab) {
     for (i = 0; i < tablinks.length; i++) {
         tablinks[i].className = tablinks[i].className.replace(" active", "");
     }
+    if (tab == "Leaderboard" && !openedLeaderboard) {
+        openedLeaderboard = true;
+        loadLeaderboards();
+    }
+    if (tab == "Donations" && !openedDonations) {
+        openedDonations = true;
+        loadDonations();
+    }
+
     document.getElementById(tab).style.display = "block";
     evt.currentTarget.className += " active";
     tabstack = [];

@@ -80,10 +80,10 @@ function createEventRequest() {
     xmlhttp.onload = function (oEvent) {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
             const obj = JSON.parse(xmlhttp.responseText);
-            alert("Create event: SUCCESS. Id: " + obj.event_id);
+            //alert("Create event: SUCCESS. Id: " + obj.event_id);
             // localStorage.setItem(obj.event_id, ItemJSON);
             $('span#disableCreate').trigger('click');
-            loadEvent(obj.event_id, true);
+            loadEvent(obj.event_id, true, true);
             return false;
 
         }
@@ -125,14 +125,15 @@ function getEvent(eventID, callback) {
 }
 
 //CreateInMap is a flag to determine if it should create the marker in the maps window
-function loadEvent(eventID, createInMap) {
+function loadEvent(eventID, createInMap, loadTab) {
     $("body").css("cursor", "progress");
     getEvent(eventID, function (data) {
         if (!data) {
             alert("Could not load event");
         }
         else {
-            loadEventTab(eventID);
+            if (loadTab)
+                loadEventTab(eventID);
             fillEventAttributes(data);
 
             if (createInMap)

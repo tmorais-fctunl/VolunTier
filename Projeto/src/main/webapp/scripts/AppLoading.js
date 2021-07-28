@@ -64,6 +64,36 @@ function getStatistics() {
 
 }
 
+/*function getServerConfigurations() {
+    if (!checkSession())
+        return;
+    var urlvariable = "/rest/getStats";
+    var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //STATS REST URL
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.open("POST", URL, true);
+    xmlhttp.setRequestHeader("Content-Type", "application/json");
+    var userId = localStorage.getItem("email"), token = localStorage.getItem("jwt");
+    var ItemJSON = '{"email": "' + userId +
+        '", "token": "' + token + '"}';
+    xmlhttp.onload = function () {
+        if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200)) {
+            console.log("Could not load statistics info");
+            return false;
+        }
+        //SUCCESS
+        let configurationsSection = $("#Configurations");
+        const obj = JSON.parse(xmlhttp.responseText);
+        
+        statistics.append(content);
+    }
+    xmlhttp.send(ItemJSON);
+
+}*/
+function getPermissionsChangers() {
+
+
+}
+
 //Request user info
 function requestUserInfo() {
     if (!checkSession())
@@ -94,12 +124,18 @@ function requestUserInfo() {
                 if (myAppRole != "USER") {
                     //SHOW STATISTICS TAB
                     $("#statisticsBTN").show();
-                    //$("#Statistics").show();
                     getStatistics();
-
-
+                    if (myAppRole == "SU" || myAppRole == "GA")
+                        //getServerConfigurations();
+                        ;
+                    else
+                        $("#Configurations").append('<h3 style="color:red; text-align:center">Insufficient role permissions</h3>')
+                    getPermissionsChangers();
                 }
-                document.getElementById("user_tag").innerHTML = obj.username;
+                if (myAppRole=="USER")
+                    document.getElementById("user_tag").innerHTML = obj.username;
+                else
+                    document.getElementById("user_tag").innerHTML = "["+myAppRole+"] "+obj.username;
                 $("#user_currency").append(obj.currentCurrency);
                 document.getElementById("profile_fullname").innerHTML = obj.full_name;
                 document.getElementById("profile_visibility").innerHTML = obj.profile;
@@ -134,7 +170,9 @@ function requestUserInfo() {
                     }
                 });
 
-
+                if (obj.pic_64 != null) {
+                    document.getElementById("user64img").src = obj.pic_64;
+                }
 
                 //request picture
                 requestUserPicture(obj.username);
@@ -196,11 +234,6 @@ function requestUserPicture(username) {
         //Other wise...
         const obj = JSON.parse(xmlhttp.responseText);
         var cloudURL = obj.url;
-        var pic = obj.pic;
-        var size = obj.size;
-
-
-        document.getElementById("user64img").src = obj.pic;
         console.log(cloudURL);
         //trying to fetch GCS image
         requestUserPictureGCS(cloudURL);
@@ -326,8 +359,8 @@ function loadCurrencyLB(cursor) {
                 clbGlobalSection.append(content);
             }
         }
-        if ($("#Leaderboard #leaderboard_currency #global").height() < 800) {
-            roamCLB(true);
+        if ($("#Leaderboard #leaderboard_currency #global").height() < 600) {
+           // roamCLB(true);
         }
        
         
@@ -424,8 +457,8 @@ function loadParticipationsLB(cursor) {
                 plbGlobalSection.append(content);
             }
         }
-        if ($("#Leaderboard #leaderboard_participations #global").height() < 800) {
-            roamPLB(true);
+        if ($("#Leaderboard #leaderboard_participations #global").height() < 600) {
+            //roamPLB(true);
         }
 
 
@@ -442,10 +475,18 @@ function roamPLB(next) {
     }
 }
 
+function refreshNotifications() {
+    let notificationSector = $("#notifications_container");
+    notificationSector.empty();
+    loadNotifications();
+}
+
 function loadNotifications() {
     let myEventIds = [];
     let events = $("#Profile #profile_events .row a");
     events.each(function () {
+        
+        
         let id = $(this).attr("id");
         id = id.split("profile_event_")[1];
         myEventIds.push(id);
@@ -454,8 +495,11 @@ function loadNotifications() {
     var content;
     //Add card for each event
     for (var i = 0; i < myEventIds.length; i++) {
+        let idformated = myEventIds[i].replace(/\./g, '\\.');
+       // console.log("Agora no content: " + myEventIds[i]);
+       // console.log("Agora no content hml: " + $("#profile_event_" + myEventIds[i]).html());
         content = '<div class="createEventFormInput" id="event_' + myEventIds[i] + '_notifications" style="text-align:center; max-height:200px; overflow:auto">' +
-        '<h5 style="text-align:center">'+$("#profile_event_"+myEventIds[i]).html()+'</h5>' +
+        '<h5 style="text-align:center">'+$("#profile_event_"+idformated).html()+'</h5>' +
         '</div><br>';
         notificationSector.append(content);
     }
@@ -504,7 +548,8 @@ function loadEventNofication(event, cursor, arrayPosition) {
         const attributes = JSON.parse(xmlhttp.responseText);
         let results = attributes.results;
         let users = attributes.participants;
-        let eventSection = $("#event_" + event + "_notifications");
+        let idformated = event.replace(/\./g, '\\.');
+        let eventSection = $("#event_" + idformated + "_notifications");
         if (results != "NO_MORE_RESULTS")
             eventNotificationCursors[arrayPosition].push(attributes.cursor);
         if (cursor == 0 && results == "NO_MORE_RESULTS" && users.length == 0)
@@ -666,7 +711,8 @@ function loadDonations() {
         const attributes = JSON.parse(xmlhttp.responseText);
         var content;
         let causes = attributes.causes;
-        let gradientvar = gradient("#f00000","#00d000", 5);
+        let gradientvar = gradient("#f00000", "#00d000", 5);
+        donationsSection.empty();
         
    
 
@@ -730,7 +776,7 @@ function loadDonationDonators(causeid) {
     var userId = localStorage.getItem("email"), token = localStorage.getItem("jwt");
 
     do {
-        xmlhttp.open("POST", URL, false);
+        xmlhttp.open("POST", URL, true);
         xmlhttp.setRequestHeader("Content-Type", "application/json");
         currentCursor = nextCursor;
         var ItemJSON = '{"email": "' + userId +
@@ -849,8 +895,8 @@ window.onload = function () {
     loadContent("appTab", "../pages/contents/loggedTab.html");
 
     requestUserInfo();
-    loadLeaderboards();
-    loadDonations();
+    //loadLeaderboards();
+    //loadDonations();
     
 
 

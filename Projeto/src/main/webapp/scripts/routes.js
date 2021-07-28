@@ -46,7 +46,7 @@ function createRouteRequest() {
     xmlhttp.onload = function (oEvent) {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
             const obj = JSON.parse(xmlhttp.responseText);
-            alert("Create event: SUCCESS. Id: " + obj.route_id);
+            //alert("Create event: SUCCESS. Id: " + obj.route_id);
             // localStorage.setItem(obj.event_id, ItemJSON);
             $('span#disableCreate').trigger('click');
             loadRoute(obj.route_id, true);

@@ -52,22 +52,51 @@
         <button class="tablinks" onclick="openTab(event, 'Leaderboard')">Leaderboard</button>
         <button class="tablinks" onclick="openTab(event, 'Donations')">Donations</button>
         <button class="tablinks" onclick="openTab(event, 'Notifications')">Requests</button>
-        <button id="statisticsBTN" class="tablinks" onclick="openTab(event, 'Statistics')" style="display:none">Statistics</button>
+        <button id="statisticsBTN" class="tablinks" onclick="openTab(event, 'BackOffice')" style="display:none">Back Office</button>
     </div>
 
     <!-- Tab contents-->
     <div id="Map" class="tabcontent">
+        <div id="myModal" style="display:none" class="modal">
+
+            <!-- Modal content -->
+            <div class="modal-content">
+                <span class="close" onclick="document.getElementById('myModal').style='display:none'">&times;</span>
+                <p>The map displays several markers.</p>
+                <p>The <span style="color:red">red</span> ones represent events, all of which are not expired.</p>
+                <p>The <span style="color:gray">gray</span> ones represent events, all of which are also not expired, but are private and require permission to join.</p>
+                <p>The <span style="color:blue">blue</span> ones represent routes. They mark the route's origin, which can then be expanded to show the whole route.</p>
+                <br />
+                <p>You can create events clicking the bottom right corner button labeled "Create Event", and filling the form correctly.</p>
+                <p>The same can be done with routes by clicking the button above "Create Route". The maximum events per route is 4, and you choose them by selecting them on the map</p>
+                <p>You can filter between events and routes using the button on the top right corner, and going through the options.</p>
+                <p>The rest of the buttons are pretty much self explanatory.</p>
+                <br />
+                <p>On the left side of your screen you can see the list of Events and Routes that have been loaded on the map. These, along with the markers, get loaded as you navigate through the map using the drag and zoom options</p>
+                <p>Take some time to explore this section and feel free to navigate to the other tabs, which offer:</p>
+                <ul style="margin-left:30px">
+                    <li>User profile customization;</li>
+                    <li>Rankings based on event participation and currency earned;</li>
+                    <li>Get to know some of the causes that need your attention, and donate your currency to the ones that interest you the most;</li>
+                    <li>Check notifications for your events, accept users trying to join private ones, and etc.</li>
+                </ul>
+                <p>You can also view user, event and route pages by clicking their names across all sections of the app</p>
+                <p>We hope you enjoy! :)</p>
+            </div>
+
+        </div>
         <!--  <span onclick="this.parentElement.style.display='none'" class="topright">&times</span>-->
         <main class="app">
             <aside class="sidebar" style="background-color: white;">
                 <h3 style="text-align:center" id="EventsTitle">Events</h3>
-                <div id="sidebar_content_event_list" style="max-height:70%; overflow:auto; border: 1px solid lightgray; box-shadow: 1px gray">
+                
+                <div id="sidebar_content_event_list" style="max-height:70%; overflow:auto; box-shadow: 1px gray; background-color:white; padding:5px; border-top:5px solid #f1f1f1; border-bottom:5px solid #f1f1f1;">
 
                     <!--<button class="btn btn-info" style="margin: auto; width:100%" id="loadEventWithIDBtn" onclick="return loadEventWithID()">Load Event</button>-->
                 </div>
-                <br>
+                <br />
                 <h3 style="text-align:center" id="RoutesTitle">Routes</h3>
-                <div id="sidebar_content_route_list" style="max-height:70%; overflow:auto; border: 1px solid lightgray; box-shadow: 1px gray">
+                <div id="sidebar_content_route_list" style="max-height:70%; overflow:auto; box-shadow: 1px gray; background-color:white; padding:5px; border-top:5px solid #f1f1f1; border-bottom:5px solid #f1f1f1;">
 
                     <!--<button class="btn btn-info" style="margin: auto; width:100%" id="loadEventWithIDBtn" onclick="return loadEventWithID()">Load Event</button>-->
                 </div>
@@ -104,9 +133,10 @@
                             <h5 style="text-align:center">Self</h5>
 
                         </div>
-                        <div id="global" class="col-sm-6 comments" style="max-height:800px">
+                        <div id="globalsec" class="col-sm-6 comments" style="max-height:600px; text-align:center">
                             <h5 style="text-align:center">Global</h5>
-
+                            <div id="global"></div>
+                            <a href="" style="text-align:center; color:gray" onclick="roamCLB(true); return false;">Load more</a>
                         </div>
                     </div>
                 </div>
@@ -118,11 +148,11 @@
 
 
                         </div>
-                        <div id="global" class="col-sm-6 comments" style="max-height:800px">
+                        <div id="globalsec" class="col-sm-6 comments" style="max-height:600px; text-align:center">
                             <h5 style="text-align:center">Global</h5>
-
+                            <div id="global"></div>
+                            <a href="" style="text-align:center; color:gray" onclick="roamPLB(true); return false;">Load more</a>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -132,15 +162,17 @@
         <!--  <span onclick="this.parentElement.style.display='none'" class="topright">&times</span>-->
         <h3 style="text-align:center">Donations</h3>
         <div class="container" style="height:80%; width: 100%;" id="donations_container">
-
+            <h3 style="text-align:center">Loading causes...</h3>
         </div>
 
     </div>
     <div id="Notifications" class="tabcontent">
         <!--  <span onclick="this.parentElement.style.display='none'" class="topright">&times</span>-->
-        <h3 style="text-align:center">Requests</h3>
+        <h3 style="text-align:center;margin-bottom: 0px">Requests</h3>
+        <span onclick="refreshNotifications()" style="margin-left:50%; margin-top: 5px; display:inline-block; float:none" class="toprightrefresh"><i style="font-size: 0.5em;" class="fa fa-refresh" aria-hidden="true"></i></span>
+
         <br>
-        <div class="container comments" id="notifications_container" style="max-height: 800px">
+        <div class="container comments" id="notifications_container" style="max-height: 600px">
 
         </div>
     </div>
@@ -690,7 +722,36 @@
             </div>
         </div>
     </div>
-    <div id="Statistics" class="tabcontent">
+    <div id="BackOffice" class="tabcontent">
+        <!---<div class="container">-->
+            <div class="row" style="column-gap:5px; height:80vh">
+                <div class="col" id="Statistics" style="border-style: solid; border-color: white; border-width: 1px; border-radius: 12px; box-shadow: rgba(100, 100, 111, 0.2) 0px 3px 13px 0px; background-color: #FDFDFD">
+                    <h3 style="text-align:center">Statistics</h3>
+
+                </div>
+                <div class="col" id="Configurations" style="border-style: solid; border-color: white; border-width: 1px; border-radius: 12px; box-shadow: rgba(100, 100, 111, 0.2) 0px 3px 13px 0px; background-color: #FDFDFD">
+                    <h3 style="text-align:center">Server Configurations</h3>
+
+                </div>
+                <div class="col" id="Permissions" style="border-style: solid; border-color: white; border-width: 1px; border-radius: 12px; box-shadow: rgba(100, 100, 111, 0.2) 0px 3px 13px 0px; background-color: #FDFDFD">
+                    <h3 style="text-align:center">Change user permissions/status</h3>
+                    <div class="search">
+                        
+                            <input id="searchUserInput" type="text"
+                                   placeholder="Search Users"
+                                   name="search">
+                            <button onclick="loadSearchUsers(0); return false;"><i class="fa fa-search" style="font-size: 18px;"></i></button>
+                        
+                    </div>
+                    <div id="loadedSearchUsers">
+                        
+                    </div>
+                    <button class="btn" style="margin-top:5px; background-color:gray; padding:0" id="showmoreloadedusers" onclick="roamLoadSearchUsers()">Load More</button>
+                    <div id="confirmMsgSearchUser"></div>
+
+                </div>
+            </div>
+       <!--- </div>-->
 
     </div>
     <!--Footer-->
