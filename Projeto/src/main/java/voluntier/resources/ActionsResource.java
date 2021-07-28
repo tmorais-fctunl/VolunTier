@@ -81,7 +81,7 @@ public class ActionsResource {
 		return target_level < user_level;
 	}
 	
-	public static boolean hasRoutePermission(Entity user) {
+	public static boolean hasGBOPermission(Entity user) {
 		if (isRemovedOrBannedUser(user))
 			return false;
 
@@ -89,20 +89,16 @@ public class ActionsResource {
 		return role == Roles.GBO || role == Roles.GA || role == Roles.SU;
 	}
 	
-	public static boolean hasEventPermission(Entity user) {
-		if (isRemovedOrBannedUser(user))
-			return false;
-
-		Roles role = Roles.valueOf(user.getString(DB_User.ROLE));
-		return role == Roles.GBO || role == Roles.GA || role == Roles.SU;
-	}
-	
-	public static boolean hasCausePermission(Entity user) {
+	public static boolean hasGAPermission(Entity user) {
 		if (isRemovedOrBannedUser(user))
 			return false;
 
 		Roles role = Roles.valueOf(user.getString(DB_User.ROLE));
 		return role == Roles.GA || role == Roles.SU;
+	}
+	
+	public static boolean hasSUPermission (Entity user) {
+		return user.getString(DB_User.ROLE).equals(Roles.SU.toString());
 	}
 
 	public static boolean isRemovedUser(Entity user) {
@@ -123,10 +119,6 @@ public class ActionsResource {
 		Entity user_role = txn.get(user_key);
 
 		return (int) user_role.getLong(action.toString());
-	}
-	
-	public static boolean isSU (Entity user) {
-		return user.getString(DB_User.ROLE).equals(Roles.SU.toString());
-	}
+	}	
 
 }

@@ -1,8 +1,8 @@
-account.email=voluntier.devs@gmail.com
+account.email=j.palmeiro@campus.fct.unl.pt
 eclipse.preferences.version=1
 include.optional.configuration.files=true
 project.bucket=
 project.id=voluntier-317915
 project.previousVersion.stop=true
 project.promote=true
-project.version=18
+project.version=19

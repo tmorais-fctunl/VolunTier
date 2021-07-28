@@ -144,7 +144,13 @@ public class SearchResource {
 		try {
 			TokensResource.checkIsValidAccess(data.token, data.email);
 
-			SearchData res = new SearchData(searchUser(query, data.cursor));
+			Key userKey = usersFactory.newKey(data.email);
+			Entity user = datastore.get(userKey);
+
+			if (user == null)
+				return Response.status(Status.NOT_FOUND).build();
+			
+			SearchData res = new SearchData(searchUser(query, data.cursor), user);
 
 			return Response.ok(JsonUtil.json.toJson(res)).build();
 
@@ -221,7 +227,7 @@ public class SearchResource {
 			Key userKey = usersFactory.newKey(data.email);
 			Entity user = datastore.get(userKey);
 			
-			if (!ActionsResource.hasCausePermission(user))
+			if (!ActionsResource.hasGAPermission(user))
 				return Response.status(Status.FORBIDDEN).entity("User has not enough permissions to get app properties").build();
 			
 			VariablesReturn variables = DB_Variables.getAllVariables();

@@ -52,7 +52,7 @@ public class StatisticsResource {
 			Key userKey = usersFactory.newKey(data.email);
 			Entity user = datastore.get(userKey);
 
-			if (user == null || ActionsResource.isRemovedOrBannedUser(user) || !ActionsResource.isSU(user)) {
+			if (user == null || ActionsResource.isRemovedOrBannedUser(user) || !ActionsResource.hasSUPermission(user)) {
 			//	LOG.warning("User:" + user.getString(DB_User.EMAIL) + " cannot do this operation.");
 				return Response.status(Status.FORBIDDEN).entity("User:" + user.getString(DB_User.EMAIL) + " cannot do this operation.").build();
 			}
@@ -83,7 +83,7 @@ public class StatisticsResource {
 			Key userKey = usersFactory.newKey(data.email);
 			Entity user = datastore.get(userKey);
 			
-			if (!ActionsResource.hasEventPermission(user))
+			if (!ActionsResource.hasGBOPermission(user))
 				return Response.status(Status.FORBIDDEN).entity("User has not enough permissions to check app statistics").build();
 			
 			StatisticsReturn stats = new StatisticsReturn (DB_Statistics.getStatistics()/*, StatisticsModes.NUMBERS*/);

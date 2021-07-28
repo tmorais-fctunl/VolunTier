@@ -58,7 +58,7 @@ public class CausesResource {
 
 		try {
 			TokensResource.checkIsValidAccess(data.token, data.email);
-			if(!ActionsResource.hasCausePermission(DB_User.getUser(data.email))) {
+			if(!ActionsResource.hasGAPermission(DB_User.getUser(data.email))) {
 				txn.rollback();
 				LOG.severe("User: " + data.email + " tried to create a new cause without permission");
 				return Response.status(Status.FORBIDDEN).build();	
