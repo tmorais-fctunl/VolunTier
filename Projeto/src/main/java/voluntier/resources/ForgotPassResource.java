@@ -26,7 +26,7 @@ import voluntier.util.data.user.DB_User;
 import voluntier.util.email.ChangePasswordEmail;
 import voluntier.util.email.ForgotData;
 
-@Path("/forgotpassword")
+@Path("/")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class ForgotPassResource {
 	private static final Logger LOG = Logger.getLogger(RegisterResource.class.getName());
@@ -39,7 +39,7 @@ public class ForgotPassResource {
 	}
 
 	@POST
-	@Path("/change")
+	@Path("/forgotpassword/change")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response changePass(@QueryParam("t") String code, ChangePassData data) {
 
@@ -102,7 +102,7 @@ public class ForgotPassResource {
 	}
 
 	@GET
-	@Path("/confirm")
+	@Path("/forgotpassword/confirm")
 	public Response doConfirmation(@QueryParam("t") String code) {
 		Transaction txn = datastore.newTransaction();
 
@@ -144,7 +144,7 @@ public class ForgotPassResource {
 	}
 
 	@POST
-	@Path("/")
+	@Path("/forgotpassword")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response forgotPass(ForgotPassData data) {
 

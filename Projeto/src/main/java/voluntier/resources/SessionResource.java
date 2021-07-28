@@ -57,7 +57,6 @@ public class SessionResource {
 		} catch (Exception e) {
 			LOG.severe(e.getMessage());
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-
 		}
 	}
 

@@ -25,7 +25,7 @@ import voluntier.util.consumes.user.RegisterData;
 import voluntier.util.data.user.DB_User;
 import voluntier.util.email.ConfirmRegistrationEmail;
 
-@Path("/register")
+@Path("/")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class RegisterResource {
 	private static final Logger LOG = Logger.getLogger(RegisterResource.class.getName());
@@ -39,7 +39,7 @@ public class RegisterResource {
 	}
 
 	@GET
-	@Path("/{code}/confirm")
+	@Path("/register/{code}/confirm")
 	// @Consumes(MediaType.APPLICATION_JSON)
 	public Response doConfirmation(@PathParam("code") String code) {
 		Transaction txn = datastore.newTransaction();
@@ -98,7 +98,7 @@ public class RegisterResource {
 	}
 
 	@POST
-	@Path("/")
+	@Path("/register")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response doRegistration(RegisterData reg_data) {
 		LOG.fine("Attempt to register by user: " + reg_data.email);
