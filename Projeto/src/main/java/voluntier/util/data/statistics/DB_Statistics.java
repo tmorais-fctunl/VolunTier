@@ -174,20 +174,6 @@ public class DB_Statistics {
 		putStatistics(stat);
 	}
 	
-	/*public static void updateNumCommentsEvent (boolean add) {
-		Entity stat = getStatistics();
-		stat = add ? util.updateProperty(stat, TOTAL_COMMENTS_EVENTS, LongValue.of(stat.getLong(TOTAL_COMMENTS_EVENTS) + 1))
-				: util.updateProperty(stat, TOTAL_COMMENTS_EVENTS, LongValue.of(stat.getLong(TOTAL_COMMENTS_EVENTS) - 1));
-		putStatistics(stat);
-	}
-	
-	public static void updateNumCommentsRoute (boolean add) {
-		Entity stat = getStatistics();
-		stat = add ? util.updateProperty(stat, TOTAL_COMMENTS_ROUTES, LongValue.of(stat.getLong(TOTAL_COMMENTS_ROUTES) + 1))
-				: util.updateProperty(stat, TOTAL_COMMENTS_ROUTES, LongValue.of(stat.getLong(TOTAL_COMMENTS_ROUTES) - 1));
-		putStatistics(stat);
-	}*/
-	
 	public static void updateTotalTimePresences (long time) {
 		Entity stat = getStatistics();
 		stat = util.updateProperty(stat, TOTAL_TIME_PRESENCES, LongValue.of(stat.getLong(TOTAL_TIME_PRESENCES) + time));

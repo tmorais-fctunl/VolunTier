@@ -65,7 +65,6 @@ public class SearchResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response doLookUp(LookUpData data) {
-		System.out.println(1);
 		if (!data.isValid())
 			return Response.status(Status.BAD_REQUEST).entity("Invalid").build();
 
@@ -156,35 +155,6 @@ public class SearchResource {
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 	}
-
-	// FOR DEBUG ONLY, USE THIS TO ADD/CHANGE PROPERTIES TO ALL EXISTENT USERS
-	// disabled for release
-	/*@POST
-	@Path("/users/rewrite")
-	public Response rewrite() {
-		Transaction txn = datastore.newTransaction();
-		try {
-		
-			List<Entity> res = searchAll();
-			res.forEach(user -> {
-				txn.put(DB_User.REWRITE(user));
-			});
-			
-			txn.commit();
-			return Response.ok().build();
-			
-		} catch (Exception e) {
-			txn.rollback();
-			LOG.severe(e.getMessage());
-			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-
-		} finally {
-			if (txn.isActive()) {
-				txn.rollback();
-				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-			}
-		}
-	}*/
 
 	@POST
 	@Path("/picture/{username}")

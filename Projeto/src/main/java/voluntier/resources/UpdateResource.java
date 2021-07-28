@@ -20,8 +20,10 @@ import com.google.cloud.datastore.Transaction;
 
 import voluntier.exceptions.InvalidTokenException;
 import voluntier.util.Argon2Util;
+import voluntier.util.DB_Variables;
 import voluntier.util.GoogleStorageUtil;
 import voluntier.util.JsonUtil;
+import voluntier.util.consumes.generic.AppPropertiesData;
 import voluntier.util.consumes.generic.UploadImageData;
 import voluntier.util.consumes.user.RemoveUserData;
 import voluntier.util.consumes.user.UpdateProfileData;
@@ -353,4 +355,34 @@ public class UpdateResource {
 			}
 		}
 	}
+	
+	@POST
+	@Path("/applicationVariables")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response updateAppVariables(AppPropertiesData data) {
+		LOG.fine("Trying to change property by user: " + data.email);
+
+		if (!data.isValid())
+			return Response.status(Status.BAD_REQUEST).build();
+
+		try {
+			TokensResource.checkIsValidAccess(data.token, data.email);
+			
+			Key userKey = usersFactory.newKey(data.email);
+			Entity user = datastore.get(userKey);
+			
+			if (!ActionsResource.hasEventPermission(user))
+				return Response.status(Status.FORBIDDEN).entity("User has not enough permissions to change app properties").build();
+			
+			if (!DB_Variables.changeVariables(data.variable, data.variableValue))
+				return Response.status(Status.CONFLICT).build();
+
+			return Response.status(Status.NO_CONTENT).build();
+		}
+		catch (InvalidTokenException e) {
+			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
+		}
+	}
+	
 }
