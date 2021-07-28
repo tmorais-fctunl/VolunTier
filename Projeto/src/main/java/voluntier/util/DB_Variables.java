@@ -10,6 +10,7 @@ import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Transaction;
 
 import voluntier.util.data.statistics.Variables;
+import voluntier.util.produces.generic.VariablesReturn;
 
 public class DB_Variables {
 
@@ -101,6 +102,12 @@ public class DB_Variables {
 				return false;
 			}
 		}
+	}
+	
+	public static VariablesReturn getAllVariables () {
+		return new VariablesReturn((int) getAccessExpiration(), (int)getMaxMessageLogSize(), (int)getCurrencyPerMinute(), getInitialCurrency(),
+				(int) getMaxEventsPerDay(), (int)getMaxRoutesPerDay(), (int)getForgotPasswordCodeExpiration(), 
+				(int) getRefreshExpiration(), (int)getRegisterCodeExpiration());
 	}
 	
 	public static boolean changeVariables (String property, String propertyValue) {

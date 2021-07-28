@@ -35,6 +35,7 @@ import com.google.cloud.datastore.StructuredQuery.CompositeFilter;
 import com.google.cloud.datastore.StructuredQuery.Filter;
 
 import voluntier.exceptions.InvalidTokenException;
+import voluntier.util.DB_Variables;
 import voluntier.util.GoogleStorageUtil;
 import voluntier.util.JsonUtil;
 import voluntier.util.consumes.generic.RequestData;
@@ -44,6 +45,7 @@ import voluntier.util.data.user.DB_User;
 import voluntier.util.data.user.ProfilePicture;
 import voluntier.util.data.user.UserData_Minimal;
 import voluntier.util.produces.generic.SearchData;
+import voluntier.util.produces.generic.VariablesReturn;
 import voluntier.util.produces.pictures.GetPictureReturn;
 
 @Path("/")
@@ -200,6 +202,34 @@ public class SearchResource {
 		} catch (Exception e) {
 			LOG.severe(e.getMessage());
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
+	}
+	
+	@POST
+	@Path("/getApplicationVariables")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response updateAppVariables(RequestData data) {
+		LOG.fine("Trying to get properties by user: " + data.email);
+
+		if (!data.isValid())
+			return Response.status(Status.BAD_REQUEST).build();
+
+		try {
+			TokensResource.checkIsValidAccess(data.token, data.email);
+			
+			Key userKey = usersFactory.newKey(data.email);
+			Entity user = datastore.get(userKey);
+			
+			if (!ActionsResource.hasCausePermission(user))
+				return Response.status(Status.FORBIDDEN).entity("User has not enough permissions to get app properties").build();
+			
+			VariablesReturn variables = DB_Variables.getAllVariables();
+
+			return Response.ok(JsonUtil.json.toJson(variables)).build();
+		}
+		catch (InvalidTokenException e) {
+			return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
 		}
 	}
 
