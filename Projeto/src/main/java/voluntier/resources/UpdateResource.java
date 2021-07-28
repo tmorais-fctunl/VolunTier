@@ -372,7 +372,7 @@ public class UpdateResource {
 			Key userKey = usersFactory.newKey(data.email);
 			Entity user = datastore.get(userKey);
 			
-			if (!ActionsResource.hasEventPermission(user))
+			if (!ActionsResource.hasCausePermission(user))
 				return Response.status(Status.FORBIDDEN).entity("User has not enough permissions to change app properties").build();
 			
 			if (!DB_Variables.changeVariables(data.variable, data.variableValue))
