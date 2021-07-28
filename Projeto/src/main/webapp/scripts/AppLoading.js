@@ -64,11 +64,11 @@ function getStatistics() {
 
 }
 
-/*function getServerConfigurations() {
+function getServerConfigurations() {
     if (!checkSession())
         return;
-    var urlvariable = "/rest/getStats";
-    var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //STATS REST URL
+    var urlvariable = "/rest/getApplicationVariables";
+    var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //CONFIGS REST URL
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.open("POST", URL, true);
     xmlhttp.setRequestHeader("Content-Type", "application/json");
@@ -77,20 +77,55 @@ function getStatistics() {
         '", "token": "' + token + '"}';
     xmlhttp.onload = function () {
         if (!(xmlhttp.readyState == 4 && xmlhttp.status == 200)) {
-            console.log("Could not load statistics info");
+            console.log("Could not load config info");
             return false;
         }
         //SUCCESS
         let configurationsSection = $("#Configurations");
         const obj = JSON.parse(xmlhttp.responseText);
-        
-        statistics.append(content);
+
+        var content = 'Change access expiration: <input class="createEventFormInput" name="ACCESS_EXPIRATION" id="ac_exp" type="text" value="' + obj.access_expiration + '" placeholder="time in miliseconds (1000*60*minutes)"><button class="btn-primary btn" onclick="return updateAppVars(\'ac_exp\')">submit</button><br><br>' +
+            'Max message log: <input class="createEventFormInput" id="max_msg_log" name="MAX_MESSAGE_LOG" type="text" value="' + obj.max_message_log + '" placeholder="Max text of bytes per message log"><button class="btn-primary btn" onclick="return updateAppVars(\'max_msg_log\')">submit</button><br><br>' +
+            'Currency per minute: <input class="createEventFormInput" id="curr_p_min" name="CURRENCY_PER_MINUTE" type="text" value="' + obj.currency_per_minute + '" placeholder="Currency must be in double"><button class="btn-primary btn" onclick="return updateAppVars(\'curr_p_min\')">submit</button><br><br>' +
+            'Initial Currency on account creation: <input class="createEventFormInput" id="init_curr" name="INITIAL_CURRENCY" type="text" value="' + obj.initial_currency + '" placeholder="Currency must be in double"><button class="btn-primary btn" onclick="return updateAppVars(\'init_curr\')">submit</button><br><br>' +
+            'User event creation limit (in 24h): <input class="createEventFormInput" id="max_event" name="MAX_EVENTS" type="text" value="' + obj.max_events + '" placeholder="Stops users from creating too much events"><button class="btn-primary btn" onclick="return updateAppVars(\'max_event\')">submit</button><br><br>' +
+            'User route creation limit (in 24h): <input class="createEventFormInput" id="max_route" name="MAX_ROUTES" type="text" value="' + obj.max_routes + '" placeholder="Stops users from creating too much routes"><button class="btn-primary btn" onclick="return updateAppVars(\'max_route\')">submit</button><br><br>' +
+            'Forgot password link expiration: <input class="createEventFormInput" id="frgt_pwd_exp" name="FORGOT_PASS_EXPIRATION" type="text" value="' + obj.forgot_pass_expiration + '" placeholder="Sets the duration of the link that enables password renewal"><button class="btn-primary btn" onclick="return updateAppVars(\'frgt_pwd_exp\')">submit</button><br><br>' +
+            'Refresh token expiration duration: <input class="createEventFormInput" id="ref_exp" type="text" name="REFRESH_EXPIRATION" value="' + obj.refresh_expiration + '" placeholder="time in miliseconds (1000*60*minutes)"><button class="btn-primary btn" onclick="return updateAppVars(\'ref_exp\')">submit</button><br><br>' +
+            'Confirm registration link expiration: <input class="createEventFormInput" id="reg_code_exp" type="text" name="REGISTER_CODE_EXPIRATION" value="' + obj.register_code_expiration + '" placeholder="time in miliseconds (1000*60*minutes)"><button class="btn-primary btn" onclick="return updateAppVars(\'reg_code_exp\')">submit</button><br><br>';
+        configurationsSection.append(content);
     }
     xmlhttp.send(ItemJSON);
 
-}*/
-function getPermissionsChangers() {
+}
 
+function updateAppVars(appvar) {
+    let input = $("#" + appvar);
+    let val = input.val();
+    let name = input.attr('name')
+    
+
+    var urlvariable = "/rest/update/applicationVariables";
+    var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //CONFIGS update REST URL
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.open("POST", URL, true);
+    xmlhttp.setRequestHeader("Content-Type", "application/json");
+    var userId = localStorage.getItem("email"), token = localStorage.getItem("jwt");
+    var ItemJSON = '{"email": "' + userId +
+        '", "token": "' + token +
+        '", "variable": "' + name +
+        '", "variableValue": "'+ val +
+        '"}';
+    xmlhttp.onload = function () {
+        if (!(xmlhttp.readyState == 4 && xmlhttp.status == 204)) {
+            alert("Could not update config info for " + name);
+            return false;
+        }
+        //SUCCESS
+        alert("Updated variable " + name + " with success. Value: " + val);
+        return true;
+    }
+    xmlhttp.send(ItemJSON);
 
 }
 
@@ -101,7 +136,7 @@ function requestUserInfo() {
     var urlvariable = "/rest/user";
     var URL = "https://voluntier-317915.appspot.com" + urlvariable;  //LookUp REST URL
     var xmlhttp = new XMLHttpRequest();
-    xmlhttp.open("POST", URL, false);
+    xmlhttp.open("POST", URL, true);
     xmlhttp.setRequestHeader("Content-Type", "application/json");
     var userId = localStorage.getItem("email"), token = localStorage.getItem("jwt");
     var ItemJSON = '{"email": "' + userId +
@@ -126,11 +161,7 @@ function requestUserInfo() {
                     $("#statisticsBTN").show();
                     getStatistics();
                     if (myAppRole == "SU" || myAppRole == "GA")
-                        //getServerConfigurations();
-                        ;
-                    else
-                        $("#Configurations").append('<h3 style="color:red; text-align:center">Insufficient role permissions</h3>')
-                    getPermissionsChangers();
+                        getServerConfigurations();
                 }
                 if (myAppRole=="USER")
                     document.getElementById("user_tag").innerHTML = obj.username;

@@ -554,7 +554,7 @@ function loadEventMiniature(attributes) {
         "<p style=\"text-align: center\">" + end + "</p>" +
         "<i style=\"\" class=\"fa fa-user-o\" style=\"\"></i><p style=\"display:inline-block; margin-left: 10px\">"+attributes.num_participants+"</p>" +
         "<br>" +
-        "<button class=\"btn btn-primary\" style='margin-bottom: 10px' type = \"button\" onclick = \"loadEvent(\'" + attributes.event_id + "\', false"+")\">View more details</button>";
+        "<button class=\"btn btn-primary\" style='margin-bottom: 10px' type = \"button\" onclick = \"loadEvent(\'" + attributes.event_id + "\', false, true"+")\">View more details</button>";
 
    
    
@@ -569,12 +569,23 @@ function loadEventMiniature(attributes) {
             content: contentString,
             title: attributes.name
         }
-    else
+    else {
+        //Thank you to: https://www.pngkey.com/maxpic/u2q8w7o0t4t4e6e6/ 28-07-2021
+        var privIcon = {
+            url: "https://www.pngkey.com/png/full/48-480344_maps-clipart-map-pin-grey-google-maps-marker.png", // url
+            scaledSize: new google.maps.Size(25 , 36) // scaled size
+           // origin: new google.maps.Point(0, 0), // origin
+           // anchor: new google.maps.Point(12,5, 36) // anchor
+        }
+
         props = {
             coords: pos,
             content: contentString,
-            title: attributes.name
+            title: attributes.name,
+            iconImage: privIcon
+
         }
+    }
     //add user location marker
     addMarker(props, attributes.event_id, attributes.name, attributes.visibility, attributes.category);
     let i = markers.length;
