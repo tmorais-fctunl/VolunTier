@@ -1,0 +1,429 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ProfileFragment">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="@string/register_username"
+            app:layout_constraintStart_toEndOf="@+id/profileImageView"
+            app:layout_constraintTop_toTopOf="@+id/guidelineUp" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guidelineDown"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.97" />
+
+        <TextView
+            android:id="@+id/textView8"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/profile_Address2"
+            app:layout_constraintStart_toStartOf="@+id/profileGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/profileAddress" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guidelineUp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.03" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/profileGuidelineLeft"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.07" />
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/profileGuidelineRight"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.93" />
+
+
+        <EditText
+            android:id="@+id/profileAddress"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="@string/profile_Address"
+            android:inputType="textPersonName"
+            app:layout_constraintEnd_toStartOf="@+id/profileGuidelineRight"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/profileGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/textView7" />
+
+        <EditText
+            android:id="@+id/profileAddress2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="@string/profile_Address2"
+            android:inputType="textPersonName"
+            app:layout_constraintEnd_toStartOf="@+id/profileGuidelineRight"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/profileGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/textView8" />
+
+        <EditText
+            android:id="@+id/profileRegion"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="@string/profile_Region"
+            android:inputType="textPersonName"
+            app:layout_constraintEnd_toStartOf="@+id/profileGuidelineRight"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/profileGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/textView10" />
+
+        <EditText
+            android:id="@+id/profilePc"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="@string/profile_ZipCode"
+            android:inputType="textPersonName"
+            app:layout_constraintEnd_toStartOf="@+id/profileGuidelineRight"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="@+id/profileGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/textView11" />
+
+        <EditText
+            android:id="@+id/profileWebsite"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="@string/profile_Website"
+            android:inputType="textPersonName"
+            app:layout_constraintEnd_toStartOf="@+id/profileGuidelineRight"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="@+id/profileGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/textView12" />
+
+        <ImageView
+            android:id="@+id/profileImageView"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:adjustViewBounds="true"
+            android:maxWidth="200dp"
+            android:maxHeight="200dp"
+            android:scaleType="fitXY"
+            android:src="@android:drawable/ic_menu_camera"
+            app:layout_constraintStart_toStartOf="@+id/profileGuidelineLeft"
+            app:layout_constraintTop_toTopOf="@+id/guidelineUp"
+            app:srcCompat="@android:drawable/ic_menu_camera" />
+
+        <EditText
+            android:id="@+id/profileUsername"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:clickable="false"
+            android:ems="10"
+            android:focusable="false"
+            android:hint="@string/register_username"
+            android:inputType="textPersonName"
+            app:layout_constraintEnd_toStartOf="@+id/profileGuidelineRight"
+            app:layout_constraintStart_toStartOf="@+id/textView2"
+            app:layout_constraintTop_toBottomOf="@+id/textView2" />
+
+        <EditText
+            android:id="@+id/profileEmail"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:clickable="false"
+            android:ems="10"
+            android:focusable="false"
+            android:hint="@string/Email"
+            android:inputType="textPersonName"
+            app:layout_constraintEnd_toStartOf="@+id/profileGuidelineRight"
+            app:layout_constraintStart_toStartOf="@+id/profileGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/textView6" />
+
+        <EditText
+            android:id="@+id/profileFacebook"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="@string/profile_Facebook"
+            android:inputType="textPersonName"
+            app:layout_constraintEnd_toStartOf="@+id/profileGuidelineRight"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/profileGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/textView13" />
+
+        <EditText
+            android:id="@+id/profileInstagram"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="@string/profile_Instagram"
+            android:inputType="textPersonName"
+            app:layout_constraintEnd_toStartOf="@+id/profileGuidelineRight"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/profileGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/textView14" />
+
+        <EditText
+            android:id="@+id/profileTwitter"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="@string/profile_Twitter"
+            android:inputType="textPersonName"
+            app:layout_constraintEnd_toStartOf="@+id/profileGuidelineRight"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/profileGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/textView15" />
+
+        <EditText
+            android:id="@+id/profileFullName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="@string/profile_FullName"
+            android:inputType="textPersonName"
+            app:layout_constraintEnd_toStartOf="@+id/profileGuidelineRight"
+            app:layout_constraintStart_toStartOf="@+id/profileGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/textView3" />
+
+        <EditText
+            android:id="@+id/profileLandline"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="@string/profile_LandLine"
+            android:inputType="phone"
+            app:layout_constraintEnd_toStartOf="@+id/profileGuidelineRight"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/profileGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/textView4" />
+
+        <EditText
+            android:id="@+id/profileMobile"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="@string/profile_Mobile"
+            android:inputType="phone"
+            app:layout_constraintEnd_toStartOf="@+id/profileGuidelineRight"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/profileGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/textView5" />
+
+        <Switch
+            android:id="@+id/profilePrivacyPublic"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="24dp"
+            android:text="@string/profile_PrivacyPublic"
+            app:layout_constraintEnd_toStartOf="@id/profileGuidelineRight"
+            app:layout_constraintStart_toEndOf="@+id/profileImageView"
+            app:layout_constraintTop_toBottomOf="@+id/profileUsername" />
+
+        <Button
+            android:id="@+id/profileChanges"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/save_changes"
+            app:layout_constraintEnd_toEndOf="@id/profileGuidelineRight"
+            app:layout_constraintStart_toStartOf="@id/profileGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/profileTwitter" />
+
+        <Button
+            android:id="@+id/profileChangePassword"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/change_password"
+            app:layout_constraintEnd_toStartOf="@+id/profileLogout"
+            app:layout_constraintStart_toStartOf="@id/profileGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/profileChanges" />
+
+        <Button
+            android:id="@+id/profileLogout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/profile_logout"
+            app:layout_constraintEnd_toEndOf="@id/profileGuidelineRight"
+            app:layout_constraintTop_toBottomOf="@+id/profileChanges" />
+
+        <Button
+            android:id="@+id/profileDeleteAccount"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="64dp"
+            android:backgroundTint="#F60404"
+            android:text="@string/delete_account"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/profileGuidelineRight"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/profileGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/profileChangePassword"
+            app:layout_constraintVertical_bias="0.0" />
+
+        <ImageButton
+            android:id="@+id/changeProfilePhoto"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/blue"
+            android:src="@android:drawable/ic_menu_edit"
+            app:layout_constraintBottom_toBottomOf="@+id/profileImageView"
+            app:layout_constraintEnd_toEndOf="@+id/profileImageView" />
+
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/profile_FullName"
+            app:layout_constraintStart_toStartOf="@+id/profileGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/profileImageView" />
+
+        <TextView
+            android:id="@+id/textView4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/profile_LandLine"
+            app:layout_constraintStart_toStartOf="@+id/profileGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/profileFullName" />
+
+        <TextView
+            android:id="@+id/textView5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/profile_Mobile"
+            app:layout_constraintStart_toStartOf="@+id/profileGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/profileLandline" />
+
+        <TextView
+            android:id="@+id/textView6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/Email"
+            app:layout_constraintStart_toStartOf="@+id/profileGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/profileMobile" />
+
+        <TextView
+            android:id="@+id/textView7"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/profile_Address"
+            app:layout_constraintStart_toStartOf="@+id/profileGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/profileEmail" />
+
+        <TextView
+            android:id="@+id/textView10"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/profile_Region"
+            app:layout_constraintStart_toStartOf="@+id/profileGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/profileAddress2" />
+
+        <TextView
+            android:id="@+id/textView11"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/profile_ZipCode"
+            app:layout_constraintStart_toStartOf="@+id/profileGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/profileRegion" />
+
+        <TextView
+            android:id="@+id/textView12"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/profile_Website"
+            app:layout_constraintStart_toStartOf="@+id/profileGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/profile_recycler_joined" />
+
+        <TextView
+            android:id="@+id/textView13"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/profile_Facebook"
+            app:layout_constraintStart_toStartOf="@+id/profileGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/profileWebsite" />
+
+        <TextView
+            android:id="@+id/textView14"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/profile_Instagram"
+            app:layout_constraintStart_toStartOf="@+id/profileGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/profileFacebook" />
+
+        <TextView
+            android:id="@+id/textView15"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/profile_Twitter"
+            app:layout_constraintStart_toStartOf="@+id/profileGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/profileInstagram" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/profile_recycler_created"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toStartOf="@+id/profileGuidelineRight"
+            app:layout_constraintStart_toStartOf="@+id/profileGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/textView28" />
+
+        <TextView
+            android:id="@+id/textView28"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/profile_my_events"
+            app:layout_constraintStart_toStartOf="@+id/profileGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/profilePc" />
+
+        <TextView
+            android:id="@+id/textView29"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/profile_joined_events"
+            app:layout_constraintStart_toStartOf="@+id/profileGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/profile_recycler_created" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/profile_recycler_joined"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toStartOf="@+id/profileGuidelineRight"
+            app:layout_constraintStart_toStartOf="@+id/profileGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/textView29" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</ScrollView>

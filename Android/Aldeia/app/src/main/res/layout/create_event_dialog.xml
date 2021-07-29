@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/eventPageDifficultyTextView"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <EditText
+            android:id="@+id/event_dialog_comment"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/event_endTime"
+            android:layout_marginTop="8dp"
+            android:hint="@string/event_page_owner_contact"
+            android:inputType="number"
+            app:layout_constraintEnd_toStartOf="@+id/loginGuidelineRight"
+            app:layout_constraintStart_toStartOf="@+id/loginGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/event_eventCategorySpinner"></EditText>
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/loginGuidelineLeft"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.07" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/loginGuidelineRight"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.93" />
+
+        <EditText
+            android:id="@+id/event_eventName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:hint="@string/maps_event_name"
+            app:layout_constraintEnd_toStartOf="@+id/loginGuidelineRight"
+            app:layout_constraintHorizontal_bias="0.775"
+            app:layout_constraintStart_toStartOf="@+id/loginGuidelineLeft"
+            app:layout_constraintTop_toTopOf="parent"></EditText>
+
+        <Button
+            android:id="@+id/event_startDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/event_eventName"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="2dp"
+            android:ems="10"
+            android:hint="@string/maps_event_start_date"
+            app:layout_constraintEnd_toStartOf="@+id/event_startTime"
+            app:layout_constraintStart_toStartOf="@+id/loginGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/event_eventName" />
+
+        <Button
+            android:id="@+id/event_endDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/event_startDate"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="2dp"
+            android:ems="10"
+            android:hint="@string/maps_event_end_date"
+            app:layout_constraintEnd_toStartOf="@+id/event_endTime"
+            app:layout_constraintStart_toStartOf="@+id/loginGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/event_startDate" />
+
+        <Button
+            android:id="@+id/event_startTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/event_eventName"
+            android:layout_marginStart="2dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:layout_toEndOf="@+id/event_startDate"
+            android:ems="10"
+            android:hint="@string/maps_event_start_time"
+            app:layout_constraintEnd_toStartOf="@+id/loginGuidelineRight"
+            app:layout_constraintStart_toEndOf="@+id/event_startDate"
+            app:layout_constraintTop_toBottomOf="@+id/event_eventName" />
+
+        <Button
+            android:id="@+id/event_endTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/event_startTime"
+            android:layout_marginStart="2dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_toEndOf="@+id/event_endDate"
+            android:ems="10"
+            android:hint="@string/maps_event_end_time"
+            app:layout_constraintEnd_toStartOf="@+id/loginGuidelineRight"
+            app:layout_constraintStart_toEndOf="@+id/event_endDate"
+            app:layout_constraintTop_toBottomOf="@+id/event_startTime" />
+
+        <EditText
+            android:id="@+id/event_eventDescription"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/event_eventCategorySpinner"
+            android:layout_marginTop="8dp"
+            android:hint="@string/event_page_description"
+            app:layout_constraintEnd_toStartOf="@+id/loginGuidelineRight"
+            app:layout_constraintStart_toStartOf="@+id/loginGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/event_endDate"></EditText>
+
+        <Spinner
+            android:id="@+id/event_eventCategorySpinner"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/event_endTime"
+            android:layout_marginTop="8dp"
+            android:hint="@string/event_page_category"
+            app:layout_constraintEnd_toStartOf="@+id/loginGuidelineRight"
+            app:layout_constraintStart_toStartOf="@+id/loginGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/event_eventDescription"></Spinner>
+
+        <EditText
+            android:id="@+id/event_eventCapacity"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:hint="@string/event_page_capacity"
+            android:inputType="number"
+            app:layout_constraintEnd_toStartOf="@+id/loginGuidelineRight"
+            app:layout_constraintStart_toEndOf="@+id/event_eventProfile"
+            app:layout_constraintTop_toBottomOf="@+id/event_dialog_comment" />
+
+        <Switch
+            android:id="@+id/event_eventProfile"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:text="@string/event_page_profile"
+            app:layout_constraintEnd_toStartOf="@+id/event_eventCapacity"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="@+id/loginGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/event_dialog_comment" />
+
+        <Spinner
+            android:id="@+id/event_difficultySpinner"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/event_endTime"
+            android:layout_marginBottom="8dp"
+            android:hint="@string/event_page_category"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/loginGuidelineRight"
+            app:layout_constraintStart_toStartOf="@+id/loginGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/textView2"></Spinner>
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Event Difficulty"
+            app:layout_constraintStart_toStartOf="@+id/loginGuidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/event_eventCapacity" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</ScrollView>

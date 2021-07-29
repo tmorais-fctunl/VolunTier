@@ -1,0 +1,230 @@
+<resources>
+    <string name="app_name">VolunTier</string>
+    <!-- Strings related to login -->
+    <string name="prompt_email">Email or Username</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Sign in</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="welcome">"Welcome "</string>
+    <string name="invalid_username">Not a valid username</string>
+    <string name="invalid_email">Not a valid email</string>
+    <string name="invalid_password">Password must be >7 characters</string>
+    <string name="login_failed">"Login failed"</string>
+    <string name="login_success">"Login success"</string>
+    <string name="to_register">"Create Account"</string>
+    <!-- Strings related to maps -->
+    <string name="title_activity_maps">Map</string>
+    <string name="maps_createEvent">New Event</string>
+    <string name="maps_event_name">Event Name</string>
+    <string name="maps_event_point">Choose Meeting Point</string>
+    <string name="maps_event_start_date">Event starting date</string>
+    <string name="maps_event_end_date">Event end date</string>
+    <string name="maps_event_start_time">Event starting time</string>
+    <string name="maps_event_end_time">Event end time</string>
+    <string name="maps_event_cancel">Cancel</string>
+    <string name="maps_event_confirm">Confirm</string>
+    <string name="addEvent_name_error">Event needs a name</string>
+    <string name="addEvent_success">Your event was successfully created</string>
+    <string name="addEvent_failed">Something went wrong with creating your event!</string>
+
+    <!-- Strings related to register -->
+    <string name="Email">Email</string>
+    <string name="Password">Password</string>
+    <string name="action_register">Register</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="register_username">Username</string>
+    <string name="register_successes">Register completed successfully</string>
+    <string name="register_failed">Register failed...</string>
+    <string name="invalid_login_credential">Not a valid login credential</string>
+    <string name="invalid_pwConfirmation">The passwords do not match</string>
+    <string name="new_registration">"Your registration was a success! Please confirm your email by clicking the link we just sent you!"</string>
+    <!-- Strings related to recover password -->
+    <string name="to_recoverPw">Forgot your password?</string>
+    <string name="recoverPw_button">Recover Password</string>
+    <string name="recoverPw_success">Password Recovery was a success. Check your email! </string>
+    <string name="recoverPw_failed">Password Recovery failed. Check your data and try again </string>
+    <!-- Strings related to login -->
+    <string name="logout_failed">Logout failed</string>
+    <string name="logout_success">Logout success</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <!-- Strings related to profile -->
+    <string name="profile_Address">Address</string>
+    <string name="profile_Address2">Address2</string>
+    <string name="profile_FullName">Full Name</string>
+    <string name="profile_Privacy">Privacy:</string>
+    <string name="profile_PrivacyPublic">Public/Private</string>
+    <string name="profile_LandLine">Landline</string>
+    <string name="profile_Mobile">Mobile</string>
+    <string name="profile_Region">Region</string>
+    <string name="profile_ZipCode">ZipCode</string>
+    <string name="profile_Website">Website</string>
+    <string name="profile_Facebook">Facebook</string>
+    <string name="profile_Instagram">Instagram</string>
+    <string name="profile_Twitter">Twitter</string>
+    <string name="lookUp_success">Look up succeeded</string>
+    <string name="lookUp_fail">Look up failed</string>
+    <string name="save_changes">Save Changes</string>
+    <string name="change_password">Change Password</string>
+    <string name="delete_account">Delete Account</string>
+    <string name="postalCode_Error">Not a valid postal code format</string>
+    <string name="mobile_Error">Not a valid mobile number format</string>
+    <string name="landLine_Error">Not a valid landline number format</string>
+    <string name="address_Error">Not a valid address</string>
+    <string name="region_Error">Not a valid region</string>
+    <string name="fullName_Error">Please try a smaller name</string>
+    <string name="DataChange_success">Your data was changed</string>
+    <string name="DataChange_failed">Oops something went wrong!</string>
+    <string name="RemoveAcc_success">Your account was successfully removed</string>
+    <string name="RemoveAcc_failed">Something went wrong with removing your account!</string>
+    <string name="ChangePW_success">Your password was successfully changed</string>
+    <string name="ChangePW_failed">Something went wrong with changing your password!</string>
+    <string name="ChangePW_invalidPassword">Password must be >7 characters and different from the last one</string>
+    <string name="ChangePW_currentPassword">Current password</string>
+    <string name="ChangePW_password">New password</string>
+    <string name="ChangePW_passwordConfirmation">Confirm new password</string>
+    <string name="profile_logout">Logout</string>
+    <string name="profile_my_events">My Events</string>
+    <string name="profile_joined_events">Events I Joined</string>
+
+    <!-- Strings related to event page -->
+    <string name="event_page_name">Event Name</string>
+    <string name="event_page_owner_email">Event Owner Email</string>
+    <string name="event_page_owner_contact">Event Owner Contact</string>
+    <string name="event_page_description">Description</string>
+    <string name="event_page_category">Event Category</string>
+    <string name="event_page_capacity">Capacity</string>
+    <string name="event_page_website">Event Website</string>
+    <string name="event_page_facebook">Event Facebook</string>
+    <string name="event_page_instagram">Event Instagram</string>
+    <string name="event_page_twitter">Event Twitter</string>
+    <string name="event_page_profile">Public/Private</string>
+    <string name="event_page_delete">Delete Event</string>
+    <string name="event_page_change_location">Change Location</string>
+    <string name="event_page_comments">Chat</string>
+    <string name="get_event_success">Event was successfully retrieved</string>
+    <string name="get_event_failed">Something went wrong retrieving this event!</string>
+    <string name="update_event_success">Event was successfully updated</string>
+    <string name="update_event_failed">Something went wrong updating this event!</string>
+    <string name="update_event_commentError">Your event needs a description</string>
+    <string name="update_event_contactError">Not a valid contactNumber</string>
+    <string name="update_event_dateError">Please select possible dates</string>
+    <string name="update_event_websiteError">This is too long...</string>
+    <string name="update_event_categoryError">Not a valid category</string>
+    <string name="RemoveEvent_success">Event was successfully deleted</string>
+    <string name="RemoveEvent_failed">Something went wrong with removing this event!</string>
+    <string name="UpdatePhoto_failed">Something went wrong with updating your photo!</string>
+    <string name="SearchEvents_failed">Something went wrong with searching the events!</string>
+    <string name="event_page_owner_name">Event Owner Name</string>
+    <string name="event_page_difficulty">Difficulty</string>
+    <string name="event_page_participants">Participants</string>
+    <string name="event_page_join">Join</string>
+    <string name="event_page_leave">Leave</string>
+    <string name="event_page_pending">Pending</string>
+    <string name="event_participation_succeeded"> Action completed with success</string>
+    <string name="event_participation_failed">Failed completing the action</string>
+    <string name="event_chat_failed">Failed retrieving the event chat</string>
+    <string name="event_no_more_comments">The event does not have more comments!</string>
+    <string name="event_comment_succeeded"> Comment added successfully</string>
+    <string name="event_comment_failed">Failed to add comment</string>
+    <string name="event_comment">Comment</string>
+    <string name="invalid_chat_action_status">You must be a participant to complete this action</string>
+    <string name="delete_comment_failed">Error deleting comment</string>
+    <string name="delete_comment_succeeded">Comment deleted successfully</string>
+    <string name="edit_comment_failed">Error editing comment</string>
+    <string name="edit_comment_succeeded">Comment edited successfully</string>
+    <string name="event_participants_failed">Failed to retrieve event participants</string>
+    <string name="event_no_more_users">The event does not have more users!</string>
+    <string name="too_many_events_created_daily">Oops... Seems like you have created enough events for today</string>
+
+
+    <!-- Strings related to event roles -->
+    <string name="event_role_participant">PARTICIPANT</string>
+    <string name="event_role_non_participant">NON_PARTICIPANT</string>
+    <string name="event_role_pending">PENDING</string>
+    <string name="event_role_mod">MOD</string>
+    <string name="event_role_owner">OWNER</string>
+
+
+    <!-- Strings related to community page -->
+    <string name="profile">Profile</string>
+    <string name="community_load_more">Load More People</string>
+    <string name="community_failed">Failed to get Users</string>
+    <string name="community_no_more">There are no more users that go by that name</string>
+
+    <!-- Strings related to leaderboard page -->
+    <string name="leaderboard_score">Score:</string>
+    <string name="leaderboard_switch">Events/Total Points</string>
+    <string name="leaderboard_failed">Failed to get Rankings</string>
+    <string name="leaderboard_load_more">Load More Rankings</string>
+    <string name="leaderboard_no_more">You have reached the rank limit</string>
+
+    <!-- Strings related to route page -->
+    <string name="route_name">Route name</string>
+    <string name="route_description">Route description</string>
+    <string name="route_creation_date">Route creation date</string>
+    <string name="route_creator">Route creator</string>
+    <string name="route_avg_rating">Route average rating</string>
+    <string name="route_my_rating">Route my rating</string>
+    <string name="route_retrieval_failed">Something went wrong retrieving this route!</string>
+    <string name="add_route_failed">Failed to create route. Make sure you do not select private events!</string>
+    <string name="add_route_dialog">Create Route</string>
+    <string name="too_many_routes_created_daily">Oops... Seems like you have created enough routes for today</string>
+    <string name="delete_route_success">Deleted route successfully</string>
+    <string name="delete_route_failed">Oops... Failed to delete route</string>
+
+    <!-- Strings related to shop page -->
+    <string name="shop_name">Cause Name</string>
+    <string name="shop_company">Company Name</string>
+    <string name="shop_coins">Coins</string>
+    <string name="shop_goal">Goal</string>
+    <string name="shop_reached">Raised</string>
+    <string name="shop_Donate">Donate!</string>
+    <string name="shop_Amount">Amount</string>
+    <string name="shop_donation_error">You cannot donate that value</string>
+
+    <!-- Strings related to qr codes page -->
+    <string name="failed_get_qr">Failed to get your QR code</string>
+    <string name="send_qr_success">Data sent successfully</string>
+    <string name="send_qr_failed">Failed sending data</string>
+    <string name="qr_coins_received">Congratulation! You received </string>
+
+
+    <string name="community_search">Search someone (case sensitive)</string>
+    <string name="num_articipants">Number of Participants</string>
+    <string name="eventcategory">Load More Events</string>
+    <string name="route_rating_failed">Something went wrong rating this route!</string>
+    <string name="route_rating_success">Route Rated!</string>
+
+    <string-array name="categories">
+        <item>Ajuda a Criancas</item>
+        <item>Ajuda a Idosos</item>
+        <item>Ajuda a Sem Abrigo</item>
+        <item>Ajuda Desportiva</item>
+        <item>Ajuda Empresarial</item>
+        <item>Ajudar Portadores de Deficiencia</item>
+        <item>Auxilio de Doentes</item>
+        <item>Comunicacao Digital</item>
+        <item>Construcao</item>
+        <item>Cuidar de Animais</item>
+        <item>Desastres Ambientais</item>
+        <item>Ensinar Idiomas</item>
+        <item>Ensinar Musica</item>
+        <item>Iniciativas Ambientais</item>
+        <item>Internacional</item>
+        <item>Promocao</item>
+        <item>Protecao Civil</item>
+        <item>Reciclagem</item>
+        <item>Social</item>
+    </string-array>
+
+    <string-array name="difficulties">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+    <string name="title_activity_edit_location">Map</string>
+
+</resources>
