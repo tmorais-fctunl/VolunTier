@@ -268,7 +268,7 @@ function fillRouteEvents(events) {
     var content;
     for (var i = 0; i < events.length; i++) {
         content = '<div class="" style="text-align:center; width:100%">' +
-            '<a href="" id="route_event_' + events[i].event_id + '" onclick="return loadEvent(\'' + events[i].event_id + '\', false)">' + String.fromCharCode(65 + i) + ": " + events[i].name + '</a></div>';
+            '<a href="" id="route_event_' + events[i].event_id + '" onclick="return loadEvent(\'' + events[i].event_id + '\', false, true)">' + String.fromCharCode(65 + i) + ": " + events[i].name + '</a></div>';
         route_events_section.append(content);
     }
 }

@@ -53,7 +53,7 @@ function closeRouteTab() {
         let tab = openPrev.Tab;
         document.getElementById(openPrev.Tab).style.display = "block";
         if (tab == "Event")
-            loadEvent(openPrev.id);
+            loadEvent(openPrev.id, false, true);
         else if (tab == "User")
             loadUser(openPrev.id);
         else if (tab == "Route")
@@ -80,7 +80,7 @@ function closeEventTab() {
         let tab = openPrev.Tab;
         document.getElementById(openPrev.Tab).style.display = "block";
         if (tab == "Event")
-            loadEvent(openPrev.id);
+            loadEvent(openPrev.id, false, true);
         else if (tab == "User")
             loadUser(openPrev.id);
         else if (tab == "Route")
@@ -108,7 +108,7 @@ function closeUserTab() {
         let tab = openPrev.Tab;
         document.getElementById(openPrev.Tab).style.display = "block";
         if (tab == "Event")
-            loadEvent(openPrev.id);
+            loadEvent(openPrev.id, false, true);
         else if (tab == "User")
             loadUser(openPrev.id);
         else if (tab == "Route")

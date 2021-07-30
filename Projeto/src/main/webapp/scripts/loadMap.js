@@ -563,7 +563,7 @@ function loadEventMiniature(attributes) {
     //last touches to info window's content
     contentString = "<div style='text-align: center'>" + contentString + "</div>";
     var props;
-    if (attributes.visibility == "PUBLIC")
+    if (attributes.visibility == "PUBLIC" || attributes.profile =="PUBLIC")
         props = {
             coords: pos,
             content: contentString,

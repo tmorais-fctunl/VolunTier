@@ -181,7 +181,7 @@ function loadUserEvents(username) {
         for (i = 0; i < events.length; i++) {
             event = events[i];
             content = '<div class="row">' +
-                '<a href="" id="user_event_' + event.event_id + '" onclick="return loadEvent(\'' + event.event_id + '\', false)">' + event.name + '</a></div>';
+                '<a href="" id="user_event_' + event.event_id + '" onclick="return loadEvent(\'' + event.event_id + '\', false, true)">' + event.name + '</a></div>';
             event_section.append(content);
         }
 
@@ -198,7 +198,7 @@ function loadUserParticipatingEvents(username) {
         for (i = 0; i < events.length; i++) {
             event = events[i];
             content = '<div class="row">' +
-                '<a href="" id="user_participating_event_' + event.event_id + '" onclick="return loadEvent(\'' + event.event_id + '\', false)">' + event.name + '</a></div>';
+                '<a href="" id="user_participating_event_' + event.event_id + '" onclick="return loadEvent(\'' + event.event_id + '\', false, true)">' + event.name + '</a></div>';
             event_section.append(content);
         }
 

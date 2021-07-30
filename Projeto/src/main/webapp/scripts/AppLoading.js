@@ -285,7 +285,7 @@ function loadProfileEvents(username) {
         for (i = 0; i < events.length; i++) {
             event = events[i];
             content = '<div class="row">' +
-                '<a href="" id="profile_event_' + event.event_id + '" onclick="return loadEvent(\'' + event.event_id + '\', false)">' + event.name + '</a></div>';
+                '<a href="" id="profile_event_' + event.event_id + '" onclick="return loadEvent(\'' + event.event_id + '\', false, true)">' + event.name + '</a></div>';
             event_section.append(content);
         }
         loadNotifications();
@@ -302,7 +302,7 @@ function loadProfileParticipatingEvents(username) {
         for (i = 0; i < events.length; i++) {
             event = events[i];
             content = '<div class="row">' +
-                '<a href="" id="profile_participating_event_' + event.event_id + '" onclick="return loadEvent(\'' + event.event_id + '\', false)">' + event.name + '</a></div>';
+                '<a href="" id="profile_participating_event_' + event.event_id + '" onclick="return loadEvent(\'' + event.event_id + '\', false, true)">' + event.name + '</a></div>';
             event_section.append(content);
         }
 
